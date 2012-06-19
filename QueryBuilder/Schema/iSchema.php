@@ -17,20 +17,29 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  *
- * @package   Miny/Widget
+ * @package   Miny/QueryBuilder/Schema
  * @copyright 2012 Dániel Buga <daniel@bugadani.hu>
  * @license   http://www.gnu.org/licenses/gpl.txt
  *            GNU General Public License
  * @version   1.0
+ *
  */
 
-namespace Miny\Widget;
+namespace Miny\QueryBuilder\Schema;
 
-interface iWidget {
+interface iSchema {
 
-    public function begin(array $params = array());
+    public function quoteField($field, $alias = NULL);
 
-    public function end(array $params = array());
+    public function quoteTable($table, $alias = NULL);
 
-    public function run(array $params = array());
+    public function getPattern($name);
+
+    public function getFunction($name);
+
+    public function getOperator($name);
+
+    public function getTypes();
+
+    public function getType($type, $length = NULL);
 }

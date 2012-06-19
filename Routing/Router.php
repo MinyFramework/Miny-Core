@@ -1,5 +1,29 @@
 <?php
 
+/**
+ * This file is part of the Miny framework.
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * any later version accepted by the author in accordance with section
+ * 14 of the GNU General Public License.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ *
+ * @package   Miny/Routing
+ * @copyright 2012 Dániel Buga <daniel@bugadani.hu>
+ * @license   http://www.gnu.org/licenses/gpl.txt
+ *            GNU General Public License
+ * @version   1.0
+ */
+
 namespace Miny\Routing;
 
 class Router {
@@ -8,18 +32,18 @@ class Router {
     private $url_prefix;
     private $format;
 
-    public function __construct($format = 'html', $prefix = NULL){
+    public function __construct($format = 'html', $prefix = NULL) {
         $this->url_prefix = $prefix;
         $this->format = $format;
     }
 
-    public function resource($name){
+    public function resource($name) {
         $resource = new ResourceRoute($name, NULL, true);
         $this->routes[$name] = $resource;
         return $resource;
     }
 
-    public function resources($name){
+    public function resources($name) {
         $resource = new ResourceRoute($name);
         $this->routes[$name] = $resource;
         return $resource;
@@ -77,22 +101,22 @@ class Router {
     public function generate($name, array $params = array()) {
         foreach ($this->routes as $route) {
             $path = $route->generate($name, $params);
-            if(!isset($params['format'])) {
+            if (!isset($params['format'])) {
                 $params['format'] = $this->format;
             }
-            if($path){
+            if ($path) {
                 $first_http_param = true;
-                if(!is_null($this->url_prefix)){
-                    if(strpos($this->url_prefix, '?') !== false){
+                if (!is_null($this->url_prefix)) {
+                    if (strpos($this->url_prefix, '?') !== false) {
                         $first_http_param = false;
                     }
                     $path = $prefix . $path;
                 }
                 foreach ($params as $name => $value) {
-                    if (strpos($path, ':'.$name) !== false) {
+                    if (strpos($path, ':' . $name) !== false) {
                         $path = str_replace(':' . $name, $value, $path);
                     } else {
-                        if($first_http_param){
+                        if ($first_http_param) {
                             $path .= sprintf('?%s=%s', $name, $value);
                         } else {
                             $path .= sprintf('&%s=%s', $name, $value);

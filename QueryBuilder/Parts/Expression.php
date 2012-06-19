@@ -1,7 +1,7 @@
 <?php
 
 /**
- * This file is part of the Prominence framework.
+ * This file is part of the Miny framework.
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -17,30 +17,27 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  *
- * @package   Prominence/$package_name$
+ * @package   Miny/QueryBuilder/Parts
  * @copyright 2012 Dániel Buga <daniel@bugadani.hu>
  * @license   http://www.gnu.org/licenses/gpl.txt
  *            GNU General Public License
- * @version   $package_version$
- */
-
-namespace Miny\Formatter;
-
-/**
- * $classname$
+ * @version   1.0
  *
- * @author Dániel Buga
  */
-class CodeColorer implements iFormatter {
 
-    private function highlightSyntax($matches) {
-        $text = $matches[1];
-        //print_r(preg_split('/\s+/mu', $text));
-        return $text;
-    }
+namespace Miny\QueryBuilder\Parts;
 
-    public function format($text) {
-        return preg_replace_callback('/(?<=\A|\n\n)[~]{3,}(?:.*)[~]*\n*(?s:(.*?))\n*[~]{3,}(?=\Z|\n)/mu', array($this, 'highlightSyntax'), $text);
+class Expression {
+
+    public $operator;
+    public $operands;
+
+    public function __construct($operator) {
+        $operands = func_get_args();
+        array_shift($operands);
+
+        $this->operator = $operator;
+        $this->operands = $operands;
     }
 
 }

@@ -1,7 +1,7 @@
 <?php
 
 /**
- * This file is part of the Prominence framework.
+ * This file is part of the Miny framework.
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -17,17 +17,17 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  *
- * @package   Prominence/$package_name$
+ * @package   Miny
  * @copyright 2012 Dániel Buga <daniel@bugadani.hu>
  * @license   http://www.gnu.org/licenses/gpl.txt
  *            GNU General Public License
- * @version   $package_version$
+ * @version   1.0
  */
 
 namespace Miny;
 
 /**
- * AutoLoader is a simple autoloader class to be used with Miny.
+ * AutoLoader is a simple autoloader class to be used with the Miny framework.
  *
  * @author Dániel Buga
  */

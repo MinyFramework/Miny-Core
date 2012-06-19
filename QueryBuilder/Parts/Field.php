@@ -17,20 +17,28 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  *
- * @package   Miny/Widget
+ * @package   Miny/QueryBuilder/Parts
  * @copyright 2012 Dániel Buga <daniel@bugadani.hu>
  * @license   http://www.gnu.org/licenses/gpl.txt
  *            GNU General Public License
  * @version   1.0
+ *
  */
 
-namespace Miny\Widget;
+namespace Miny\QueryBuilder\Parts;
 
-interface iWidget {
+class Field {
 
-    public function begin(array $params = array());
+    public $name;
+    public $table;
+    public $alias;
+    public $type;
 
-    public function end(array $params = array());
+    public function __construct($table, $name, $type) {
 
-    public function run(array $params = array());
+        $this->table = $table;
+        $this->name = $name;
+        $this->type = $type;
+    }
+
 }

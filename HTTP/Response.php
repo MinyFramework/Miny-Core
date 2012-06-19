@@ -1,5 +1,29 @@
 <?php
 
+/**
+ * This file is part of the Miny framework.
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * any later version accepted by the author in accordance with section
+ * 14 of the GNU General Public License.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ *
+ * @package   Miny/HTTP
+ * @copyright 2012 Dániel Buga <daniel@bugadani.hu>
+ * @license   http://www.gnu.org/licenses/gpl.txt
+ *            GNU General Public License
+ * @version   1.0
+ */
+
 namespace Miny\HTTP;
 
 class Response {
@@ -37,11 +61,11 @@ class Response {
         }
     }
 
-    public function getHeaders(){
+    public function getHeaders() {
         return $this->headers;
     }
 
-    public function getCookies(){
+    public function getCookies() {
         return $this->cookies;
     }
 
@@ -52,8 +76,8 @@ class Response {
     public function getContent() {
         return $this->content;
     }
-    
-    public function __toString(){
+
+    public function __toString() {
         return $this->content;
     }
 
@@ -107,7 +131,7 @@ class Response {
         }
     }
 
-    protected function sendHeaders(){
+    protected function sendHeaders() {
         $this->sendHTTPStatus();
         foreach ($this->headers as $name => $header) {
             if (is_string($header)) {

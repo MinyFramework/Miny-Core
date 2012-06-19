@@ -1,14 +1,39 @@
 <?php
 
-namespace Miny\Database\Builder\Abstracts;
+/**
+ * This file is part of the Miny framework.
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * any later version accepted by the author in accordance with section
+ * 14 of the GNU General Public License.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ *
+ * @package   Miny/QueryBuilder/Abstracts
+ * @copyright 2012 Dániel Buga <daniel@bugadani.hu>
+ * @license   http://www.gnu.org/licenses/gpl.txt
+ *            GNU General Public License
+ * @version   1.0
+ *
+ */
 
-use Miny\Database\Schema\iSchema;
-use Miny\Database\Table;
-use Miny\Database\Builder\Parts\Field;
-use Miny\Database\Builder\Parts\Parameter;
-use Miny\Database\Builder\Parts\Expression;
-use Miny\Database\Builder\Parts\QueryFunction;
-use Miny\Database\Builder\Abstracts\ExtendedQueryBase;
+namespace Miny\QueryBuilder\Abstracts;
+
+use Miny\QueryBuilder\Schema\iSchema;
+use Miny\QueryBuilder\Table;
+use Miny\QueryBuilder\Parts\Field;
+use Miny\QueryBuilder\Parts\Parameter;
+use Miny\QueryBuilder\Parts\Expression;
+use Miny\QueryBuilder\Parts\QueryFunction;
+use Miny\QueryBuilder\Abstracts\ExtendedQueryBase;
 
 abstract class QueryBase {
 
@@ -196,7 +221,7 @@ abstract class QueryBase {
 
     public function where($where) {
         if (!$where instanceof Expression) {
-            $ref = new \ReflectionClass('\Miny\Database\Builder\Parts\Expression');
+            $ref = new \ReflectionClass('\Miny\QueryBuilder\Parts\Expression');
             $where = $ref->newInstanceArgs(func_get_args());
         }
         $this->where = $where;
