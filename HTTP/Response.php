@@ -1,0 +1,131 @@
+<?php
+
+namespace Miny\HTTP;
+
+class Response {
+
+    private $content;
+    private $cookies = array();
+    private $headers = array();
+    private $status_code;
+
+    public function __construct($content = '', $code = 200) {
+        $this->setContent($content);
+        $this->setCode($code);
+    }
+
+    public function setCookie($name, $value) {
+        $this->cookies[$name] = $value;
+    }
+
+    public function setCode($code) {
+        $this->status_code = $code;
+    }
+
+    public function hasHeader($name) {
+        return isset($this->headers[$name]);
+    }
+
+    public function setHeader($name, $value, $replace = true) {
+        if ($replace) {
+            $this->headers[$name] = $value;
+        } else {
+            if (!isset($this->headers[$name])) {
+                $this->headers[$name] = array();
+            }
+            $this->headers[$name][] = $value;
+        }
+    }
+
+    public function getHeaders(){
+        return $this->headers;
+    }
+
+    public function getCookies(){
+        return $this->cookies;
+    }
+
+    public function setContent($content) {
+        $this->content = $content;
+    }
+
+    public function getContent() {
+        return $this->content;
+    }
+    
+    public function __toString(){
+        return $this->content;
+    }
+
+    private function sendHTTPStatus() {
+        if ($this->status_code !== NULL) {
+            $codes = array(
+                100 => 'Continue',
+                101 => 'Switching Protocols',
+                200 => 'OK',
+                201 => 'Created',
+                202 => 'Accepted',
+                203 => 'Non-Authoritative Information',
+                204 => 'No Content',
+                205 => 'Reset Content',
+                206 => 'Partial Content',
+                300 => 'Multiple Choices',
+                301 => 'Moved Permanently',
+                302 => 'Found',
+                303 => 'See Other',
+                304 => 'Not Modified',
+                305 => 'Use Proxy',
+                306 => 'Temporary Redirect',
+                400 => 'Bad Request',
+                401 => 'Unauthorized',
+                402 => 'Payment Required',
+                403 => 'Forbidden',
+                404 => 'Not Found',
+                405 => 'Method Not Allowed',
+                406 => 'Not Acceptable',
+                407 => 'Proxy Authentication Required',
+                408 => 'Request Timeout',
+                409 => 'Conflict',
+                410 => 'Gone',
+                411 => 'Length Required',
+                412 => 'Precondition Failed',
+                413 => 'Request Entity Too Large',
+                414 => 'Request-URI Too Long',
+                415 => 'Unsupported Media Type',
+                416 => 'Requested Range Not Satisfiable',
+                417 => 'Expectation Failed',
+                500 => 'Internal Server Error',
+                501 => 'Not Implemented',
+                502 => 'Bad Gateway',
+                503 => 'Service Unavailable',
+                504 => 'Gateway Timeout',
+                505 => 'HTTP Version Not Supported'
+            );
+            if (isset($codes[$this->status_code])) {
+                header(sprintf('HTTP/1.1 %d: %s', $this->status_code, $codes[$this->status_code]), true, $this->status_code);
+            }
+        }
+    }
+
+    protected function sendHeaders(){
+        $this->sendHTTPStatus();
+        foreach ($this->headers as $name => $header) {
+            if (is_string($header)) {
+                header($name . ': ' . $header);
+            } elseif (is_array($header)) {
+                foreach ($header as $h) {
+                    header($name . ': ' . $h, false);
+                }
+            }
+        }
+        foreach ($this->cookies as $name => $value) {
+            setcookie($name, $value);
+        }
+    }
+
+    public function send() {
+        $this->sendHeaders();
+        echo $this->content;
+    }
+
+}
