@@ -17,20 +17,22 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  *
- * @package   Miny/Event
+ * @package   Miny/HTTP
  * @copyright 2012 Dániel Buga <daniel@bugadani.hu>
  * @license   http://www.gnu.org/licenses/gpl.txt
  *            GNU General Public License
  * @version   1.0
- *
  */
 
-namespace Miny\Event;
+namespace Miny\HTTP;
 
-abstract class EventHandler implements iEventHandler {
+use \Miny\Event\Event;
+use \Miny\HTTP\Response;
 
-    public function handle(\Miny\Event\Event $event, $handling_method = NULL) {
-        throw new \BadMethodCallException('Handler not exists: ' . $handling_method);
+class ResponseFilter extends \Miny\Event\EventHandler {
+
+    public function handle(Event $event, $handling_method = NULL) {
+        $event->setResponse(new Response($event->getParameter('response')));
     }
 
 }

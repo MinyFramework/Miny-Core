@@ -17,7 +17,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  *
- * @package   Miny/Event
+ * @package   Miny/Config
  * @copyright 2012 Dániel Buga <daniel@bugadani.hu>
  * @license   http://www.gnu.org/licenses/gpl.txt
  *            GNU General Public License
@@ -25,12 +25,17 @@
  *
  */
 
-namespace Miny\Event;
+namespace Miny\Config;
 
-abstract class EventHandler implements iEventHandler {
+interface iConfig {
 
-    public function handle(\Miny\Event\Event $event, $handling_method = NULL) {
-        throw new \BadMethodCallException('Handler not exists: ' . $handling_method);
-    }
+    public function exists($key);
 
+    public function get($key);
+
+    public function store($key, $data, $ttl);
+
+    public function remove($key);
+
+    public function close();
 }

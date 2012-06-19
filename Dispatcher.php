@@ -26,7 +26,9 @@
 
 namespace Miny;
 
+use \Miny\Controller\iControllerResolver;
 use \Miny\Event\Event;
+use \Miny\Event\EventDispatcher;
 use \Miny\HTTP\Response;
 use \Miny\HTTP\Request;
 
@@ -35,7 +37,7 @@ class Dispatcher {
     private $events;
     private $controller_resolver;
 
-    public function __construct(\Miny\Event\EventDispatcher $events, \Miny\Controller\iControllerResolver $resolver) {
+    public function __construct(EventDispatcher $events, iControllerResolver $resolver) {
         $this->events = $events;
         $this->controller_resolver = $resolver;
     }
@@ -65,11 +67,6 @@ class Dispatcher {
 
         $rsp = $this->getResponse($r);
 
-        if (!$rsp instanceof Response) {
-            $event = new Event('invalid_response', array('response' => $rsp));
-            $this->events->raiseEvent($event);
-            $rsp = $this->getEventResponse($event);
-        }
         return $rsp;
     }
 
@@ -98,6 +95,13 @@ class Dispatcher {
         } catch (\Exception $e) {
             $rsp = $this->handleException($e);
         }
+
+        if (!$rsp instanceof Response) {
+            $event = new Event('invalid_response', array('response' => $rsp));
+            $this->events->raiseEvent($event);
+            $rsp = $this->getEventResponse($event);
+        }
+
         $event = new Event('filter_response',
                         array(
                             'response' => $rsp,

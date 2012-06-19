@@ -26,6 +26,8 @@
 
 namespace Miny\Template;
 
+use \Miny\Event\Event;
+
 class TemplateEvents extends \Miny\Event\EventHandler {
 
     private $template_array = array();
@@ -34,7 +36,13 @@ class TemplateEvents extends \Miny\Event\EventHandler {
         $this->template_array[$name] = $t;
     }
 
-    public function filterRequest(\Miny\Event\Event $event) {
+    public function handleException(Event $event) {
+        $tpl = $this->template_array['layout'];
+        $tpl->exception = $event->getParameter('exception');
+        $event->setResponse($tpl->render('layouts/exception'));
+    }
+
+    public function filterRequest(Event $event) {
         $request = $event->getParameter('request');
         try {
             $format = $request->get('format');
@@ -46,7 +54,7 @@ class TemplateEvents extends \Miny\Event\EventHandler {
         }
     }
 
-    public function filterResponse(\Miny\Event\Event $event) {
+    public function filterResponse(Event $event) {
         $request = $event->getParameter('request');
         if ($request->isSubRequest()) {
             return;

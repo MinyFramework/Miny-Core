@@ -25,13 +25,12 @@
  *
  */
 
-namespace Miny\Cache\Drivers;
+namespace Miny\Config\Drivers;
 
-class MySQLCacheDriver implements \Miny\Cache\iCacheDriver {
+class MySQLConfig implements \Miny\Config\iConfig {
 
     private $keys = array();
     private $data = array();
-    private $ttls = array();
     private $table_name;
     private $driver;
 
@@ -39,12 +38,11 @@ class MySQLCacheDriver implements \Miny\Cache\iCacheDriver {
         register_shutdown_function(array($this, 'close'));
         $this->driver = $driver;
         $this->table_name = $table_name;
-        //GC
-        $this->driver->exec('DELETE FROM `' . $this->table_name . '` WHERE `expiration` < NOW()');
 
-        $result = $this->driver->query('SELECT `key` FROM `' . $this->table_name . '` WHERE `expiration` >= NOW()');
+        $result = $this->driver->query('SELECT `key`, `value` FROM `' . $this->table_name);
         foreach ($result as $row) {
             $this->keys[$row['key']] = 1;
+            $this->data[$row['key']] = $row['value'];
         }
     }
 
@@ -56,27 +54,18 @@ class MySQLCacheDriver implements \Miny\Cache\iCacheDriver {
         if (!$this->exists($key)) {
             throw new \OutOfBoundsException('Key not found: ' . $key);
         }
-        if (!array_key_exists($key, $this->data)) {
-            $statement = $this->driver->prepare('SELECT `data` FROM `' . $this->table_name . '` WHERE `key` = :key');
-            $statement->bindValue('key', $key);
-            $statement->execute();
-            $temp = $statement->fetch();
-            $this->data[$key] = unserialize($temp['data']);
-        }
         return $this->data[$key];
     }
 
     public function store($key, $data, $ttl) {
         $this->keys[$key] = 'm';
-        $this->data[$key] = $data;
-        $this->ttls[$key] = $ttl;
+        $this->data[$key] = array($data, $ttl);
     }
 
     public function remove($key) {
         if ($key !== false) {
             $this->keys[$key] = 'r';
             unset($this->data[$key]);
-            unset($this->ttls[$key]);
         }
     }
 
@@ -90,7 +79,7 @@ class MySQLCacheDriver implements \Miny\Cache\iCacheDriver {
         }
         if (in_array('m', $this->keys)) {
             $save = true;
-            $statements['m'] = $db->prepare('REPLACE INTO `' . $this->table_name . '` (`key`, `data`, `expiration`) VALUES(:key, :value, :expiration)');
+            $statements['m'] = $db->prepare('REPLACE INTO `' . $this->table_name . '` (`key`, `value`) VALUES(:key, :value)');
         }
         if (!$save) {
             return;
@@ -102,9 +91,7 @@ class MySQLCacheDriver implements \Miny\Cache\iCacheDriver {
             $statement = $statements[$state];
             switch ($state) {
                 case 'm':
-                    $expiration = date('Y-m-d H:i:s', time() + $this->ttls[$key]);
-                    $statement->bindValue(':value', serialize($this->data[$key]));
-                    $statement->bindValue(':expiration', $expiration);
+                    $statement->bindValue(':value', $this->data[$key]);
                 case 'r':
                     $statement->bindValue(':key', $key);
                     break;
