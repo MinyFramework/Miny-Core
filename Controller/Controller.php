@@ -42,7 +42,11 @@ abstract class Controller implements iController {
     }
 
     public function __set($key, $value) {
-        $this->assigns[$key] = $value;
+        $this->assign($key, $value);
+    }
+
+    public function assign($key, $value, $scope = NULL) {
+        $this->assigns[$key] = array($value, $scope);
     }
 
     public function service($key, $service) {
@@ -53,8 +57,8 @@ abstract class Controller implements iController {
         if (isset($this->services[$key])) {
             return $this->services[$key];
         } else {
-            if (array_key_exists($key, $this->assigns)) {
-                return $this->assigns[$key];
+            if (array_key_exists($key, $this->assigns) && is_null($this->assigns[$key][1])) {
+                return $this->assigns[$key][0];
             }
             throw new \OutOfBoundsException('Variable not set: ' . $key);
         }

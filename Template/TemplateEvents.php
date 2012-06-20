@@ -31,14 +31,18 @@ use \Miny\Event\Event;
 class TemplateEvents extends \Miny\Event\EventHandler {
 
     private $templating;
+    private $scope;
 
-    public function __construct(Template $t) {
+    public function __construct(Template $t, $scope = NULL) {
         $this->templating = $t;
+        $this->scope = $scope;
     }
 
     public function handleException(Event $event) {
+        $this->templating->setScope($this->scope);
         $this->templating->exception = $event->getParameter('exception');
         $event->setResponse($this->templating->render('layouts/exception'));
+        $this->templating->leaveScope();
     }
 
     public function filterRequest(Event $event) {
@@ -58,10 +62,12 @@ class TemplateEvents extends \Miny\Event\EventHandler {
         }
         $rsp = $event->getParameter('response');
 
+        $this->templating->setScope($this->scope);
         $this->templating->content = $rsp->getContent();
         $this->templating->stylesheets = array('application', $request->get('controller'));
 
         $rsp->setContent($this->templating->render('layouts/application'));
+        $this->templating->leaveScope();
         $event->setResponse($rsp);
     }
 

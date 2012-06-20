@@ -30,12 +30,34 @@ class Template {
 
     private $path;
     private $template_vars = array();
+    private $scope;
+    private $scopes = array();
     private $format;
     private $plugins = array();
 
     public function __construct($path, $default_format = NULL) {
         $this->path = $path;
         $this->setFormat($default_format);
+    }
+
+    public function setScope($scope = NULL) {
+        $this->scopes[] = $this->scope;
+        $this->scope = $scope;
+    }
+
+    public function leaveScope($clean = false) {
+        if($clean) {
+            unset($this->template_vars[$this->scope]);
+        }
+        $this->scope = array_pop($this->scopes);
+    }
+
+    public function getScope($scope = NULL) {
+        $scope = $scope ? : $this->scope;
+        if (is_null($scope)) {
+            $scope = 0;
+        }
+        return $scope;
     }
 
     public function getPath() {
@@ -69,12 +91,9 @@ class Template {
         $this->assign($key, $value);
     }
 
-    public function assign($key, $value) {
-        $this->template_vars[$key] = $value;
-    }
-
-    public function clean() {
-        $this->template_vars = array();
+    public function assign($key, $value, $scope = NULL) {
+        $scope = $this->getScope($scope);
+        $this->template_vars[$scope][$key] = $value;
     }
 
     public function setFormat($format) {
@@ -98,9 +117,9 @@ class Template {
         return $file;
     }
 
-    public function render($template, $format = NULL) {
+    public function render($template, $format = NULL, $scope = NULL) {
         ob_start();
-        extract($this->template_vars, EXTR_SKIP);
+        extract($this->template_vars[$this->getScope($scope)], EXTR_SKIP);
         include $this->getTemplatePath($template, $format);
         return ob_get_clean();
     }

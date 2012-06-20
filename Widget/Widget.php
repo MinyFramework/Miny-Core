@@ -57,7 +57,7 @@ abstract class Widget implements iWidget {
 
     public function end(array $params = array()) {
         $tpl = $this->templating;
-
+        $tpl->setScope('widget');
         $this->run($params);
 
         foreach ($this->assigns as $key => $value) {
@@ -70,7 +70,7 @@ abstract class Widget implements iWidget {
 
         $response = $tpl->render('widgets/' . $this->view);
 
-        $tpl->clean();
+        $tpl->leaveScope(true);
         return $response;
     }
 

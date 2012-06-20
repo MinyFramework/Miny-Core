@@ -86,14 +86,17 @@ class ControllerResolver implements iControllerResolver {
     }
 
     private function runController(iController $controller, $class, $action, array $params = array()) {
+        $template_scope = $class . '_' . $action;
+        $this->template->setScope($template_scope);
         $return = $controller->run($class, $action, $params);
 
         if (is_string($return)) {
             $response = new \Miny\HTTP\RedirectResponse($return);
         } else {
             $this->template->controller = $controller;
-            foreach ($controller->getAssigns() as $key => $value) {
-                $this->template->$key = $value;
+            foreach ($controller->getAssigns() as $key => $array) {
+                list($value, $scope) = $array;
+                $this->template->assign($key, $value, $scope ?: $template_scope);
             }
             $response = new \Miny\HTTP\Response($this->template->render($controller->getTemplate()), $controller->status());
         }
@@ -103,7 +106,7 @@ class ControllerResolver implements iControllerResolver {
         foreach ($controller->getCookies() as $name => $value) {
             $response->setCookie($name, $value);
         }
-        $this->template->clean();
+        $this->template->leaveScope(true);
         return $response;
     }
 
