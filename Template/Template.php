@@ -31,30 +31,34 @@ class Template {
     private $path;
     private $template_vars = array();
     private $format;
-    private $plugins;
+    private $plugins = array();
 
-    public function __construct($template_path, $default_format = NULL) {
-        $this->path = $template_path;
+    public function __construct($path, $default_format = NULL) {
+        $this->path = $path;
         $this->setFormat($default_format);
     }
 
-    public function plugin($key, $plugin = NULL) {
-        if (is_null($plugin)) {
-            if (!isset($this->plugins[$key])) {
-                throw new \InvalidArgumentException('Plugin not found: ' . $key);
-            }
-            return $this->plugins[$key];
-        } else {
-            if (!is_callable($plugin) && !$plugin instanceof \Closure) {
-                throw new \InvalidArgumentException('Invalid plugin: ' . $key);
-            }
-            $this->plugins[$key] = $plugin;
+    public function getPath() {
+        return $this->path;
+    }
+
+    public function addPlugin($key, $plugin) {
+        if (!is_callable($plugin) && !$plugin instanceof \Closure) {
+            throw new \InvalidArgumentException('Invalid plugin: ' . $key);
         }
+        $this->plugins[$key] = $plugin;
+    }
+
+    public function getPlugin($key) {
+        if (!isset($this->plugins[$key])) {
+            throw new \InvalidArgumentException('Plugin not found: ' . $key);
+        }
+        return $this->plugins[$key];
     }
 
     public function __call($key, $args) {
         try {
-            $plugin = $this->plugin($key);
+            $plugin = $this->getPlugin($key);
             return call_user_func_array($plugin, $args);
         } catch (\InvalidArgumentException $e) {
             throw new \BadMethodCallException('Method not found: ' . $key, 0, $e);
@@ -62,6 +66,10 @@ class Template {
     }
 
     public function __set($key, $value) {
+        $this->assign($key, $value);
+    }
+
+    public function assign($key, $value) {
         $this->template_vars[$key] = $value;
     }
 
@@ -74,24 +82,26 @@ class Template {
     }
 
     public function getFormat($format = NULL) {
-        if (is_null($format)) {
-            if (is_null($this->format)) {
-                return '';
-            } else {
-                return '.' . $this->format;
-            }
-        } else {
-            return '.' . $format;
+        $format = $format ? : $this->format;
+        if (!is_null($format)) {
+            $format = '.' . $format;
         }
+        return $format;
+    }
+
+    private function getTemplatePath($template, $format) {
+        $format = $this->getFormat($format);
+        $file = $this->getPath() . '/' . $template . $format . '.php';
+        if (!is_file($file)) {
+            throw new \RuntimeException('Template not found: ' . $template . $format);
+        }
+        return $file;
     }
 
     public function render($template, $format = NULL) {
-        if (!is_file($this->path . '/' . $template . '.' . $this->format . '.php')) {
-            throw new \RuntimeException('Template not found: ' . $template . '.' . $this->format);
-        }
         ob_start();
-        extract($this->template_vars, EXTR_OVERWRITE);
-        include $this->path . '/' . $template . $this->getFormat($format) . '.php';
+        extract($this->template_vars, EXTR_SKIP);
+        include $this->getTemplatePath($template, $format);
         return ob_get_clean();
     }
 

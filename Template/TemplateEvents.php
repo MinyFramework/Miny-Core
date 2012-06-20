@@ -30,25 +30,22 @@ use \Miny\Event\Event;
 
 class TemplateEvents extends \Miny\Event\EventHandler {
 
-    private $template_array = array();
+    private $templating;
 
-    public function setTemplating($name, Template $t) {
-        $this->template_array[$name] = $t;
+    public function __construct(Template $t) {
+        $this->templating = $t;
     }
 
     public function handleException(Event $event) {
-        $tpl = $this->template_array['layout'];
-        $tpl->exception = $event->getParameter('exception');
-        $event->setResponse($tpl->render('layouts/exception'));
+        $this->templating->exception = $event->getParameter('exception');
+        $event->setResponse($this->templating->render('layouts/exception'));
     }
 
     public function filterRequest(Event $event) {
         $request = $event->getParameter('request');
         try {
             $format = $request->get('format');
-            foreach ($this->template_array as $tpl) {
-                $tpl->setFormat($format);
-            }
+            $this->templating->setFormat($format);
         } catch (\OutOfBoundsException $e) {
 
         }
@@ -60,12 +57,11 @@ class TemplateEvents extends \Miny\Event\EventHandler {
             return;
         }
         $rsp = $event->getParameter('response');
-        $tpl = $this->template_array['layout'];
 
-        $tpl->content = $rsp->getContent();
-        $tpl->stylesheets = array('application', $request->get('controller'));
+        $this->templating->content = $rsp->getContent();
+        $this->templating->stylesheets = array('application', $request->get('controller'));
 
-        $rsp->setContent($tpl->render('layouts/application'));
+        $rsp->setContent($this->templating->render('layouts/application'));
         $event->setResponse($rsp);
     }
 
