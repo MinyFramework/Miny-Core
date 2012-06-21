@@ -39,8 +39,17 @@ class AutoLoader {
         spl_autoload_register('\Miny\AutoLoader::load');
     }
 
-    public static function register($namespace, $path) {
-        self::$map[$namespace] = $path;
+    public static function register($namespace, $path = NULL) {
+        if (is_array($namespace)) {
+            foreach ($namespace as $ns => $path) {
+                self::$map[$ns] = $path;
+            }
+        } else {
+            if (is_null($path)) {
+                throw new \InvalidArgumentException('Missing argument: path');
+            }
+            self::$map[$namespace] = $path;
+        }
     }
 
     private static function getPathToNamespace($class) {
@@ -55,7 +64,7 @@ class AutoLoader {
         if ($pos === false) {
             throw new \InvalidArgumentException('Class not found: ' . $class);
         }
-        $path = substr_replace('\\'.$class, self::$map[$temp], 0, $pos) . '.php';
+        $path = substr_replace('\\' . $class, self::$map[$temp], 0, $pos) . '.php';
         return str_replace('\\', DIRECTORY_SEPARATOR, $path);
     }
 
