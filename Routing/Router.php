@@ -67,7 +67,11 @@ class Router {
 
     public function add($method, $path, $name = NULL, array $params = array()) {
         $route = new Route($path, $name, $method, $params);
-        $this->routes[$name] = $route;
+        if (is_null($name)) {
+            $this->routes[] = $route;
+        } else {
+            $this->routes[$name] = $route;
+        }
         return $route;
     }
 

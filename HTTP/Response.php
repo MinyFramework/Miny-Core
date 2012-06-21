@@ -126,7 +126,9 @@ class Response {
                 505 => 'HTTP Version Not Supported'
             );
             if (isset($codes[$this->status_code])) {
-                header(sprintf('HTTP/1.1 %d: %s', $this->status_code, $codes[$this->status_code]), true, $this->status_code);
+                $code = $codes[$this->status_code];
+                $header = sprintf('HTTP/1.1 %d: %s', $this->status_code, $code);
+                header($header, true, $this->status_code);
             }
         }
     }

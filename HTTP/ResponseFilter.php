@@ -31,8 +31,11 @@ use \Miny\HTTP\Response;
 
 class ResponseFilter extends \Miny\Event\EventHandler {
 
-    public function handle(Event $event, $handling_method = NULL) {
-        $event->setResponse(new Response($event->getParameter('response')));
+    public function filterStringToResponse(Event $event) {
+        $response = $event->getParameter('response');
+        if (!$response instanceof Response) {
+            $event->setResponse(new Response($response));
+        }
     }
 
 }

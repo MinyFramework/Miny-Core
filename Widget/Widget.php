@@ -30,10 +30,19 @@ abstract class Widget implements iWidget {
 
     private $assigns = array();
     private $services = array();
-    protected $view;
+    private $container;
+    public $view;
+
+    public function setContainer(WidgetContainer $container) {
+        $this->container = $container;
+    }
 
     public function __set($key, $value) {
         $this->assigns[$key] = $value;
+    }
+
+    public function getAssigns() {
+        return $this->assigns;
     }
 
     public function service($key, $service) {
@@ -56,22 +65,7 @@ abstract class Widget implements iWidget {
     }
 
     public function end(array $params = array()) {
-        $tpl = $this->templating;
-        $tpl->setScope('widget');
-        $this->run($params);
-
-        foreach ($this->assigns as $key => $value) {
-            $tpl->$key = $value;
-        }
-
-        if (is_null($this->view)) {
-            throw new \RuntimeException('Template not set.');
-        }
-
-        $response = $tpl->render('widgets/' . $this->view);
-
-        $tpl->leaveScope(true);
-        return $response;
+        return $this->container->render($this, $params);
     }
 
 }

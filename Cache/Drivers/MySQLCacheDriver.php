@@ -40,16 +40,16 @@ class MySQLCacheDriver implements \Miny\Cache\iCacheDriver {
         $this->driver = $driver;
         $this->table_name = $table_name;
         //GC
-        $this->driver->exec('DELETE FROM `' . $this->table_name . '` WHERE `expiration` < NOW()');
+        $driver->exec('DELETE FROM `' . $table_name . '` WHERE `expiration` < NOW()');
 
-        $result = $this->driver->query('SELECT `key` FROM `' . $this->table_name . '` WHERE `expiration` >= NOW()');
+        $result = $driver->query('SELECT `key` FROM `' . $table_name . '` WHERE `expiration` >= NOW()');
         foreach ($result as $row) {
             $this->keys[$row['key']] = 1;
         }
     }
 
     public function exists($key) {
-        return array_key_exists($key, $this->keys);
+        return array_key_exists($key, $this->keys) && $this->keys[$key] != 'r';
     }
 
     public function get($key) {

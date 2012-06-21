@@ -140,15 +140,15 @@ class Factory {
         $descriptor = $this->getDescriptor($alias);
         $obj = $this->instantiate($descriptor);
 
+        if ($descriptor->isSingleton()) {
+            $this->setInstance($alias, $obj);
+        }
+
         if ($descriptor->hasParent()) {
             $parent = $this->getDescriptor($descriptor->getParent());
             $this->injectParentDependencies($obj, $parent);
         }
         $this->injectDependencies($obj, $descriptor);
-
-        if ($descriptor->isSingleton()) {
-            $this->setInstance($alias, $obj);
-        }
         return $obj;
     }
 

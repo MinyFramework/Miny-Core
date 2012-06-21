@@ -17,7 +17,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  *
- * @package   Miny/Cache
+ * @package   Miny/Config
  * @copyright 2012 Dániel Buga <daniel@bugadani.hu>
  * @license   http://www.gnu.org/licenses/gpl.txt
  *            GNU General Public License
@@ -39,15 +39,16 @@ class MySQLConfig implements \Miny\Config\iConfig {
         $this->driver = $driver;
         $this->table_name = $table_name;
 
-        $result = $this->driver->query('SELECT `key`, `value` FROM `' . $this->table_name);
-        foreach ($result as $row) {
+        $sql = sprintf('SELECT `key`, `value` FROM `%s`', $table_name);
+
+        foreach ($driver->query($sql) as $row) {
             $this->keys[$row['key']] = 1;
             $this->data[$row['key']] = $row['value'];
         }
     }
 
     public function exists($key) {
-        return array_key_exists($key, $this->keys);
+        return array_key_exists($key, $this->keys) && $this->keys[$key] != 'r';
     }
 
     public function get($key) {
@@ -71,20 +72,23 @@ class MySQLConfig implements \Miny\Config\iConfig {
 
     public function close() {
         $save = false;
-        $db = $this->driver;
         $statements = array();
         if (in_array('r', $this->keys)) {
             $save = true;
-            $statements['r'] = $db->prepare('DELETE FROM `' . $this->table_name . '` WHERE `key` = :key');
+            $sql = 'DELETE FROM `%s` WHERE `key` = :key';
+            $sql = sprintf($sql, $this->table_name);
+            $statements['r'] = $this->driver->prepare($sql);
         }
         if (in_array('m', $this->keys)) {
             $save = true;
-            $statements['m'] = $db->prepare('REPLACE INTO `' . $this->table_name . '` (`key`, `value`) VALUES(:key, :value)');
+            $sql = 'REPLACE INTO `%s` (`key`, `value`) VALUES(:key, :value)';
+            $sql = sprintf($sql, $this->table_name);
+            $statements['m'] = $this->driver->prepare($sql);
         }
         if (!$save) {
             return;
         }
-        $db->beginTransaction();
+        $this->driver->beginTransaction();
         foreach ($this->keys as $key => $state) {
             if ($state == 1)
                 continue;
@@ -98,7 +102,7 @@ class MySQLConfig implements \Miny\Config\iConfig {
             }
             $statement->execute();
         }
-        $db->commit();
+        $this->driver->commit();
     }
 
 }

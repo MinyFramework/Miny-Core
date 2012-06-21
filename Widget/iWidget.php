@@ -30,6 +30,8 @@ interface iWidget {
 
     public function begin(array $params = array());
 
+    public function setContainer(WidgetContainer $container);
+
     public function end(array $params = array());
 
     public function run(array $params = array());

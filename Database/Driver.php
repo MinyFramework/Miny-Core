@@ -29,11 +29,7 @@ namespace Miny\Database;
 
 class Driver extends \PDO {
 
-    private $table_prefix;
-
-    public function setPrefix($prefix) {
-        $this->table_prefix = $prefix;
-    }
+    public $table_prefix;
 
     public function replacePrefix($sql) {
         if ($this->table_prefix) {

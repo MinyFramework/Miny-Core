@@ -26,15 +26,20 @@
 
 namespace Miny\Widget;
 
+use \Miny\Factory\Factory;
+use \Miny\Template\Template;
+
 class WidgetContainer {
 
     private $widgets = array();
     private $groups;
     private $factory;
+    private $templating;
 
-    public function __construct(\Miny\Factory\Factory $factory) {
+    public function __construct(Factory $factory, Template $templating) {
         $this->groups = array('no_group' => array());
         $this->factory = $factory;
+        $this->templating = $templating;
     }
 
     public function addGroup($group, array $widgets = array()) {
@@ -71,31 +76,54 @@ class WidgetContainer {
     }
 
     public function getWidgetParameters($id) {
-        if (!isset($this->widgets[$id])) {
+        if (!$this->widgetExists($id)) {
             throw new \OutOfBoundsException('Widget not set: ' . $id);
         }
         return $this->widgets[$id][1];
     }
 
     public function getWidget($name, array $parameters = array()) {
+        //TODO: factory kiiktatása
         $widget_name = $name . '_widget';
         $widget = $this->factory->$widget_name;
+
         if (!$widget instanceof iWidget) {
-            throw new \InvalidArgumentException('Invalid widget: ' . $widget_name . '(' . get_class($widget) . ')');
+            $pattern = 'Invalid widget: %s (class: %s)';
+            $message = sprintf($pattern, $widget_name, get_class($widget));
+            throw new \InvalidArgumentException($message);
         }
+        $widget->setContainer($this);
         return $widget->begin($parameters);
     }
 
     public function renderWidget($id, array $parameters = array()) {
-        if (isset($this->widgets[$id])) {
+        if ($this->widgetExists($id)) {
             $parameters = $parameters + $this->getWidgetParameters($id);
             $id = $this->widgets[$id][0];
         }
         return $this->getWidget($id)->end($parameters);
     }
-//
-//    public function render(iWidget $widget) {
-//
-//    }
+
+    public function render(iWidget $widget, array $params = array()) {
+
+        $this->templating->setScope('widget');
+
+        if ($widget->run($params) === false) {
+            return;
+        }
+
+        foreach ($widget->getAssigns() as $key => $value) {
+            $this->templating->$key = $value;
+        }
+
+        if (is_null($widget->view)) {
+            throw new \RuntimeException('Template not set.');
+        }
+
+        $response = $this->templating->render('widgets/' . $widget->view);
+
+        $this->templating->leaveScope(true);
+        return $response;
+    }
 
 }
