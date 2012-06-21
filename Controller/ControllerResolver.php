@@ -60,9 +60,9 @@ class ControllerResolver {
         } elseif (is_string($this->controllers[$class])) {
             $controller = $this->getControllerFromClassName($this->controllers[$class]);
         } else {
-            $params = $this->controllers[$class];
-            $callable = array_shift($params);
-            $controller = call_user_func_array($callable, $params);
+            $factory_params = $this->controllers[$class];
+            $callable = array_shift($factory_params);
+            $controller = call_user_func_array($callable, $factory_params);
         }
         if (!$controller instanceof Controller) {
             throw new \RuntimeException('Controller must implement interface "iController": ' . $class);
