@@ -26,23 +26,23 @@
 
 namespace Miny\Widget;
 
-use \Miny\Factory\Factory;
 use \Miny\Template\Template;
 
 class WidgetContainer {
 
     private $widgets = array();
     private $groups;
-    private $factory;
     private $templating;
 
-    public function __construct(Factory $factory, Template $templating) {
+    public function __construct(Template $templating) {
         $this->groups = array('no_group' => array());
-        $this->factory = $factory;
         $this->templating = $templating;
     }
 
-    public function addGroup($group, array $widgets = array()) {
+    public function addGroup($group) {
+        $widgets = func_get_args();
+        array_shift($widgets);
+        
         if (!isset($this->groups[$group])) {
             $this->groups[$group] = $widgets;
         }
@@ -62,8 +62,27 @@ class WidgetContainer {
         return $output;
     }
 
-    public function addWidget($id, $name = NULL, array $parameters = array()) {
-        $this->widgets[$id] = array($name ? : $id, $parameters);
+    public function addWidget($id, $widget) {
+        if (!is_string($widget)
+                && !is_callable($widget)
+                && !$widget instanceof \Closure) {
+            $message = sprintf('Invalid widget: %s (%s)', $id, gettype($widget));
+            throw new \InvalidArgumentException($message);
+        }
+
+        if (!is_string($widget)) {
+            $widget = func_get_args();
+            array_shift($widget);
+        }
+
+        $this->widgets[$id] = array('widget' => $widget, 'params' => array());
+    }
+
+    public function setWidgetParams($id, array $params) {
+        if (!$this->widgetExists($id)) {
+            throw new \OutOfBoundsException('Widget not set: ' . $id);
+        }
+        return $this->widgets[$id]['params'] = $params;
     }
 
     public function removeWidget($id, $group = 'no_group') {
@@ -79,13 +98,27 @@ class WidgetContainer {
         if (!$this->widgetExists($id)) {
             throw new \OutOfBoundsException('Widget not set: ' . $id);
         }
-        return $this->widgets[$id][1];
+        return $this->widgets[$id]['params'];
     }
 
     public function getWidget($name, array $parameters = array()) {
         //TODO: factory kiiktatása
-        $widget_name = $name . '_widget';
-        $widget = $this->factory->$widget_name;
+
+        if (!$this->widgetExists($name)) {
+            if (!class_exists($name)) {
+                throw new \InvalidArgumentException('Widget not found: ' . $name);
+            }
+            $widget = new $name;
+        } elseif (is_string($this->widgets[$name]['widget'])) {
+            if (!class_exists($this->widgets[$name]['widget'])) {
+                throw new \InvalidArgumentException('Widget not found: ' . $this->widgets[$name]['widget']);
+            }
+            $widget = new $this->widgets[$name]['widget'];
+        } else {
+            $factory_params = $this->widgets[$name]['widget'];
+            $callable = array_shift($factory_params);
+            $widget = call_user_func_array($callable, $factory_params);
+        }
 
         if (!$widget instanceof iWidget) {
             $pattern = 'Invalid widget: %s (class: %s)';
@@ -99,7 +132,6 @@ class WidgetContainer {
     public function renderWidget($id, array $parameters = array()) {
         if ($this->widgetExists($id)) {
             $parameters = $parameters + $this->getWidgetParameters($id);
-            $id = $this->widgets[$id][0];
         }
         return $this->getWidget($id)->end($parameters);
     }
