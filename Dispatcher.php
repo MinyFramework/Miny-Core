@@ -26,7 +26,7 @@
 
 namespace Miny;
 
-use \Miny\Controller\iControllerResolver;
+use \Miny\Controller\ControllerResolver;
 use \Miny\Event\Event;
 use \Miny\Event\EventDispatcher;
 use \Miny\HTTP\Response;
@@ -37,7 +37,7 @@ class Dispatcher {
     private $events;
     private $controller_resolver;
 
-    public function __construct(EventDispatcher $events, iControllerResolver $resolver) {
+    public function __construct(EventDispatcher $events, ControllerResolver $resolver) {
         $this->events = $events;
         $this->controller_resolver = $resolver;
     }

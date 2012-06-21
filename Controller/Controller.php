@@ -27,15 +27,27 @@
 
 namespace Miny\Controller;
 
-abstract class Controller implements iController {
+use \Miny\HTTP\Request;
+
+abstract class Controller  {
 
     private $default_action;
-    private $status = 200;
     private $assigns = array();
-    private $headers = array(); //$http = array();
-    private $cookies = array();
     private $services = array();
-    private $template;
+    private $headers = array();
+    private $cookies = array();
+
+    /**
+     * HTTP status code
+     * @var int
+     */
+    public $status = 200;
+
+    /**
+     * The template file to render
+     * @var string
+     */
+    public $template;
 
     public function __construct($default_action = NULL) {
         $this->default_action = $default_action;
@@ -56,20 +68,11 @@ abstract class Controller implements iController {
     public function __get($key) {
         if (isset($this->services[$key])) {
             return $this->services[$key];
-        } else {
-            if (array_key_exists($key, $this->assigns) && is_null($this->assigns[$key][1])) {
-                return $this->assigns[$key][0];
-            }
-            throw new \OutOfBoundsException('Variable not set: ' . $key);
+        } elseif (array_key_exists($key, $this->assigns) && is_null($this->assigns[$key][1])) {
+            //Only get variables assigned to current scope.
+            return $this->assigns[$key][0];
         }
-    }
-
-    public function status($code = NULL) {
-        if ($code) {
-            $this->status = $code;
-        } else {
-            return $this->status;
-        }
+        throw new \OutOfBoundsException('Variable not set: ' . $key);
     }
 
     public function cookie($name, $value) {
@@ -92,16 +95,8 @@ abstract class Controller implements iController {
         return $this->assigns;
     }
 
-    public function setTemplate($template) {
-        $this->template = $template;
-    }
-
-    public function getTemplate() {
-        return $this->template;
-    }
-
     public function request($path, array $get = array(), array $post = array()) {
-        $request = new \Miny\HTTP\Request($path, $get, $post, \Miny\HTTP\Request::SUB_REQUEST);
+        $request = new Request($path, $get, $post, Request::SUB_REQUEST);
         $response = $this->dispatcher->dispatch($request); //TODO: biztosítani kell, hogy ez egyáltalán létezzen - System::Event?
 
         foreach ($response->getHeaders() as $name => $value) {
@@ -123,7 +118,7 @@ abstract class Controller implements iController {
         if (!method_exists($this, $fn)) {
             throw new \InvalidArgumentException('Action not found: ' . $fn);
         }
-        $this->setTemplate($controller . '/' . $action);
+        $this->template = $controller . '/' . $action;
 
         return $this->$fn($params);
     }

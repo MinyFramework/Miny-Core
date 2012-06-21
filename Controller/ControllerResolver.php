@@ -27,18 +27,25 @@
 
 namespace Miny\Controller;
 
-class ControllerResolver implements iControllerResolver {
+use \Miny\HTTP\Response;
+use \Miny\HTTP\RedirectResponse;
+use \Miny\Template\Template;
 
-    private $template;
+class ControllerResolver {
+
+    private $templating;
     private $controllers = array();
 
-    public function __construct(\Miny\Template\Template $template) {
-        $this->template = $template;
+    public function __construct(Template $templating) {
+        $this->templating = $templating;
     }
 
     public function register($name, $controller) {
-        if (!is_string($controller) && !is_callable($controller) && !$controller instanceof \Closure) {
-            throw new \InvalidArgumentException('Invalid controller: ' . $name . ' (' . gettype($controller) . ')');
+        if (!is_string($controller)
+                && !is_callable($controller)
+                && !$controller instanceof \Closure) {
+            $message = sprintf('Invalid controller: %s (%s)', $name, gettype($controller));
+            throw new \InvalidArgumentException($message);
         }
         if (!is_string($controller)) {
             $controller = func_get_args();
@@ -47,66 +54,56 @@ class ControllerResolver implements iControllerResolver {
         $this->controllers[$name] = $controller;
     }
 
-    public function resolve($controller_class, $action = NULL, array $params = array()) {
-        try {
-            $controller = $this->getController($controller_class);
-        } catch (\RuntimeException $e) {
-            throw new \InvalidArgumentException('Controller not found: ' . $controller_class, 0, $e);
-        }
-        if (!$controller instanceof iController) {
-            throw new \RuntimeException('Invalid controller: ' . $controller_class);
-        }
-        return $this->runController($controller, $controller_class, $action, $params);
-    }
-
-    private function getController($class) {
+    public function resolve($class, $action = NULL, array $params = array()) {
         if (!isset($this->controllers[$class])) {
             $controller = $this->getControllerFromClassName($class);
+        } elseif (is_string($this->controllers[$class])) {
+            $controller = $this->getControllerFromClassName($this->controllers[$class]);
         } else {
-            if (is_string($this->controllers[$class])) {
-                $controller = $this->getControllerFromClassName($this->controllers[$class]);
-            } else {
-                $params = $this->controllers[$class];
-                $callable = array_shift($params);
-                $controller = call_user_func_array($callable, $params);
-                if (!$controller instanceof iController) {
-                    throw new \InvalidArgumentException('Invalid controller: ' . $class);
-                }
-            }
+            $params = $this->controllers[$class];
+            $callable = array_shift($params);
+            $controller = call_user_func_array($callable, $params);
         }
-        return $controller;
+        if (!$controller instanceof Controller) {
+            throw new \RuntimeException('Controller must implement interface "iController": ' . $class);
+        }
+        return $this->runController($controller, $class, $action, $params);
     }
 
     private function getControllerFromClassName($class) {
-        $classpath = '\\Application\\Controller\\' . $class . 'Controller';
-        if (!class_exists($classpath)) {
+        if (!class_exists($class)) {
             throw new \InvalidArgumentException('Controller not found: ' . $class);
         }
-        return new $classpath;
+        return new $class;
     }
 
-    private function runController(iController $controller, $class, $action, array $params = array()) {
+    private function runController(Controller $controller, $class, $action, array $params = array()) {
         $template_scope = $class . '_' . $action;
-        $this->template->setScope($template_scope);
+        $this->templating->setScope($template_scope);
+
         $return = $controller->run($class, $action, $params);
 
         if (is_string($return)) {
-            $response = new \Miny\HTTP\RedirectResponse($return);
+            $response = new RedirectResponse($return);
         } else {
-            $this->template->controller = $controller;
+            $this->templating->controller = $controller;
             foreach ($controller->getAssigns() as $key => $array) {
                 list($value, $scope) = $array;
-                $this->template->assign($key, $value, $scope ?: $template_scope);
+                $scope = $scope ? : $template_scope;
+                $this->templating->assign($key, $value, $scope);
             }
-            $response = new \Miny\HTTP\Response($this->template->render($controller->getTemplate()), $controller->status());
+            $output = $this->templating->render($controller->template);
+            $response = new Response($output, $controller->status);
         }
+
         foreach ($controller->getHeaders() as $name => $value) {
             $response->setHeader($name, $value);
         }
         foreach ($controller->getCookies() as $name => $value) {
             $response->setCookie($name, $value);
         }
-        $this->template->leaveScope(true);
+
+        $this->templating->leaveScope(true);
         return $response;
     }
 
