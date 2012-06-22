@@ -88,8 +88,11 @@ class Translation {
 
         $arg_num = func_num_args();
         if ($arg_num > 1) {
-            for ($i = 1; $i < $arg_num; ++$i) {
-                $replace_arr['{' . ($i - 1) . '}'] = func_get_arg($i);
+            $replace_arr = array(
+                '{n}' => $num
+            );
+            for ($i = 2; $i < $arg_num; ++$i) {
+                $replace_arr['{' . $i - 2 . '}'] = func_get_arg($i);
             }
             $string = str_replace(array_keys($replace_arr), $replace_arr, $string);
         }

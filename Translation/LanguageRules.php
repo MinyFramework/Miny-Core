@@ -33,7 +33,7 @@ class LanguageRules {
         'en' => array(),
     );
 
-    public static function getRules($lang) {
+    public function getRules($lang) {
         if (!isset(self::$rules[$lang])) {
             throw new \OutOfBoundsException('Language data not found: ' . $lang);
         }
