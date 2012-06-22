@@ -26,7 +26,10 @@
 
 namespace Miny\Translation\Loaders;
 
-class PHP extends \Miny\Translation\Loader {
+use Miny\Translation\Loader;
+use Miny\Translation\Translation;
+
+class PHP extends Loader {
 
     private $strings_dir;
 

@@ -34,5 +34,5 @@ abstract class Loader {
         }
     }
 
-    protected abstract function load();
+    protected abstract function load($lang);
 }
