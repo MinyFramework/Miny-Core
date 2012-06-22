@@ -26,6 +26,8 @@
 
 namespace Miny\Translation;
 
+use Miny\Translation\Translation;
+
 abstract class Loader {
 
     public function __construct($lang, Translation $t) {
@@ -34,5 +36,5 @@ abstract class Loader {
         }
     }
 
-    protected abstract function load();
+    protected abstract function load($lang);
 }
