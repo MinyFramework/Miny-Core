@@ -49,7 +49,7 @@ class Session implements \ArrayAccess, \IteratorAggregate, \Countable {
         $this->registerCustomStorage();
         session_start();
         $this->is_open = true;
-        $this->regenerateID(true);
+        session_regenerate_id(true);
         if (!isset($_SESSION['data'])) {
             $_SESSION = array(
                 'data' => array(),
