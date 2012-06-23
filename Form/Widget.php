@@ -1,10 +1,10 @@
 <?php
 
-namespace Miny\Widget\Widgets;
+namespace Miny\Form;
 
 use \Miny\Template\Template;
 
-class Form extends \Miny\Widget\Widget {
+class Widget extends \Miny\Widget\Widget {
 
     public static $error_template = 'widgets/ui/form/error';
     public $data = array();
