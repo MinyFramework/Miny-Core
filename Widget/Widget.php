@@ -26,7 +26,7 @@
 
 namespace Miny\Widget;
 
-abstract class Widget implements iWidget {
+abstract class Widget {
 
     private $assigns = array();
     private $services = array();

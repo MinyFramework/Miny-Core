@@ -102,25 +102,24 @@ class WidgetContainer {
     }
 
     public function getWidget($name, array $parameters = array()) {
-        //TODO: factory kiiktatása
-
         if (!$this->widgetExists($name)) {
             if (!class_exists($name)) {
                 throw new \InvalidArgumentException('Widget not found: ' . $name);
             }
             $widget = new $name;
-        } elseif (is_string($this->widgets[$name]['widget'])) {
-            if (!class_exists($this->widgets[$name]['widget'])) {
-                throw new \InvalidArgumentException('Widget not found: ' . $this->widgets[$name]['widget']);
-            }
-            $widget = new $this->widgets[$name]['widget'];
         } else {
-            $factory_params = $this->widgets[$name]['widget'];
-            $callable = array_shift($factory_params);
-            $widget = call_user_func_array($callable, $factory_params);
+            $params = $this->widgets[$name]['widget'];
+            if (is_string($params)) {
+                if (!class_exists($params)) {
+                    throw new \InvalidArgumentException('Widget class not found: ' . $params);
+                }
+                $widget = new $params;
+            } else {
+                $callable = array_shift($params);
+                $widget = call_user_func_array($callable, $params);
+            }
         }
-
-        if (!$widget instanceof iWidget) {
+        if (!$widget instanceof Widget) {
             $pattern = 'Invalid widget: %s (class: %s)';
             $message = sprintf($pattern, $widget_name, get_class($widget));
             throw new \InvalidArgumentException($message);
@@ -136,7 +135,7 @@ class WidgetContainer {
         return $this->getWidget($id)->end($parameters);
     }
 
-    public function render(iWidget $widget, array $params = array()) {
+    public function render(Widget $widget, array $params = array()) {
         $this->templating->setScope();
         if ($widget->run($params) !== false) {
             foreach ($widget->getAssigns() as $key => $value) {
