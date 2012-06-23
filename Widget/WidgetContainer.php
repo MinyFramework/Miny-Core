@@ -42,7 +42,7 @@ class WidgetContainer {
     public function addGroup($group) {
         $widgets = func_get_args();
         array_shift($widgets);
-        
+
         if (!isset($this->groups[$group])) {
             $this->groups[$group] = $widgets;
         }
@@ -141,6 +141,7 @@ class WidgetContainer {
         $this->templating->setScope('widget');
 
         if ($widget->run($params) === false) {
+            $this->templating->leaveScope(true);
             return;
         }
 
