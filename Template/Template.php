@@ -42,26 +42,17 @@ class Template {
 
     public function setScope($scope = NULL) {
         $this->scopes[] = $this->scope;
-        $this->scope = $scope;
+        $this->scope = $scope ? : count($this->scopes);
     }
 
     public function leaveScope($clean = false) {
-        if($clean) {
+        if (empty($this->scopes)) {
+            throw new \OutOfBoundsException('There are no scopes to leave.');
+        }
+        if ($clean) {
             unset($this->template_vars[$this->scope]);
         }
         $this->scope = array_pop($this->scopes);
-    }
-
-    public function getScope($scope = NULL) {
-        $scope = $scope ? : $this->scope;
-        if (is_null($scope)) {
-            $scope = 0;
-        }
-        return $scope;
-    }
-
-    public function getPath() {
-        return $this->path;
     }
 
     public function addPlugin($key, $plugin) {
@@ -92,7 +83,7 @@ class Template {
     }
 
     public function assign($key, $value, $scope = NULL) {
-        $scope = $this->getScope($scope);
+        $scope = $scope ? : $this->scope;
         $this->template_vars[$scope][$key] = $value;
     }
 
@@ -109,17 +100,18 @@ class Template {
     }
 
     private function getTemplatePath($template, $format) {
-        $format = $this->getFormat($format);
-        $file = $this->getPath() . '/' . $template . $format . '.php';
+        $filename = $template . $this->getFormat($format);
+        $file = $this->path . '/' . $filename . '.php';
         if (!is_file($file)) {
-            throw new \RuntimeException('Template not found: ' . $template . $format);
+            throw new \RuntimeException('Template not found: ' . $filename);
         }
         return $file;
     }
 
     public function render($template, $format = NULL, $scope = NULL) {
         ob_start();
-        extract($this->template_vars[$this->getScope($scope)], EXTR_SKIP);
+        $scope = $scope ? : $this->scope;
+        extract($this->template_vars[$scope], EXTR_SKIP);
         include $this->getTemplatePath($template, $format);
         return ob_get_clean();
     }
