@@ -27,9 +27,10 @@
 namespace Miny\HTTP;
 
 use \Miny\Event\Event;
+use \Miny\Event\EventHandler;
 use \Miny\HTTP\Response;
 
-class ResponseFilter extends \Miny\Event\EventHandler {
+class ResponseFilter extends EventHandler {
 
     public function filterStringToResponse(Event $event) {
         $response = $event->getParameter('response');

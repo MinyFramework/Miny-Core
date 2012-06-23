@@ -27,7 +27,7 @@
 
 namespace Miny\Event;
 
-class Event implements iEvent {
+class Event {
 
     private $parameters;
     private $name;
@@ -48,7 +48,7 @@ class Event implements iEvent {
 
     public function getParameter($key) {
         if (!$this->hasParameter($key)) {
-            throw new InvalidArgumentException('Event has no parameter "%s" set.', $key);
+            throw new \InvalidArgumentException('Event has no parameter "%s" set.', $key);
         }
         return $this->parameters[$key];
     }

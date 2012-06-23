@@ -31,11 +31,11 @@ class EventDispatcher {
 
     private $handlers = array();
 
-    public function setHandler($event, iEventHandler $handler, $method = 'handle') {
+    public function setHandler($event, EventHandler $handler, $method = 'handle') {
         $this->handlers[$event][] = array($handler, $method);
     }
 
-    public function raiseEvent(iEvent $event) {
+    public function raiseEvent(Event $event) {
         $name = $event->getName();
         if (isset($this->handlers[$name])) {
             foreach ($this->handlers[$name] as $handler) {

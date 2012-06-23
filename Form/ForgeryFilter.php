@@ -17,40 +17,32 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  *
- * @package   Miny/Routing
+ * @package   Miny/Form
  * @copyright 2012 Dániel Buga <daniel@bugadani.hu>
  * @license   http://www.gnu.org/licenses/gpl.txt
  *            GNU General Public License
  * @version   1.0
  */
 
-namespace Miny\Routing;
+namespace Miny\Form;
 
-use \Miny\Event\Event;
 use \Miny\Event\EventHandler;
+use \Miny\Event\Event;
+use \Miny\Session\Session;
 
-class RouteFilter extends EventHandler {
+class ForgeryFilter extends EventHandler {
 
-    private $router;
+    private $session;
 
-    public function setRouter(Router $router) {
-        $this->router = $router;
+    public function setSession(Session $session) {
+        $this->session = $session;
     }
 
-    public function handle(Event $event, $handling_method = NULL) {
+    public function filterRequest(Event $event) {
         $request = $event->getParameter('request');
-        $route = $this->router->match($request->path, $request->method);
-        if (!$route) {
-            throw new \RuntimeException('E404 - Page not found: ' . $request->path);
+        if ($request->isSubRequest()) {
+            return;
         }
-        $start = strpos($_SERVER['REQUEST_URI'], '?');
-        $extra = array();
-        if ($start) {
-            $str = substr($_SERVER['REQUEST_URI'], $start + 1);
-            parse_str($str, $extra);
-        }
-        $request->get(NULL, $route->get() + $_GET + $extra);
-        $event->setResponse($request);
     }
 
 }

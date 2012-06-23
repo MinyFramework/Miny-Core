@@ -27,9 +27,9 @@
 
 namespace Miny\Event;
 
-abstract class EventHandler implements iEventHandler {
+abstract class EventHandler {
 
-    public function handle(\Miny\Event\Event $event, $handling_method = NULL) {
+    public function handle(Event $event, $handling_method = NULL) {
         throw new \BadMethodCallException('Handler not exists: ' . $handling_method);
     }
 
