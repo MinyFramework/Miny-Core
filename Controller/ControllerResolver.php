@@ -78,8 +78,7 @@ class ControllerResolver {
     }
 
     private function runController(Controller $controller, $class, $action, array $params = array()) {
-        $template_scope = $class . '_' . $action;
-        $this->templating->setScope($template_scope);
+        $this->templating->setScope();
 
         $return = $controller->run($class, $action, $params);
 
@@ -89,7 +88,6 @@ class ControllerResolver {
             $this->templating->controller = $controller;
             foreach ($controller->getAssigns() as $key => $array) {
                 list($value, $scope) = $array;
-                $scope = $scope ? : $template_scope;
                 $this->templating->assign($key, $value, $scope);
             }
             $output = $this->templating->render($controller->template);

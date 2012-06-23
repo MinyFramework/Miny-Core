@@ -137,24 +137,18 @@ class WidgetContainer {
     }
 
     public function render(iWidget $widget, array $params = array()) {
-
-        $this->templating->setScope('widget');
-
-        if ($widget->run($params) === false) {
-            $this->templating->leaveScope(true);
-            return;
+        $this->templating->setScope();
+        if ($widget->run($params) !== false) {
+            foreach ($widget->getAssigns() as $key => $value) {
+                $this->templating->$key = $value;
+            }
+            if (is_null($widget->view)) {
+                throw new \RuntimeException('Template not set.');
+            }
+            $response = $this->templating->render('widgets/' . $widget->view);
+        } else {
+            $response = '';
         }
-
-        foreach ($widget->getAssigns() as $key => $value) {
-            $this->templating->$key = $value;
-        }
-
-        if (is_null($widget->view)) {
-            throw new \RuntimeException('Template not set.');
-        }
-
-        $response = $this->templating->render('widgets/' . $widget->view);
-
         $this->templating->leaveScope(true);
         return $response;
     }
