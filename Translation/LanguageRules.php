@@ -26,16 +26,17 @@
 
 namespace Miny\Translation;
 
-class LanguageRules {
-
+class LanguageRules
+{
     private static $rules = array(
         'hu' => array(),
         'en' => array(),
     );
 
-    public static function getRules($lang) {
+    public static function getRules($lang)
+    {
         if (!isset(self::$rules[$lang])) {
-            throw new \OutOfBoundsException('Language data not found: ' . $lang);
+            throw new \OutOfBoundsException('Language data not set: ' . $lang);
         }
         return self::$rules[$lang];
     }

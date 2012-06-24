@@ -29,19 +29,21 @@ namespace Miny\Routing;
 use \Miny\Event\Event;
 use \Miny\Event\EventHandler;
 
-class RouteFilter extends EventHandler {
-
+class RouteFilter extends EventHandler
+{
     private $router;
 
-    public function setRouter(Router $router) {
+    public function setRouter(Router $router)
+    {
         $this->router = $router;
     }
 
-    public function handle(Event $event, $handling_method = NULL) {
+    public function handle(Event $event, $handling_method = NULL)
+    {
         $request = $event->getParameter('request');
         $route = $this->router->match($request->path, $request->method);
         if (!$route) {
-            throw new \RuntimeException('E404 - Page not found: ' . $request->path);
+            throw new \RuntimeException('Page not found: ' . $request->path);
         }
         $start = strpos($_SERVER['REQUEST_URI'], '?');
         $extra = array();

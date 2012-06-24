@@ -26,8 +26,8 @@
 
 namespace Miny\Template;
 
-class Template {
-
+class Template
+{
     private $path;
     private $template_vars = array();
     private $scope;
@@ -35,17 +35,20 @@ class Template {
     private $format;
     private $plugins = array();
 
-    public function __construct($path, $default_format = NULL) {
+    public function __construct($path, $default_format = NULL)
+    {
         $this->path = $path;
         $this->setFormat($default_format);
     }
 
-    public function setScope($scope = NULL) {
+    public function setScope($scope = NULL)
+    {
         $this->scopes[] = $this->scope;
         $this->scope = $scope ? : count($this->scopes);
     }
 
-    public function leaveScope($clean = false) {
+    public function leaveScope($clean = false)
+    {
         if (empty($this->scopes)) {
             throw new \OutOfBoundsException('There are no scopes to leave.');
         }
@@ -55,43 +58,51 @@ class Template {
         $this->scope = array_pop($this->scopes);
     }
 
-    public function addPlugin($key, $plugin) {
+    public function addPlugin($key, $plugin)
+    {
         if (!is_callable($plugin) && !$plugin instanceof \Closure) {
             throw new \InvalidArgumentException('Invalid plugin: ' . $key);
         }
         $this->plugins[$key] = $plugin;
     }
 
-    public function getPlugin($key) {
+    public function getPlugin($key)
+    {
         if (!isset($this->plugins[$key])) {
             throw new \InvalidArgumentException('Plugin not found: ' . $key);
         }
         return $this->plugins[$key];
     }
 
-    public function __call($key, $args) {
+    public function __call($key, $args)
+    {
         try {
             $plugin = $this->getPlugin($key);
             return call_user_func_array($plugin, $args);
         } catch (\InvalidArgumentException $e) {
-            throw new \BadMethodCallException('Method not found: ' . $key, 0, $e);
+            $message = 'Method not found: ' . $key;
+            throw new \BadMethodCallException($message, 0, $e);
         }
     }
 
-    public function __set($key, $value) {
+    public function __set($key, $value)
+    {
         $this->assign($key, $value);
     }
 
-    public function assign($key, $value, $scope = NULL) {
+    public function assign($key, $value, $scope = NULL)
+    {
         $scope = $scope ? : $this->scope;
         $this->template_vars[$scope][$key] = $value;
     }
 
-    public function setFormat($format) {
+    public function setFormat($format)
+    {
         $this->format = $format;
     }
 
-    public function getFormat($format = NULL) {
+    public function getFormat($format = NULL)
+    {
         $format = $format ? : $this->format;
         if (!is_null($format)) {
             $format = '.' . $format;
@@ -99,7 +110,8 @@ class Template {
         return $format;
     }
 
-    private function getTemplatePath($template, $format) {
+    private function getTemplatePath($template, $format)
+    {
         $filename = $template . $this->getFormat($format);
         $file = $this->path . '/' . $filename . '.php';
         if (!is_file($file)) {
@@ -108,7 +120,8 @@ class Template {
         return $file;
     }
 
-    public function render($template, $format = NULL, $scope = NULL) {
+    public function render($template, $format = NULL, $scope = NULL)
+    {
         ob_start();
         $scope = $scope ? : $this->scope;
         extract($this->template_vars[$scope], EXTR_SKIP);

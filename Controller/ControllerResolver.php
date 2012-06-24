@@ -31,20 +31,23 @@ use \Miny\HTTP\Response;
 use \Miny\HTTP\RedirectResponse;
 use \Miny\Template\Template;
 
-class ControllerResolver {
-
+class ControllerResolver
+{
     private $templating;
     private $controllers = array();
 
-    public function __construct(Template $templating) {
+    public function __construct(Template $templating)
+    {
         $this->templating = $templating;
     }
 
-    public function register($name, $controller) {
+    public function register($name, $controller)
+    {
         if (!is_string($controller)
                 && !is_callable($controller)
                 && !$controller instanceof \Closure) {
-            $message = sprintf('Invalid controller: %s (%s)', $name, gettype($controller));
+            $type = gettype($controller);
+            $message = sprintf('Invalid controller: %s (%s)', $name, $type);
             throw new \InvalidArgumentException($message);
         }
         if (!is_string($controller)) {
@@ -54,30 +57,36 @@ class ControllerResolver {
         $this->controllers[$name] = $controller;
     }
 
-    public function resolve($class, $action = NULL, array $params = array()) {
+    public function resolve($class, $action = NULL, array $params = array())
+    {
         if (!isset($this->controllers[$class])) {
-            $controller = $this->getControllerFromClassName($class);
+            $controller = $this->getController($class);
         } elseif (is_string($this->controllers[$class])) {
-            $controller = $this->getControllerFromClassName($this->controllers[$class]);
+            $controller = $this->getController($this->controllers[$class]);
         } else {
             $factory_params = $this->controllers[$class];
             $callable = array_shift($factory_params);
             $controller = call_user_func_array($callable, $factory_params);
         }
         if (!$controller instanceof Controller) {
-            throw new \RuntimeException('Controller must implement interface "iController": ' . $class);
+            $message = 'Controller must extend Controller: ' . $class;
+            throw new \RuntimeException($message);
         }
         return $this->runController($controller, $class, $action, $params);
     }
 
-    private function getControllerFromClassName($class) {
+    private function getController($class)
+    {
         if (!class_exists($class)) {
-            throw new \InvalidArgumentException('Controller not found: ' . $class);
+            $message = 'Controller not found: ' . $class;
+            throw new \InvalidArgumentException($message);
         }
         return new $class;
     }
 
-    private function runController(Controller $controller, $class, $action, array $params = array()) {
+    private function runController(Controller $controller, $class, $action,
+            array $params = NULL)
+    {
         $this->templating->setScope();
 
         $return = $controller->run($class, $action, $params);

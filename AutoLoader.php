@@ -31,15 +31,17 @@ namespace Miny;
  *
  * @author Dániel Buga
  */
-class AutoLoader {
-
+class AutoLoader
+{
     private static $map = array();
 
-    public static function init() {
+    public static function init()
+    {
         spl_autoload_register('\Miny\AutoLoader::load');
     }
 
-    public static function register($namespace, $path = NULL) {
+    public static function register($namespace, $path = NULL)
+    {
         if (is_array($namespace)) {
             foreach ($namespace as $ns => $path) {
                 self::$map[$ns] = $path;
@@ -52,29 +54,36 @@ class AutoLoader {
         }
     }
 
-    private static function getPathToNamespace($class) {
+    private static function getPathToNamespace($class)
+    {
         $temp = '\\' . $class;
         /*
          * We look for the longest matching namespace so we are trimming
          * from the right.
          */
-        while (!isset(self::$map[$temp]) && ($pos = strrpos($temp, '\\')) !== false) {
+        while (!isset(self::$map[$temp])) {
+            if (($pos = strrpos($temp, '\\')) === false) {
+                break;
+            }
             $temp = substr($temp, 0, $pos);
         }
         if ($pos === false) {
             throw new \InvalidArgumentException('Class not found: ' . $class);
         }
-        $path = substr_replace('\\' . $class, self::$map[$temp], 0, $pos) . '.php';
+        $path = substr_replace('\\' . $class, self::$map[$temp], 0, $pos);
+        $path .= '.php';
         return str_replace('\\', DIRECTORY_SEPARATOR, $path);
     }
 
-    public static function load($class) {
+    public static function load($class)
+    {
         if (isset(self::$map[$class])) {
             $path = self::$map[$class];
         } else if (strpos($class, '\\') !== false) {
             $path = self::getPathToNamespace($class);
         } else {
-            throw new \InvalidArgumentException('Class not registered: ' . $class);
+            $message = 'Class not registered: ' . $class;
+            throw new \InvalidArgumentException($message);
         }
 
         if (!file_exists($path)) {
@@ -82,12 +91,14 @@ class AutoLoader {
         }
         include_once $path;
         if (!class_exists($class) && !interface_exists($class)) {
-            throw new \RuntimeException(
-                    sprintf('File %s does not contain class %s.', $path, $class));
+            $message = 'File %s does not contain class %s.';
+            $message = sprintf($message, $path, $class);
+            throw new \RuntimeException($message);
         }
     }
 
-    public static function getMap() {
+    public static function getMap()
+    {
         return self::$map;
     }
 

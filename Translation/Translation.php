@@ -26,28 +26,31 @@
 
 namespace Miny\Translation;
 
-class Translation {
-
+class Translation
+{
     private $strings = array();
     private $rules = array();
 
-    public function __construct(array $rules) {
+    public function __construct(array $rules)
+    {
         foreach ($rules as $name => $rule) {
             $rule = preg_replace('/[^n0-9\w=\-+%<>]/', '', $rule);
             $this->rules[$name] = $rule;
         }
     }
 
-    public function addString($key, $string) {
-        if(is_array($string)) {
-            if(count($string) == 1) {
+    public function addString($key, $string)
+    {
+        if (is_array($string)) {
+            if (count($string) == 1) {
                 $string = current($string);
             }
         }
         $this->strings[$key] = $string;
     }
 
-    private function getStringForN(array $string, $num) {
+    private function getStringForN(array $string, $num)
+    {
         $fallback = NULL;
         foreach ($string as $q => $str) {
             if (is_int($q)) {
@@ -56,22 +59,25 @@ class Translation {
                 }
             } elseif ($q == 'other') {
                 $fallback = $str;
-            } elseif (isset($this->rules[$q]) && $this->ruleApplies($this->rules[$q], $num)) {
+            } elseif ($this->ruleApplies($q, $num)) {
                 return $str;
             }
         }
         return $fallback;
     }
 
-    private function ruleApplies($rule, $num) {
-        if (!is_int($num)) {
+    private function ruleApplies($rule, $num)
+    {
+
+        if (!isset($this->rules[$rule]) || !is_int($num)) {
             return false;
         }
-        $rule = str_replace('n', $num, $rule);
+        $rule = str_replace('n', $num, $this->rules[$rule]);
         return eval('return (' . $rule . ');');
     }
 
-    public function get($key, $num = NULL) {
+    public function get($key, $num = NULL)
+    {
         if (isset($this->strings[$key])) {
             $string = $this->strings[$key];
         } else {
@@ -88,10 +94,13 @@ class Translation {
 
         $arg_num = func_num_args();
         if ($arg_num > 1) {
+            $keys = array();
+            $vals = array();
             for ($i = 1; $i < $arg_num; ++$i) {
-                $replace_arr['{' . ($i - 1) . '}'] = func_get_arg($i);
+                $keys[] = '{' . ($i - 1) . '}';
+                $vals[] = func_get_arg($i);
             }
-            $string = str_replace(array_keys($replace_arr), $replace_arr, $string);
+            $string = str_replace($keys, $vals, $string);
         }
         return $string;
     }

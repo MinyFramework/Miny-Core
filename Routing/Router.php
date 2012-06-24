@@ -26,46 +26,54 @@
 
 namespace Miny\Routing;
 
-class Router {
-
+class Router
+{
     private $routes = array();
     private $url_prefix;
     private $format;
 
-    public function __construct($format = 'html', $prefix = NULL) {
+    public function __construct($format = 'html', $prefix = NULL)
+    {
         $this->url_prefix = $prefix;
         $this->format = $format;
     }
 
-    public function resource($name) {
+    public function resource($name)
+    {
         $resource = new ResourceRoute($name, NULL, true);
         $this->routes[$name] = $resource;
         return $resource;
     }
 
-    public function resources($name) {
+    public function resources($name)
+    {
         $resource = new ResourceRoute($name);
         $this->routes[$name] = $resource;
         return $resource;
     }
 
-    public function get($path, $name = NULL, array $params = array()) {
+    public function get($path, $name = NULL, array $params = array())
+    {
         return $this->add('GET', $path, $name, $params);
     }
 
-    public function post($path, $name = NULL, array $params = array()) {
+    public function post($path, $name = NULL, array $params = array())
+    {
         return $this->add('POST', $path, $name, $params);
     }
 
-    public function put($path, $name = NULL, array $params = array()) {
+    public function put($path, $name = NULL, array $params = array())
+    {
         return $this->add('PUT', $path, $name, $params);
     }
 
-    public function delete($path, $name = NULL, array $params = array()) {
+    public function delete($path, $name = NULL, array $params = array())
+    {
         return $this->add('DELETE', $path, $name, $params);
     }
 
-    public function add($method, $path, $name = NULL, array $params = array()) {
+    public function add($method, $path, $name = NULL, array $params = array())
+    {
         $route = new Route($path, $name, $method, $params);
         if (is_null($name)) {
             $this->routes[] = $route;
@@ -75,7 +83,8 @@ class Router {
         return $route;
     }
 
-    public function matchCurrent() {
+    public function matchCurrent()
+    {
         parse_str(parse_url($_SERVER['REQUEST_URI'], PHP_URL_QUERY), $_GET);
         if (isset($_POST['_method'])) {
             $method = strtoupper($_POST['_method']);
@@ -93,7 +102,8 @@ class Router {
         return $this->match($query_string, $method);
     }
 
-    public function match($path, $method = NULL) {
+    public function match($path, $method = NULL)
+    {
         foreach ($this->routes as $route) {
             $route = $route->match($path, $method);
             if ($route) {
@@ -102,7 +112,8 @@ class Router {
         }
     }
 
-    public function generate($name, array $params = array()) {
+    public function generate($name, array $params = array())
+    {
         foreach ($this->routes as $route) {
             $path = $route->generate($name, $params);
             if (!isset($params['format'])) {

@@ -30,20 +30,22 @@ use \Miny\Event\EventHandler;
 use \Miny\Event\Event;
 use \Miny\Session\Session;
 
-class ForgeryFilter extends EventHandler {
-
+class ForgeryFilter extends EventHandler
+{
     private $session;
 
-    public function __construct(Session $session) {
+    public function __construct(Session $session)
+    {
         $this->session = $session;
     }
 
-    public function filterRequest(Event $event) {
+    public function filterRequest(Event $event)
+    {
         $request = $event->getParameter('request');
         if ($request->isSubRequest()) {
             return;
         }
-        
+
         $valid_tokens = $this->session->flash('tokens');
         $this->session->flash('tokens', array());
 

@@ -28,18 +28,20 @@ namespace Miny\Widget;
 
 use \Miny\Template\Template;
 
-class WidgetContainer {
-
+class WidgetContainer
+{
     private $widgets = array();
     private $groups;
     private $templating;
 
-    public function __construct(Template $templating) {
+    public function __construct(Template $templating)
+    {
         $this->groups = array('no_group' => array());
         $this->templating = $templating;
     }
 
-    public function addGroup($group) {
+    public function addGroup($group)
+    {
         $widgets = func_get_args();
         array_shift($widgets);
 
@@ -48,11 +50,13 @@ class WidgetContainer {
         }
     }
 
-    public function removeGroup($group) {
+    public function removeGroup($group)
+    {
         unset($this->groups[$group]);
     }
 
-    public function renderGroup($group) {
+    public function renderGroup($group)
+    {
         $output = '';
         if (isset($this->groups[$group])) {
             foreach ($this->groups[$group] as $widget_id) {
@@ -62,11 +66,13 @@ class WidgetContainer {
         return $output;
     }
 
-    public function addWidget($id, $widget) {
+    public function addWidget($id, $widget)
+    {
         if (!is_string($widget)
                 && !is_callable($widget)
                 && !$widget instanceof \Closure) {
-            $message = sprintf('Invalid widget: %s (%s)', $id, gettype($widget));
+            $type = gettype($widget);
+            $message = sprintf('Invalid widget: %s (%s)', $id, $type);
             throw new \InvalidArgumentException($message);
         }
 
@@ -78,40 +84,47 @@ class WidgetContainer {
         $this->widgets[$id] = array('widget' => $widget, 'params' => array());
     }
 
-    public function setWidgetParams($id, array $params) {
+    public function setWidgetParams($id, array $params)
+    {
         if (!$this->widgetExists($id)) {
             throw new \OutOfBoundsException('Widget not set: ' . $id);
         }
         return $this->widgets[$id]['params'] = $params;
     }
 
-    public function removeWidget($id, $group = 'no_group') {
+    public function removeWidget($id, $group = 'no_group')
+    {
         unset($this->groups[$group][$id]);
         unset($this->widgets[$id]);
     }
 
-    public function widgetExists($id) {
+    public function widgetExists($id)
+    {
         return isset($this->widgets[$id]);
     }
 
-    public function getWidgetParameters($id) {
+    public function getWidgetParameters($id)
+    {
         if (!$this->widgetExists($id)) {
             throw new \OutOfBoundsException('Widget not set: ' . $id);
         }
         return $this->widgets[$id]['params'];
     }
 
-    public function getWidget($name, array $parameters = array()) {
+    public function getWidget($name, array $parameters = array())
+    {
         if (!$this->widgetExists($name)) {
             if (!class_exists($name)) {
-                throw new \InvalidArgumentException('Widget not found: ' . $name);
+                $message = 'Widget not found: ' . $name;
+                throw new \InvalidArgumentException($message);
             }
             $widget = new $name;
         } else {
             $params = $this->widgets[$name]['widget'];
             if (is_string($params)) {
                 if (!class_exists($params)) {
-                    throw new \InvalidArgumentException('Widget class not found: ' . $params);
+                    $message = 'Widget class not found: ' . $params;
+                    throw new \InvalidArgumentException($message);
                 }
                 $widget = new $params;
             } else {
@@ -128,14 +141,16 @@ class WidgetContainer {
         return $widget->begin($parameters);
     }
 
-    public function renderWidget($id, array $parameters = array()) {
+    public function renderWidget($id, array $parameters = array())
+    {
         if ($this->widgetExists($id)) {
             $parameters = $parameters + $this->getWidgetParameters($id);
         }
         return $this->getWidget($id)->end($parameters);
     }
 
-    public function render(Widget $widget, array $params = array()) {
+    public function render(Widget $widget, array $params = array())
+    {
         $this->templating->setScope();
         if ($widget->run($params) !== false) {
             foreach ($widget->getAssigns() as $key => $value) {

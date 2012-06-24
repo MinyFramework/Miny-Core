@@ -48,8 +48,8 @@
 
 namespace Miny\Formatter;
 
-class Markdown implements iFormatter {
-
+class Markdown implements iFormatter
+{
     private $links;
     private $html_blocks;
     private static $char_map = array(
@@ -70,37 +70,51 @@ class Markdown implements iFormatter {
         '\!'   => '!'
     );
 
-    public static function escape($str) {
+    public static function escape($str)
+    {
         return strtr($str, array_flip(self::$char_map));
     }
 
-    public static function unescape($str) {
+    public static function unescape($str)
+    {
         return strtr($str, self::$char_map);
     }
 
-    private function escapeSpan($matches) {
+    private function escapeSpan($matches)
+    {
         return self::escape($matches[1]);
     }
 
-    public function formatLine($line) {
+    public function formatLine($line)
+    {
         //code
-        $line = preg_replace_callback('/(?<!\\\)(`+)(.*?)(?<!\\\)\1/u', array($this, 'insertCode'), $line);
+        $line = preg_replace_callback('/(?<!\\\)(`+)(.*?)(?<!\\\)\1/u',
+                array($this, 'insertCode'), $line);
         //image, link
-        $line = preg_replace_callback('/(?<!\\\)!\[(.+?)(?<!\\\)\]\((.+?)(?:\s+"(.*?)")?(?<!\\\)\)/u', array($this, 'insertImage'), $line);
-        $line = preg_replace_callback('/(?<!\\\)!\[(.*?)(?<!\\\)\]\s{0,1}(?<!\\\)\[(.*?)(?<!\\\)\]/u', array($this, 'insertImageDefinition'), $line);
-        $line = preg_replace_callback('/(?<!\\\)\[(.+?)(?<!\\\)\]\((.+?)(?:\s+"(.*?)")?(?<!\\\)\)/u', array($this, 'insertLink'), $line);
-        $line = preg_replace_callback('/(?<!\\\)\[(.*?)(?<!\\\)\]\s{0,1}(?<!\\\)\[(.*?)(?<!\\\)\]/u', array($this, 'insertLinkDefinition'), $line);
+        $line = preg_replace_callback('/(?<!\\\)!\[(.+?)(?<!\\\)\]\((.+?)(?:\s+"(.*?)")?(?<!\\\)\)/u',
+                array($this, 'insertImage'), $line);
+        $line = preg_replace_callback('/(?<!\\\)!\[(.*?)(?<!\\\)\]\s{0,1}(?<!\\\)\[(.*?)(?<!\\\)\]/u',
+                array($this, 'insertImageDefinition'), $line);
+        $line = preg_replace_callback('/(?<!\\\)\[(.+?)(?<!\\\)\]\((.+?)(?:\s+"(.*?)")?(?<!\\\)\)/u',
+                array($this, 'insertLink'), $line);
+        $line = preg_replace_callback('/(?<!\\\)\[(.*?)(?<!\\\)\]\s{0,1}(?<!\\\)\[(.*?)(?<!\\\)\]/u',
+                array($this, 'insertLinkDefinition'), $line);
         //autolink
-        $line = preg_replace_callback('/(?<!\\\)<(\w+@(\w+[.])*\w+)>/u', array($this, 'insertEmail'), $line);
-        $line = preg_replace('/(?<!\\\)<((?:http|https|ftp):\/\/.*?)(?<!\\\)>/u', '<a href="$1">$1</a>', $line);
+        $line = preg_replace_callback('/(?<!\\\)<(\w+@(\w+[.])*\w+)>/u',
+                array($this, 'insertEmail'), $line);
+        $line = preg_replace('/(?<!\\\)<((?:http|https|ftp):\/\/.*?)(?<!\\\)>/u',
+                '<a href="$1">$1</a>', $line);
         //bold & itallic
-        $line = preg_replace('/(?<!\\\)(\*\*|__)(.+?)(?<!\\\)\1/u', '<strong>$2</strong>', $line);
-        $line = preg_replace('/(?<!\\\)(\*|_)(.+?)(?<!\\\)\1/u', '<em>$2</em>', $line);
+        $line = preg_replace('/(?<!\\\)(\*\*|__)(.+?)(?<!\\\)\1/u',
+                '<strong>$2</strong>', $line);
+        $line = preg_replace('/(?<!\\\)(\*|_)(.+?)(?<!\\\)\1/u', '<em>$2</em>',
+                $line);
         $line = str_replace("  \n", '<br />', $line);
         return $line;
     }
 
-    private function randomize($str) {
+    private function randomize($str)
+    {
         $out = '';
         $strlen = strlen($str);
         for ($i = 0; $i < $strlen; $i++) {
@@ -119,34 +133,43 @@ class Markdown implements iFormatter {
         return $out;
     }
 
-    private function insertCode($matches) {
+    private function insertCode($matches)
+    {
         return '<code>' . self::escape(htmlspecialchars($matches[2])) . '</code>';
     }
 
-    private function insertEmail($matches) {
+    private function insertEmail($matches)
+    {
         $mail = $this->randomize($matches[1]);
         $mailto = $this->randomize('mailto:' . $matches[1]);
         return sprintf('<a href="%s">%s</a>', $mailto, $mail);
     }
 
-    private function insertLink($matches) {
+    private function insertLink($matches)
+    {
         if (isset($matches[3])) {
-            return sprintf('<a href="%s" title="%s">%s</a>', Markdown::escape($matches[2]), Markdown::escape($matches[3]), $matches[1]);
+            return sprintf('<a href="%s" title="%s">%s</a>',
+                            Markdown::escape($matches[2]),
+                            Markdown::escape($matches[3]), $matches[1]);
         } else {
-            return sprintf('<a href="%s">%s</a>', Markdown::escape($matches[2]), $matches[1]);
+            return sprintf('<a href="%s">%s</a>', Markdown::escape($matches[2]),
+                            $matches[1]);
         }
     }
 
-    private function insertImage($matches) {
+    private function insertImage($matches)
+    {
         $matches = array_map('Markdown::escape', $matches);
         if (isset($matches[3])) {
-            return sprintf('<img src="%s" title="%s" alt="%s" />', $matches[2], $matches[3], $matches[1]);
+            return sprintf('<img src="%s" title="%s" alt="%s" />', $matches[2],
+                            $matches[3], $matches[1]);
         } else {
             return sprintf('<img src="%s" alt="%s" />', $matches[2], $matches[1]);
         }
     }
 
-    private function insertLinkDefinition($matches) {
+    private function insertLinkDefinition($matches)
+    {
         if (empty($matches[2])) {
             if (isset($this->links[$matches[1]])) {
                 $link = $this->links[$matches[1]];
@@ -163,7 +186,8 @@ class Markdown implements iFormatter {
         return $this->insertLink($link);
     }
 
-    private function insertImageDefinition($matches) {
+    private function insertImageDefinition($matches)
+    {
         if (empty($matches[2])) {
             if (isset($this->links[$matches[1]])) {
                 $link = $this->links[$matches[1]];
@@ -180,13 +204,15 @@ class Markdown implements iFormatter {
         return $this->insertImage($link);
     }
 
-    private function collectLinkDefinition($matches) {
+    private function collectLinkDefinition($matches)
+    {
         $arr = array(
             2 => preg_replace(
                     array(
                 '/&(?!#?[xX]?(?:[0-9a-fA-F]+|\w+);)/',
                 '#<(?![a-z/?\$!])#'
-                    ), array(
+                    ),
+                    array(
                 '&amp;',
                 '&lt;'
                     ), $matches[2])); //url
@@ -197,7 +223,8 @@ class Markdown implements iFormatter {
         return '';
     }
 
-    private function prepare($text) {
+    private function prepare($text)
+    {
         $this->structure = array();
         $arr = array(
             "\r\n" => "\n",
@@ -207,18 +234,23 @@ class Markdown implements iFormatter {
         $text = strtr($text, $arr);
         $text = preg_replace("/^\s*$/mu", '', $text);
         $text = $this->hashHTML($text);
-        return preg_replace_callback('/^[ ]{0,3}\[(.*)\]:[ ]*\n?[ ]*<?(\S+?)>?[ ]*\n?[ ]*(?:(?<=\s)["(](.*?)[")][ ]*)?(?:\n+|\Z)/mu', array($this, 'collectLinkDefinition'), $text);
+        return preg_replace_callback('/^[ ]{0,3}\[(.*)\]:[ ]*\n?[ ]*<?(\S+?)>?[ ]*\n?[ ]*(?:(?<=\s)["(](.*?)[")][ ]*)?(?:\n+|\Z)/mu',
+                        array($this, 'collectLinkDefinition'), $text);
     }
 
-    private function callbackHeader($str, $level) {
-        return sprintf('<h%2$d>%1$s</h%2$d>' . "\n\n", $this->formatLine($str), $level);
+    private function callbackHeader($str, $level)
+    {
+        return sprintf('<h%2$d>%1$s</h%2$d>' . "\n\n", $this->formatLine($str),
+                        $level);
     }
 
-    private function callbackInsertHeader($matches) {
+    private function callbackInsertHeader($matches)
+    {
         return $this->callbackHeader($matches[2], strlen($matches[1]));
     }
 
-    private function callbackInsertSetexHeader($matches) {
+    private function callbackInsertSetexHeader($matches)
+    {
         switch ($matches[2]) {
             case '=':
                 $level = 1;
@@ -230,28 +262,36 @@ class Markdown implements iFormatter {
         return $this->callbackHeader($matches[1], $level);
     }
 
-    private function transformHeaders($text) {
-        $text = preg_replace_callback('/^(.+)[ ]*\n(=|-)+[ ]*\n+/mu', array($this, 'callbackInsertSetexHeader'), $text);
-        return preg_replace_callback('/^(#{1,6})\s*(.+?)\s*#*\n+/mu', array($this, 'callbackInsertHeader'), $text);
+    private function transformHeaders($text)
+    {
+        $text = preg_replace_callback('/^(.+)[ ]*\n(=|-)+[ ]*\n+/mu',
+                array($this, 'callbackInsertSetexHeader'), $text);
+        return preg_replace_callback('/^(#{1,6})\s*(.+?)\s*#*\n+/mu',
+                        array($this, 'callbackInsertHeader'), $text);
     }
 
-    private function transformHorizontalRules($text) {
+    private function transformHorizontalRules($text)
+    {
         $text = preg_replace('/[ ]{0,2}([ ]?\*[ ]?){3,}\s*/', "<hr />\n", $text);
         $text = preg_replace('/[ ]{0,2}([ ]?_[ ]?){3,}\s*/', "<hr />\n", $text);
         $text = preg_replace('/[ ]{0,2}([ ]?-[ ]?){3,}\s*/', "<hr />\n", $text);
         return $text;
     }
 
-    private function transformLists($text) {
+    private function transformLists($text)
+    {
         return preg_replace_callback(
-                        '/^(([ ]{0,3}((?:[*+-]|\d+[.]))[ ]+)(?s:.+?)(\z|\n{2,}(?=\S)(?![ ]*(?:[*+-]|\d+[.])[ ]+)))/mu', array($this, 'transformListsCallback'), $text);
+                        '/^(([ ]{0,3}((?:[*+-]|\d+[.]))[ ]+)(?s:.+?)(\z|\n{2,}(?=\S)(?![ ]*(?:[*+-]|\d+[.])[ ]+)))/mu',
+                        array($this, 'transformListsCallback'), $text);
     }
 
-    private function transformListsCallback($matches) {
+    private function transformListsCallback($matches)
+    {
         $list = preg_replace('/\n{2,}/', "\n\n\n", $matches[1]);
         $list = preg_replace('/\n{2,}$/', "\n", $list);
         $list = preg_replace_callback(
-                '/(\n)?(^[ ]*)([*+-]|\d+[.])[ ]+((?s:.+?)(?:\z|\n{1,2}))(?=\n*(?:\z|\2([*+-]|\d+[.])[ ]+))/mu', array($this, 'processListItemsCallback'), $list);
+                '/(\n)?(^[ ]*)([*+-]|\d+[.])[ ]+((?s:.+?)(?:\z|\n{1,2}))(?=\n*(?:\z|\2([*+-]|\d+[.])[ ]+))/mu',
+                array($this, 'processListItemsCallback'), $list);
 
         if (in_array($matches[3], array('*', '+', '-'))) {
             $element = 'ul';
@@ -261,7 +301,8 @@ class Markdown implements iFormatter {
         return '<' . $element . ">" . $list . '</' . $element . ">\n";
     }
 
-    private function processListItemsCallback($matches) {
+    private function processListItemsCallback($matches)
+    {
         $item = $matches[4];
         $leading_line = $matches[1];
         if ($leading_line || (strpos($item, "\n\n") !== false)) {
@@ -274,7 +315,8 @@ class Markdown implements iFormatter {
         return '<li>' . $item . "</li>\n";
     }
 
-    private function transformCodeBlocksCallback($matches) {
+    private function transformCodeBlocksCallback($matches)
+    {
         $matches[1] = self::escape($this->outdent($matches[1]));
         $matches[1] = ltrim($matches[1], "\n");
         $matches[1] = rtrim($matches[1]);
@@ -282,27 +324,35 @@ class Markdown implements iFormatter {
         return $matches[1];
     }
 
-    private function transformCodeBlocks($text) {
-        return preg_replace_callback('/(?:\n\n|\A)((?:(?:[ ]{4}).*\n+)+)((?=^[ ]{0,4}\S)|\Z)/mu', array($this, 'transformCodeBlocksCallback'), $text);
+    private function transformCodeBlocks($text)
+    {
+        return preg_replace_callback('/(?:\n\n|\A)((?:(?:[ ]{4}).*\n+)+)((?=^[ ]{0,4}\S)|\Z)/mu',
+                        array($this, 'transformCodeBlocksCallback'), $text);
     }
 
-    private function trimBlockQuotePre($matches) {
+    private function trimBlockQuotePre($matches)
+    {
         return preg_replace('/^  /m', '', $matches[0]);
     }
 
-    private function transformBlockQuotesCallback($matches) {
+    private function transformBlockQuotesCallback($matches)
+    {
         $bq = $matches[1];
         $bq = preg_replace('/^[ ]*>[ ]?/', '', $bq);
         $bq = '  ' . $bq;
-        $bq = preg_replace_callback('#\s*<pre>.+?</pre>#s', array($this, 'trimBlockQuotePre'), $bq);
+        $bq = preg_replace_callback('#\s*<pre>.+?</pre>#s',
+                array($this, 'trimBlockQuotePre'), $bq);
         return "<blockquote>\n" . $bq . "\n</blockquote>\n\n";
     }
 
-    private function transformBlockQuotes($text) {
-        return preg_replace_callback('/((^[ ]*>[ ]?.+\n(.+\n)*(?:\n)*)+)/mu', array($this, 'transformBlockQuotesCallback'), $text);
+    private function transformBlockQuotes($text)
+    {
+        return preg_replace_callback('/((^[ ]*>[ ]?.+\n(.+\n)*(?:\n)*)+)/mu',
+                        array($this, 'transformBlockQuotesCallback'), $text);
     }
 
-    private function makeParagraphs($text) {
+    private function makeParagraphs($text)
+    {
         $text = preg_replace('/\\A\n+/', '', $text);
         $text = preg_replace('/\n+\\z/', '', $text);
         $lines = preg_split('/\n{2,}/', $text);
@@ -317,31 +367,39 @@ class Markdown implements iFormatter {
         return implode("\n\n", $lines);
     }
 
-    private function storeHTMLBlock($matches) {
+    private function storeHTMLBlock($matches)
+    {
         $key = hash('md5', $matches[1]);
         $this->html_blocks[$key] = $matches[1];
         return "\n\n" . $key . "\n\n";
     }
 
-    private function hashHTML($text) {
+    private function hashHTML($text)
+    {
         $block_tags_a = 'p|div|h[1-6]|blockquote|pre|table|dl|ol|ul|script|noscript|form|fieldset|iframe|math|ins|del';
         $block_tags_b = 'p|div|h[1-6]|blockquote|pre|table|dl|ol|ul|script|noscript|form|fieldset|iframe|math';
 
-        $text = preg_replace_callback('#(^<(' . $block_tags_a . ')\b(.*\n)*?</\2>[ \t]*(?=\n+|\Z))#mux', array($this, 'storeHTMLBlock'), $text);
+        $text = preg_replace_callback('#(^<(' . $block_tags_a . ')\b(.*\n)*?</\2>[ \t]*(?=\n+|\Z))#mux',
+                array($this, 'storeHTMLBlock'), $text);
 
-        $text = preg_replace_callback('#(^<(' . $block_tags_b . ')\b(.*\n)*?.*</\2>[ \t]*(?=\n+|\Z))#mux', array($this, 'storeHTMLBlock'), $text);
+        $text = preg_replace_callback('#(^<(' . $block_tags_b . ')\b(.*\n)*?.*</\2>[ \t]*(?=\n+|\Z))#mux',
+                array($this, 'storeHTMLBlock'), $text);
 
-        $text = preg_replace_callback('#(?:(?<=\n\n)|\A\n?)([ ]{0,3}<(hr)\b([^<>])*?/?>[ \t]*(?=\n{2,}|\Z))#mux', array($this, 'storeHTMLBlock'), $text);
+        $text = preg_replace_callback('#(?:(?<=\n\n)|\A\n?)([ ]{0,3}<(hr)\b([^<>])*?/?>[ \t]*(?=\n{2,}|\Z))#mux',
+                array($this, 'storeHTMLBlock'), $text);
 
-        $text = preg_replace_callback('#(?:(?<=\n\n)|\A\n?)([ ]{0,3}(?s:<!(--.*?--\s*)+>)[ \t]*(?=\n{2,}|\Z))#mux', array($this, 'storeHTMLBlock'), $text);
+        $text = preg_replace_callback('#(?:(?<=\n\n)|\A\n?)([ ]{0,3}(?s:<!(--.*?--\s*)+>)[ \t]*(?=\n{2,}|\Z))#mux',
+                array($this, 'storeHTMLBlock'), $text);
         return $text;
     }
 
-    private function outdent($text) {
+    private function outdent($text)
+    {
         return preg_replace('/^([ ]{1,4})/m', '', $text);
     }
 
-    private function formatBlock($text) {
+    private function formatBlock($text)
+    {
         $text = $this->transformHeaders($text);
         $text = $this->transformHorizontalRules($text);
         $text = $this->transformLists($text);
@@ -352,7 +410,8 @@ class Markdown implements iFormatter {
         return $text;
     }
 
-    public function format($text) {
+    public function format($text)
+    {
         $this->links = array();
         $this->html_blocks = array();
 

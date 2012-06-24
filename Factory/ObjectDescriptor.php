@@ -34,8 +34,8 @@ namespace Miny\Factory;
  *
  * @author  Dániel Buga
  */
-class ObjectDescriptor {
-
+class ObjectDescriptor
+{
     /**
      * @see ObjectDescriptor::isSingleton()
      * @access private
@@ -83,7 +83,9 @@ class ObjectDescriptor {
      * @param array $ctor_arguments The parameters for object constructor.
      * @param boolean $singleton Indicates, whether the object is a singleton.
      */
-    public function __construct($classname, array $ctor_arguments = NULL, $singleton = true) {
+    public function __construct($classname, array $ctor_arguments = NULL,
+            $singleton = true)
+    {
         if (!is_string($classname)) {
             throw new \InvalidArgumentException('Classname must be string.');
         }
@@ -100,7 +102,8 @@ class ObjectDescriptor {
      * @param array $arg
      * @return ObjectDescriptor
      */
-    public function setArguments() {
+    public function setArguments()
+    {
         $this->args = func_get_args();
         return $this;
     }
@@ -111,7 +114,8 @@ class ObjectDescriptor {
      * @param string $parent
      * @return ObjectDescriptor
      */
-    public function setParent($parent) {
+    public function setParent($parent)
+    {
         $this->parent = $parent;
         return $this;
     }
@@ -123,7 +127,8 @@ class ObjectDescriptor {
      * @param array $arguments
      * @return ObjectDescriptor
      */
-    public function addMethodCall() {
+    public function addMethodCall()
+    {
         $arguments = func_get_args();
         $method = array_shift($arguments);
         $this->methods[] = array($method, $arguments);
@@ -137,7 +142,8 @@ class ObjectDescriptor {
      * @param mixed $value
      * @return ObjectDescriptor
      */
-    public function setProperty($name, $value) {
+    public function setProperty($name, $value)
+    {
         $this->properties[$name] = $value;
         return $this;
     }
@@ -147,7 +153,8 @@ class ObjectDescriptor {
      *
      * @return string
      */
-    public function getClassName() {
+    public function getClassName()
+    {
         return $this->classname;
     }
 
@@ -157,7 +164,8 @@ class ObjectDescriptor {
      *
      * @return boolean
      */
-    public function isSingleton() {
+    public function isSingleton()
+    {
         return $this->singleton;
     }
 
@@ -166,16 +174,19 @@ class ObjectDescriptor {
      *
      * @return array
      */
-    public function getArguments() {
+    public function getArguments()
+    {
         return $this->args;
     }
 
     /**
-     * Gets the method names and parameters which should be called on the object.
+     * Gets the method names and parameters which
+     * should be called on the object.
      *
      * @return array
      */
-    public function getMethodCalls() {
+    public function getMethodCalls()
+    {
         return $this->methods;
     }
 
@@ -184,14 +195,16 @@ class ObjectDescriptor {
      *
      * @return array
      */
-    public function getProperties() {
+    public function getProperties()
+    {
         return $this->properties;
     }
 
     /**
      * @return boolean Wether the object has a parent or not.
      */
-    public function hasParent() {
+    public function hasParent()
+    {
         return $this->parent !== NULL;
     }
 
@@ -200,7 +213,8 @@ class ObjectDescriptor {
      *
      * @return string
      */
-    public function getParent() {
+    public function getParent()
+    {
         return $this->parent;
     }
 

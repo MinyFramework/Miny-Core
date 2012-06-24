@@ -29,8 +29,8 @@ namespace Miny\Controller;
 
 use \Miny\HTTP\Request;
 
-abstract class Controller  {
-
+abstract class Controller
+{
     private $default_action;
     private $assigns = array();
     private $services = array();
@@ -49,55 +49,69 @@ abstract class Controller  {
      */
     public $template;
 
-    public function __construct($default_action = NULL) {
+    public function __construct($default_action = NULL)
+    {
         $this->default_action = $default_action;
     }
 
-    public function __set($key, $value) {
+    public function __set($key, $value)
+    {
         $this->assign($key, $value);
     }
 
-    public function assign($key, $value, $scope = NULL) {
+    public function assign($key, $value, $scope = NULL)
+    {
         $this->assigns[$key] = array($value, $scope);
     }
 
-    public function service($key, $service) {
+    public function service($key, $service)
+    {
         $this->services[$key] = $service;
     }
 
-    public function __get($key) {
+    public function __get($key)
+    {
         if (isset($this->services[$key])) {
             return $this->services[$key];
-        } elseif (array_key_exists($key, $this->assigns) && is_null($this->assigns[$key][1])) {
-            //Only get variables assigned to current scope.
-            return $this->assigns[$key][0];
+        } elseif (array_key_exists($key, $this->assigns)) {
+            if (is_null($this->assigns[$key][1])) {
+                //Only get variables assigned to current scope.
+                return $this->assigns[$key][0];
+            }
         }
         throw new \OutOfBoundsException('Variable not set: ' . $key);
     }
 
-    public function cookie($name, $value) {
+    public function cookie($name, $value)
+    {
         $this->cookies[$name] = $value;
     }
 
-    public function header($name, $value) {
+    public function header($name, $value)
+    {
         $this->headers[$name] = $value;
     }
 
-    public function getCookies() {
+    public function getCookies()
+    {
         return $this->cookies;
     }
 
-    public function getHeaders() {
+    public function getHeaders()
+    {
         return $this->headers;
     }
 
-    public function getAssigns() {
+    public function getAssigns()
+    {
         return $this->assigns;
     }
 
-    public function request($path, array $get = array(), array $post = array()) {
+    public function request($path, array $get = NULL, array $post = NULL)
+    {
         $request = new Request($path, $get, $post, Request::SUB_REQUEST);
-        $response = $this->dispatcher->dispatch($request); //TODO: biztosítani kell, hogy ez egyáltalán létezzen - System::Event?
+        //TODO: biztosítani kell, hogy ez egyáltalán létezzen
+        $response = $this->dispatcher->dispatch($request);
 
         foreach ($response->getHeaders() as $name => $value) {
             $this->header($name, $value);
@@ -110,7 +124,8 @@ abstract class Controller  {
         return $response;
     }
 
-    public function run($controller, $action, array $params = NULL) {
+    public function run($controller, $action, array $params = NULL)
+    {
         if (!$action) {
             $action = $this->default_action ? : 'index';
         }
@@ -120,7 +135,7 @@ abstract class Controller  {
         }
         $this->template = $controller . '/' . $action;
 
-        return $this->$fn($params);
+        return $this->$fn($params ? : array());
     }
 
 }

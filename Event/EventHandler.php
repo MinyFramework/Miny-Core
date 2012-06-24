@@ -27,10 +27,12 @@
 
 namespace Miny\Event;
 
-abstract class EventHandler {
-
-    public function handle(Event $event, $handling_method = NULL) {
-        throw new \BadMethodCallException('Handler not exists: ' . $handling_method);
+abstract class EventHandler
+{
+    public function handle(Event $event, $handling_method = NULL)
+    {
+        $message = 'Handler not exists: ' . $handling_method;
+        throw new \BadMethodCallException($message);
     }
 
 }

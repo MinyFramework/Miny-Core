@@ -28,24 +28,27 @@ namespace Miny\Template;
 
 use \Miny\Event\Event;
 
-class TemplateEvents extends \Miny\Event\EventHandler {
-
+class TemplateEvents extends \Miny\Event\EventHandler
+{
     private $templating;
     private $scope;
 
-    public function __construct(Template $t, $scope = NULL) {
+    public function __construct(Template $t, $scope = NULL)
+    {
         $this->templating = $t;
         $this->scope = $scope;
     }
 
-    public function handleException(Event $event) {
+    public function handleException(Event $event)
+    {
         $this->templating->setScope($this->scope);
         $this->templating->exception = $event->getParameter('exception');
         $event->setResponse($this->templating->render('layouts/exception'));
         $this->templating->leaveScope();
     }
 
-    public function filterRequest(Event $event) {
+    public function filterRequest(Event $event)
+    {
         $request = $event->getParameter('request');
         try {
             $format = $request->get('format');
@@ -55,16 +58,18 @@ class TemplateEvents extends \Miny\Event\EventHandler {
         }
     }
 
-    public function filterResponse(Event $event) {
+    public function filterResponse(Event $event)
+    {
         $request = $event->getParameter('request');
         if ($request->isSubRequest()) {
             return;
         }
         $rsp = $event->getParameter('response');
+        $controller = $request->get('controller');
 
         $this->templating->setScope($this->scope);
         $this->templating->content = $rsp->getContent();
-        $this->templating->stylesheets = array('application', $request->get('controller'));
+        $this->templating->stylesheets = array('application', $controller);
 
         $rsp->setContent($this->templating->render('layouts/application'));
         $this->templating->leaveScope();

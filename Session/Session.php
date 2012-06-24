@@ -26,8 +26,8 @@
 
 namespace Miny\Session;
 
-class Session implements \ArrayAccess, \IteratorAggregate, \Countable {
-
+class Session implements \ArrayAccess, \IteratorAggregate, \Countable
+{
     /**
      * Indicates whether a custom storage method is implemented.
      * @access private
@@ -46,7 +46,8 @@ class Session implements \ArrayAccess, \IteratorAggregate, \Countable {
      * Starts the session. Regenerates the session ID each request
      * for security reasons and updates flash variables.
      */
-    public function open() {
+    public function open()
+    {
         $this->registerCustomStorage();
         session_start();
         $this->is_open = true;
@@ -63,7 +64,8 @@ class Session implements \ArrayAccess, \IteratorAggregate, \Countable {
     /**
      * Closes the current session.
      */
-    public function close() {
+    public function close()
+    {
         if ($this->is_open) {
             session_write_close();
             $this->is_open = false;
@@ -73,7 +75,8 @@ class Session implements \ArrayAccess, \IteratorAggregate, \Countable {
     /**
      * Destroys the current session and its data.
      */
-    public function destroy() {
+    public function destroy()
+    {
         if ($this->is_open) {
             session_unset();
             session_destroy();
@@ -85,7 +88,8 @@ class Session implements \ArrayAccess, \IteratorAggregate, \Countable {
      * them to be used as session handlers.
      * @access private
      */
-    private function registerCustomStorage() {
+    private function registerCustomStorage()
+    {
         if ($this->custom_storage) {
             session_set_save_handler(
                     array($this, 'openSession'), array($this, 'closeSession'),
@@ -100,7 +104,8 @@ class Session implements \ArrayAccess, \IteratorAggregate, \Countable {
      * Updates time to live values for flash variable and removes old items.
      * @access private
      */
-    private function updateFlash() {
+    private function updateFlash()
+    {
         foreach ($_SESSION['flash'] as $key => &$array) {
             if ($array['ttl']-- == 0) {
                 unset($_SESSION['flash'][$key]);
@@ -118,7 +123,8 @@ class Session implements \ArrayAccess, \IteratorAggregate, \Countable {
      * @param mixed $value The value to be stored
      * @param int $ttl The number of requests for the variable to be set.
      */
-    public function flash($key, $value = NULL, $ttl = 1) {
+    public function flash($key, $value = NULL, $ttl = 1)
+    {
         if (is_null($value)) {
             if (isset($_SESSION['flash'][$key])) {
                 return $_SESSION['flash'][$key]['data'];
@@ -132,44 +138,51 @@ class Session implements \ArrayAccess, \IteratorAggregate, \Countable {
      * @return Whether a flashdata with $key key is set.
      * @param unknown_type $key
      */
-    public function hasFlash($key) {
+    public function hasFlash($key)
+    {
         return isset($_SESSION['flash'][$key]);
     }
 
     //Session handling methods
 
-    public function openSession() {
+    public function openSession()
+    {
         return true;
     }
 
-    public function closeSession() {
+    public function closeSession()
+    {
         return true;
     }
 
-    public function readSession($key) {
+    public function readSession($key)
+    {
         return '';
     }
 
-    public function writeSession($key, $value) {
+    public function writeSession($key, $value)
+    {
         return true;
     }
 
-    public function destroySession($key) {
+    public function destroySession($key)
+    {
         return true;
     }
 
-    public function gcSession($lifetime) {
+    public function gcSession($lifetime)
+    {
         return true;
     }
 
     //Session option methods
-
     /**
      * Gets the session ID.
      *
      * @return string the current session ID
      */
-    public function sessionId() {
+    public function sessionId()
+    {
         return session_id();
     }
 
@@ -179,7 +192,8 @@ class Session implements \ArrayAccess, \IteratorAggregate, \Countable {
      *
      * @return string the current session name
      */
-    public function sessionName($name = NULL) {
+    public function sessionName($name = NULL)
+    {
         if ($name !== NULL) {
             if (!$this->is_open) {
                 session_name($name);
@@ -194,7 +208,8 @@ class Session implements \ArrayAccess, \IteratorAggregate, \Countable {
      *
      * @return string the current session save path.
      */
-    public function savePath($path = NULL) {
+    public function savePath($path = NULL)
+    {
         if (is_null($path)) {
             return session_save_path();
         } elseif (!$this->is_open) {
@@ -208,7 +223,8 @@ class Session implements \ArrayAccess, \IteratorAggregate, \Countable {
     /**
      * @see http://us2.php.net/manual/en/function.session-get-cookie-params.php
      */
-    public function cookieParams(array $new_params = NULL) {
+    public function cookieParams(array $new_params = NULL)
+    {
         $params = session_get_cookie_params();
         if (!is_null($new_params) && !$this->is_open) {
             $params = $new_params + $params;
@@ -222,19 +238,23 @@ class Session implements \ArrayAccess, \IteratorAggregate, \Countable {
 
     //Session data methods
 
-    public function keys() {
+    public function keys()
+    {
         return array_keys($_SESSION['data']);
     }
 
-    public function toArray() {
+    public function toArray()
+    {
         return $_SESSION['data'];
     }
 
-    public function clean() {
+    public function clean()
+    {
         $_SESSION['data'] = array();
     }
 
-    public function set($key, $value) {
+    public function set($key, $value)
+    {
         if (is_null($key)) {
             $_SESSION['data'][] = $value;
         } else {
@@ -242,44 +262,53 @@ class Session implements \ArrayAccess, \IteratorAggregate, \Countable {
         }
     }
 
-    public function has($key) {
+    public function has($key)
+    {
         return isset($_SESSION['data'][$key]);
     }
 
-    public function get($key, $default = NULL) {
+    public function get($key, $default = NULL)
+    {
         if (isset($_SESSION['data'][$key])) {
             return $_SESSION['data'][$key];
         }
         return $default;
     }
 
-    public function remove($key) {
+    public function remove($key)
+    {
         unset($_SESSION['data'][$key]);
     }
 
     //Interfaces
 
-    public function getIterator() {
+    public function getIterator()
+    {
         return new ArrayIterator($_SESSION['data']);
     }
 
-    public function count() {
+    public function count()
+    {
         return count($_SESSION['data']);
     }
 
-    public function offsetSet($key, $value) {
+    public function offsetSet($key, $value)
+    {
         $this->set($key, $value);
     }
 
-    public function offsetExists($key) {
+    public function offsetExists($key)
+    {
         return $this->has($key);
     }
 
-    public function offsetUnset($key) {
+    public function offsetUnset($key)
+    {
         $this->remove($key);
     }
 
-    public function offsetGet($key) {
+    public function offsetGet($key)
+    {
         return $this->get($key);
     }
 

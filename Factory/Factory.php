@@ -36,8 +36,8 @@ namespace Miny\Factory;
  *
  * @author  Dániel Buga
  */
-class Factory {
-
+class Factory
+{
     /**
      * A name => object array of stored objects
      * @var array
@@ -60,7 +60,8 @@ class Factory {
      *
      * @param array $params Initial list of parameters to be stored.
      */
-    public function __construct(array $params = array()) {
+    public function __construct(array $params = array())
+    {
         $this->setParameters($params);
         $this->setInstance('factory', $this);
     }
@@ -72,7 +73,8 @@ class Factory {
      * @param boolean $singleton
      * @return ObjectDescriptor
      */
-    public function add($alias, $classname, $singleton = true) {
+    public function add($alias, $classname, $singleton = true)
+    {
         $object = new ObjectDescriptor($classname, NULL, $singleton);
         return $this->register($alias, $object);
     }
@@ -85,7 +87,8 @@ class Factory {
      * @param ObjectDescriptor $object
      * @return ObjectDescriptor
      */
-    public function register($alias, ObjectDescriptor $object) {
+    public function register($alias, ObjectDescriptor $object)
+    {
         $this->descriptors[$alias] = $object;
         unset($this->objects[$alias]);
         return $object;
@@ -98,11 +101,13 @@ class Factory {
      * @param string $alias
      * @param object $object
      */
-    public function setInstance($alias, $object) {
+    public function setInstance($alias, $object)
+    {
         $this->objects[$alias] = $object;
     }
 
-    public function __set($alias, $object) {
+    public function __set($alias, $object)
+    {
         if ($object instanceof ObjectDescriptor) {
             $this->register($alias, $object);
         } else {
@@ -117,9 +122,11 @@ class Factory {
      * @return ObjectDescriptor
      * @throws OutOfBoundsException
      */
-    public function getDescriptor($alias) {
+    public function getDescriptor($alias)
+    {
         if (!isset($this->descriptors[$alias])) {
-            throw new \OutOfBoundsException('Object descriptor not found: ' . $alias);
+            $message = 'Object descriptor not found: ' . $alias;
+            throw new \OutOfBoundsException($message);
         }
         return $this->descriptors[$alias];
     }
@@ -132,7 +139,8 @@ class Factory {
      * @param string $alias
      * @return object
      */
-    public function get($alias) {
+    public function get($alias)
+    {
         if (isset($this->objects[$alias])) {
             return $this->objects[$alias];
         }
@@ -155,7 +163,8 @@ class Factory {
     /**
      * Shorthand function for {get}
      */
-    public function __get($alias) {
+    public function __get($alias)
+    {
         return $this->get($alias);
     }
 
@@ -165,7 +174,8 @@ class Factory {
      * @param object $object
      * @param ObjectDesciptor $descriptor
      */
-    private function injectDependencies($object, ObjectDescriptor $descriptor) {
+    private function injectDependencies($object, ObjectDescriptor $descriptor)
+    {
         foreach ($descriptor->getProperties() as $name => $value) {
             $object->$name = $this->getValue($value);
         }
@@ -182,7 +192,8 @@ class Factory {
      * @param object $object
      * @param ObjectDesciptor $descriptor
      */
-    private function injectParentDependencies($object, ObjectDescriptor $parent) {
+    private function injectParentDependencies($object, ObjectDescriptor $parent)
+    {
         if ($parent->hasParent()) {
             $_parent = $this->getDescriptor($descriptor->getParent());
             $this->injectParentDependencies($object, $_parent);
@@ -198,7 +209,8 @@ class Factory {
      * @return object
      * @throws InvalidArgumentException
      */
-    private function instantiate(ObjectDescriptor $descriptor) {
+    private function instantiate(ObjectDescriptor $descriptor)
+    {
         $class = $descriptor->getClassName();
         if ($this->hasParameter($class)) {
             $class = $this->getParameter($class);
@@ -226,28 +238,31 @@ class Factory {
 
     /**
      * Resolves parameter references.
-     * If the parameter is a string, the first character specifies the value type:
+     * If the parameter is a string, the first character specifies the value
+     * type:
      *  - @: A parameter, @see Factory::getParameter()
      *  - &: An instance or the return value of a method call.
      *       Syntax to define a method call:
      *       object::method[::parameter1::parameter2...]
      *       At this moment, only string or integer parameters are supported.
-     *  - *: A callback function. This can be a function or a method of an object.
-     *       To define a function, give simply the function name. To define
-     *       an object, use the object::method syntax.
+     *  - *: A callback function. This can be a function or a method of an
+     *       object.
+     *       To define a function, give simply the function name.
+     *       To define an object, use the object::method syntax.
      * If the $var parameter is not a string, or is only a character it is
      * returned as is.
      * If you wish to pass a string beginning with one of these characters, you
      * need to escape the first character. To do that, simply prefix it with a
      * backslash (\) character. The backslash character must also be escaped the
-     * same way if you want to pass a string starting with a backlash followed by
-     * a parameter specifier. In practice it means, that in order to pass a string
-     * starting with *, &, @, \*, \&, \@ character sequence, you must prefix
-     * those with a backslash.
+     * same way if you want to pass a string starting with a backlash followed
+     * by a parameter specifier. In practice it means, that in order to pass a
+     * string starting with *, &, @, \*, \&, \@ character sequence, you must
+     * prefix those with a backslash.
      * @param mixed $var
      * @return mixed
      */
-    public function getValue($var) {
+    public function getValue($var)
+    {
         //direct injection for non-string values
         if (!is_string($var) || strlen($var) === 1) {
             return $var;
@@ -296,7 +311,8 @@ class Factory {
      * @param string $str
      * @return mixed
      */
-    private function getObjectParameter($str) {
+    private function getObjectParameter($str)
+    {
         if (($pos = strpos($str, '::')) !== false) {
             $arr = explode('::', $str);
             $obj_name = array_shift($arr);
@@ -326,23 +342,24 @@ class Factory {
      * @return mixed The parameter value
      * @throws LogicException
      */
-    public function getParameter($key) {
+    public function getParameter($key)
+    {
         if (strpos($key, ':') !== false) {
             $parts = explode(':', $key);
             $arr = $this->parameters;
             foreach ($parts as $k) {
                 if (!array_key_exists($k, $arr)) {
-                    throw new \OutOfBoundsException('Parameter not set: ' . $key);
+                    $message = 'Parameter not set: ' . $key;
+                    throw new \OutOfBoundsException($message);
                 }
                 $arr = $arr[$k];
             }
             return $arr;
-        } else {
-            if (!isset($this->parameters[$key])) {
-                throw new \OutOfBoundsException('Parameter not set: ' . $key);
-            }
-            return $this->parameters[$key];
+        } elseif (!isset($this->parameters[$key])) {
+            $message = 'Parameter not set: ' . $key;
+            throw new \OutOfBoundsException($message);
         }
+        return $this->parameters[$key];
     }
 
     /**
@@ -351,7 +368,8 @@ class Factory {
      * @param string $key
      * @param mixed $value
      */
-    public function addParameter($key, $value) {
+    public function addParameter($key, $value)
+    {
         if (strpos($key, ':') !== false) {
             $parts = explode(':', $key);
             $arr = & $this->parameters;
@@ -372,7 +390,8 @@ class Factory {
      *
      * @param array $parameters A name => value array of parameters to store.
      */
-    public function setParameters(array $parameters) {
+    public function setParameters(array $parameters)
+    {
         $this->parameters = $parameters + $this->parameters;
     }
 
@@ -381,7 +400,8 @@ class Factory {
      *
      * @param string $key
      */
-    public function removeParameter($key) {
+    public function removeParameter($key)
+    {
         if (strpos($key, ':') !== false) {
             $parts = explode(':', $key);
             $arr = & $this->parameters;
@@ -406,7 +426,8 @@ class Factory {
      * @param string $key
      * @return boolean
      */
-    public function hasParameter($key) {
+    public function hasParameter($key)
+    {
         if (strpos($key, ':') !== false) {
             $parts = explode(':', $key);
             $arr = $this->parameters;
@@ -427,7 +448,8 @@ class Factory {
      *
      * @return array
      */
-    public function getParameters() {
+    public function getParameters()
+    {
         return $this->parameters;
     }
 
@@ -436,7 +458,8 @@ class Factory {
      *
      * @return array
      */
-    public function getDescriptors() {
+    public function getDescriptors()
+    {
         return $this->descriptors;
     }
 

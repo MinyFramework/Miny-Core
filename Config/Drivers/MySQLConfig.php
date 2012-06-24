@@ -27,14 +27,15 @@
 
 namespace Miny\Config\Drivers;
 
-class MySQLConfig implements \Miny\Config\iConfig {
-
+class MySQLConfig implements \Miny\Config\iConfig
+{
     private $keys = array();
     private $data = array();
     private $table_name;
     private $driver;
 
-    public function __construct(\PDO $driver, $table_name) {
+    public function __construct(\PDO $driver, $table_name)
+    {
         register_shutdown_function(array($this, 'close'));
         $this->driver = $driver;
         $this->table_name = $table_name;
@@ -47,30 +48,35 @@ class MySQLConfig implements \Miny\Config\iConfig {
         }
     }
 
-    public function exists($key) {
+    public function exists($key)
+    {
         return array_key_exists($key, $this->keys) && $this->keys[$key] != 'r';
     }
 
-    public function get($key) {
+    public function get($key)
+    {
         if (!$this->exists($key)) {
             throw new \OutOfBoundsException('Key not found: ' . $key);
         }
         return $this->data[$key];
     }
 
-    public function store($key, $data, $ttl) {
+    public function store($key, $data, $ttl)
+    {
         $this->keys[$key] = 'm';
         $this->data[$key] = array($data, $ttl);
     }
 
-    public function remove($key) {
+    public function remove($key)
+    {
         if ($key !== false) {
             $this->keys[$key] = 'r';
             unset($this->data[$key]);
         }
     }
 
-    public function close() {
+    public function close()
+    {
         $save = false;
         $statements = array();
         if (in_array('r', $this->keys)) {
@@ -85,24 +91,24 @@ class MySQLConfig implements \Miny\Config\iConfig {
             $sql = sprintf($sql, $this->table_name);
             $statements['m'] = $this->driver->prepare($sql);
         }
-        if (!$save) {
-            return;
-        }
-        $this->driver->beginTransaction();
-        foreach ($this->keys as $key => $state) {
-            if ($state == 1)
-                continue;
-            $statement = $statements[$state];
-            switch ($state) {
-                case 'm':
-                    $statement->bindValue(':value', $this->data[$key]);
-                case 'r':
-                    $statement->bindValue(':key', $key);
-                    break;
+        if ($save) {
+            $this->driver->beginTransaction();
+            foreach ($this->keys as $key => $state) {
+                if ($state == 1) {
+                    continue;
+                }
+                $statement = $statements[$state];
+                switch ($state) {
+                    case 'm':
+                        $statement->bindValue(':value', $this->data[$key]);
+                    case 'r':
+                        $statement->bindValue(':key', $key);
+                        break;
+                }
+                $statement->execute();
             }
-            $statement->execute();
+            $this->driver->commit();
         }
-        $this->driver->commit();
     }
 
 }

@@ -26,18 +26,21 @@
 
 namespace Miny\HTTP;
 
-class RedirectResponse extends Response {
-
-    public function __construct($url, $code = 301) {
+class RedirectResponse extends Response
+{
+    public function __construct($url, $code = 301)
+    {
         parent::__construct('', $code);
         $this->setHeader('Location', $url);
     }
 
-    public function setContent($content) {
-
+    public function setContent($content)
+    {
+        //intentionally blank
     }
 
-    public function send() {
+    public function send()
+    {
         $this->sendHeaders();
     }
 

@@ -26,31 +26,36 @@
 
 namespace Miny\HTTP;
 
-class Response {
-
+class Response
+{
     private $content;
     private $cookies = array();
     private $headers = array();
     private $status_code;
 
-    public function __construct($content = '', $code = 200) {
+    public function __construct($content = '', $code = 200)
+    {
         $this->setContent($content);
         $this->setCode($code);
     }
 
-    public function setCookie($name, $value) {
+    public function setCookie($name, $value)
+    {
         $this->cookies[$name] = $value;
     }
 
-    public function setCode($code) {
+    public function setCode($code)
+    {
         $this->status_code = $code;
     }
 
-    public function hasHeader($name) {
+    public function hasHeader($name)
+    {
         return isset($this->headers[$name]);
     }
 
-    public function setHeader($name, $value, $replace = true) {
+    public function setHeader($name, $value, $replace = true)
+    {
         if ($replace) {
             $this->headers[$name] = $value;
         } else {
@@ -61,27 +66,33 @@ class Response {
         }
     }
 
-    public function getHeaders() {
+    public function getHeaders()
+    {
         return $this->headers;
     }
 
-    public function getCookies() {
+    public function getCookies()
+    {
         return $this->cookies;
     }
 
-    public function setContent($content) {
+    public function setContent($content)
+    {
         $this->content = $content;
     }
 
-    public function getContent() {
+    public function getContent()
+    {
         return $this->content;
     }
 
-    public function __toString() {
+    public function __toString()
+    {
         return $this->content;
     }
 
-    private function sendHTTPStatus() {
+    private function sendHTTPStatus()
+    {
         if ($this->status_code !== NULL) {
             $codes = array(
                 100 => 'Continue',
@@ -133,7 +144,8 @@ class Response {
         }
     }
 
-    protected function sendHeaders() {
+    protected function sendHeaders()
+    {
         $this->sendHTTPStatus();
         foreach ($this->headers as $name => $header) {
             if (is_string($header)) {
@@ -149,7 +161,8 @@ class Response {
         }
     }
 
-    public function send() {
+    public function send()
+    {
         $this->sendHeaders();
         echo $this->content;
     }

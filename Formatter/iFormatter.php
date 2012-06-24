@@ -27,7 +27,7 @@
 
 namespace Miny\Formatter;
 
-interface iFormatter {
-
+interface iFormatter
+{
     public function format($text);
 }

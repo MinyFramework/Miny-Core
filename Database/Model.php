@@ -27,17 +27,20 @@
 
 namespace Miny\Database;
 
-class Model {
-
+class Model
+{
     private static $connections = array();
 
-    public static function setConnection(\PDO $db, $name = 'default') {
+    public static function setConnection(\PDO $db, $name = 'default')
+    {
         self::$connections[$name] = $db;
     }
 
-    public static function getDBConnection($connection = 'default') {
+    public static function getDBConnection($connection = 'default')
+    {
         if (!isset(self::$connections[$connection])) {
-            throw new \InvalidArgumentException('Connection not set: ' . $connection);
+            $message = 'Connection not set: ' . $connection;
+            throw new \InvalidArgumentException($message);
         }
         return self::$connections[$connection];
     }
@@ -45,16 +48,19 @@ class Model {
     private $connection_name;
     private $connection;
 
-    public function __construct($connection = 'default') {
+    public function __construct($connection = 'default')
+    {
         $this->connection_name = $connection;
         $this->connection = self::getDBConnection($connection);
     }
 
-    public function getConnection() {
+    public function getConnection()
+    {
         return $this->connection;
     }
 
-    public function getConnectionName() {
+    public function getConnectionName()
+    {
         return $this->connection_name;
     }
 

@@ -27,28 +27,32 @@
 
 namespace Miny\Database;
 
-class Driver extends \PDO {
-
+class Driver extends \PDO
+{
     public $table_prefix;
 
-    public function replacePrefix($sql) {
+    public function replacePrefix($sql)
+    {
         if ($this->table_prefix) {
             $sql = str_replace('{prefix}', $this->table_prefix, $sql);
         }
         return $sql;
     }
 
-    public function prepare($statement, $driver_options = array()) {
+    public function prepare($statement, $driver_options = array())
+    {
         $statement = $this->replacePrefix($statement);
         return parent::prepare($statement, $driver_options);
     }
 
-    public function query($statement) {
+    public function query($statement)
+    {
         $statement = $this->replacePrefix($statement);
         return parent::query($statement);
     }
 
-    public function exec($statement) {
+    public function exec($statement)
+    {
         $statement = $this->replacePrefix($statement);
         return parent::exec($statement);
     }

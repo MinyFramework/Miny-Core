@@ -27,15 +27,17 @@
 
 namespace Miny\Event;
 
-class EventDispatcher {
-
+class EventDispatcher
+{
     private $handlers = array();
 
-    public function setHandler($event, EventHandler $handler, $method = 'handle') {
+    public function setHandler($event, EventHandler $handler, $method = NULL)
+    {
         $this->handlers[$event][] = array($handler, $method);
     }
 
-    public function raiseEvent(Event $event) {
+    public function raiseEvent(Event $event)
+    {
         $name = $event->getName();
         if (isset($this->handlers[$name])) {
             foreach ($this->handlers[$name] as $handler) {

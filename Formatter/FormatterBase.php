@@ -26,27 +26,31 @@
 
 namespace Miny\Formatter;
 
-class FormatterBase {
-
+class FormatterBase
+{
     private $formatters = array();
     private $cache;
 
-    public function setCacheDriver(\Miny\Cache\iCacheDriver $driver) {
+    public function setCacheDriver(\Miny\Cache\iCacheDriver $driver)
+    {
         $this->cache = $driver;
     }
 
-    public function addFormatter(iFormatter $formatter) {
+    public function addFormatter(iFormatter $formatter)
+    {
         $this->formatters[] = $formatter;
     }
 
-    private function doFormat($text) {
+    private function doFormat($text)
+    {
         foreach ($this->formatters as $formatter) {
             $text = $formatter->format($text);
         }
         return $text;
     }
 
-    public function format($text) {
+    public function format($text)
+    {
         if (!is_null($this->cache)) {
             $key = md5($text);
             if (!$this->cache->exists($key)) {

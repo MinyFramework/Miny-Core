@@ -32,37 +32,43 @@ use \Miny\Event\EventDispatcher;
 use \Miny\HTTP\Response;
 use \Miny\HTTP\Request;
 
-class Dispatcher {
-
+class Dispatcher
+{
     private $events;
     private $controller_resolver;
 
-    public function __construct(EventDispatcher $events, ControllerResolver $resolver) {
-        $this->events = $events;
+    public function __construct(EventDispatcher $evts,
+            ControllerResolver $resolver)
+    {
+        $this->events = $evts;
         $this->controller_resolver = $resolver;
     }
 
-    private function filterRequest(Request $r) {
+    private function filterRequest(Request $r)
+    {
         $event = new Event('filter_request', array('request' => $r));
         $this->events->raiseEvent($event);
         if ($event->hasResponse()) {
             $rsp = $event->getResponse();
             if ($rsp instanceof Response) {
                 return $rsp;
-            } else if ($rsp instanceof Request) {
+            } elseif ($rsp instanceof Request) {
                 $r = $rsp;
             }
         }
     }
 
-    private function getResponse(Request $r) {
+    private function getResponse(Request $r)
+    {
         $get = $r->get();
         $params = $r->getHTTPParams();
         $action = isset($get['action']) ? $get['action'] : NULL;
-        return $this->controller_resolver->resolve($get['controller'], $action, $params);
+        $resolver = $this->controller_resolver;
+        return $resolver->resolve($get['controller'], $action, $params);
     }
 
-    private function handle(Request $r) {
+    private function handle(Request $r)
+    {
         $this->filterRequest($r);
 
         $rsp = $this->getResponse($r);
@@ -70,16 +76,19 @@ class Dispatcher {
         return $rsp;
     }
 
-    private function getEventResponse(Event $event) {
+    private function getEventResponse(Event $event)
+    {
         $response = $event->getResponse();
         if (!$response instanceof Response) {
-            throw new \RuntimeException(
-                    sprintf('Invalid response, (%s) %s given.', gettype($response), $response));
+            $message = 'Invalid response, (%s) %s given.';
+            $message = sprintf($message, gettype($response), $response);
+            throw new \RuntimeException($message);
         }
         return $response;
     }
 
-    private function handleException(\Exception $e) {
+    private function handleException(\Exception $e)
+    {
         $event = new Event('handle_exception', array('exception' => $e));
         $this->events->raiseEvent($event);
         if ($event->hasResponse()) {
@@ -89,7 +98,8 @@ class Dispatcher {
         }
     }
 
-    public function dispatch(Request $r) {
+    public function dispatch(Request $r)
+    {
         try {
             $rsp = $this->handle($r);
         } catch (\Exception $e) {

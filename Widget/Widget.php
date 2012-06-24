@@ -26,30 +26,35 @@
 
 namespace Miny\Widget;
 
-abstract class Widget {
-
+abstract class Widget
+{
     private $assigns = array();
     private $services = array();
     private $container;
     public $view;
 
-    public function setContainer(WidgetContainer $container) {
+    public function setContainer(WidgetContainer $container)
+    {
         $this->container = $container;
     }
 
-    public function __set($key, $value) {
+    public function __set($key, $value)
+    {
         $this->assigns[$key] = $value;
     }
 
-    public function getAssigns() {
+    public function getAssigns()
+    {
         return $this->assigns;
     }
 
-    public function service($key, $service) {
+    public function service($key, $service)
+    {
         $this->services[$key] = $service;
     }
 
-    public function __get($key) {
+    public function __get($key)
+    {
         if (isset($this->services[$key])) {
             return $this->services[$key];
         } else {
@@ -60,11 +65,13 @@ abstract class Widget {
         }
     }
 
-    public function begin(array $params = array()) {
+    public function begin(array $params = array())
+    {
         return $this;
     }
 
-    public function end(array $params = array()) {
+    public function end(array $params = array())
+    {
         return $this->container->render($this, $params);
     }
 

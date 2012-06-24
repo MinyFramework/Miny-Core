@@ -26,8 +26,8 @@
 
 namespace Miny\Routing;
 
-class Route implements iRoute {
-
+class Route implements iRoute
+{
     private $name;
     private $path;
     private $default_parameters = array();
@@ -37,30 +37,35 @@ class Route implements iRoute {
     private $regex;
     private $static;
 
-    public function __construct($path, $name = NULL, $method = NULL, array $default_parameters = array()) {
+    public function __construct($path, $name = NULL, $method = NULL,
+            array $default_parameters = array())
+    {
         $this->method = $method;
         $this->path = $path;
         $this->name = $name;
         $this->default_parameters = $default_parameters;
     }
 
-    public function specify($parameter, $pattern) {
+    public function specify($parameter, $pattern)
+    {
         $this->parameter_patterns[$parameter] = $pattern;
     }
 
-    private function getParameterPattern($parameter) {
+    private function getParameterPattern($parameter)
+    {
         if (isset($this->parameter_patterns[$parameter])) {
             return $this->parameter_patterns[$parameter];
         }
         return '(\w+)';
     }
 
-    private function build() {
+    private function build()
+    {
         if ($this->static !== NULL) {
             return;
         }
         $arr = array();
-        if(!empty($this->path)){
+        if (!empty($this->path)) {
             $path = $this->path . '.:format';
         } else {
             $path = '';
@@ -75,10 +80,16 @@ class Route implements iRoute {
         $this->regex = str_replace(array_keys($tokens), $tokens, $this->regex);
     }
 
-    public function match($path, $method = NULL) {
-        if ($method !== NULL && $this->method !== NULL && $method !== $this->method) {
+    public function match($path, $method = NULL)
+    {
+        if ($method !== NULL && $this->method !== NULL) {
             return false;
         }
+
+        if ($method !== $this->method) {
+            return false;
+        }
+
         $this->build();
         $matched = array();
         if (preg_match('#^' . $this->regex . '$#Du', $path, $matched)) {
@@ -91,27 +102,31 @@ class Route implements iRoute {
         return false;
     }
 
-    public function get($parameter = NULL) {
+    public function get($parameter = NULL)
+    {
         if ($parameter === NULL) {
             return $this->default_parameters + $this->matched_parameters;
         }
         if (!isset($this->default_parameters[$parameter])) {
             if (!isset($this->matched_parameters[$parameter])) {
-                throw new \OutOfBoundsException('Parameter not set: ' . $parameter);
+                $message = 'Parameter not set: ' . $parameter;
+                throw new \OutOfBoundsException($message);
             }
             return $this->matched_parameters[$parameter];
         }
         return $this->default_parameters[$parameter];
     }
 
-    public function generate($name, array $parameters = array()) {
-        if($this->name !== $name) {
+    public function generate($name, array $parameters = array())
+    {
+        if ($this->name !== $name) {
             return false;
         }
         $this->build();
         foreach ($this->parameter_names as $param) {
             if (!array_key_exists($param, $parameters)) {
-                throw new \InvalidArgumentException('Parameter not set: ' . $param);
+                $message = 'Parameter not set: ' . $param;
+                throw new \InvalidArgumentException($message);
             }
         }
         return $this->path . '.:format';

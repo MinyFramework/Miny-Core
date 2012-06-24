@@ -29,23 +29,26 @@ namespace Miny\Form;
 use \Miny\Session\Session;
 use \Miny\Template\Template;
 
-class Widget extends \Miny\Widget\Widget {
-
+class Widget extends \Miny\Widget\Widget
+{
     public static $error_template = 'widgets/ui/form/error';
     public $data = array();
     public $errors = array();
     private $templating;
     private $session;
 
-    public function setSession(Session $session) {
+    public function setSession(Session $session)
+    {
         $this->session = $session;
     }
 
-    public function setTemplating(Template $templating) {
+    public function setTemplating(Template $templating)
+    {
         $this->templating = $templating;
     }
 
-    public function __call($type, $args) {
+    public function __call($type, $args)
+    {
 
         switch ($type) {
             case 'datetime_local':
@@ -73,18 +76,21 @@ class Widget extends \Miny\Widget\Widget {
                 $this->input($args[0]);
                 break;
             default:
-                throw new \InvalidArgumentException('Unknown form element: ' . $type);
+                $message = 'Unknown form element: ' . $type;
+                throw new \InvalidArgumentException($message);
         }
     }
 
-    public function getData($name, $default = NULL) {
+    public function getData($name, $default = NULL)
+    {
         if (isset($this->data[$name])) {
             return $this->data[$name];
         }
         return $default;
     }
 
-    public function getErrors($name) {
+    public function getErrors($name)
+    {
         if (isset($this->errors[$name])) {
             if (!is_array($this->errors[$name])) {
                 $this->errors[$name] = array($this->errors[$name]);
@@ -94,7 +100,8 @@ class Widget extends \Miny\Widget\Widget {
         return array();
     }
 
-    private function getHTMLArgList(array $args) {
+    private function getHTMLArgList(array $args)
+    {
         $arglist = '';
         foreach ($args as $name => $value) {
             $arglist .= sprintf(' %s="%s"', $name, $value);
@@ -102,7 +109,8 @@ class Widget extends \Miny\Widget\Widget {
         return $arglist;
     }
 
-    private function renderElement($element, array $errors = array()) {
+    private function renderElement($element, array $errors = array())
+    {
         if (!empty($errors) && !is_null($this->templating)) {
             $this->templating->setScope('form_error');
 
@@ -117,7 +125,8 @@ class Widget extends \Miny\Widget\Widget {
         }
     }
 
-    public function label(array $args) {
+    public function label(array $args)
+    {
         if (isset($args['text'])) {
             $text = $args['text'];
             unset($args['text']);
@@ -128,7 +137,8 @@ class Widget extends \Miny\Widget\Widget {
         printf('<label%s>%s</label>', $arglist, $text);
     }
 
-    public function textarea(array $args) {
+    public function textarea(array $args)
+    {
 
         if (isset($args['name'])) {
             $text = $this->getData($args['name']);
@@ -143,7 +153,8 @@ class Widget extends \Miny\Widget\Widget {
         $this->renderElement($element, $errors);
     }
 
-    public function input(array $args) {
+    public function input(array $args)
+    {
 
         if (isset($args['name'])) {
             $errors = $this->getErrors($args['name']);
@@ -160,7 +171,8 @@ class Widget extends \Miny\Widget\Widget {
         $this->renderElement($element, $errors);
     }
 
-    public function checkbox(array $args) {
+    public function checkbox(array $args)
+    {
         $args['type'] = 'checkbox';
 
         if (isset($args['name'])) {
@@ -178,7 +190,8 @@ class Widget extends \Miny\Widget\Widget {
         $this->renderElement($element, $errors);
     }
 
-    public function radio(array $args) {
+    public function radio(array $args)
+    {
         $args['type'] = 'radio';
 
         if (isset($args['name'])) {
@@ -196,7 +209,8 @@ class Widget extends \Miny\Widget\Widget {
         $this->renderElement($element, $errors);
     }
 
-    public function select(array $args, array $options) {
+    public function select(array $args, array $options)
+    {
 
         if (isset($args['name'])) {
             $values = $this->getData($args['name']);
@@ -243,7 +257,9 @@ class Widget extends \Miny\Widget\Widget {
         $this->renderElement($element, $errors);
     }
 
-    public function begin(array $params = array(), array $data = array(), array $errors = array()) {
+    public function begin(array $params = array(), array $data = array(),
+            array $errors = array())
+    {
         ob_start();
         $this->params = $params;
         $this->data = $data;
@@ -251,7 +267,8 @@ class Widget extends \Miny\Widget\Widget {
         return $this;
     }
 
-    public function run(array $params = array()) {
+    public function run(array $params = array())
+    {
         $params = $params + $this->params;
 
         if ($params['method'] != 'GET') {

@@ -29,19 +29,22 @@ namespace Miny\Translation\Loaders;
 use Miny\Translation\Loader;
 use Miny\Translation\Translation;
 
-class PHP extends Loader {
-
+class PHP extends Loader
+{
     private $strings_dir;
 
-    public function __construct($dir, $lang, Translation $t) {
+    public function __construct($dir, $lang, Translation $t)
+    {
         $this->strings_dir = $dir;
         parent::__construct($lang, $t);
     }
 
-    protected function load($lang) {
+    protected function load($lang)
+    {
         $file = $this->strings_dir . '/' . $lang . '.php';
         if (!file_exists($file)) {
-            throw new \OutOfBoundsException('Language data not found: ' . $lang);
+            $message = 'Language data not found for language: ' . $lang;
+            throw new \OutOfBoundsException($message);
         }
         return include $file;
     }

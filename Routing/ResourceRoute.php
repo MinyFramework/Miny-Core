@@ -26,8 +26,8 @@
 
 namespace Miny\Routing;
 
-class ResourceRoute {
-
+class ResourceRoute
+{
     private $name;
     private $singular_name;
     private $path_alias;
@@ -42,7 +42,9 @@ class ResourceRoute {
     private $name_prefix;
     private $nice_url;
 
-    public function __construct($name, ResourceRoute $parent = NULL, $singular = false) {
+    public function __construct($name, ResourceRoute $parent = NULL,
+            $singular = false)
+    {
         $this->name = $name;
         $this->controller = $name;
         $this->singular = $singular;
@@ -57,68 +59,77 @@ class ResourceRoute {
 
         if ($singular) {
             $this->collection_actions = array(
-                'show' => 'GET',
+                'show'    => 'GET',
                 'destroy' => 'DELETE',
-                'edit' => 'GET',
-                'update' => 'PUT',
-                'new' => 'GET',
-                'create' => 'POST'
+                'edit'    => 'GET',
+                'update'  => 'PUT',
+                'new'     => 'GET',
+                'create'  => 'POST'
             );
         } else {
             $this->member_actions = array(
-                'show' => 'GET',
+                'show'    => 'GET',
                 'destroy' => 'DELETE',
-                'edit' => 'GET',
-                'update' => 'PUT',
+                'edit'    => 'GET',
+                'update'  => 'PUT',
             );
 
             $this->collection_actions = array(
-                'index' => 'GET',
-                'new' => 'GET',
+                'index'  => 'GET',
+                'new'    => 'GET',
                 'create' => 'POST'
             );
         }
     }
 
-    public function niceUrl($nice = true) {
+    public function niceUrl($nice = true)
+    {
         $this->nice_url = $nice;
     }
 
-    public function getName() {
+    public function getName()
+    {
         return $this->name;
     }
 
-    public function getSingularName() {
+    public function getSingularName()
+    {
         return $this->singular_name;
     }
 
-    public function getPathAlias() {
+    public function getPathAlias()
+    {
         return $this->path_alias;
     }
 
-    public function path($name) {
+    public function path($name)
+    {
         $this->path_alias = $name;
         return $this;
     }
 
-    public function specify($pattern) {
+    public function specify($pattern)
+    {
         $this->id_pattern = $pattern;
         return $this;
     }
 
-    public function controller($name) {
+    public function controller($name)
+    {
         $this->controller = $name;
         return $this;
     }
 
-    public function singularForm($name) {
+    public function singularForm($name)
+    {
         if (!$this->singular) {
             $this->singular_name = $name;
         }
         return $this;
     }
 
-    public function only() {
+    public function only()
+    {
         $only = func_get_args();
         foreach ($this->collection_actions as $action => $method) {
             if (!in_array($action, $only)) {
@@ -133,7 +144,8 @@ class ResourceRoute {
         return $this;
     }
 
-    public function except() {
+    public function except()
+    {
         $except = func_get_args();
         foreach ($this->collection_actions as $action => $method) {
             if (in_array($action, $except)) {
@@ -148,29 +160,34 @@ class ResourceRoute {
         return $this;
     }
 
-    public function member($method, $name) {
+    public function member($method, $name)
+    {
         $this->member_actions[$name] = $method;
         return $this;
     }
 
-    public function collection($method, $name) {
+    public function collection($method, $name)
+    {
         $this->collection_actions[$name] = $method;
         return $this;
     }
 
-    public function resource($name) {
+    public function resource($name)
+    {
         $resource = new ResourceRoute($name, $this, true);
         $this->resources[$name] = $resource;
         return $resource;
     }
 
-    public function resources($name) {
+    public function resources($name)
+    {
         $resource = new ResourceRoute($name, $this);
         $this->resources[$name] = $resource;
         return $resource;
     }
 
-    public function getBasePath() {
+    public function getBasePath()
+    {
         if (is_null($this->base_path)) {
             if ($this->parent) {
                 $this->base_path = $this->parent->getBasePath() . ':' . $this->parent->getSingularName() . '_id/' . $this->path_alias;
@@ -181,7 +198,8 @@ class ResourceRoute {
         return $this->base_path;
     }
 
-    public function getSingularBasePath() {
+    public function getSingularBasePath()
+    {
         if (is_null($this->base_path)) {
             if ($this->parent) {
                 $this->singular_base_path = $this->parent->getBasePath() . ':' . $this->parent->getSingularName() . '_id/' . $this->singular_name;
@@ -192,7 +210,8 @@ class ResourceRoute {
         return $this->singular_base_path;
     }
 
-    public function getNamePrefix() {
+    public function getNamePrefix()
+    {
         if (is_null($this->name_prefix)) {
             if ($this->parent) {
                 $this->name_prefix = $this->parent->getNamePrefix() . '_' . $this->parent->getSingularName() . '_';
@@ -203,7 +222,8 @@ class ResourceRoute {
         return $this->name_prefix;
     }
 
-    public function addIdPattern(Route $route, $name = NULL) {
+    public function addIdPattern(Route $route, $name = NULL)
+    {
         if ($this->parent) {
             $this->parent->addIdPattern($route, $this->parent->getSingularName());
         }
@@ -211,7 +231,8 @@ class ResourceRoute {
         $route->specify($key, $this->id_pattern);
     }
 
-    public function build() {
+    public function build()
+    {
         if (!empty($this->routes))
             return;
         $member_path = $this->getSingularBasePath() . '/:id';
@@ -220,7 +241,7 @@ class ResourceRoute {
         foreach ($this->member_actions as $action => $method) {
             $options = array(
                 'controller' => $this->controller,
-                'action' => $action
+                'action'     => $action
             );
             switch ($action) {
                 case 'show':
@@ -245,7 +266,7 @@ class ResourceRoute {
         foreach ($this->collection_actions as $action => $method) {
             $options = array(
                 'controller' => $this->controller,
-                'action' => $action
+                'action'     => $action
             );
             switch ($action) {
                 case 'index':
@@ -273,7 +294,8 @@ class ResourceRoute {
         }
     }
 
-    public function match($path, $method = NULL) {
+    public function match($path, $method = NULL)
+    {
         $this->build();
         foreach ($this->routes as $route) {
             if ($route->match($path, $method)) {
@@ -289,7 +311,8 @@ class ResourceRoute {
         return false;
     }
 
-    public function generate($name, array $parameters = array()) {
+    public function generate($name, array $parameters = array())
+    {
         $this->build();
         foreach ($this->routes as $route) {
             $ret = $route->generate($name, $parameters);
