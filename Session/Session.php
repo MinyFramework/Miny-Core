@@ -43,7 +43,8 @@ class Session implements \ArrayAccess, \IteratorAggregate, \Countable {
     private $is_open = false;
 
     /**
-     * Starts the session. Regenerates the session ID each request for security reasons and updates flash variables.
+     * Starts the session. Regenerates the session ID each request
+     * for security reasons and updates flash variables.
      */
     public function open() {
         $this->registerCustomStorage();
@@ -80,13 +81,16 @@ class Session implements \ArrayAccess, \IteratorAggregate, \Countable {
     }
 
     /**
-     * If a subclass implements session storage methods this method registers them to be used as session handlers.
+     * If a subclass implements session storage methods this method registers
+     * them to be used as session handlers.
      * @access private
      */
     private function registerCustomStorage() {
         if ($this->custom_storage) {
             session_set_save_handler(
-                    array($this, 'openSession'), array($this, 'closeSession'), array($this, 'readSession'), array($this, 'writeSession'), array($this, 'destroySession'), array($this, 'gcSession')
+                    array($this, 'openSession'), array($this, 'closeSession'),
+                    array($this, 'readSession'), array($this, 'writeSession'),
+                    array($this, 'destroySession'), array($this, 'gcSession')
             );
             register_shutdown_function('session_write_close');
         }
@@ -107,7 +111,8 @@ class Session implements \ArrayAccess, \IteratorAggregate, \Countable {
     /**
      * Gets or sets a flash variable.
      *
-     * A flash variable is a session variable that is only available for a number of requests.
+     * A flash variable is a session variable that is only available
+     * for a limited number of requests.
      *
      * @param string $key The key of the stored or accessed flashdata.
      * @param mixed $value The value to be stored
@@ -115,9 +120,11 @@ class Session implements \ArrayAccess, \IteratorAggregate, \Countable {
      */
     public function flash($key, $value = NULL, $ttl = 1) {
         if (is_null($value)) {
-            return isset($_SESSION['flash'][$key]) ? $_SESSION['flash'][$key]['data'] : NULL;
+            if (isset($_SESSION['flash'][$key])) {
+                return $_SESSION['flash'][$key]['data'];
+            }
         } else {
-            $_SESSION['flash'][$key] = array('data' => $value, 'set' => $ttl);
+            $_SESSION['flash'][$key] = array('data' => $value, 'set'  => $ttl);
         }
     }
 
@@ -206,7 +213,8 @@ class Session implements \ArrayAccess, \IteratorAggregate, \Countable {
         if (!is_null($new_params) && !$this->is_open) {
             $params = $new_params + $params;
             session_set_cookie_params(
-                    $params['lifetime'], $params['path'], $params['domain'], $params['secure'], $params['http_only']
+                    $params['lifetime'], $params['path'], $params['domain'],
+                    $params['secure'], $params['http_only']
             );
         }
         return $params;
@@ -239,7 +247,10 @@ class Session implements \ArrayAccess, \IteratorAggregate, \Countable {
     }
 
     public function get($key, $default = NULL) {
-        return isset($_SESSION['data'][$key]) ? $_SESSION['data'][$key] : $default;
+        if (isset($_SESSION['data'][$key])) {
+            return $_SESSION['data'][$key];
+        }
+        return $default;
     }
 
     public function remove($key) {
