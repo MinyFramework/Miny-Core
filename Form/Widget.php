@@ -31,7 +31,7 @@ use \Miny\Template\Template;
 
 class Widget extends \Miny\Widget\Widget
 {
-    public static $error_template = 'widgets/ui/form/error';
+    public static $error_template = 'widgets/ui/form_error';
     public $data = array();
     public $errors = array();
     private $templating;
