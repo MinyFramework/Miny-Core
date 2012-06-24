@@ -46,7 +46,8 @@ class Widget extends \Miny\Widget\Widget {
             case 'email':
             case 'submit':
             case 'reset':
-                $this->input($type, $args);
+                $args[0]['type'] = $type;
+                $this->input($args[0]);
                 break;
             default:
                 throw new \InvalidArgumentException('Unknown form element: ' . $type);
@@ -78,7 +79,7 @@ class Widget extends \Miny\Widget\Widget {
         return $arglist;
     }
 
-    private function renderError($element, array $errors = array()) {
+    private function renderElement($element, array $errors = array()) {
         if (!empty($errors) && !is_null($this->templating)) {
             $this->templating->setScope('form_error');
 
@@ -93,6 +94,17 @@ class Widget extends \Miny\Widget\Widget {
         }
     }
 
+    public function label(array $args) {
+        if (isset($args['text'])) {
+            $text = $args['text'];
+            unset($args['text']);
+        } else {
+            $text = 'label';
+        }
+        $arglist = $this->getHTMLArgList($args);
+        printf('<label%s>%s</label>', $arglist, $text);
+    }
+
     public function textarea(array $args) {
 
         if (isset($args['name'])) {
@@ -105,50 +117,92 @@ class Widget extends \Miny\Widget\Widget {
 
         $arglist = $this->getHTMLArgList($args);
         $element = sprintf('<textarea%s>%s</textarea>', $arglist, $text);
-        $this->renderError($element, $errors);
+        $this->renderElement($element, $errors);
     }
 
-    public function input($type, array $args) {
+    public function input(array $args) {
 
-        if (isset($args[0]['name'])) {
-            $value = $this->getData($args[0]['name']);
+        if (isset($args['name'])) {
+            $value = $this->getData($args['name']);
+            $errors = $this->getErrors($args['name']);
             if ($value) {
-                $args[0]['value'] = $value;
+                $args['value'] = $value;
             }
-            $errors = $this->getErrors($args[0]['name']);
         } else {
             $errors = array();
         }
 
-        $params = array('type'  => $type);
-        $params = $params + $args[0];
-
-        $arglist = $this->getHTMLArgList($params);
-        $element = sprintf('<input%s/>', $arglist);
-        $this->renderError($element, $errors);
-    }
-
-    public function label(array $args) {
-        if (isset($args['text'])) {
-            $text = $args['text'];
-            unset($args['text']);
-        } else {
-            $text = 'label';
-        }
         $arglist = $this->getHTMLArgList($args);
-        printf('<label%s>%s</label>', $arglist, $text);
+        $element = sprintf('<input%s/>', $arglist);
+        $this->renderElement($element, $errors);
     }
 
     public function checkbox(array $args) {
+        $args['type'] = 'checkbox';
 
+        if (isset($args['name'])) {
+            $value = $this->getData($args['name']);
+            $errors = $this->getErrors($args['name']);
+            if((isset($args['value']) && $value == $args['value']) || !is_null($value)) {
+                $args['checked'] = 'checked';
+            }
+        } else {
+            $errors = array();
+        }
+
+        $arglist = $this->getHTMLArgList($args);
+        $element = sprintf('<input%s/>', $arglist);
+        $this->renderElement($element, $errors);
     }
 
-    public function radio(array $args) {
-
+    public function radio(array $args, array $options) {
+        $args['type'] = 'radio';
     }
 
-    public function select(array $args) {
+    public function select(array $args, array $options) {
 
+        if (isset($args['name'])) {
+            $values = $this->getData($args['name']);
+            $errors = $this->getErrors($args['name']);
+
+            if (isset($args['multiple'])) {
+                $args['name'] .= '[]';
+            } else {
+                $values = array($values);
+            }
+        } else {
+            $values = array();
+            $errors = array();
+        }
+
+        $option = '<option value="%s">%s</option>';
+        $option_selected = '<option value="%s" selected="selected">%s</option>';
+        $optgroup = '<optgroup label="%s">%s</optgroup>';
+
+        $options = array();
+        foreach ($options as $name => $value) {
+            if (is_array($value)) {
+                $temp = array();
+                foreach ($value as $key => $val) {
+                    if (in_array($val, $values)) {
+                        $temp[] = sprintf($option_selected, $val, $key);
+                    } else {
+                        $temp[] = sprintf($option, $val, $key);
+                    }
+                }
+                $options[] = sprintf($optgroup, $name, implode("\n", $temp));
+            } else {
+                if (in_array($value, $values)) {
+                    $options[] = sprintf($option_selected, $value, $name);
+                } else {
+                    $options[] = sprintf($option, $value, $name);
+                }
+            }
+        }
+
+        $arglist = $this->getHTMLArgList($args);
+        $element = sprintf('<select%s>%s</select>', $arglist, implode("\n", $options));
+        $this->renderElement($element, $errors);
     }
 
     public function begin(array $params = array(), array $data = array(), array $errors = array()) {

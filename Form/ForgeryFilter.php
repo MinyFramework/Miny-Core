@@ -43,6 +43,11 @@ class ForgeryFilter extends EventHandler {
         if ($request->isSubRequest()) {
             return;
         }
+        if($request->method == 'GET') {
+            return;
+        }
+        //session->flash->token
+        //request->post->token
     }
 
 }
