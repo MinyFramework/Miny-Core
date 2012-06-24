@@ -83,11 +83,9 @@ class Route implements iRoute
     public function match($path, $method = NULL)
     {
         if ($method !== NULL && $this->method !== NULL) {
-            return false;
-        }
-
-        if ($method !== $this->method) {
-            return false;
+            if ($method !== $this->method) {
+                return false;
+            }
         }
 
         $this->build();
