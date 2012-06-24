@@ -143,7 +143,7 @@ class Widget extends \Miny\Widget\Widget {
         if (isset($args['name'])) {
             $value = $this->getData($args['name']);
             $errors = $this->getErrors($args['name']);
-            if((isset($args['value']) && $value == $args['value']) || !is_null($value)) {
+            if(!is_null($value)) {
                 $args['checked'] = 'checked';
             }
         } else {
@@ -155,8 +155,22 @@ class Widget extends \Miny\Widget\Widget {
         $this->renderElement($element, $errors);
     }
 
-    public function radio(array $args, array $options) {
+    public function radio(array $args) {
         $args['type'] = 'radio';
+
+        if (isset($args['name'])) {
+            $value = $this->getData($args['name']);
+            $errors = $this->getErrors($args['name']);
+            if(isset($args['value']) && $args['value'] == $value) {
+                $args['checked'] = 'checked';
+            }
+        } else {
+            $errors = array();
+        }
+
+        $arglist = $this->getHTMLArgList($args);
+        $element = sprintf('<input%s/>', $arglist);
+        $this->renderElement($element, $errors);
     }
 
     public function select(array $args, array $options) {
