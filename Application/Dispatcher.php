@@ -44,20 +44,6 @@ class Dispatcher
         $this->controller_resolver = $resolver;
     }
 
-    private function filterRequest(Request $r)
-    {
-        $event = new Event('filter_request', array('request' => $r));
-        $this->events->raiseEvent($event);
-        if ($event->hasResponse()) {
-            $rsp = $event->getResponse();
-            if ($rsp instanceof Response) {
-                return $rsp;
-            } elseif ($rsp instanceof Request) {
-                $r = $rsp;
-            }
-        }
-    }
-
     private function getResponse(Request $r)
     {
         $get = $r->get();
@@ -69,11 +55,17 @@ class Dispatcher
 
     private function handle(Request $r)
     {
-        $this->filterRequest($r);
-
-        $rsp = $this->getResponse($r);
-
-        return $rsp;
+        $event = new Event('filter_request', array('request' => $r));
+        $this->events->raiseEvent($event);
+        if ($event->hasResponse()) {
+            $rsp = $event->getResponse();
+            if ($rsp instanceof Response) {
+                return $rsp;
+            } elseif ($rsp instanceof Request) {
+                $r = $rsp;
+            }
+        }
+        return $this->getResponse($r);
     }
 
     private function getEventResponse(Event $event)

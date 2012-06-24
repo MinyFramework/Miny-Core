@@ -105,9 +105,8 @@ class Template
     {
         $format = $format ? : $this->format;
         if (!is_null($format)) {
-            $format = '.' . $format;
+            return '.' . $format;
         }
-        return $format;
     }
 
     private function getTemplatePath($template, $format)

@@ -271,9 +271,7 @@ class Factory
         $str = substr($var, 1);
         switch ($var[0]) {
             case '@'://param
-
                 $var = $this->getParameter($str);
-
                 break;
             case '&':
                 /*
@@ -281,7 +279,6 @@ class Factory
                  * $factory->create('object')->method(parameters);
                  */
                 $var = $this->getObjectParameter($str);
-
                 break;
             case '*'://callback
                 if (strpos($var, '::') !== false) {
@@ -289,7 +286,6 @@ class Factory
                     $var = array($this->get($obj_name), $method);
                 }
                 break;
-
             case '\\':
                 /*
                  * if parameter is string beginning

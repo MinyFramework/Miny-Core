@@ -57,12 +57,10 @@ abstract class Widget
     {
         if (isset($this->services[$key])) {
             return $this->services[$key];
-        } else {
-            if (array_key_exists($key, $this->assigns)) {
-                return $this->assigns[$key];
-            }
-            throw new \OutOfBoundsException('Variable not set: ' . $key);
+        } elseif (array_key_exists($key, $this->assigns)) {
+            return $this->assigns[$key];
         }
+        throw new \OutOfBoundsException('Variable not set: ' . $key);
     }
 
     public function begin(array $params = array())

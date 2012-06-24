@@ -49,7 +49,6 @@ class Widget extends \Miny\Widget\Widget
 
     public function __call($type, $args)
     {
-
         switch ($type) {
             case 'datetime_local':
                 $type = 'datetime-local';
@@ -139,7 +138,6 @@ class Widget extends \Miny\Widget\Widget
 
     public function textarea(array $args)
     {
-
         if (isset($args['name'])) {
             $text = $this->getData($args['name']);
             $errors = $this->getErrors($args['name']);
@@ -155,7 +153,6 @@ class Widget extends \Miny\Widget\Widget
 
     public function input(array $args)
     {
-
         if (isset($args['name'])) {
             $errors = $this->getErrors($args['name']);
             $value = $this->getData($args['name']);
@@ -211,7 +208,6 @@ class Widget extends \Miny\Widget\Widget
 
     public function select(array $args, array $options)
     {
-
         if (isset($args['name'])) {
             $values = $this->getData($args['name']);
             $errors = $this->getErrors($args['name']);

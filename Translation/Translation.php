@@ -41,10 +41,8 @@ class Translation
 
     public function addString($key, $string)
     {
-        if (is_array($string)) {
-            if (count($string) == 1) {
-                $string = current($string);
-            }
+        if (is_array($string) && count($string) == 1) {
+            $string = current($string);
         }
         $this->strings[$key] = $string;
     }
@@ -68,7 +66,6 @@ class Translation
 
     private function ruleApplies($rule, $num)
     {
-
         if (!isset($this->rules[$rule]) || !is_int($num)) {
             return false;
         }
@@ -85,11 +82,7 @@ class Translation
         }
         if (is_array($string)) {
             $str = $this->getStringForN($string, $num);
-            if (is_null($str)) {
-                $string = $key;
-            } else {
-                $string = $str;
-            }
+            $string = is_null($str) ? $key : $str;
         }
 
         $arg_num = func_num_args();

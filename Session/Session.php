@@ -284,7 +284,7 @@ class Session implements \ArrayAccess, \IteratorAggregate, \Countable
 
     public function getIterator()
     {
-        return new ArrayIterator($_SESSION['data']);
+        return new \ArrayIterator($_SESSION['data']);
     }
 
     public function count()
