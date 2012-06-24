@@ -102,7 +102,7 @@ class Session implements \ArrayAccess, \IteratorAggregate, \Countable {
      */
     private function updateFlash() {
         foreach ($_SESSION['flash'] as $key => &$array) {
-            if ($array['set']-- == 0) {
+            if ($array['ttl']-- == 0) {
                 unset($_SESSION['flash'][$key]);
             }
         }
@@ -124,12 +124,12 @@ class Session implements \ArrayAccess, \IteratorAggregate, \Countable {
                 return $_SESSION['flash'][$key]['data'];
             }
         } else {
-            $_SESSION['flash'][$key] = array('data' => $value, 'set'  => $ttl);
+            $_SESSION['flash'][$key] = array('data' => $value, 'ttl'  => $ttl);
         }
     }
 
     /**
-     * @return Wether a flashdata with $key key is set.
+     * @return Whether a flashdata with $key key is set.
      * @param unknown_type $key
      */
     public function hasFlash($key) {
