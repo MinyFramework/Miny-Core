@@ -40,12 +40,29 @@ class Widget extends \Miny\Widget\Widget {
     }
 
     public function __call($type, $args) {
+
         switch ($type) {
-            case 'hidden':
-            case 'text':
+            case 'datetime_local':
+                $type = 'datetime-local';
+            case 'button':
+            case 'color':
+            case 'date':
+            case 'datetime':
             case 'email':
-            case 'submit':
+            case 'file':
+            case 'hidden':
+            case 'image':
+            case 'month':
+            case 'number':
+            case 'range':
             case 'reset':
+            case 'search':
+            case 'submit':
+            case 'tel':
+            case 'text':
+            case 'time':
+            case 'url':
+            case 'week':
                 $args[0]['type'] = $type;
                 $this->input($args[0]);
                 break;
@@ -123,8 +140,8 @@ class Widget extends \Miny\Widget\Widget {
     public function input(array $args) {
 
         if (isset($args['name'])) {
-            $value = $this->getData($args['name']);
             $errors = $this->getErrors($args['name']);
+            $value = $this->getData($args['name']);
             if ($value) {
                 $args['value'] = $value;
             }
@@ -143,7 +160,7 @@ class Widget extends \Miny\Widget\Widget {
         if (isset($args['name'])) {
             $value = $this->getData($args['name']);
             $errors = $this->getErrors($args['name']);
-            if(!is_null($value)) {
+            if (!is_null($value)) {
                 $args['checked'] = 'checked';
             }
         } else {
@@ -161,7 +178,7 @@ class Widget extends \Miny\Widget\Widget {
         if (isset($args['name'])) {
             $value = $this->getData($args['name']);
             $errors = $this->getErrors($args['name']);
-            if(isset($args['value']) && $args['value'] == $value) {
+            if (isset($args['value']) && $args['value'] == $value) {
                 $args['checked'] = 'checked';
             }
         } else {
