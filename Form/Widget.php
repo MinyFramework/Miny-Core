@@ -26,6 +26,7 @@
 
 namespace Miny\Form;
 
+use \Miny\Session\Session;
 use \Miny\Template\Template;
 
 class Widget extends \Miny\Widget\Widget {
@@ -34,6 +35,11 @@ class Widget extends \Miny\Widget\Widget {
     public $data = array();
     public $errors = array();
     private $templating;
+    private $session;
+
+    public function setSession(Session $session) {
+        $this->session = $session;
+    }
 
     public function setTemplating(Template $templating) {
         $this->templating = $templating;
@@ -232,7 +238,8 @@ class Widget extends \Miny\Widget\Widget {
         }
 
         $arglist = $this->getHTMLArgList($args);
-        $element = sprintf('<select%s>%s</select>', $arglist, implode("\n", $options));
+        $element = sprintf('<select%s>%s</select>', $arglist,
+                implode("\n", $options));
         $this->renderElement($element, $errors);
     }
 
@@ -249,9 +256,17 @@ class Widget extends \Miny\Widget\Widget {
 
         if ($params['method'] != 'GET') {
             if ($params['method'] != 'POST') {
-                printf('<input type="hidden" name="_method" value="%s" />', $params['method']);
+                printf('<input type="hidden" name="_method" value="%s" />',
+                        $params['method']);
             }
             $params['method'] = 'POST';
+        }
+        if (!is_null($this->session)) {
+            $token = md5(mt_rand());
+            $tokens = $this->session->flash('tokens');
+            $tokens[] = $token;
+            $this->session->flash('tokens', $tokens);
+            printf('<input type="hidden" name="token" value="%s" />', $token);
         }
 
         $content = ob_get_clean();

@@ -34,7 +34,7 @@ class ForgeryFilter extends EventHandler {
 
     private $session;
 
-    public function setSession(Session $session) {
+    public function __construct(Session $session) {
         $this->session = $session;
     }
 
@@ -43,11 +43,17 @@ class ForgeryFilter extends EventHandler {
         if ($request->isSubRequest()) {
             return;
         }
-        if($request->method == 'GET') {
+        
+        $valid_tokens = $this->session->flash('tokens');
+        $this->session->flash('tokens', array());
+
+        if ($request->method == 'GET') {
             return;
         }
-        //session->flash->token
-        //request->post->token
+        $token = $request->post('token');
+        if (!in_array($token, $valid_tokens)) {
+            throw new \HttpRequestException('Wrong token sent.');
+        }
     }
 
 }
