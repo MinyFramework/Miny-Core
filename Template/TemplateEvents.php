@@ -47,7 +47,7 @@ class TemplateEvents extends \Miny\Event\EventHandler
         $this->templating->leaveScope();
     }
 
-    public function filterRequest(Event $event)
+    public function filterRequestFormat(Event $event)
     {
         $request = $event->getParameter('request');
         try {
