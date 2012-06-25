@@ -30,11 +30,12 @@ class SecurityProvider
 {
     private $protected = array();
 
-    public function addRule($controller, $action, $permission) {
-        if($action == '*' || is_null($action)) {
+    public function addRule($controller, $action, $permission)
+    {
+        if ($action == '*' || is_null($action)) {
             $this->protected[$controller] = $permission;
         } else {
-            if(!is_string($action)) {
+            if (!is_string($action)) {
                 $message = 'Action must be string, %s given';
                 $message = sprintf($message, gettype($action));
                 throw new \InvalidArgumentException($message);

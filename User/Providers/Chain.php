@@ -17,31 +17,42 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  *
- * @package   Miny/User
+ * @package   Miny/User/Providers
  * @copyright 2012 Dániel Buga <daniel@bugadani.hu>
  * @license   http://www.gnu.org/licenses/gpl.txt
  *            GNU General Public License
  * @version   1.0
  */
 
-namespace Miny\User;
+namespace Miny\User\Providers;
 
-class UserProvider
+use \Miny\User\UserProvider;
+
+class Chain extends UserProvider
 {
-    private $users = array();
+    private $providers = array();
+
+    public function addProvider(UserProvider $provider)
+    {
+        $this->providers[] = $provider;
+    }
 
     public function addUser(UserIdentity $user)
     {
-        $this->users[$user->name] = $user;
-        return true;
+        foreach ($this->providers as $provider) {
+            if ($provider->addUser($user)) {
+                return true;
+            }
+        }
     }
 
     public function removeUser($user)
     {
-        if ($this->userExists($user)) {
-            unset($this->users[$user]);
+        foreach ($this->providers as $provider) {
+            if ($provider->removeUser($username)) {
+                return true;
+            }
         }
-        return true;
     }
 
     public function getAnonymUser()
@@ -51,15 +62,23 @@ class UserProvider
 
     public function getUser($username)
     {
-        if (!$this->userExists($username)) {
-            return false;
+        foreach ($this->providers as $provider) {
+            $user = $provider->getUser($username);
+            if ($user) {
+                return $user;
+            }
         }
-        return $this->users[$username];
+        return false;
     }
 
     public function userExists($username)
     {
-        return isset($this->users[$username]);
+        foreach ($this->providers as $provider) {
+            if ($provider->userExists($username)) {
+                return true;
+            }
+        }
+        return false;
     }
 
 }
