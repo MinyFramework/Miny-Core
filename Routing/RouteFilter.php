@@ -32,18 +32,25 @@ use \Miny\Event\EventHandler;
 class RouteFilter extends EventHandler
 {
     private $router;
+    private $handled_exceptions = array();
+
+    public function addExceptionHandler($exception_class, $redirect_to)
+    {
+        $this->handled_exceptions[$exception_class] = $redirect_to;
+    }
 
     public function setRouter(Router $router)
     {
         $this->router = $router;
     }
 
-    public function handle(Event $event, $handling_method = NULL)
+    public function filterRoutes(Event $event)
     {
         $request = $event->getParameter('request');
         $route = $this->router->match($request->path, $request->method);
         if (!$route) {
-            throw new \RuntimeException('Page not found: ' . $request->path);
+            $message = 'Page not found: ' . $request->path;
+            throw new \HttpRequestException($message);
         }
         $start = strpos($_SERVER['REQUEST_URI'], '?');
         $extra = array();
@@ -53,6 +60,22 @@ class RouteFilter extends EventHandler
         }
         $request->get(NULL, $route->get() + $_GET + $extra);
         $event->setResponse($request);
+    }
+
+    public function handleRequestException(Event $event)
+    {
+        //kimenet: response
+        if (empty($this->handled_exceptions)) {
+            return;
+        }
+        $ex = $event->getParameter('exception');
+        $class = get_class($ex);
+        if (!isset($this->handled_exceptions[$class])) {
+            throw $ex;
+        }
+        $request = $event->getParameter('request');
+        $request->path = $this->handled_exceptions[$class];
+        $this->fitlerRoutes($event);
     }
 
 }
