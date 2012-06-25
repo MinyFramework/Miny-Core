@@ -55,8 +55,16 @@ class Dispatcher
 
     private function handle(Request $r)
     {
-        $event = new Event('filter_request', array('request' => $r));
-        $this->events->raiseEvent($event);
+        try {
+            $event = new Event('filter_request', array('request' => $r));
+            $this->events->raiseEvent($event);
+        } catch (\Exception $e) {
+            $event = new Event('handle_request_exception', array(
+                        'request'   => $r,
+                        'exception' => $e
+                    ));
+            $this->events->raiseEvent($event);
+        }
         if ($event->hasResponse()) {
             $rsp = $event->getResponse();
             if ($rsp instanceof Response) {
