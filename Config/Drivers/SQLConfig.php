@@ -17,7 +17,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  *
- * @package   Miny/Cache
+ * @package   Miny/Config
  * @copyright 2012 Dániel Buga <daniel@bugadani.hu>
  * @license   http://www.gnu.org/licenses/gpl.txt
  *            GNU General Public License
@@ -25,13 +25,27 @@
  *
  */
 
-namespace Miny\Cache\Drivers;
+namespace Miny\Config\Drivers;
 
-class MySQLCacheDriver implements \Miny\Cache\iCacheDriver
+class SQLConfig implements \Miny\Config\iConfig
 {
+    protected static $queries = array(
+        'load'   => 'SELECT `key`, `value` FROM `%s`',
+        'delete' => 'DELETE FROM `%s` WHERE `key` = :key',
+        'modify' => 'REPLACE INTO `%s` (`key`, `value`)
+                VALUES(:key, :value)'
+    );
+
+    public static function getQuery($query)
+    {
+        if (!isset(static::$queries[$query])) {
+            throw new \OutOfBoundsException('Query not set: ' . $query);
+        }
+        return static::$queries[$query];
+    }
+
     private $keys = array();
     private $data = array();
-    private $ttls = array();
     private $table_name;
     private $driver;
 
@@ -41,15 +55,11 @@ class MySQLCacheDriver implements \Miny\Cache\iCacheDriver
         $this->driver = $driver;
         $this->table_name = $table_name;
 
-        //GC
-        $gc_query = 'DELETE FROM `%s` WHERE `expiration` < NOW()';
-        $driver->exec(sprintf($gc_query, $table_name));
+        $sql = sprintf(static::getQuery('load'), $table_name);
 
-        $index_query = 'SELECT `key` FROM `%s` WHERE `expiration` >= NOW()';
-        $result = $driver->query(sprintf($index_query, $table_name));
-
-        foreach ($result as $row) {
+        foreach ($driver->query($sql) as $row) {
             $this->keys[$row['key']] = 1;
+            $this->data[$row['key']] = $row['value'];
         }
     }
 
@@ -63,23 +73,13 @@ class MySQLCacheDriver implements \Miny\Cache\iCacheDriver
         if (!$this->exists($key)) {
             throw new \OutOfBoundsException('Key not found: ' . $key);
         }
-        if (!array_key_exists($key, $this->data)) {
-            $select_query = 'SELECT `data` FROM `%s` WHERE `key` = :key';
-            $select_query = sprintf($select_query, $this->table_name);
-            $statement = $this->driver->prepare($select_query);
-            $statement->bindValue('key', $key);
-            $statement->execute();
-            $temp = $statement->fetch();
-            $this->data[$key] = unserialize($temp['data']);
-        }
         return $this->data[$key];
     }
 
     public function store($key, $data, $ttl)
     {
         $this->keys[$key] = 'm';
-        $this->data[$key] = $data;
-        $this->ttls[$key] = $ttl;
+        $this->data[$key] = array($data, $ttl);
     }
 
     public function remove($key)
@@ -87,33 +87,27 @@ class MySQLCacheDriver implements \Miny\Cache\iCacheDriver
         if ($key !== false) {
             $this->keys[$key] = 'r';
             unset($this->data[$key]);
-            unset($this->ttls[$key]);
         }
     }
 
     public function close()
     {
         $save = false;
-        $db = $this->driver;
         $statements = array();
         if (in_array('r', $this->keys)) {
             $save = true;
-
-            $delete_query = 'DELETE FROM `%s` WHERE `key` = :key';
-            $delete_query = sprintf($delete_query, $this->table_name);
-
-            $statements['r'] = $db->prepare($delete_query);
+            $sql = static::getQuery('delete');
+            $sql = sprintf($sql, $this->table_name);
+            $statements['r'] = $this->driver->prepare($sql);
         }
         if (in_array('m', $this->keys)) {
             $save = true;
-            $replace_query = 'REPLACE INTO `%s` (`key`, `data`, `expiration`)
-                VALUES(:key, :value, :expiration)';
-            $replace_query = sprintf($replace_query, $this->table_name);
-            $statements['m'] = $db->prepare($replace_query);
+            $sql = static::getQuery('modify');
+            $sql = sprintf($sql, $this->table_name);
+            $statements['m'] = $this->driver->prepare($sql);
         }
-
         if ($save) {
-            $db->beginTransaction();
+            $this->driver->beginTransaction();
             foreach ($this->keys as $key => $state) {
                 if ($state == 1) {
                     continue;
@@ -121,19 +115,14 @@ class MySQLCacheDriver implements \Miny\Cache\iCacheDriver
                 $statement = $statements[$state];
                 switch ($state) {
                     case 'm':
-                        $data = serialize($this->data[$key]);
-                        $expire = date('Y-m-d H:i:s', time() + $this->ttls[$key]);
-
-                        $statement->bindValue(':value', $data);
-                        $statement->bindValue(':expiration', $expire);
-
+                        $statement->bindValue(':value', $this->data[$key]);
                     case 'r':
                         $statement->bindValue(':key', $key);
                         break;
                 }
                 $statement->execute();
             }
-            $db->commit();
+            $this->driver->commit();
         }
     }
 

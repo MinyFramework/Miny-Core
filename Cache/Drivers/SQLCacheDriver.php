@@ -17,7 +17,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  *
- * @package   Miny/Config
+ * @package   Miny/Cache
  * @copyright 2012 Dániel Buga <daniel@bugadani.hu>
  * @license   http://www.gnu.org/licenses/gpl.txt
  *            GNU General Public License
@@ -25,12 +25,30 @@
  *
  */
 
-namespace Miny\Config\Drivers;
+namespace Miny\Cache\Drivers;
 
-class MySQLConfig implements \Miny\Config\iConfig
+class SQLCacheDriver implements \Miny\Cache\iCacheDriver
 {
+    protected static $queries = array(
+        'gc'     => 'DELETE FROM `%s` WHERE `expiration` < NOW()',
+        'index'  => 'SELECT `key` FROM `%s` WHERE `expiration` >= NOW()',
+        'select' => 'SELECT `data` FROM `%s` WHERE `key` = :key',
+        'delete' => 'DELETE FROM `%s` WHERE `key` = :key',
+        'modify' => 'REPLACE INTO `%s` (`key`, `data`, `expiration`)
+                VALUES(:key, :value, :expiration)'
+    );
+
+    public static function getQuery($query)
+    {
+        if (!isset(static::$queries[$query])) {
+            throw new \OutOfBoundsException('Query not set: ' . $query);
+        }
+        return static::$queries[$query];
+    }
+
     private $keys = array();
     private $data = array();
+    private $ttls = array();
     private $table_name;
     private $driver;
 
@@ -40,11 +58,15 @@ class MySQLConfig implements \Miny\Config\iConfig
         $this->driver = $driver;
         $this->table_name = $table_name;
 
-        $sql = sprintf('SELECT `key`, `value` FROM `%s`', $table_name);
+        //GC
+        $gc_query = static::getQuery('gc');
+        $driver->exec(sprintf($gc_query, $table_name));
 
-        foreach ($driver->query($sql) as $row) {
+        $index_query = static::getQuery('index');
+        $result = $driver->query(sprintf($index_query, $table_name));
+
+        foreach ($result as $row) {
             $this->keys[$row['key']] = 1;
-            $this->data[$row['key']] = $row['value'];
         }
     }
 
@@ -58,13 +80,23 @@ class MySQLConfig implements \Miny\Config\iConfig
         if (!$this->exists($key)) {
             throw new \OutOfBoundsException('Key not found: ' . $key);
         }
+        if (!array_key_exists($key, $this->data)) {
+            $select_query = static::getQuery('select');
+            $select_query = sprintf($select_query, $this->table_name);
+            $statement = $this->driver->prepare($select_query);
+            $statement->bindValue('key', $key);
+            $statement->execute();
+            $temp = $statement->fetch();
+            $this->data[$key] = unserialize($temp['data']);
+        }
         return $this->data[$key];
     }
 
     public function store($key, $data, $ttl)
     {
         $this->keys[$key] = 'm';
-        $this->data[$key] = array($data, $ttl);
+        $this->data[$key] = $data;
+        $this->ttls[$key] = $ttl;
     }
 
     public function remove($key)
@@ -72,27 +104,32 @@ class MySQLConfig implements \Miny\Config\iConfig
         if ($key !== false) {
             $this->keys[$key] = 'r';
             unset($this->data[$key]);
+            unset($this->ttls[$key]);
         }
     }
 
     public function close()
     {
         $save = false;
+        $db = $this->driver;
         $statements = array();
         if (in_array('r', $this->keys)) {
             $save = true;
-            $sql = 'DELETE FROM `%s` WHERE `key` = :key';
-            $sql = sprintf($sql, $this->table_name);
-            $statements['r'] = $this->driver->prepare($sql);
+
+            $delete_query = static::getQuery('delete');
+            $delete_query = sprintf($delete_query, $this->table_name);
+
+            $statements['r'] = $db->prepare($delete_query);
         }
         if (in_array('m', $this->keys)) {
             $save = true;
-            $sql = 'REPLACE INTO `%s` (`key`, `value`) VALUES(:key, :value)';
-            $sql = sprintf($sql, $this->table_name);
-            $statements['m'] = $this->driver->prepare($sql);
+            $replace_query = static::getQuery('modify');
+            $replace_query = sprintf($replace_query, $this->table_name);
+            $statements['m'] = $db->prepare($replace_query);
         }
+
         if ($save) {
-            $this->driver->beginTransaction();
+            $db->beginTransaction();
             foreach ($this->keys as $key => $state) {
                 if ($state == 1) {
                     continue;
@@ -100,14 +137,20 @@ class MySQLConfig implements \Miny\Config\iConfig
                 $statement = $statements[$state];
                 switch ($state) {
                     case 'm':
-                        $statement->bindValue(':value', $this->data[$key]);
+                        $data = serialize($this->data[$key]);
+                        $ttl = $this->ttls[$key];
+                        $expire = date('Y-m-d H:i:s', time() + $ttl);
+
+                        $statement->bindValue(':value', $data);
+                        $statement->bindValue(':expiration', $expire);
+
                     case 'r':
                         $statement->bindValue(':key', $key);
                         break;
                 }
                 $statement->execute();
             }
-            $this->driver->commit();
+            $db->commit();
         }
     }
 
