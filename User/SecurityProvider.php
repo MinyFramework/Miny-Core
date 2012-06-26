@@ -32,14 +32,14 @@ class SecurityProvider
 
     public function addRule($controller, $action, $permission)
     {
+        if (!is_string($action) && !is_callable($action)) {
+            $message = 'Action must be string or callable type, %s given';
+            $message = sprintf($message, gettype($action));
+            throw new \InvalidArgumentException($message);
+        }
         if ($action == '*' || is_null($action)) {
             $this->protected[$controller] = $permission;
         } else {
-            if (!is_string($action)) {
-                $message = 'Action must be string, %s given';
-                $message = sprintf($message, gettype($action));
-                throw new \InvalidArgumentException($message);
-            }
             $this->protected[$controller][$action] = $permission;
         }
     }

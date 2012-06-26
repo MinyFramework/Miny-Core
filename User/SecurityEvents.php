@@ -71,15 +71,23 @@ class SecurityEvents extends \Miny\Event\EventHandler
         }
 
         $request = $event->getParameter('request');
+        $path = $request->path;
         $provider = $this->security_provider;
 
         $controller = $request->get('controller');
         $action = $request->get('action');
         if ($provider->isActionProtected($controller, $action)) {
-            $permission = $provider->getPermission($controller, $action);
-            if (!$this->identity->hasPermission($permission)) {
-                $message = 'Access denied: ' . $permission;
-                throw new \HttpRequestException($message);
+            $rule = $provider->getPermission($controller, $action);
+            if (is_string($rule)) {
+                if (!$this->identity->hasPermission($rule)) {
+                    $message = 'Access denied for path: ' . $path;
+                    throw new \HttpRequestException($message);
+                }
+            } elseif (is_callable($rule)) {
+                if (!call_user_func($rule)) {
+                    $message = 'Access denied for path: ' . $path;
+                    throw new \HttpRequestException($message);
+                }
             }
         }
     }
