@@ -26,6 +26,7 @@
 
 namespace Miny\User\Providers;
 
+use \Miny\User\AnonymUserIdentity;
 use \Miny\User\UserIdentity;
 use \Miny\User\UserProvider;
 
