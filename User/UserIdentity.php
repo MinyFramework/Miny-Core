@@ -105,13 +105,4 @@ class UserIdentity
         return false;
     }
 
-    /**
-     * Returns whether the given user is identical to the current one.
-     * @return boolean
-     */
-    public function isIdentical(UserIdentity $other)
-    {
-        return $other->id == $this->userdata['id'];
-    }
-
 }

@@ -70,13 +70,4 @@ class AnonymUserIdentity extends UserIdentity
         return true;
     }
 
-    /**
-     * Returns whether the given user is identical to the current one.
-     * @return boolean
-     */
-    public function isIdentical(UserIdentity $other)
-    {
-        return false;
-    }
-
 }
