@@ -27,8 +27,9 @@
 namespace Miny\Template;
 
 use \Miny\Event\Event;
+use \Miny\Event\EventHandler;
 
-class TemplateEvents extends \Miny\Event\EventHandler
+class TemplateEvents extends EventHandler
 {
     private $templating;
     private $scope;
@@ -71,6 +72,7 @@ class TemplateEvents extends \Miny\Event\EventHandler
         $this->templating->content = $rsp->getContent();
         $this->templating->stylesheets = array('application', $controller);
 
+        //TODO: make this customizable
         $rsp->setContent($this->templating->render('layouts/application'));
         $this->templating->leaveScope();
         $event->setResponse($rsp);

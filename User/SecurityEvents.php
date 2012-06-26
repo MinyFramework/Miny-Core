@@ -27,8 +27,10 @@
 namespace Miny\User;
 
 use \Miny\Event\Event;
+use \Miny\Event\EventHandler;
+use \Miny\Session\Session;
 
-class SecurityEvents extends \Miny\Event\EventHandler
+class SecurityEvents extends EventHandler
 {
     private $security_provider;
     private $user_provider;

@@ -27,8 +27,8 @@
 
 namespace Miny\Controller;
 
-use \Miny\HTTP\Response;
 use \Miny\HTTP\RedirectResponse;
+use \Miny\HTTP\Response;
 use \Miny\Template\Template;
 
 class ControllerResolver

@@ -26,6 +26,7 @@
 
 namespace Miny\User\Providers;
 
+use \Miny\User\UserIdentity;
 use \Miny\User\UserProvider;
 
 class Chain extends UserProvider

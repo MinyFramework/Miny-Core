@@ -26,8 +26,8 @@
 
 namespace Miny\Form;
 
-use \Miny\Event\EventHandler;
 use \Miny\Event\Event;
+use \Miny\Event\EventHandler;
 use \Miny\Session\Session;
 
 class ForgeryFilter extends EventHandler
