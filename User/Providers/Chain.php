@@ -62,6 +62,16 @@ class Chain extends UserProvider
         return new AnonymUserIdentity();
     }
 
+    public function userExists($username)
+    {
+        foreach ($this->providers as $provider) {
+            if ($provider->userExists($username)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
     public function getUser($username)
     {
         foreach ($this->providers as $provider) {
@@ -73,14 +83,13 @@ class Chain extends UserProvider
         return false;
     }
 
-    public function userExists($username)
+    public function getUsers()
     {
+        $users = array();
         foreach ($this->providers as $provider) {
-            if ($provider->userExists($username)) {
-                return true;
-            }
+            $users = array_merge($provider->getUsers(), $users);
         }
-        return false;
+        return $users;
     }
 
 }

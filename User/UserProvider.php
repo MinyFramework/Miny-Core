@@ -49,6 +49,11 @@ class UserProvider
         return new AnonymUserIdentity();
     }
 
+    public function userExists($username)
+    {
+        return isset($this->users[$username]);
+    }
+
     public function getUser($username)
     {
         if (!$this->userExists($username)) {
@@ -57,9 +62,9 @@ class UserProvider
         return $this->users[$username];
     }
 
-    public function userExists($username)
+    public function getUsers()
     {
-        return isset($this->users[$username]);
+        return array_values($this->users);
     }
 
 }
