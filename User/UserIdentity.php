@@ -32,6 +32,7 @@ namespace Miny\User;
  */
 class UserIdentity
 {
+    private $changed;
     private $password;
     private $userdata = array();
     private $permissions = array();
@@ -44,9 +45,10 @@ class UserIdentity
      */
     public function __construct(array $userdata, $password, array $permissions)
     {
-        if(!isset($userdata['id'])) {
+        if (!isset($userdata['id'])) {
             throw new \InvalidArgumentException('Userdata must contain an ID');
         }
+        $this->changed = false;
         $this->userdata = $userdata;
         $this->password = $password;
         $this->permissions = $permissions;
@@ -64,6 +66,17 @@ class UserIdentity
             throw new \OutOfBoundsException('Userdata not set: ' . $key);
         }
         return $this->userdata[$key];
+    }
+
+    /**
+     * Magic function to set userdata.
+     * @param string $key
+     * @param mixed $value
+     */
+    public function __set($key, $value)
+    {
+        $this->userdata[$key] = $value;
+        $this->changed = true;
     }
 
     /**
@@ -103,6 +116,15 @@ class UserIdentity
     public function isAnonym()
     {
         return false;
+    }
+
+    /**
+     * Returns whether the user has been changed.
+     * @return boolean
+     */
+    public function isChanged()
+    {
+        return $this->changed;
     }
 
 }

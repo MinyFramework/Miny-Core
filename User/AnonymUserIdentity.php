@@ -52,6 +52,16 @@ class AnonymUserIdentity extends UserIdentity
     }
 
     /**
+     * Magic function to set userdata.
+     * @param string $key
+     * @param mixed $value
+     */
+    public function __set($key, $value)
+    {
+
+    }
+
+    /**
      * Checks whether the user has the given permission or not.
      * @param string $permission
      * @return boolean
@@ -68,6 +78,15 @@ class AnonymUserIdentity extends UserIdentity
     public function isAnonym()
     {
         return true;
+    }
+
+    /**
+     * Returns whether the user has been changed.
+     * @return boolean
+     */
+    public function isChanged()
+    {
+        return false;
     }
 
 }
