@@ -32,6 +32,7 @@ namespace Miny\User;
  */
 class UserIdentity
 {
+    private $password;
     private $userdata = array();
     private $permissions = array();
 
@@ -41,9 +42,13 @@ class UserIdentity
      * @param array $userdata The userdata like username, e-mail, etc.
      * @param array $permissions Permissions the user has.
      */
-    public function __construct(array $userdata, array $permissions)
+    public function __construct(array $userdata, $password, array $permissions)
     {
+        if(!isset($userdata['id'])) {
+            throw new \InvalidArgumentException('Userdata must contain an ID');
+        }
         $this->userdata = $userdata;
+        $this->password = $password;
         $this->permissions = $permissions;
     }
 
@@ -77,6 +82,18 @@ class UserIdentity
             return true;
         }
         return in_array($permission, $this->permissions);
+    }
+
+    /**
+     * Checks whether the user can be authenticated with
+     * the given password.
+     *
+     * @param string $hash
+     * @return boolean
+     */
+    public function checkPassword($password)
+    {
+        return $password === $this->password;
     }
 
     /**
