@@ -36,10 +36,10 @@ class UserProvider
         return true;
     }
 
-    public function removeUser($user)
+    public function removeUser($username)
     {
-        if ($this->userExists($user)) {
-            unset($this->users[$user]);
+        if ($this->userExists($username)) {
+            unset($this->users[$username]);
         }
         return true;
     }
