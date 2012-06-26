@@ -44,15 +44,22 @@ class SecurityProvider
         }
     }
 
+    private function isRule($rule)
+    {
+        return is_string($rule) || is_callable($rule);
+    }
+
     public function isActionProtected($controller, $action)
     {
-        if (isset($this->protected[$controller])) {
-            if (is_array($this->protected[$controller])) {
-                if (isset($this->protected[$controller][$action])) {
-                    return true;
-                }
-            } elseif (is_string($this->protected[$controller])) {
-                //the whole controller is protected
+        if (!isset($this->protected[$controller])) {
+            return false;
+        }
+        if ($this->isRule($this->protected[$controller])) {
+            //the whole controller is protected
+            return true;
+        } elseif (is_array($this->protected[$controller])) {
+            if (isset($this->protected[$controller][$action])) {
+                //the specific action is protected
                 return true;
             }
         }
@@ -61,16 +68,19 @@ class SecurityProvider
 
     public function getPermission($controller, $action)
     {
-        if (isset($this->protected[$controller])) {
-            if (is_array($this->protected[$controller])) {
-                if (isset($this->protected[$controller][$action])) {
-                    return $this->protected[$controller][$action];
-                }
-            } elseif (is_string($this->protected[$controller])) {
-                //the whole controller is protected
-                return $this->protected[$controller];
+        if (!isset($this->protected[$controller])) {
+            return;
+        }
+        if ($this->isRule($this->protected[$controller])) {
+            //the whole controller is protected
+            return $this->protected[$controller];
+        } elseif (is_array($this->protected[$controller])) {
+            if (isset($this->protected[$controller][$action])) {
+                //the specific action is protected
+                return $this->protected[$controller][$action];
             }
         }
+        //not protected - nothing to return
     }
 
 }
