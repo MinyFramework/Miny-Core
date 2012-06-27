@@ -48,20 +48,6 @@ class Chain extends UserProvider
         }
     }
 
-    public function removeUser($username)
-    {
-        foreach ($this->providers as $provider) {
-            if ($provider->removeUser($username)) {
-                return true;
-            }
-        }
-    }
-
-    public function getAnonymUser()
-    {
-        return new AnonymUserIdentity();
-    }
-
     public function userExists($username)
     {
         foreach ($this->providers as $provider) {
@@ -81,15 +67,6 @@ class Chain extends UserProvider
             }
         }
         return false;
-    }
-
-    public function getUsers()
-    {
-        $users = array();
-        foreach ($this->providers as $provider) {
-            $users = array_merge($provider->getUsers(), $users);
-        }
-        return $users;
     }
 
 }
