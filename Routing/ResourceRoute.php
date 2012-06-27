@@ -38,8 +38,9 @@ class ResourceRoute
     private $id_pattern = '(\d+)';
     private $resources = array();
     private $routes = array();
-    private $base_path;
-    private $name_prefix;
+    private $singular_base_path = '';
+    private $base_path = '';
+    private $name_prefix = '';
     private $nice_url;
 
     public function __construct($name, ResourceRoute $parent = NULL,
@@ -71,7 +72,7 @@ class ResourceRoute
                 'show'    => 'GET',
                 'destroy' => 'DELETE',
                 'edit'    => 'GET',
-                'update'  => 'PUT',
+                'update'  => 'PUT'
             );
 
             $this->collection_actions = array(
@@ -172,117 +173,119 @@ class ResourceRoute
         return $this;
     }
 
-    public function resource($name)
+    public function resource($name, $singular = true)
     {
-        $resource = new ResourceRoute($name, $this, true);
+        $resource = new ResourceRoute($name, $this, $singular);
         $this->resources[$name] = $resource;
         return $resource;
     }
 
     public function resources($name)
     {
-        $resource = new ResourceRoute($name, $this);
-        $this->resources[$name] = $resource;
-        return $resource;
+        return $this->resource($name, $this, false);
+    }
+
+    private function getBaseString()
+    {
+        if (!$this->parent) {
+            return '';
+        }
+        $parent = $this->parent;
+        return $parent->getBasePath . ':' . $parent->getSingularName() . '_id/';
     }
 
     public function getBasePath()
     {
-        if (is_null($this->base_path)) {
-            if ($this->parent) {
-                $this->base_path = $this->parent->getBasePath() . ':' . $this->parent->getSingularName() . '_id/' . $this->path_alias;
-            } else {
-                $this->base_path = $this->path_alias;
-            }
+        if ($this->base_path == '') {
+            $this->base_path = $this->getBaseString() . $this->path_alias;
         }
         return $this->base_path;
     }
 
     public function getSingularBasePath()
     {
-        if (is_null($this->base_path)) {
-            if ($this->parent) {
-                $this->singular_base_path = $this->parent->getBasePath() . ':' . $this->parent->getSingularName() . '_id/' . $this->singular_name;
-            } else {
-                $this->singular_base_path = $this->singular_name;
-            }
+        if ($this->singular_base_path == '') {
+            $this->singular_base_path = $this->getBaseString();
+            $this->singular_base_path .= $this->singular_name;
         }
         return $this->singular_base_path;
     }
 
     public function getNamePrefix()
     {
-        if (is_null($this->name_prefix)) {
+        if ($this->name_prefix == '') {
             if ($this->parent) {
-                $this->name_prefix = $this->parent->getNamePrefix() . '_' . $this->parent->getSingularName() . '_';
-            } else {
-                $this->name_prefix = '';
+                $this->name_prefix = $this->parent->getNamePrefix() . '_';
+                $this->name_prefix .= $this->parent->getSingularName() . '_';
             }
         }
         return $this->name_prefix;
     }
 
-    public function addIdPattern(Route $route, $name = NULL)
+    private function addIdPattern(Route $route, $name = NULL)
     {
         if ($this->parent) {
-            $this->parent->addIdPattern($route, $this->parent->getSingularName());
+            $singular_name = $this->parent->getSingularName();
+            $this->parent->addIdPattern($route, $singular_name);
         }
-        $key = $name ? $name . '_id' : 'id';
-        $route->specify($key, $this->id_pattern);
+        $route->specify($name ? $name . '_id' : 'id', $this->id_pattern);
     }
 
-    public function build()
+    private function build()
     {
-        if (!empty($this->routes))
+        if (!empty($this->routes)) {
             return;
-        $member_path = $this->getSingularBasePath() . '/:id';
+        }
+        $path = $this->getSingularBasePath() . '/:id';
         $singular_name = $this->getNamePrefix() . $this->getSingularName();
-        $has_named = false;
+        $has_named_action_route = false;
+
+        $options = array(
+            'controller' => $this->controller
+        );
         foreach ($this->member_actions as $action => $method) {
-            $options = array(
-                'controller' => $this->controller,
-                'action'     => $action
-            );
+            $options['action'] = $action;
             switch ($action) {
                 case 'show':
                 case 'update':
                 case 'destroy':
-                    if (!$has_named) {
-                        $route = new Route($member_path, $singular_name, $method, $options);
-                        $has_named = true;
+                    if (!$has_named_action_route) {
+                        $route = new Route($path, $singular_name, $method, $options);
+                        $has_named_action_route = true;
                     } else {
-                        $route = new Route($member_path, NULL, $method);
+                        $route = new Route($path, NULL, $method);
                     }
                     break;
                 default:
-                    $route = new Route($member_path . '/' . $action, $action . '_' . $singular_name, $method);
+                    $route_name = $action . '_' . $singular_name;
+                    $route_path = $path . '/' . $action;
+                    $route = new Route($route_path, $route_name, $method, $options);
             }
             $this->routes[] = $route;
         }
 
         $name = $this->getNamePrefix() . $this->getName();
         $path = $this->getBasePath();
-        $has_named = false;
+        $has_named_action_route = false;
         foreach ($this->collection_actions as $action => $method) {
-            $options = array(
-                'controller' => $this->controller,
-                'action'     => $action
-            );
+            $options['action'] = $action;
             switch ($action) {
                 case 'index':
                 case 'create':
                 case 'update':
                 case 'destroy':
                 case 'show':
-                    if (!$has_named) {
+                    if (!$has_named_action_route) {
                         $route = new Route($path, $name, $method, $options);
-                        $has_named = true;
+                        $has_named_action_route = true;
                     } else {
                         $route = new Route($path, NULL, $method, $options);
                     }
                     break;
                 default:
-                    $route = new Route($path . '/' . $action, $action . '_' . $singular_name, $method, $options);
+                    $route_name = $action . '_' . $singular_name;
+                    $route_path = $path . '/' . $action;
+                    $route = new Route($route_path, $route_name, $method, $options);
             }
             $this->routes[] = $route;
         }
@@ -321,7 +324,7 @@ class ResourceRoute
             }
         }
         foreach ($this->resources as $resource) {
-            $ret = $resource->match($path, $method);
+            $ret = $resource->generate($name, $parameters);
             if ($ret) {
                 return $ret;
             }

@@ -52,19 +52,13 @@ class RouteFilter extends EventHandler
             $message = 'Page not found: ' . $request->path;
             throw new \HttpRequestException($message);
         }
-        $start = strpos($_SERVER['REQUEST_URI'], '?');
-        $extra = array();
-        if ($start) {
-            $str = substr($_SERVER['REQUEST_URI'], $start + 1);
-            parse_str($str, $extra);
-        }
-        $request->get(NULL, $route->get() + $_GET + $extra);
+        parse_str(parse_url($_SERVER['REQUEST_URI'], PHP_URL_QUERY), $_GET);
+        $request->get(NULL, $route->get() + $_GET);
         $event->setResponse($request);
     }
 
     public function handleRequestException(Event $event)
     {
-        //kimenet: response
         if (empty($this->handled_exceptions)) {
             return;
         }
