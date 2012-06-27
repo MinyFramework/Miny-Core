@@ -50,8 +50,8 @@ namespace Miny\Formatter;
 
 class Markdown implements iFormatter
 {
-    private $links;
-    private $html_blocks;
+    private $links = array();
+    private $html_blocks = array();
     private static $char_map = array(
         '\\\\'    => '\\',
         '\`'      => '`',
@@ -69,7 +69,7 @@ class Markdown implements iFormatter
         '\.'      => '.',
         '\!'      => '!'
     );
-    //one-liner patterns
+//one-liner patterns
     private static $patterns = array(
         'code'             => '/(?<!\\\)(`+)(.*?)(?<!\\\)\1/u',
         'image'            => '/(?<!\\\)!\[(.+?)(?<!\\\)\]\((.+?)(?:\s+"(.*?)")?(?<!\\\)\)/u',
@@ -164,14 +164,15 @@ class Markdown implements iFormatter
     {
         if (isset($matches[3])) {
             return sprintf('<a href="%s" title="%s">%s</a>',
-                            Markdown::escape($matches[2]),
-                            Markdown::escape($matches[3]), $matches[1]);
-        } elseif (isset($matches[2])) {
-            return sprintf('<a href="%s">%s</a>', self::escape($matches[2]),
-                            $matches[1]);
+                            self::escape($matches[2]),
+                            self::escape($matches[3]), $matches[1]);
         } else {
-            return sprintf('<a href="%s">%s</a>', self::escape($matches[1]),
-                            $matches[1]);
+            if (isset($matches[2])) {
+                $href = self::escape($matches[2]);
+            } else {
+                $href = self::escape($matches[1]);
+            }
+            return sprintf('<a href="%s">%s</a>', $href, $matches[1]);
         }
     }
 
@@ -179,8 +180,8 @@ class Markdown implements iFormatter
     {
         $matches = array_map('Markdown::escape', $matches);
         if (isset($matches[3])) {
-            return sprintf('<img src="%s" title="%s" alt="%s" />', $matches[2],
-                            $matches[3], $matches[1]);
+            $pattern = '<img src="%s" title="%s" alt="%s" />';
+            return sprintf($pattern, $matches[2], $matches[3], $matches[1]);
         } else {
             $pattern = '<img src="%s" alt="%s" />';
             return sprintf($pattern, $matches[2], $matches[1]);
@@ -197,6 +198,7 @@ class Markdown implements iFormatter
             $link = $this->links[$matches[2]];
         }
         if (!isset($link)) {
+            //not a definition
             return $matches[0];
         }
         $link[1] = $matches[1];
@@ -214,6 +216,7 @@ class Markdown implements iFormatter
         }
 
         if (!isset($link)) {
+            //not a definition
             return $matches[0];
         }
         $link[1] = $matches[1];
@@ -241,7 +244,6 @@ class Markdown implements iFormatter
 
     private function prepare($text)
     {
-        $this->structure = array();
         $arr = array(
             "\r\n" => "\n",
             "\r"   => "\n",
@@ -309,11 +311,11 @@ class Markdown implements iFormatter
                 array($this, 'processListItemsCallback'), $list);
 
         if (in_array($matches[3], array('*', '+', '-'))) {
-            $element = 'ul';
+            $pattern = "<ul>%s</ul>\n";
         } else {
-            $element = 'ol';
+            $pattern = "<ol>%s</ol>\n";
         }
-        return '<' . $element . ">" . $list . '</' . $element . ">\n";
+        return sprintf($pattern, $list);
     }
 
     private function processListItemsCallback($matches)
@@ -324,8 +326,7 @@ class Markdown implements iFormatter
             $item = $this->formatBlock($this->outdent($item));
         } else {
             $item = $this->transformLists($this->outdent($item));
-            $item = rtrim($item);
-            $item = $this->formatLine($item);
+            $item = $this->formatLine(rtrim($item));
         }
         return sprintf("<li>%s</li>\n", $item);
     }
@@ -397,17 +398,18 @@ class Markdown implements iFormatter
         $block_tags_a = 'p|div|h[1-6]|blockquote|pre|table|dl|ol|ul|script|noscript|form|fieldset|iframe|math|ins|del';
         $block_tags_b = 'p|div|h[1-6]|blockquote|pre|table|dl|ol|ul|script|noscript|form|fieldset|iframe|math';
 
-        $text = preg_replace_callback('#(^<(' . $block_tags_a . ')\b(.*\n)*?</\2>[ \t]*(?=\n+|\Z))#mux',
-                array($this, 'storeHTMLBlock'), $text);
+        $html_patterns = array(
+            '#(^<(' . $block_tags_a . ')\b(.*\n)*?</\2>[ \t]*(?=\n+|\Z))#mux',
+            '#(^<(' . $block_tags_b . ')\b(.*\n)*?.*</\2>[ \t]*(?=\n+|\Z))#mux',
+            '#(?:(?<=\n\n)|\A\n?)([ ]{0,3}<(hr)\b([^<>])*?/?>[ \t]*(?=\n{2,}|\Z))#mux',
+            '#(?:(?<=\n\n)|\A\n?)([ ]{0,3}(?s:<!(--.*?--\s*)+>)[ \t]*(?=\n{2,}|\Z))#mux'
+        );
 
-        $text = preg_replace_callback('#(^<(' . $block_tags_b . ')\b(.*\n)*?.*</\2>[ \t]*(?=\n+|\Z))#mux',
-                array($this, 'storeHTMLBlock'), $text);
+        $callback = array($this, 'storeHTMLBlock');
 
-        $text = preg_replace_callback('#(?:(?<=\n\n)|\A\n?)([ ]{0,3}<(hr)\b([^<>])*?/?>[ \t]*(?=\n{2,}|\Z))#mux',
-                array($this, 'storeHTMLBlock'), $text);
-
-        $text = preg_replace_callback('#(?:(?<=\n\n)|\A\n?)([ ]{0,3}(?s:<!(--.*?--\s*)+>)[ \t]*(?=\n{2,}|\Z))#mux',
-                array($this, 'storeHTMLBlock'), $text);
+        foreach ($html_patterns as $pattern) {
+            $text = preg_replace_callback($pattern, $callback, $text);
+        }
         return $text;
     }
 
