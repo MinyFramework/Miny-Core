@@ -40,8 +40,8 @@ class UserProvider
     {
         if ($this->userExists($username)) {
             unset($this->users[$username]);
+            return true;
         }
-        return true;
     }
 
     public function getAnonymUser()
@@ -60,6 +60,11 @@ class UserProvider
             return false;
         }
         return $this->users[$username];
+    }
+
+    public function getUserCount()
+    {
+        return count($this->users);
     }
 
     public function getUsers()
