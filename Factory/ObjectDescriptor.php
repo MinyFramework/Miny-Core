@@ -55,21 +55,21 @@ class ObjectDescriptor
      * @access private
      * @var array
      */
-    private $args;
+    private $args = array();
 
     /**
      * Methods to call upon instantiation.
      * @access private
      * @var array
      */
-    private $methods;
+    private $methods = array();
 
     /**
      * Properties to set upon instantaiation.
      * @access private
      * @var array
      */
-    private $properties;
+    private $properties = array();
 
     /**
      * @access private
@@ -83,17 +83,13 @@ class ObjectDescriptor
      * @param array $ctor_arguments The parameters for object constructor.
      * @param boolean $singleton Indicates, whether the object is a singleton.
      */
-    public function __construct($classname, array $ctor_arguments = NULL,
-            $singleton = true)
+    public function __construct($classname, $singleton = true)
     {
         if (!is_string($classname)) {
             throw new \InvalidArgumentException('Classname must be string.');
         }
         $this->classname = $classname;
         $this->singleton = $singleton;
-        $this->args = $ctor_arguments;
-        $this->methods = array();
-        $this->properties = array();
     }
 
     /**

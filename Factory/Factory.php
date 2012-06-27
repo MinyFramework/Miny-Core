@@ -75,7 +75,7 @@ class Factory
      */
     public function add($alias, $classname, $singleton = true)
     {
-        $object = new ObjectDescriptor($classname, NULL, $singleton);
+        $object = new ObjectDescriptor($classname, $singleton);
         return $this->register($alias, $object);
     }
 
