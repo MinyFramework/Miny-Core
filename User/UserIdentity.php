@@ -43,14 +43,14 @@ class UserIdentity
      * @param array $userdata The userdata like username, e-mail, etc.
      * @param array $permissions Permissions the user has.
      */
-    public function __construct(array $userdata, $password, array $permissions)
+    public function __construct(array $userdata, array $permissions)
     {
-        if (!isset($userdata['id'])) {
-            throw new \InvalidArgumentException('Userdata must contain an ID');
+        if (isset($userdata['password'])) {
+            $this->password = $userdata['password'];
+            unset($userdata['password']);
         }
         $this->changed = false;
         $this->userdata = $userdata;
-        $this->password = $password;
         $this->permissions = $permissions;
     }
 
@@ -95,6 +95,15 @@ class UserIdentity
             return true;
         }
         return in_array($permission, $this->permissions);
+    }
+
+    /**
+     * Returns the permissions the user has.
+     * @return array The users' permissions
+     */
+    public function getPermissions()
+    {
+        return $this->permissions;
     }
 
     /**
