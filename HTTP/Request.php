@@ -35,7 +35,7 @@ class Request
     private $type;
 
     public function __construct($path = NULL, array $get = NULL,
-            array $post = NULL, $type = self::MASTER_REQUEST)
+                                array $post = NULL, $type = self::MASTER_REQUEST)
     {
         if ($path === NULL) {
             $this->getFromGlobals();

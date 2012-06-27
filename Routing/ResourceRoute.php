@@ -43,7 +43,7 @@ class ResourceRoute
     private $nice_url;
 
     public function __construct($name, ResourceRoute $parent = NULL,
-            $singular = false)
+                                $singular = false)
     {
         $this->name = $name;
         $this->controller = $name;

@@ -85,7 +85,7 @@ class ControllerResolver
     }
 
     private function runController(Controller $controller, $class, $action,
-            array $params = NULL)
+                                   array $params = NULL)
     {
         $this->templating->setScope();
 

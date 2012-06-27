@@ -38,7 +38,7 @@ class Dispatcher
     private $controller_resolver;
 
     public function __construct(EventDispatcher $evts,
-            ControllerResolver $resolver)
+                                ControllerResolver $resolver)
     {
         $this->events = $evts;
         $this->controller_resolver = $resolver;

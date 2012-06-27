@@ -30,7 +30,7 @@ class Route implements iRoute
 {
     private $name;
     private $path;
-    private $default_parameters = array();
+    private $default_parameters;
     private $matched_parameters = array();
     private $parameter_names = array();
     private $parameter_patterns = array();
@@ -38,12 +38,12 @@ class Route implements iRoute
     private $static;
 
     public function __construct($path, $name = NULL, $method = NULL,
-            array $default_parameters = array())
+                                array $default_parameters = NULL)
     {
         $this->method = $method;
         $this->path = $path;
         $this->name = $name;
-        $this->default_parameters = $default_parameters;
+        $this->default_parameters = $default_parameters ? : array();
     }
 
     public function specify($parameter, $pattern)
