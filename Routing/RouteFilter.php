@@ -54,7 +54,6 @@ class RouteFilter extends EventHandler
         }
         parse_str(parse_url($_SERVER['REQUEST_URI'], PHP_URL_QUERY), $_GET);
         $request->get(NULL, $route->get() + $_GET);
-        $event->setResponse($request);
     }
 
     public function handleRequestException(Event $event)

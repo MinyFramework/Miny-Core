@@ -69,8 +69,6 @@ class Dispatcher
             $rsp = $event->getResponse();
             if ($rsp instanceof Response) {
                 return $rsp;
-            } elseif ($rsp instanceof Request) {
-                $r = $rsp;
             }
         }
         return $this->getResponse($r);
