@@ -81,19 +81,11 @@ class UserIdentity
 
     /**
      * Checks whether the user has the given permission or not.
-     * @param string|array $permission
+     * @param string $permission
      * @return boolean
      */
     public function hasPermission($permission)
     {
-        if (is_array($permission)) {
-            foreach ($permission as $perm) {
-                if (!in_array($perm, $this->permissions)) {
-                    return false;
-                }
-            }
-            return true;
-        }
         return in_array($permission, $this->permissions);
     }
 

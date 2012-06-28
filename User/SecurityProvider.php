@@ -30,23 +30,39 @@ class SecurityProvider
 {
     private $protected = array();
 
-    public function addRule($controller, $action, $permission)
+    public function addRule($controller, $action, $rule)
     {
         if (!is_string($action) && !is_callable($action)) {
             $message = 'Action must be string or callable type, %s given';
             $message = sprintf($message, gettype($action));
             throw new \InvalidArgumentException($message);
         }
+        if (!$this->isRule($rule)) {
+            $message = 'Invalid rule supplied.' .
+                    'Rules must be string or callable types.';
+            throw new \InvalidArgumentException($message);
+        }
         if ($action == '*' || is_null($action)) {
-            $this->protected[$controller] = $permission;
+            $this->protected[$controller]['*'] = $rule;
         } else {
-            $this->protected[$controller][$action] = $permission;
+            $this->protected[$controller][$action] = $rule;
         }
     }
 
     private function isRule($rule)
     {
-        return is_string($rule) || is_callable($rule);
+        if (is_string($rule) || is_callable($rule)) {
+            return true;
+        }
+        if (is_array($rule)) {
+            foreach ($rule as $r) {
+                if (!$this->isRule($r)) {
+                    return false;
+                }
+            }
+            return true;
+        }
+        return false;
     }
 
     public function isActionProtected($controller, $action)
@@ -71,14 +87,12 @@ class SecurityProvider
         if (!isset($this->protected[$controller])) {
             return;
         }
-        if ($this->isRule($this->protected[$controller])) {
+        if (isset($this->protected[$controller][$action])) {
+            //the specific action is protected
+            return $this->protected[$controller][$action];
+        } elseif (isset($this->protected[$controller]['*'])) {
             //the whole controller is protected
-            return $this->protected[$controller];
-        } elseif (is_array($this->protected[$controller])) {
-            if (isset($this->protected[$controller][$action])) {
-                //the specific action is protected
-                return $this->protected[$controller][$action];
-            }
+            return $this->protected[$controller]['*'];
         }
         //not protected - nothing to return
     }

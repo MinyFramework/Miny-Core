@@ -53,14 +53,25 @@ class SecurityEvents extends EventHandler
             return;
         }
         $user_provider = $this->user_provider;
-        $has_key = isset($session['user']);
-        if ($has_key && $user_provider->userExists($session['user'])) {
+        $user_set = isset($session['user']);
+        if ($user_set && $user_provider->userExists($session['user'])) {
             $this->identity = $user_provider->getUser($session['user']);
         } else {
             $this->identity = $user_provider->getAnonymUser();
         }
         $session->flash('identity', $this->identity, 0);
         $this->authenticated = true;
+    }
+
+    private function hasAccess($rule)
+    {
+        if (is_string($rule) && !$this->identity->hasPermission($rule)) {
+            return false;
+        }
+        if (is_callable($rule) && !call_user_func($rule)) {
+            return false;
+        }
+        return true;
     }
 
     public function authorize(Event $event)
@@ -73,21 +84,18 @@ class SecurityEvents extends EventHandler
         }
 
         $request = $event->getParameter('request');
-        $path = $request->path;
         $provider = $this->security_provider;
 
         $controller = $request->get('controller');
         $action = $request->get('action');
         if ($provider->isActionProtected($controller, $action)) {
-            $rule = $provider->getPermission($controller, $action);
-            if (is_string($rule)) {
-                if (!$this->identity->hasPermission($rule)) {
-                    $message = 'Access denied for path: ' . $path;
-                    throw new \HttpRequestException($message);
-                }
-            } elseif (is_callable($rule)) {
-                if (!call_user_func($rule)) {
-                    $message = 'Access denied for path: ' . $path;
+            $rules = $provider->getPermission($controller, $action);
+            if (is_callable($rules) || is_string($rules)) {
+                $rules = array($rules);
+            }
+            foreach ($rules as $rule) {
+                if (!$this->hasAccess($rule)) {
+                    $message = 'Access denied for path: ' . $request->path;
                     throw new \HttpRequestException($message);
                 }
             }
