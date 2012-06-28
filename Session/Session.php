@@ -143,6 +143,14 @@ class Session implements \ArrayAccess, \IteratorAggregate, \Countable
         return isset($_SESSION['flash'][$key]);
     }
 
+    /**
+     * Removes the specified flashdata
+     */
+    public function removeFlash($key)
+    {
+        unset($_SESSION['flash'][$key]);
+    }
+
     //Session handling methods
 
     public function openSession()
