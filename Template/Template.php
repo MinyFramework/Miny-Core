@@ -45,6 +45,9 @@ class Template
     {
         $this->scopes[] = $this->scope;
         $this->scope = $scope ? : count($this->scopes);
+        if (!isset($this->template_vars[$this->scope])) {
+            $this->template_vars[$this->scope] = array();
+        }
     }
 
     public function leaveScope($clean = false)
@@ -96,6 +99,12 @@ class Template
         $this->template_vars[$scope][$key] = $value;
     }
 
+    public function getVariables($scope = NULL)
+    {
+        $scope = $scope ? : $this->scope;
+        return $this->template_vars[$scope];
+    }
+
     public function setFormat($format)
     {
         $this->format = $format;
@@ -122,8 +131,7 @@ class Template
     public function render($template, $format = NULL, $scope = NULL)
     {
         ob_start();
-        $scope = $scope ? : $this->scope;
-        extract($this->template_vars[$scope], EXTR_SKIP);
+        extract($this->getVariables($scope), EXTR_SKIP);
         include $this->getTemplatePath($template, $format);
         return ob_get_clean();
     }

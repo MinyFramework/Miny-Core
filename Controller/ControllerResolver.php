@@ -87,8 +87,8 @@ class ControllerResolver
     private function runController(Controller $controller, $class, $action,
                                    array $params = NULL)
     {
-        $this->templating->setScope();
-
+        $this->templating->setScope('controller');
+        $vars = $this->templating->getVariables();
         $return = $controller->run($class, $action, $params);
 
         if (is_string($return)) {
@@ -111,6 +111,9 @@ class ControllerResolver
         }
 
         $this->templating->leaveScope(true);
+        foreach ($vars as $k => $v) {
+            $this->templating->assign($k, $v, 'controller');
+        }
         return $response;
     }
 
