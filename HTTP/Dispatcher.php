@@ -29,8 +29,6 @@ namespace Miny\Application;
 use \Miny\Controller\ControllerResolver;
 use \Miny\Event\Event;
 use \Miny\Event\EventDispatcher;
-use \Miny\HTTP\Request;
-use \Miny\HTTP\Response;
 
 class Dispatcher
 {
