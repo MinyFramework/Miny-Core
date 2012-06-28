@@ -43,11 +43,6 @@ class SQL extends UserProvider
         $this->permissions_table_name = $permissions_table;
     }
 
-    public function addUser(UserIdentity $user)
-    {
-        parent::addUser($user);
-    }
-
     public function userExists($username)
     {
         if (parent::userExists($username)) {
@@ -68,9 +63,6 @@ class SQL extends UserProvider
         $stmt = $this->driver->prepare($sql);
         $stmt->bindValue(1, $username);
         $stmt->execute();
-        if ($stmt->rowCount() == 0) {
-            return array();
-        }
         $array = array();
         foreach($stmt->fetchAll() as $permission) {
             $array[] = $permission['permission'];
