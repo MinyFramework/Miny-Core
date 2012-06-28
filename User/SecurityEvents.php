@@ -32,10 +32,18 @@ use \Miny\Session\Session;
 
 class SecurityEvents extends EventHandler
 {
+    public $logout_path = '/logout';
+    public $logout_target = '/';
     private $security_provider;
     private $user_provider;
     private $identity;
-    private $authenticated = false;
+    private $session;
+    private $authenticated;
+
+    public function __construct(Session $session)
+    {
+        $this->session = $session;
+    }
 
     public function setSecurityProvider(SecurityProvider $provider)
     {
@@ -47,19 +55,28 @@ class SecurityEvents extends EventHandler
         $this->user_provider = $user_provider;
     }
 
-    public function authenticate(Session $session)
+    public function handleLogout(Event $event)
     {
-        if ($this->authenticated) {
+        $r = $event->getParameter('request');
+        if ($r->path == $this->logout_path) {
+            $this->session->removeFlash('user');
+            $r->path = $this->logout_target;
+        }
+    }
+
+    public function authenticate()
+    {
+        if(is_null($this->user_provider) || $this->authenticated) {
             return;
         }
         $user_provider = $this->user_provider;
-        $user_set = isset($session['user']);
-        if ($user_set && $user_provider->userExists($session['user'])) {
-            $this->identity = $user_provider->getUser($session['user']);
+        $user = $this->session->flash('user');
+        if (!is_null($user) && $user_provider->userExists($user)) {
+            $this->identity = $user_provider->getUser($user);
         } else {
             $this->identity = $user_provider->getAnonymUser();
         }
-        $session->flash('identity', $this->identity, 0);
+        $this->session->flash('identity', $this->identity);
         $this->authenticated = true;
     }
 
