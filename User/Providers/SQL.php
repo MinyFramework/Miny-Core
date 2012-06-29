@@ -35,12 +35,14 @@ class SQL extends UserProvider
     private $driver;
     private $table_name;
     private $permissions_table_name;
+    private $modified_users = array();
 
     public function __construct(\PDO $driver, $users_table, $permissions_table)
     {
         $this->driver = $driver;
         $this->table_name = $users_table;
         $this->permissions_table_name = $permissions_table;
+        register_shutdown_function(array($this, 'save'));
     }
 
     public function userExists($username)
@@ -64,7 +66,7 @@ class SQL extends UserProvider
         $stmt->bindValue(1, $username);
         $stmt->execute();
         $array = array();
-        foreach($stmt->fetchAll() as $permission) {
+        foreach ($stmt->fetchAll() as $permission) {
             $array[] = $permission['permission'];
         }
         return $array;
@@ -88,6 +90,142 @@ class SQL extends UserProvider
             parent::addUser($user);
         }
         return $user;
+    }
+
+    private function createUser(array $userdata)
+    {
+        if (!$this->userExists($userdata['name'])) {
+            $permissions = $this->getPermissions($userdata['name']);
+            $user = new UserIdentity($userdata, $permissions);
+            parent::addUser($user);
+            return $user;
+        } else {
+            return parent::getUser($userdata['name']);
+        }
+    }
+
+    public function getUserBySQL($sql, array $params = array())
+    {
+        $sql = 'SELECT * FROM `%s` ' . $sql;
+        $sql = sprintf($sql, $this->table_name);
+        $stmt = $this->driver->prepare($sql);
+        foreach ($params as $key => $param) {
+            $stmt->bindValue($key, $param);
+        }
+        $stmt->execute();
+        switch ($stmt->rowCount()) {
+            case 0:
+                return false;
+            case 1:
+                $userdata = $stmt->fetch();
+                return $this->createUser($userdata);
+            default:
+                $return = array();
+                foreach ($stmt->fetchAll() as $userdata) {
+                    $return[] = $this->createUser($userdata);
+                }
+                return $return;
+        }
+    }
+
+    public function addUser(UserIdentity $user)
+    {
+        $state = $this->userExists($user->name) ? 'm' : 'a';
+        $this->modified_users[$user->name] = $state;
+        return parent::addUser($user);
+    }
+
+    public function removeUser($username)
+    {
+        if (parent::removeUser($username)) {
+            $this->modified_users[$username] = 'r';
+            return true;
+        }
+    }
+
+    public function save()
+    {
+        if (empty($this->modified_users)) {
+            return;
+        }
+        $this->driver->beginTransaction();
+        foreach ($this->modified_users as $username => $state) {
+            switch ($state) {
+                case 'a':
+                case 'm':
+                    $user = parent::getUser($username);
+                    $this->saveUser($user);
+                    break;
+                case 'r':
+                    $this->deleteUser($username);
+                    break;
+            }
+        }
+        $this->driver->commit();
+    }
+
+    private function deleteUser($username)
+    {
+        $pattern = 'DELETE FROM `%s` WHERE `%s` = ?';
+        $tables = array(
+            $this->table_name             => 'name',
+            $this->permissions_table_name => 'name'
+        );
+        foreach ($tables as $table => $key) {
+            $sql = sprintf($pattern, $table, $key);
+            $stmt = $this->driver->prepare($sql);
+            $stmt->bindValue(1, $username);
+            $stmt->execute();
+        }
+    }
+
+    private function saveUser(UserIdentity $user)
+    {
+        //TODO: clean this stuff up, looks ugly
+        //update userdata
+        $fields = array();
+        $values = array();
+        foreach ($user->getData() as $name => $value) {
+            $fields[] = '`' . $name . '`';
+            $values[':' . $name] = $value;
+        }
+        $fields = implode(', ', $fields);
+        $values = implode(', ', array_keys($values));
+
+        $sql = 'REPLACE INTO `%s` (%s) VALUES (%s)';
+        $sql = sprintf($sql, $this->table_name, $fields, $values);
+        $stmt = $this->driver->prepare($sql);
+        $stmt->execute($values);
+
+        //delete removed permissions
+        $permissions = $user->getPermissions();
+        $permission_count = count($permissions);
+        $in = array_fill(0, $permission_count, '?');
+        $in = implode(', ', $in);
+
+        $sql = 'DELETE FROM `%s` WHERE `%s` = ? AND `permission` NOT IN(%s)';
+        $sql = sprintf($sql, $this->permissions_table_name, 'name', $in);
+        $stmt = $this->driver->prepare($sql);
+        $stmt->bindValue(1, $user->name);
+        $i = 2;
+        foreach ($permissions as $permission) {
+            $stmt->bindValue(++$i, $permission);
+        }
+        $stmt->execute();
+
+        //insert new permissions
+        $values = array_fill(0, $permission_count, '(?, ?)');
+        $values = implode(', ', $values);
+        $sql = 'REPLACE INTO `%s` (`%s`, `permission`) VALUES %s';
+        $sql = sprintf($sql, $this->permissions_table_name, 'name', $values);
+
+        $stmt = $this->driver->prepare($sql);
+        $i = 1;
+        foreach ($permissions as $permission) {
+            $stmt->bindValue($i++, $user->name);
+            $stmt->bindValue($i++, $permission);
+        }
+        $stmt->execute();
     }
 
 }

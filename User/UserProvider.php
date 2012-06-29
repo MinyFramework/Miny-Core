@@ -36,6 +36,14 @@ class UserProvider
         return true;
     }
 
+    public function removeUser($username)
+    {
+        if (isset($this->users[$username])) {
+            unset($this->users[$username]);
+            return true;
+        }
+    }
+
     public function getAnonymUser()
     {
         return new AnonymUserIdentity();

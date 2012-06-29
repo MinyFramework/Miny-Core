@@ -48,6 +48,15 @@ class Chain extends UserProvider
         }
     }
 
+    public function removeUser($username)
+    {
+        foreach ($this->providers as $provider) {
+            if ($provider->removeUser($username)) {
+                return true;
+            }
+        }
+    }
+
     public function userExists($username)
     {
         foreach ($this->providers as $provider) {
