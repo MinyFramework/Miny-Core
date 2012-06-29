@@ -31,7 +31,7 @@ class SQLConfig implements \Miny\Config\iConfig
 {
     protected static $queries = array(
         'load'   => 'SELECT `key`, `value` FROM `%s`',
-        'delete' => 'DELETE FROM `%s` WHERE `key` = :key',
+        'delete' => 'DELETE FROM `%s` WHERE `key` = ?',
         'modify' => 'REPLACE INTO `%s` (`key`, `value`)
                 VALUES(:key, :value)'
     );
@@ -108,11 +108,11 @@ class SQLConfig implements \Miny\Config\iConfig
             $this->driver->beginTransaction();
             foreach ($this->keys as $key => $state) {
                 if ($state == 'm') {
-                    $modify_statement->bindValue(':key', $key);
-                    $modify_statement->bindValue(':value', $this->data[$key]);
+                    $modify_statement->bindValue('key', $key);
+                    $modify_statement->bindValue('value', $this->data[$key]);
                     $modify_statement->execute($array);
                 } elseif ($state == 'r') {
-                    $delete_statement->execute(array(':key' => $key));
+                    $delete_statement->execute(array($key));
                 }
             }
             $this->driver->commit();

@@ -32,8 +32,8 @@ class SQLCacheDriver implements \Miny\Cache\iCacheDriver
     protected static $queries = array(
         'gc'     => 'DELETE FROM `%s` WHERE `expiration` < NOW()',
         'index'  => 'SELECT `key` FROM `%s` WHERE `expiration` >= NOW()',
-        'select' => 'SELECT `data` FROM `%s` WHERE `key` = :key',
-        'delete' => 'DELETE FROM `%s` WHERE `key` = :key',
+        'select' => 'SELECT `data` FROM `%s` WHERE `key` = ?',
+        'delete' => 'DELETE FROM `%s` WHERE `key` = ?',
         'modify' => 'REPLACE INTO `%s` (`key`, `data`, `expiration`)
                 VALUES(:key, :value, :expiration)'
     );
@@ -82,10 +82,12 @@ class SQLCacheDriver implements \Miny\Cache\iCacheDriver
         }
         if (!array_key_exists($key, $this->data)) {
             $statement = $this->getStatement('select');
-            $statement->bindValue('key', $key);
-            $statement->execute();
-            $temp = $statement->fetch();
-            $this->data[$key] = unserialize($temp['data']);
+            $statement->execute(array($key));
+            if ($statement->rowCount() == 0) {
+                //the key was deleted during an other request...
+                throw new \OutOfBoundsException('Key not found: ' . $key);
+            }
+            $this->data[$key] = unserialize($statement->fetchColumn(0));
         }
         return $this->data[$key];
     }
@@ -124,13 +126,13 @@ class SQLCacheDriver implements \Miny\Cache\iCacheDriver
                 if ($state == 'm') {
                     $ttl = $this->ttls[$key];
                     $array = array(
-                        ':key'        => $key,
-                        ':expiration' => date('Y-m-d H:i:s', time() + $ttl),
-                        ':value'      => serialize($this->data[$key])
+                        'key'        => $key,
+                        'expiration' => date('Y-m-d H:i:s', time() + $ttl),
+                        'value'      => serialize($this->data[$key])
                     );
                     $modify_statement->execute($array);
                 } elseif ($state == 'r') {
-                    $delete_statement->execute(array(':key' => $key));
+                    $delete_statement->execute(array($key));
                 }
             }
             $this->driver->commit();

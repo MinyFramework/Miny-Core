@@ -63,13 +63,8 @@ class SQL extends UserProvider
         $sql = sprintf($sql, $this->permissions_table_name);
 
         $stmt = $this->driver->prepare($sql);
-        $stmt->bindValue(1, $username);
-        $stmt->execute();
-        $array = array();
-        foreach ($stmt->fetchAll() as $permission) {
-            $array[] = $permission['permission'];
-        }
-        return $array;
+        $stmt->execute(array($username));
+        return $stmt->fetchAll(\PDO::FETCH_COLUMN, 0);
     }
 
     public function getUser($username)
@@ -168,45 +163,51 @@ class SQL extends UserProvider
         //TODO: clean this stuff up, looks ugly
         //update userdata
         $fields = array();
-        $values = array();
-        foreach ($user->getData() as $name => $value) {
+        $data = $user->getData();
+        $data_keys = array_keys($data);
+        foreach ($data_keys as $name) {
             $fields[] = '`' . $name . '`';
-            $values[':' . $name] = $value;
         }
         $fields = implode(', ', $fields);
-        $values = implode(', ', array_keys($values));
+        $values = implode(', ', $data_keys);
 
         $sql = 'REPLACE INTO `%s` (%s) VALUES (%s)';
         $sql = sprintf($sql, $this->table_name, $fields, $values);
-        $stmt = $this->driver->prepare($sql);
-        $stmt->execute($values);
+        $this->driver->prepare($sql)->execute($data);
 
         //delete removed permissions
         $permissions = $user->getPermissions();
         $permission_count = count($permissions);
-        $in = array_fill(0, $permission_count, '?');
-        $in = implode(', ', $in);
 
+        //no permissions - delete all old ones and return
+        if ($permission_count == 0) {
+            $sql = 'DELETE FROM `%s` WHERE `%s` = ?';
+            $sql = sprintf($sql, $this->permissions_table_name, 'name');
+            $this->driver->prepare($sql)->execute(array($user->name));
+            return;
+        }
+        //delete only removed permissions
+        $marks = array_fill(0, $permission_count, '?');
+        $marks = implode(', ', $marks);
         $sql = 'DELETE FROM `%s` WHERE `%s` = ? AND `permission` NOT IN(%s)';
-        $sql = sprintf($sql, $this->permissions_table_name, 'name', $in);
-        $stmt = $this->driver->prepare($sql);
+        $sql = sprintf($sql, $this->permissions_table_name, 'name', $marks);
+        
         $array = $permissions;
         array_unshift($array, $user->name);
-        $stmt->execute($array);
+        $this->driver->prepare($sql)->execute($array);
 
         //insert new permissions
-        $values = array_fill(0, $permission_count, '(?, ?)');
-        $values = implode(', ', $values);
+        $marks = array_fill(0, $permission_count, '(?, ?)');
+        $marks = implode(', ', $marks);
         $sql = 'REPLACE INTO `%s` (`%s`, `permission`) VALUES %s';
-        $sql = sprintf($sql, $this->permissions_table_name, 'name', $values);
+        $sql = sprintf($sql, $this->permissions_table_name, 'name', $marks);
 
-        $stmt = $this->driver->prepare($sql);
         $array = array();
         foreach ($permissions as $permission) {
             $array[] = $user->name;
             $array[] = $permission;
         }
-        $stmt->execute($array);
+        $this->driver->prepare($sql)->execute($array);
     }
 
 }
