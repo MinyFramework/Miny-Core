@@ -43,7 +43,7 @@ class UserIdentity
      * @param array $userdata The userdata like username, e-mail, etc.
      * @param array $permissions Permissions the user has.
      */
-    public function __construct(array $userdata, array $permissions)
+    public function __construct(array $userdata, array $permissions = array())
     {
         if (isset($userdata['password'])) {
             $this->password = $userdata['password'];
@@ -77,6 +77,15 @@ class UserIdentity
     {
         $this->userdata[$key] = $value;
         $this->changed = true;
+    }
+
+    /**
+     * Returns the userdata
+     * @return array
+     */
+    public function getData()
+    {
+        return $this->userdata;
     }
 
     /**
