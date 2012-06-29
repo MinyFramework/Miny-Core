@@ -35,15 +35,6 @@ class SQLConfig implements \Miny\Config\iConfig
         'modify' => 'REPLACE INTO `%s` (`key`, `value`)
                 VALUES(:key, :value)'
     );
-
-    public static function getQuery($query)
-    {
-        if (!isset(static::$queries[$query])) {
-            throw new \OutOfBoundsException('Query not set: ' . $query);
-        }
-        return static::$queries[$query];
-    }
-
     private $keys = array();
     private $data = array();
     private $table_name;
@@ -55,12 +46,23 @@ class SQLConfig implements \Miny\Config\iConfig
         $this->driver = $driver;
         $this->table_name = $table_name;
 
-        $sql = sprintf(static::getQuery('load'), $table_name);
-
-        foreach ($driver->query($sql) as $row) {
+        foreach ($driver->query($this->getQuery('load')) as $row) {
             $this->keys[$row['key']] = 1;
             $this->data[$row['key']] = $row['value'];
         }
+    }
+
+    public function getQuery($query)
+    {
+        if (!isset(static::$queries[$query])) {
+            throw new \OutOfBoundsException('Query not set: ' . $query);
+        }
+        return sprintf(static::$queries[$query], $this->table_name);
+    }
+
+    public function getStatement($query)
+    {
+        return $this->driver->prepare($this->getQuery($query));
     }
 
     public function exists($key)
@@ -93,34 +95,25 @@ class SQLConfig implements \Miny\Config\iConfig
     public function close()
     {
         $save = false;
-        $statements = array();
         if (in_array('r', $this->keys)) {
             $save = true;
-            $sql = static::getQuery('delete');
-            $sql = sprintf($sql, $this->table_name);
-            $statements['r'] = $this->driver->prepare($sql);
+            $delete_statement = $this->getStatement('delete');
         }
         if (in_array('m', $this->keys)) {
             $save = true;
-            $sql = static::getQuery('modify');
-            $sql = sprintf($sql, $this->table_name);
-            $statements['m'] = $this->driver->prepare($sql);
+            $modify_statement = $this->getStatement('modify');
         }
+
         if ($save) {
             $this->driver->beginTransaction();
             foreach ($this->keys as $key => $state) {
-                if ($state == 1) {
-                    continue;
+                if ($state == 'm') {
+                    $modify_statement->bindValue(':key', $key);
+                    $modify_statement->bindValue(':value', $this->data[$key]);
+                    $modify_statement->execute($array);
+                } elseif ($state == 'r') {
+                    $delete_statement->execute(array(':key' => $key));
                 }
-                $statement = $statements[$state];
-                switch ($state) {
-                    case 'm':
-                        $statement->bindValue(':value', $this->data[$key]);
-                    case 'r':
-                        $statement->bindValue(':key', $key);
-                        break;
-                }
-                $statement->execute();
             }
             $this->driver->commit();
         }

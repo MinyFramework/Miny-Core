@@ -37,15 +37,6 @@ class SQLCacheDriver implements \Miny\Cache\iCacheDriver
         'modify' => 'REPLACE INTO `%s` (`key`, `data`, `expiration`)
                 VALUES(:key, :value, :expiration)'
     );
-
-    public static function getQuery($query)
-    {
-        if (!isset(static::$queries[$query])) {
-            throw new \OutOfBoundsException('Query not set: ' . $query);
-        }
-        return static::$queries[$query];
-    }
-
     private $keys = array();
     private $data = array();
     private $ttls = array();
@@ -59,15 +50,24 @@ class SQLCacheDriver implements \Miny\Cache\iCacheDriver
         $this->table_name = $table_name;
 
         //GC
-        $gc_query = static::getQuery('gc');
-        $driver->exec(sprintf($gc_query, $table_name));
+        $driver->exec($this->getQuery('gc'));
 
-        $index_query = static::getQuery('index');
-        $result = $driver->query(sprintf($index_query, $table_name));
-
-        foreach ($result as $row) {
+        foreach ($driver->query($this->getQuery('index')) as $row) {
             $this->keys[$row['key']] = 1;
         }
+    }
+
+    public function getQuery($query)
+    {
+        if (!isset(static::$queries[$query])) {
+            throw new \OutOfBoundsException('Query not set: ' . $query);
+        }
+        return sprintf(static::$queries[$query], $this->table_name);
+    }
+
+    public function getStatement($query)
+    {
+        return $this->driver->prepare($this->getQuery($query));
     }
 
     public function exists($key)
@@ -81,9 +81,7 @@ class SQLCacheDriver implements \Miny\Cache\iCacheDriver
             throw new \OutOfBoundsException('Key not found: ' . $key);
         }
         if (!array_key_exists($key, $this->data)) {
-            $select_query = static::getQuery('select');
-            $select_query = sprintf($select_query, $this->table_name);
-            $statement = $this->driver->prepare($select_query);
+            $statement = $this->getStatement('select');
             $statement->bindValue('key', $key);
             $statement->execute();
             $temp = $statement->fetch();
@@ -111,46 +109,31 @@ class SQLCacheDriver implements \Miny\Cache\iCacheDriver
     public function close()
     {
         $save = false;
-        $db = $this->driver;
-        $statements = array();
         if (in_array('r', $this->keys)) {
             $save = true;
-
-            $delete_query = static::getQuery('delete');
-            $delete_query = sprintf($delete_query, $this->table_name);
-
-            $statements['r'] = $db->prepare($delete_query);
+            $delete_statement = $this->getStatement('delete');
         }
         if (in_array('m', $this->keys)) {
             $save = true;
-            $replace_query = static::getQuery('modify');
-            $replace_query = sprintf($replace_query, $this->table_name);
-            $statements['m'] = $db->prepare($replace_query);
+            $modify_statement = $this->getStatement('modify');
         }
 
         if ($save) {
-            $db->beginTransaction();
+            $this->driver->beginTransaction();
             foreach ($this->keys as $key => $state) {
-                if ($state == 1) {
-                    continue;
+                if ($state == 'm') {
+                    $ttl = $this->ttls[$key];
+                    $array = array(
+                        ':key'        => $key,
+                        ':expiration' => date('Y-m-d H:i:s', time() + $ttl),
+                        ':value'      => serialize($this->data[$key])
+                    );
+                    $modify_statement->execute($array);
+                } elseif ($state == 'r') {
+                    $delete_statement->execute(array(':key' => $key));
                 }
-                $statement = $statements[$state];
-                switch ($state) {
-                    case 'm':
-                        $data = serialize($this->data[$key]);
-                        $ttl = $this->ttls[$key];
-                        $expire = date('Y-m-d H:i:s', time() + $ttl);
-
-                        $statement->bindValue(':value', $data);
-                        $statement->bindValue(':expiration', $expire);
-
-                    case 'r':
-                        $statement->bindValue(':key', $key);
-                        break;
-                }
-                $statement->execute();
             }
-            $db->commit();
+            $this->driver->commit();
         }
     }
 

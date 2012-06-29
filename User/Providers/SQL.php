@@ -174,8 +174,7 @@ class SQL extends UserProvider
         foreach ($tables as $table => $key) {
             $sql = sprintf($pattern, $table, $key);
             $stmt = $this->driver->prepare($sql);
-            $stmt->bindValue(1, $username);
-            $stmt->execute();
+            $stmt->execute(array($username));
         }
     }
 
@@ -206,12 +205,9 @@ class SQL extends UserProvider
         $sql = 'DELETE FROM `%s` WHERE `%s` = ? AND `permission` NOT IN(%s)';
         $sql = sprintf($sql, $this->permissions_table_name, 'name', $in);
         $stmt = $this->driver->prepare($sql);
-        $stmt->bindValue(1, $user->name);
-        $i = 2;
-        foreach ($permissions as $permission) {
-            $stmt->bindValue(++$i, $permission);
-        }
-        $stmt->execute();
+        $array = $permissions;
+        array_unshift($array, $user->name);
+        $stmt->execute($array);
 
         //insert new permissions
         $values = array_fill(0, $permission_count, '(?, ?)');
@@ -220,12 +216,12 @@ class SQL extends UserProvider
         $sql = sprintf($sql, $this->permissions_table_name, 'name', $values);
 
         $stmt = $this->driver->prepare($sql);
-        $i = 1;
+        $array = array();
         foreach ($permissions as $permission) {
-            $stmt->bindValue($i++, $user->name);
-            $stmt->bindValue($i++, $permission);
+            $array[] = $user->name;
+            $array[] = $permission;
         }
-        $stmt->execute();
+        $stmt->execute($array);
     }
 
 }
