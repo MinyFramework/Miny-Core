@@ -76,17 +76,7 @@ class SQL extends UserProvider
     {
         $user = parent::getUser($username);
         if (!$user) {
-            $sql = 'SELECT * FROM `%s` WHERE `name` = ?';
-            $sql = sprintf($sql, $this->table_name);
-            $stmt = $this->driver->prepare($sql);
-            $stmt->bindValue(1, $username);
-            $stmt->execute();
-            if ($stmt->rowCount() == 0) {
-                return false;
-            }
-            $userdata = $stmt->fetch();
-            $permissions = $this->getPermissions($userdata['name']);
-            $user = new UserIdentity($userdata, $permissions);
+            $user = $this->getUserBySQL('WHERE `name` = ?', array($username));
             parent::addUser($user);
         }
         return $user;
@@ -104,15 +94,11 @@ class SQL extends UserProvider
         }
     }
 
-    public function getUserBySQL($sql, array $params = array())
+    public function getUserBySQL($sql, array $params = NULL)
     {
         $sql = 'SELECT * FROM `%s` ' . $sql;
-        $sql = sprintf($sql, $this->table_name);
-        $stmt = $this->driver->prepare($sql);
-        foreach ($params as $key => $param) {
-            $stmt->bindValue($key, $param);
-        }
-        $stmt->execute();
+        $stmt = $this->driver->prepare(sprintf($sql, $this->table_name));
+        $stmt->execute($params);
         switch ($stmt->rowCount()) {
             case 0:
                 return false;
@@ -153,8 +139,7 @@ class SQL extends UserProvider
             switch ($state) {
                 case 'a':
                 case 'm':
-                    $user = parent::getUser($username);
-                    $this->saveUser($user);
+                    $this->saveUser(parent::getUser($username));
                     break;
                 case 'r':
                     $this->deleteUser($username);
@@ -171,10 +156,10 @@ class SQL extends UserProvider
             $this->table_name             => 'name',
             $this->permissions_table_name => 'name'
         );
+        $uname = array($username);
         foreach ($tables as $table => $key) {
-            $sql = sprintf($pattern, $table, $key);
-            $stmt = $this->driver->prepare($sql);
-            $stmt->execute(array($username));
+            $stmt = $this->driver->prepare(sprintf($pattern, $table, $key));
+            $stmt->execute($uname);
         }
     }
 
