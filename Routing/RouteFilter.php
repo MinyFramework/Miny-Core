@@ -34,14 +34,14 @@ class RouteFilter extends EventHandler
     private $router;
     private $handled_exceptions = array();
 
+    public function __construct(Router $router)
+    {
+        $this->router = $router;
+    }
+
     public function addExceptionHandler($exception_class, $redirect_to)
     {
         $this->handled_exceptions[$exception_class] = $redirect_to;
-    }
-
-    public function setRouter(Router $router)
-    {
-        $this->router = $router;
     }
 
     public function filterRoutes(Event $event)
