@@ -263,6 +263,12 @@ class Factory
      */
     public function getValue($var)
     {
+        //substitute values in arrays, too
+        if (is_array($var)) {
+            foreach ($var as $key => $value) {
+                $var[$key] = $this->getValue($value);
+            }
+        }
         //direct injection for non-string values
         if (!is_string($var) || strlen($var) === 1) {
             return $var;
