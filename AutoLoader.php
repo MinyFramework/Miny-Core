@@ -40,17 +40,26 @@ class AutoLoader
         spl_autoload_register('\Miny\AutoLoader::load');
     }
 
+    private static function addNamespacePath($namespace, $path)
+    {
+        if (!isset(self::$map[$namespace])) {
+            self::$map[$namespace] = array($path);
+        } else {
+            self::$map[$namespace][] = $path;
+        }
+    }
+
     public static function register($namespace, $path = NULL)
     {
         if (is_array($namespace)) {
             foreach ($namespace as $ns => $path) {
-                self::$map[$ns] = $path;
+                self::addNamespacePath($ns, $path);
             }
         } else {
             if (is_null($path)) {
                 throw new \InvalidArgumentException('Missing argument: path');
             }
-            self::$map[$namespace] = $path;
+            self::addNamespacePath($namespace, $path);
         }
     }
 
@@ -68,32 +77,39 @@ class AutoLoader
             $temp = substr($temp, 0, $pos);
         }
         if ($pos === false) {
-            throw new \InvalidArgumentException('Class not found: ' . $class);
+            throw new ClassNotFoundException('Class not registered: ' . $class);
         }
-        $path = substr_replace('\\' . $class, self::$map[$temp], 0, $pos);
-        $path .= '.php';
-        return str_replace('\\', DIRECTORY_SEPARATOR, $path);
+        foreach (self::$map[$temp] as $part) {
+            $path = substr_replace('\\' . $class, $part, 0, $pos);
+            $path .= '.php';
+            $path = str_replace('\\', DIRECTORY_SEPARATOR, $path);
+            if (file_exists($path)) {
+                return $path;
+            }
+        }
+        throw new ClassNotFoundException('Class file not found: ' . $class);
     }
 
     public static function load($class)
     {
         if (isset(self::$map[$class])) {
             $path = self::$map[$class];
-        } else if (strpos($class, '\\') !== false) {
+            if (!file_exists($path)) {
+                $message = 'Class file not found: ' . $path;
+                throw new ClassNotFoundException($message);
+            }
+        } elseif (strpos($class, '\\') !== false) {
             $path = self::getPathToNamespace($class);
         } else {
             $message = 'Class not registered: ' . $class;
-            throw new \InvalidArgumentException($message);
+            throw new ClassNotFoundException($message);
         }
 
-        if (!file_exists($path)) {
-            throw new \RuntimeException('File not found: ' . $path);
-        }
         include_once $path;
         if (!class_exists($class) && !interface_exists($class)) {
             $message = 'File %s does not contain class %s.';
             $message = sprintf($message, $path, $class);
-            throw new \RuntimeException($message);
+            throw new ClassNotFoundException($message);
         }
     }
 
@@ -101,5 +117,10 @@ class AutoLoader
     {
         return self::$map;
     }
+
+}
+
+class ClassNotFoundException extends \OutOfBoundsException
+{
 
 }
