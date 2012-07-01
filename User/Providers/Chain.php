@@ -48,29 +48,29 @@ class Chain extends UserProvider
         }
     }
 
-    public function removeUser($username)
+    public function removeUser($key)
     {
         foreach ($this->providers as $provider) {
-            if ($provider->removeUser($username)) {
+            if ($provider->removeUser($key)) {
                 return true;
             }
         }
     }
 
-    public function userExists($username)
+    public function userExists($key)
     {
         foreach ($this->providers as $provider) {
-            if ($provider->userExists($username)) {
+            if ($provider->userExists($key)) {
                 return true;
             }
         }
         return false;
     }
 
-    public function getUser($username)
+    public function getUser($key)
     {
         foreach ($this->providers as $provider) {
-            $user = $provider->getUser($username);
+            $user = $provider->getUser($key);
             if ($user) {
                 return $user;
             }

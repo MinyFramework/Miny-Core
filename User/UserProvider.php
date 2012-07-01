@@ -28,18 +28,32 @@ namespace Miny\User;
 
 class UserProvider
 {
+    private $user_key = 'name';
     private $users = array();
+
+    public function __construct($key_field = NULL)
+    {
+        if (!is_null($key_field)) {
+            $this->user_key = $key_field;
+        }
+    }
+
+    public function getKeyName()
+    {
+        return $this->user_key;
+    }
 
     public function addUser(UserIdentity $user)
     {
-        $this->users[$user->name] = $user;
+        $key = $user->get($this->getKeyName());
+        $this->users[$key] = $user;
         return true;
     }
 
-    public function removeUser($username)
+    public function removeUser($key)
     {
-        if (isset($this->users[$username])) {
-            unset($this->users[$username]);
+        if (isset($this->users[$key])) {
+            unset($this->users[$key]);
             return true;
         }
     }
@@ -49,17 +63,17 @@ class UserProvider
         return new AnonymUserIdentity();
     }
 
-    public function userExists($username)
+    public function userExists($key)
     {
-        return isset($this->users[$username]);
+        return isset($this->users[$key]);
     }
 
-    public function getUser($username)
+    public function getUser($key)
     {
-        if (!$this->userExists($username)) {
+        if (!$this->userExists($key)) {
             return false;
         }
-        return $this->users[$username];
+        return $this->users[$key];
     }
 
 }
