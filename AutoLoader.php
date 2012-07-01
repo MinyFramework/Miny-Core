@@ -33,6 +33,7 @@ namespace Miny;
  */
 class AutoLoader
 {
+    public static $extension = '.php';
     private static $map = array();
 
     public static function init()
@@ -42,9 +43,15 @@ class AutoLoader
 
     private static function addNamespacePath($namespace, $path)
     {
-        if (!isset(self::$map[$namespace])) {
-            self::$map[$namespace] = array($path);
+        if (is_array($path)) {
+            if (isset(self::$map[$namespace])) {
+                $path = array_merge(self::$map[$namespace], $path);
+            }
+            self::$map[$namespace] = $path;
         } else {
+            if (!isset(self::$map[$namespace])) {
+                self::$map[$namespace] = array();
+            }
             self::$map[$namespace][] = $path;
         }
     }
@@ -80,14 +87,13 @@ class AutoLoader
             throw new ClassNotFoundException('Class not registered: ' . $class);
         }
         foreach (self::$map[$temp] as $part) {
-            $path = substr_replace('\\' . $class, $part, 0, $pos);
-            $path .= '.php';
+            $path = $part . substr('\\' . $class, $pos) . self::$extension;
             $path = str_replace('\\', DIRECTORY_SEPARATOR, $path);
             if (file_exists($path)) {
                 return $path;
             }
         }
-        throw new ClassNotFoundException('Class file not found: ' . $class);
+        throw new ClassNotFoundException('Class not found: ' . $class);
     }
 
     public static function load($class)
