@@ -56,11 +56,20 @@ class UserIdentity
 
     /**
      * Magic function to access userdata.
+     * @see UserIdentity::get()
+     */
+    public function __get($key)
+    {
+        return $this->get($key);
+    }
+
+    /**
+     * Function to access userdata.
      * @param string $key
      * @return mixed The accessed userdata value
      * @throws \OutOfBoundsException if userdata is not set.
      */
-    public function __get($key)
+    public function get($key)
     {
         if (!isset($this->userdata[$key])) {
             throw new \OutOfBoundsException('Userdata not set: ' . $key);
