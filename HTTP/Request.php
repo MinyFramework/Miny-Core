@@ -93,21 +93,20 @@ class Request
 
     private function param($type, $key, $value)
     {
-        if (!$key && !$value) {
-            return $this->params[$type];
-        }
-        if ($value) {
-            if (is_array($value)) {
-                $this->params[$type] = $value + $this->params[$type];
-            } else {
-                $this->params[$type][$key] = $value;
+        if (is_null($value)) {
+            if (is_null($key)) {
+                return $this->params[$type];
             }
-        } else {
             if (!isset($this->params[$type][$key])) {
-                $message = 'Parameter not set: ' . $type . ' ' . $key;
+                $message = 'Value not set: ' . $key . '(' . $type . ')';
                 throw new \OutOfBoundsException($message);
             }
             return $this->params[$type][$key];
+        }
+        if (is_array($value)) {
+            $this->params[$type] = $value + $this->params[$type];
+        } else {
+            $this->params[$type][$key] = $value;
         }
     }
 
