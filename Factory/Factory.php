@@ -197,8 +197,8 @@ class Factory
     private function instantiate(ObjectDescriptor $descriptor)
     {
         $class = $descriptor->getClassName();
-        if ($this->hasParameter($class)) {
-            $class = $this->getParameter($class);
+        if ($class[0] == '@') {
+            $class = $this->getParameter(substr($class, 1));
         }
 
         if (!class_exists($class)) {
