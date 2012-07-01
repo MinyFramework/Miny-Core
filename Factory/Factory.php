@@ -152,10 +152,6 @@ class Factory
             $this->setInstance($alias, $obj);
         }
 
-        if ($descriptor->hasParent()) {
-            $parent = $this->getDescriptor($descriptor->getParent());
-            $this->injectParentDependencies($obj, $parent);
-        }
         $this->injectDependencies($obj, $descriptor);
         return $obj;
     }
@@ -176,6 +172,10 @@ class Factory
      */
     private function injectDependencies($object, ObjectDescriptor $descriptor)
     {
+        if ($descriptor->hasParent()) {
+            $parent = $this->getDescriptor($descriptor->getParent());
+            $this->injectDependencies($object, $parent);
+        }
         foreach ($descriptor->getProperties() as $name => $value) {
             $object->$name = $this->getValue($value);
         }
@@ -184,21 +184,6 @@ class Factory
             $args = array_map(array($this, 'getValue'), $args);
             call_user_func_array(array($object, $name), $args);
         }
-    }
-
-    /**
-     * Injects the object with it's parent's dependencies.
-     *
-     * @param object $object
-     * @param ObjectDesciptor $descriptor
-     */
-    private function injectParentDependencies($object, ObjectDescriptor $parent)
-    {
-        if ($parent->hasParent()) {
-            $_parent = $this->getDescriptor($descriptor->getParent());
-            $this->injectParentDependencies($object, $_parent);
-        }
-        $this->injectDependencies($object, $parent);
     }
 
     /**
