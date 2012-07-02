@@ -61,7 +61,11 @@ class Dispatcher
                         'request'   => $r,
                         'exception' => $e
                     ));
-            $this->events->raiseEvent($event);
+            if ($this->events->raiseEvent($event)) {
+                //Let's retry with the fallback-request
+                $event = new Event('filter_request', array('request' => $r));
+                $this->events->raiseEvent($event);
+            }
         }
         if ($event->hasResponse()) {
             $rsp = $event->getResponse();
