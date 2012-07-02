@@ -26,7 +26,7 @@
 
 namespace Miny\User\Exceptions;
 
-class UnauthorizedException extends \HttpRequestException
+class UnauthorizedException extends \RuntimeException
 {
-    
+
 }
