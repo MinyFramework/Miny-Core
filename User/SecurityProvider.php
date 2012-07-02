@@ -77,14 +77,13 @@ class SecurityProvider
         if (!isset($this->protected[$controller])) {
             return false;
         }
-        if ($this->isRule($this->protected[$controller])) {
+        if (isset($this->protected[$controller]['*'])) {
             //the whole controller is protected
             return true;
-        } elseif (is_array($this->protected[$controller])) {
-            if (isset($this->protected[$controller][$action])) {
-                //the specific action is protected
-                return true;
-            }
+        }
+        if (isset($this->protected[$controller][$action])) {
+            //the specific action is protected
+            return true;
         }
         return false;
     }

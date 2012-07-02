@@ -104,8 +104,9 @@ class SecurityEvents extends EventHandler
         $request = $event->getParameter('request');
         $provider = $this->security_provider;
 
-        $controller = $request->get('controller');
-        $action = $request->get('action');
+        $get = $request->get;
+        $controller = $get['controller'];
+        $action = isset($get['action']) ? $get['action'] : NULL;
         if ($provider->isActionProtected($controller, $action)) {
             $rules = $provider->getPermission($controller, $action);
             foreach ($rules as $rule) {
