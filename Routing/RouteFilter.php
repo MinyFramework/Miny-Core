@@ -69,7 +69,7 @@ class RouteFilter extends EventHandler
         }
         $request = $event->getParameter('request');
         $request->path = $this->handled_exceptions[$class];
-        $this->fitlerRoutes($event);
+        $this->filterRoutes($event);
     }
 
 }
