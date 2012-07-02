@@ -28,6 +28,7 @@ namespace Miny\Routing;
 
 use \Miny\Event\Event;
 use \Miny\Event\EventHandler;
+use \Miny\Routing\Exceptions\PageNotFoundException;
 
 class RouteFilter extends EventHandler
 {
@@ -50,7 +51,7 @@ class RouteFilter extends EventHandler
         $route = $this->router->match($request->path, $request->method);
         if (!$route) {
             $message = 'Page not found: ' . $request->path;
-            throw new \HttpRequestException($message);
+            throw new PageNotFoundException($message);
         }
         parse_str(parse_url($_SERVER['REQUEST_URI'], PHP_URL_QUERY), $_GET);
         $request->get(NULL, $route->get() + $_GET);
