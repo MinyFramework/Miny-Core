@@ -29,6 +29,7 @@ namespace Miny\User;
 use \Miny\Event\Event;
 use \Miny\Event\EventHandler;
 use \Miny\Session\Session;
+use \Miny\User\Exceptions\UnauthorizedException;
 
 class SecurityEvents extends EventHandler
 {
@@ -66,7 +67,7 @@ class SecurityEvents extends EventHandler
 
     public function authenticate()
     {
-        if(is_null($this->user_provider) || $this->authenticated) {
+        if (is_null($this->user_provider) || $this->authenticated) {
             return;
         }
         $user_provider = $this->user_provider;
@@ -113,7 +114,7 @@ class SecurityEvents extends EventHandler
             foreach ($rules as $rule) {
                 if (!$this->hasAccess($rule)) {
                     $message = 'Access denied for path: ' . $request->path;
-                    throw new \HttpRequestException($message);
+                    throw new UnauthorizedException($message);
                 }
             }
         }
