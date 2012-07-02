@@ -31,10 +31,13 @@ class UserProvider
     private $user_key = 'name';
     private $users = array();
 
-    public function __construct($key_field = NULL)
+    public function __construct($key_field = NULL, array $users = array())
     {
         if (!is_null($key_field)) {
             $this->user_key = $key_field;
+        }
+        foreach ($users as $user) {
+            $this->addUser($user);
         }
     }
 
