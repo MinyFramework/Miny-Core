@@ -61,6 +61,10 @@ class RouteFilter extends EventHandler
         if (empty($this->handled_exceptions)) {
             return;
         }
+        $request = $event->getParameter('request');
+        if ($request->isSubRequest()) {
+            return;
+        }
         $ex = $event->getParameter('exception');
         $class = get_class($ex);
         if (!isset($this->handled_exceptions[$class])) {
