@@ -45,9 +45,10 @@ class WidgetContainer
         $widgets = func_get_args();
         array_shift($widgets);
 
-        if (!isset($this->groups[$group])) {
-            $this->groups[$group] = $widgets;
+        if (isset($this->groups[$group])) {
+            $widgets = array_merge($this->groups[$group], $widgets);
         }
+        $this->groups[$group] = $widgets;
     }
 
     public function removeGroup($group)
