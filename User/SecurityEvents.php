@@ -108,9 +108,6 @@ class SecurityEvents extends EventHandler
         $action = $request->get('action');
         if ($provider->isActionProtected($controller, $action)) {
             $rules = $provider->getPermission($controller, $action);
-            if (is_callable($rules) || is_string($rules)) {
-                $rules = array($rules);
-            }
             foreach ($rules as $rule) {
                 if (!$this->hasAccess($rule)) {
                     $message = 'Access denied for path: ' . $request->path;

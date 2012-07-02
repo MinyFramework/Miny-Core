@@ -30,6 +30,13 @@ class SecurityProvider
 {
     private $protected = array();
 
+    public function __construct(array $rules = array())
+    {
+        foreach ($rules as $rule) {
+            $this->addRule($rule['controller'], $rule['action'], $rule['rule']);
+        }
+    }
+
     public function addRule($controller, $action, $rule)
     {
         if (!is_string($action) && !is_callable($action)) {
@@ -87,14 +94,28 @@ class SecurityProvider
         if (!isset($this->protected[$controller])) {
             return;
         }
+        $return = array();
         if (isset($this->protected[$controller][$action])) {
             //the specific action is protected
-            return $this->protected[$controller][$action];
-        } elseif (isset($this->protected[$controller]['*'])) {
-            //the whole controller is protected
-            return $this->protected[$controller]['*'];
+            $permission = $this->protected[$controller][$action];
+
+            if (is_callable($permission) || is_string($permission)) {
+                $return[] = $permission;
+            } else {
+                $return = array_merge($return, $permission);
+            }
         }
-        //not protected - nothing to return
+        if (isset($this->protected[$controller]['*'])) {
+            //the whole controller is protected
+            $permission = $this->protected[$controller]['*'];
+
+            if (is_callable($permission) || is_string($permission)) {
+                $return[] = $permission;
+            } else {
+                $return = array_merge($return, $permission);
+            }
+        }
+        return $return;
     }
 
 }
