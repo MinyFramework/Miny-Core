@@ -62,6 +62,7 @@ class Widget extends \Miny\Widget\Widget
             case 'image':
             case 'month':
             case 'number':
+            case 'password':
             case 'range':
             case 'reset':
             case 'search':
@@ -254,7 +255,7 @@ class Widget extends \Miny\Widget\Widget
     }
 
     public function begin(array $params = array(), array $data = array(),
-            array $errors = array())
+                          array $errors = array())
     {
         ob_start();
         $this->params = $params;

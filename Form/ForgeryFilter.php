@@ -28,6 +28,7 @@ namespace Miny\Form;
 
 use \Miny\Event\Event;
 use \Miny\Event\EventHandler;
+use \Miny\Form\Exceptions\TokenException;
 use \Miny\Session\Session;
 
 class ForgeryFilter extends EventHandler
@@ -54,7 +55,7 @@ class ForgeryFilter extends EventHandler
         }
         $token = $request->post('token');
         if (!in_array($token, $valid_tokens)) {
-            throw new \HttpRequestException('Wrong token sent.');
+            throw new TokenException('Wrong token sent.');
         }
     }
 
