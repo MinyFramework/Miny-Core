@@ -254,13 +254,10 @@ class Widget extends \Miny\Widget\Widget
         $this->renderElement($element, $errors);
     }
 
-    public function begin(array $params = array(), array $data = array(),
-                          array $errors = array())
+    public function begin(array $params = array())
     {
         ob_start();
         $this->params = $params;
-        $this->data = $data;
-        $this->errors = $errors;
         return $this;
     }
 
