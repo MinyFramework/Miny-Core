@@ -38,6 +38,11 @@ class Router
         $this->format = $format;
     }
 
+    public function getUrlPrefix()
+    {
+        return $this->url_prefix;
+    }
+
     public function resource($name)
     {
         $resource = new ResourceRoute($name, NULL, true);
@@ -104,6 +109,9 @@ class Router
 
     public function match($path, $method = NULL)
     {
+        if(substr($path, 0, strlen($this->url_prefix)) == $this->url_prefix) {
+            $path = substr($path, strlen($this->url_prefix));
+        }
         foreach ($this->routes as $route) {
             $route = $route->match($path, $method);
             if ($route) {
@@ -125,7 +133,7 @@ class Router
                     if (strpos($this->url_prefix, '?') !== false) {
                         $first_http_param = false;
                     }
-                    $path = $prefix . $path;
+                    $path = $this->url_prefix . $path;
                 }
                 foreach ($params as $name => $value) {
                     if (strpos($path, ':' . $name) !== false) {
