@@ -211,12 +211,12 @@ class Widget extends \Miny\Widget\Widget
     public function select(array $args, array $options)
     {
         if (isset($args['name'])) {
-            $values = $this->getData($args['name']);
+            $values = $this->getData($args['name'], array());
             $errors = $this->getErrors($args['name']);
 
             if (isset($args['multiple'])) {
                 $args['name'] .= '[]';
-            } else {
+            } elseif (!empty($values)) {
                 $values = array($values);
             }
         } else {
