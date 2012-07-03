@@ -36,6 +36,7 @@ class Widget extends \Miny\Widget\Widget
     public $errors = array();
     private $templating;
     private $session;
+    private $params;
 
     public function setSession(Session $session)
     {
@@ -268,6 +269,9 @@ class Widget extends \Miny\Widget\Widget
     {
         $params = $params + $this->params;
 
+        if(!isset($params['method'])) {
+            $params['method'] = 'GET';
+        }
         if ($params['method'] != 'GET') {
             if ($params['method'] != 'POST') {
                 printf('<input type="hidden" name="_method" value="%s" />',
