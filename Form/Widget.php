@@ -229,10 +229,10 @@ class Widget extends \Miny\Widget\Widget
         $optgroup = '<optgroup label="%s">%s</optgroup>';
 
         $rendered_options = array();
-        foreach ($options as $name => $value) {
-            if (is_array($value)) {
+        foreach ($options as $value => $name) {
+            if (is_array($name)) {
                 $temp = array();
-                foreach ($value as $key => $val) {
+                foreach ($name as $key => $val) {
                     if (in_array($val, $values)) {
                         $temp[] = sprintf($option_selected, $val, $key);
                     } else {
