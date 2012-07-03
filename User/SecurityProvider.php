@@ -33,6 +33,9 @@ class SecurityProvider
     public function __construct(array $rules = array())
     {
         foreach ($rules as $rule) {
+            if(!isset($rule['action'])) {
+                $rule['action'] = '*';
+            }
             $this->addRule($rule['controller'], $rule['action'], $rule['rule']);
         }
     }
