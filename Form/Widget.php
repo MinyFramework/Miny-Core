@@ -216,7 +216,7 @@ class Widget extends \Miny\Widget\Widget
 
             if (isset($args['multiple'])) {
                 $args['name'] .= '[]';
-            } elseif (!empty($values)) {
+            } elseif (!is_array($values)) {
                 $values = array($values);
             }
         } else {
