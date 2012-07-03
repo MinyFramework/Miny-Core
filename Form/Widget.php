@@ -228,7 +228,7 @@ class Widget extends \Miny\Widget\Widget
         $option_selected = '<option value="%s" selected="selected">%s</option>';
         $optgroup = '<optgroup label="%s">%s</optgroup>';
 
-        $options = array();
+        $rendered_options = array();
         foreach ($options as $name => $value) {
             if (is_array($value)) {
                 $temp = array();
@@ -239,19 +239,18 @@ class Widget extends \Miny\Widget\Widget
                         $temp[] = sprintf($option, $val, $key);
                     }
                 }
-                $options[] = sprintf($optgroup, $name, implode("\n", $temp));
+                $rendered_options[] = sprintf($optgroup, $name,
+                        implode("\n", $temp));
+            } elseif (in_array($value, $values)) {
+                $rendered_options[] = sprintf($option_selected, $value, $name);
             } else {
-                if (in_array($value, $values)) {
-                    $options[] = sprintf($option_selected, $value, $name);
-                } else {
-                    $options[] = sprintf($option, $value, $name);
-                }
+                $rendered_options[] = sprintf($option, $value, $name);
             }
         }
 
         $arglist = $this->getHTMLArgList($args);
         $element = sprintf('<select%s>%s</select>', $arglist,
-                implode("\n", $options));
+                implode("\n", $rendered_options));
         $this->renderElement($element, $errors);
     }
 
@@ -269,7 +268,7 @@ class Widget extends \Miny\Widget\Widget
     {
         $params = $params + $this->params;
 
-        if(!isset($params['method'])) {
+        if (!isset($params['method'])) {
             $params['method'] = 'GET';
         }
         if ($params['method'] != 'GET') {
