@@ -62,7 +62,7 @@ class Request
     private function getFromGlobals()
     {
         $this->params = array(
-            'path' => $_SERVER['QUERY_STRING'],
+            'path' => parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH),
             'get'  => $_GET,
             'post' => $_POST
         );
