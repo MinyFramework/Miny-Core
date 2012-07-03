@@ -253,7 +253,7 @@ class ResourceRoute
                         $route = new Route($path, $singular_name, $method, $options);
                         $has_named_action_route = true;
                     } else {
-                        $route = new Route($path, NULL, $method);
+                        $route = new Route($path, NULL, $method, $options);
                     }
                     break;
                 default:
