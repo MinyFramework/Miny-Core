@@ -28,6 +28,7 @@ namespace Miny\Template;
 
 use \Miny\Event\Event;
 use \Miny\Event\EventHandler;
+use \Miny\HTTP\RedirectResponse;
 
 class TemplateEvents extends EventHandler
 {
@@ -66,6 +67,9 @@ class TemplateEvents extends EventHandler
             return;
         }
         $rsp = $event->getParameter('response');
+        if ($rsp instanceof RedirectResponse) {
+            return;
+        }
         $controller = $request->get('controller');
 
         $this->templating->setScope($this->scope);
