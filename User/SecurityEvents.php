@@ -66,8 +66,7 @@ class SecurityEvents extends EventHandler
         } else {
             $this->identity = $user_provider->getAnonymUser();
         }
-
-        $this->session->flash('identity', $this->identity);
+        
         $this->authenticated = true;
     }
 
