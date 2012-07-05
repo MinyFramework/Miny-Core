@@ -36,13 +36,7 @@ class SecurityEvents extends EventHandler
     private $security_provider;
     private $user_provider;
     private $identity;
-    private $session;
     private $authenticated;
-
-    public function __construct(Session $session)
-    {
-        $this->session = $session;
-    }
 
     public function setSecurityProvider(SecurityProvider $provider)
     {
@@ -54,19 +48,18 @@ class SecurityEvents extends EventHandler
         $this->user_provider = $user_provider;
     }
 
-    public function authenticate()
+    public function authenticate(Session $session)
     {
         if (is_null($this->user_provider) || $this->authenticated) {
             return;
         }
         $user_provider = $this->user_provider;
-        $user = $this->session['user'];
-        if ($user_provider->userExists($user)) {
-            $this->identity = $user_provider->getUser($user);
+        if ($user_provider->userExists($session['user'])) {
+            $this->identity = $user_provider->getUser($session['user']);
         } else {
             $this->identity = $user_provider->getAnonymUser();
         }
-        
+
         $this->authenticated = true;
     }
 
