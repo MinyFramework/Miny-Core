@@ -29,18 +29,22 @@ namespace Miny\Session;
 class Session implements \ArrayAccess, \IteratorAggregate, \Countable
 {
     /**
-     * Indicates whether a custom storage method is implemented.
-     * @access private
-     * @var boolean
-     */
-    private $custom_storage = false;
-
-    /**
      * Indicates whether the session is started.
      * @access private
      * @var boolean
      */
     private $is_open = false;
+
+    public function __construct($register_custom_storage = false)
+    {
+        if ($register_custom_storage) {
+            session_set_save_handler(
+                    array($this, 'openSession'), array($this, 'closeSession'),
+                    array($this, 'readSession'), array($this, 'writeSession'),
+                    array($this, 'destroySession'), array($this, 'gcSession')
+            );
+        }
+    }
 
     /**
      * Starts the session. Regenerates the session ID each request
@@ -48,15 +52,16 @@ class Session implements \ArrayAccess, \IteratorAggregate, \Countable
      */
     public function open()
     {
-        $this->registerCustomStorage();
-        session_start();
-        $this->is_open = true;
+        $this->is_open = session_start();
         session_regenerate_id(true);
-        if (!isset($_SESSION['data'])) {
-            $_SESSION = array(
-                'data' => array(),
-                'flash' => array()
-            );
+
+        register_shutdown_function(array($this, 'close'));
+
+        if (!isset($_SESSION['data']) || !is_array($_SESSION['data'])) {
+            $_SESSION['data'] = array();
+        }
+        if (!isset($_SESSION['flash']) || !is_array($_SESSION['flash'])) {
+            $_SESSION['flash'] = array();
         }
         $this->updateFlash();
     }
@@ -75,28 +80,15 @@ class Session implements \ArrayAccess, \IteratorAggregate, \Countable
     /**
      * Destroys the current session and its data.
      */
-    public function destroy()
+    public function destroy($reopen = true)
     {
         if ($this->is_open) {
             session_unset();
             session_destroy();
+            $this->is_open = false;
         }
-    }
-
-    /**
-     * If a subclass implements session storage methods this method registers
-     * them to be used as session handlers.
-     * @access private
-     */
-    private function registerCustomStorage()
-    {
-        if ($this->custom_storage) {
-            session_set_save_handler(
-                    array($this, 'openSession'), array($this, 'closeSession'),
-                    array($this, 'readSession'), array($this, 'writeSession'),
-                    array($this, 'destroySession'), array($this, 'gcSession')
-            );
-            register_shutdown_function('session_write_close');
+        if ($reopen) {
+            $this->open();
         }
     }
 
@@ -106,32 +98,40 @@ class Session implements \ArrayAccess, \IteratorAggregate, \Countable
      */
     private function updateFlash()
     {
-        foreach ($_SESSION['flash'] as $key => &$array) {
-            if ($array['ttl']-- == 0) {
+        foreach (array_keys($_SESSION['flash']) as $key) {
+            if ($_SESSION['flash'][$key]['ttl']-- == 0) {
                 unset($_SESSION['flash'][$key]);
             }
         }
     }
 
     /**
-     * Gets or sets a flash variable.
+     * Sets a flash variable.
      *
      * A flash variable is a session variable that is only available
      * for a limited number of requests.
      *
-     * @param string $key The key of the stored or accessed flashdata.
+     * @param string $key The key of the stored flashdata.
      * @param mixed $value The value to be stored
      * @param int $ttl The number of requests for the variable to be set.
      */
-    public function flash($key, $value = NULL, $ttl = 1)
+    public function setFlash($key, $value, $ttl = 1)
     {
-        if (is_null($value)) {
-            if (isset($_SESSION['flash'][$key])) {
-                return $_SESSION['flash'][$key]['data'];
-            }
-        } else {
-            $_SESSION['flash'][$key] = array('data' => $value, 'ttl'  => $ttl);
+        $_SESSION['flash'][$key] = array('data' => $value, 'ttl'  => $ttl);
+    }
+
+    /**
+     * Gets a flash variable.
+     *
+     * @param string $key The key of the accessed flashdata.
+     * @param mixed $default
+     */
+    public function getFlash($key, $default = NULL)
+    {
+        if ($this->hasFlash($key)) {
+            return $_SESSION['flash'][$key]['data'];
         }
+        return $default;
     }
 
     /**
