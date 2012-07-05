@@ -47,8 +47,8 @@ class ForgeryFilter extends EventHandler
             return;
         }
 
-        $valid_tokens = $this->session->flash('tokens') ?: array();
-        $this->session->flash('tokens', array());
+        $valid_tokens = $this->session->getFlash('tokens', array());
+        $this->session->setFlash('tokens', array());
 
         if ($request->method == 'GET') {
             return;

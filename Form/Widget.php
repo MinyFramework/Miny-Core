@@ -277,9 +277,9 @@ class Widget extends \Miny\Widget\Widget
         }
         if (!is_null($this->session)) {
             $token = md5(mt_rand());
-            $tokens = $this->session->flash('tokens') ?: array();
+            $tokens = $this->session->getFlash('tokens', array());
             $tokens[] = $token;
-            $this->session->flash('tokens', $tokens);
+            $this->session->setFlash('tokens', $tokens);
             printf('<input type="hidden" name="token" value="%s" />', $token);
         }
 
