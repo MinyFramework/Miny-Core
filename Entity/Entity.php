@@ -54,7 +54,11 @@ abstract class Entity implements \ArrayAccess
         $this->provider->remove($this->getKey());
     }
 
-    public abstract function getKeyName();
+    public function getKeyName()
+    {
+        return 'id';
+    }
+
     public function getKey()
     {
         $key = $this->getKeyName();
