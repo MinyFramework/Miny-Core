@@ -31,14 +31,6 @@ namespace Miny\User;
  */
 class AnonymUserIdentity extends UserIdentity
 {
-    /**
-     * Creates an anonym UserIdentity
-     *
-     */
-    public function __construct()
-    {
-
-    }
 
     /**
      * Magic function to access userdata.
@@ -78,15 +70,6 @@ class AnonymUserIdentity extends UserIdentity
     public function isAnonym()
     {
         return true;
-    }
-
-    /**
-     * Returns whether the user has been changed.
-     * @return boolean
-     */
-    public function isChanged()
-    {
-        return false;
     }
 
 }

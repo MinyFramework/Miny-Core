@@ -54,8 +54,8 @@ class SecurityEvents extends EventHandler
             return;
         }
         $user_provider = $this->user_provider;
-        if ($user_provider->userExists($session['user'])) {
-            $this->identity = $user_provider->getUser($session['user']);
+        if ($user_provider->has($session['user'])) {
+            $this->identity = $user_provider->get($session['user']);
         } else {
             $this->identity = $user_provider->getAnonymUser();
         }

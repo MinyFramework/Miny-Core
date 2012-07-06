@@ -26,75 +26,26 @@
 
 namespace Miny\User;
 
+use \Miny\Entity\Entity;
+use \Miny\Entity\EntityProvider;
+
 /**
- * UserIdentity is a basic class for describing a user who has some
- * userdata as a key => data array and can have permissions.
+ * UserIdentity is a basic class for describing a user.
  */
-class UserIdentity
+class UserIdentity extends Entity
 {
-    private $changed;
-    private $password;
-    private $userdata = array();
-    private $permissions = array();
+    protected $password;
+    protected $name;
+    protected $email;
+    protected $display_name;
+    protected $permissions = array();
 
     /**
-     * Creates a UserIdentity
-     *
-     * @param array $userdata The userdata like username, e-mail, etc.
-     * @param array $permissions Permissions the user has.
+     * The primary key of the User entity.
      */
-    public function __construct(array $userdata, array $permissions = array())
+    public function getKeyName()
     {
-        if (isset($userdata['password'])) {
-            $this->password = $userdata['password'];
-            unset($userdata['password']);
-        }
-        $this->changed = false;
-        $this->userdata = $userdata;
-        $this->permissions = $permissions;
-    }
-
-    /**
-     * Magic function to access userdata.
-     * @see UserIdentity::get()
-     */
-    public function __get($key)
-    {
-        return $this->get($key);
-    }
-
-    /**
-     * Function to access userdata.
-     * @param string $key
-     * @return mixed The accessed userdata value
-     * @throws \OutOfBoundsException if userdata is not set.
-     */
-    public function get($key)
-    {
-        if (!isset($this->userdata[$key])) {
-            throw new \OutOfBoundsException('Userdata not set: ' . $key);
-        }
-        return $this->userdata[$key];
-    }
-
-    /**
-     * Magic function to set userdata.
-     * @param string $key
-     * @param mixed $value
-     */
-    public function __set($key, $value)
-    {
-        $this->userdata[$key] = $value;
-        $this->changed = true;
-    }
-
-    /**
-     * Returns the userdata
-     * @return array
-     */
-    public function getData()
-    {
-        return $this->userdata;
+        return 'name';
     }
 
     /**
@@ -108,42 +59,12 @@ class UserIdentity
     }
 
     /**
-     * Returns the permissions the user has.
-     * @return array The users' permissions
-     */
-    public function getPermissions()
-    {
-        return $this->permissions;
-    }
-
-    /**
-     * Checks whether the user can be authenticated with
-     * the given password.
-     *
-     * @param string $hash
-     * @return boolean
-     */
-    public function checkPassword($password)
-    {
-        return $password === $this->password;
-    }
-
-    /**
      * Returns whether the user is anonym or not.
      * @return boolean
      */
     public function isAnonym()
     {
         return false;
-    }
-
-    /**
-     * Returns whether the user has been changed.
-     * @return boolean
-     */
-    public function isChanged()
-    {
-        return $this->changed;
     }
 
 }

@@ -26,7 +26,6 @@
 
 namespace Miny\User\Providers;
 
-use \Miny\User\AnonymUserIdentity;
 use \Miny\User\UserIdentity;
 use \Miny\User\UserProvider;
 
@@ -47,12 +46,17 @@ class SQL extends UserProvider
         register_shutdown_function(array($this, 'save'));
     }
 
-    public function userExists($key)
+    public function has($key)
     {
-        if (parent::userExists($key)) {
+        if (parent::has($key)) {
             return true;
         }
-        return $this->getUser($key) !== false;
+        try {
+            $this->get($key);
+            return true;
+        } catch (\OutOfBoundsException $e) {
+            return false;
+        }
     }
 
     private function getPermissions($key)
@@ -61,35 +65,34 @@ class SQL extends UserProvider
             return array();
         }
 
-        $sql = 'SELECT `permission` FROM `%s` WHERE `%s` = ?';
-        $sql = sprintf($sql, $this->permissions_table_name, $this->getKeyName());
+        $sql = 'SELECT `permission` FROM `%s` WHERE `name` = ?';
+        $sql = sprintf($sql, $this->permissions_table_name);
 
         $stmt = $this->driver->prepare($sql);
         $stmt->execute(array($key));
         return $stmt->fetchAll(\PDO::FETCH_COLUMN, 0);
     }
 
-    public function getUser($key)
+    public function get($key)
     {
-        $user = parent::getUser($key);
+        $user = parent::get($key);
         if (!$user) {
-            $sql = sprintf('WHERE `%s` = ?', $this->getKeyName());
-            $user = $this->getUserBySQL($sql, array($key));
-            parent::addUser($user);
+            $user = $this->getUserBySQL('WHERE `name` = ?', array($key));
+            parent::add($user);
         }
         return $user;
     }
 
     private function createUser(array $userdata)
     {
-        $key = $userdata[$this->getKeyName()];
+        $key = $userdata['name'];
         if (!$this->userExists($key)) {
-            $permissions = $this->getPermissions($key);
-            $user = new UserIdentity($userdata, $permissions);
-            parent::addUser($user);
+            $userdata['permissions'] = $this->getPermissions($key);
+            $user = new UserIdentity($userdata);
+            parent::add($user);
             return $user;
         } else {
-            return parent::getUser($key);
+            return parent::get($key);
         }
     }
 
@@ -113,17 +116,17 @@ class SQL extends UserProvider
         }
     }
 
-    public function addUser(UserIdentity $user)
+    public function add(UserIdentity $user)
     {
-        $key = $user->get($this->getKeyName());
-        $state = $this->userExists($key) ? 'm' : 'a';
+        $key = $user->getKey();
+        $state = $this->has($key) ? 'm' : 'a';
         $this->modified_users[$key] = $state;
-        return parent::addUser($user);
+        return parent::add($user);
     }
 
-    public function removeUser($key)
+    public function remove($key)
     {
-        if (parent::removeUser($key)) {
+        if (parent::remove($key)) {
             $this->modified_users[$key] = 'r';
             return true;
         }
@@ -139,7 +142,7 @@ class SQL extends UserProvider
             switch ($state) {
                 case 'a':
                 case 'm':
-                    $this->saveUser(parent::getUser($key));
+                    $this->saveUser(parent::get($key));
                     break;
                 case 'r':
                     $this->deleteUser($key);
@@ -151,14 +154,14 @@ class SQL extends UserProvider
 
     private function deleteUser($key)
     {
-        $pattern = 'DELETE FROM `%s` WHERE `%s` = ?';
+        $pattern = 'DELETE FROM `%s` WHERE `name` = ?';
         $tables = array(
             $this->table_name,
             $this->permissions_table_name
         );
         $key = array($key);
         foreach ($tables as $table) {
-            $sql = sprintf($pattern, $table, $this->getKeyName());
+            $sql = sprintf($pattern, $table);
             $stmt = $this->driver->prepare($sql);
             $stmt->execute($key);
         }
@@ -167,11 +170,10 @@ class SQL extends UserProvider
     private function saveUser(UserIdentity $user)
     {
         //TODO: clean this stuff up, looks ugly
-        $key_name = $this->getKeyName();
-        $key = $user->get($key_name);
+        $key = $user->getKey();
         //update userdata
         $fields = array();
-        $data = $user->getData();
+        $data = $user->toArray();
         $data_keys = array_keys($data);
         foreach ($data_keys as $name) {
             $fields[] = '`' . $name . '`';
@@ -184,21 +186,21 @@ class SQL extends UserProvider
         $this->driver->prepare($sql)->execute($data);
 
         //delete removed permissions
-        $permissions = $user->getPermissions();
+        $permissions = $user->permissions;
         $permission_count = count($permissions);
 
         //no permissions - delete all old ones and return
         if ($permission_count == 0) {
-            $sql = 'DELETE FROM `%s` WHERE `%s` = ?';
-            $sql = sprintf($sql, $this->permissions_table_name, $key_name);
+            $sql = 'DELETE FROM `%s` WHERE `name` = ?';
+            $sql = sprintf($sql, $this->permissions_table_name);
             $this->driver->prepare($sql)->execute(array($key));
             return;
         }
         //delete only removed permissions
         $marks = array_fill(0, $permission_count, '?');
         $marks = implode(', ', $marks);
-        $sql = 'DELETE FROM `%s` WHERE `%s` = ? AND `permission` NOT IN(%s)';
-        $sql = sprintf($sql, $this->permissions_table_name, $key_name, $marks);
+        $sql = 'DELETE FROM `%s` WHERE `name` = ? AND `permission` NOT IN(%s)';
+        $sql = sprintf($sql, $this->permissions_table_name, $marks);
 
         $array = $permissions;
         array_unshift($array, $key);
@@ -207,8 +209,8 @@ class SQL extends UserProvider
         //insert new permissions
         $marks = array_fill(0, $permission_count, '(?, ?)');
         $marks = implode(', ', $marks);
-        $sql = 'REPLACE INTO `%s` (`%s`, `permission`) VALUES %s';
-        $sql = sprintf($sql, $this->permissions_table_name, $key_name, $marks);
+        $sql = 'REPLACE INTO `%s` (`name`, `permission`) VALUES %s';
+        $sql = sprintf($sql, $this->permissions_table_name, $marks);
 
         $array = array();
         foreach ($permissions as $permission) {

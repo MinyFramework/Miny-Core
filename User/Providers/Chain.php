@@ -39,43 +39,44 @@ class Chain extends UserProvider
         $this->providers[] = $provider;
     }
 
-    public function addUser(UserIdentity $user)
+    public function add(UserIdentity $user)
     {
         foreach ($this->providers as $provider) {
-            if ($provider->addUser($user)) {
+            if ($provider->add($user)) {
                 return true;
             }
         }
     }
 
-    public function removeUser($key)
+    public function remove($key)
     {
         foreach ($this->providers as $provider) {
-            if ($provider->removeUser($key)) {
+            if ($provider->remove($key)) {
                 return true;
             }
         }
     }
 
-    public function userExists($key)
+    public function has($key)
     {
         foreach ($this->providers as $provider) {
-            if ($provider->userExists($key)) {
+            if ($provider->has($key)) {
                 return true;
             }
         }
         return false;
     }
 
-    public function getUser($key)
+    public function get($key)
     {
         foreach ($this->providers as $provider) {
-            $user = $provider->getUser($key);
-            if ($user) {
-                return $user;
+            try {
+                return $provider->get($key);
+            } catch (\OutOfBoundsException $e) {
+
             }
         }
-        return false;
+        throw new \OutOfBoundsException('UserIdentity not set: ' . $key);
     }
 
 }

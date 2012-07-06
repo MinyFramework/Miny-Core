@@ -26,57 +26,18 @@
 
 namespace Miny\User;
 
-class UserProvider
+use \Miny\Entity\EntityProvider;
+
+class UserProvider extends EntityProvider
 {
-    private $user_key = 'name';
-    private $users = array();
-
-    public function __construct(array $users = array(), $key_field = NULL)
+    public function __construct(array $users = array())
     {
-        if (!is_null($key_field)) {
-            $this->user_key = $key_field;
-        }
-        foreach ($users as $user) {
-            $this->addUser($user);
-        }
-    }
-
-    public function getKeyName()
-    {
-        return $this->user_key;
-    }
-
-    public function addUser(UserIdentity $user)
-    {
-        $key = $user->get($this->getKeyName());
-        $this->users[$key] = $user;
-        return true;
-    }
-
-    public function removeUser($key)
-    {
-        if (isset($this->users[$key])) {
-            unset($this->users[$key]);
-            return true;
-        }
+        parent::__construct('\Miny\User\UserIdentity', $users);
     }
 
     public function getAnonymUser()
     {
-        return new AnonymUserIdentity();
-    }
-
-    public function userExists($key)
-    {
-        return isset($this->users[$key]);
-    }
-
-    public function getUser($key)
-    {
-        if (!$this->userExists($key)) {
-            return false;
-        }
-        return $this->users[$key];
+        return new AnonymUserIdentity;
     }
 
 }
