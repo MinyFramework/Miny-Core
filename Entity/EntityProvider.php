@@ -36,6 +36,13 @@ abstract class EntityProvider
         $this->entity_class = $entity_class;
     }
 
+    public function create()
+    {
+        $entity = new $this->entity_class;
+        $entity->setProvider($this);
+        return $entity;
+    }
+
     public function add(Entity $ent)
     {
         $this->entities[$ent->getKey()] = $ent;

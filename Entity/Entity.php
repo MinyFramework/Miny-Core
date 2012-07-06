@@ -28,6 +28,32 @@ namespace Miny\Entity;
 
 abstract class Entity implements \ArrayAccess
 {
+    private $provider;
+
+    public function setProvider(EntityProvider $provider)
+    {
+        $this->provider = $provider;
+    }
+
+    private function checkProvider()
+    {
+        if (is_null($this->provider)) {
+            throw new \BadMethodCallException('Entity provider is not set.');
+        }
+    }
+
+    public function save()
+    {
+        $this->checkProvider();
+        $this->provider->add($this);
+    }
+
+    public function remove()
+    {
+        $this->checkProvider();
+        $this->provider->remove($this->getKey());
+    }
+
     public abstract function getKeyName();
     public function getKey()
     {
