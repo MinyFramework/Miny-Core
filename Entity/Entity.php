@@ -30,6 +30,13 @@ abstract class Entity implements \ArrayAccess
 {
     private $provider;
 
+    public function __construct(array $data = array())
+    {
+        foreach ($data as $key => $value) {
+            $this->$key = $value;
+        }
+    }
+
     public function setProvider(EntityProvider $provider)
     {
         $this->provider = $provider;

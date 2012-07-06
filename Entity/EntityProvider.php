@@ -31,14 +31,18 @@ abstract class EntityProvider
     private $entity_class;
     private $entities = array();
 
-    public function __construct($entity_class)
+    public function __construct($entity_class, array $entities = array())
     {
         $this->entity_class = $entity_class;
+        foreach($entities as $entity) {
+            $this->add($this->create($entity));
+        }
     }
 
-    public function create()
+    public function create(array $entity_data = array())
     {
-        $entity = new $this->entity_class;
+        $class = $this->entity_class;
+        $entity = new $class($entity_data);
         $entity->setProvider($this);
         return $entity;
     }
