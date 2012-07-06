@@ -50,6 +50,7 @@ abstract class EntityProvider
     public function add(Entity $ent)
     {
         $this->entities[$ent->getKey()] = $ent;
+        return true;
     }
 
     public function get($key)
