@@ -69,9 +69,10 @@ class Markdown implements iFormatter
         '\.'      => '.',
         '\!'      => '!'
     );
-//one-liner patterns
+    //one-liner patterns
     private static $patterns = array(
         'code'             => '/(?<!\\\)(`+)(.*?)(?<!\\\)\1/u',
+        'youtube'          => '/(?<!\\\)\[youtube\]\((.+?)(?<!\\\)\)/u',
         'image'            => '/(?<!\\\)!\[(.+?)(?<!\\\)\]\((.+?)(?:\s+"(.*?)")?(?<!\\\)\)/u',
         'image_definition' => '/(?<!\\\)!\[(.*?)(?<!\\\)\]\s{0,1}(?<!\\\)\[(.*?)(?<!\\\)\]/u',
         'link'             => '/(?<!\\\)\[(.+?)(?<!\\\)\]\((.+?)(?:\s+"(.*?)")?(?<!\\\)\)/u',
@@ -88,11 +89,12 @@ class Markdown implements iFormatter
         'link'             => 'insertLink',
         'link_definition'  => 'insertLinkDefinition',
         'autoemail'        => 'insertEmail',
-        'autolink'         => 'insertLink',
+        'autolink'         => 'insertLink'
     );
     private static $pattern_replaces = array(
         'bold'    => '<strong>$2</strong>',
-        'itallic' => '<em>$2</em>'
+        'itallic' => '<em>$2</em>',
+        'youtube' => '<iframe class="youtube" src="http://www.youtube.com/embed/$1" frameborder="0" allowfullscreen></iframe>'
     );
 
     public static function escape($str)
