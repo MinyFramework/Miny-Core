@@ -37,17 +37,17 @@ abstract class Constraint
     public $message = 'This value is not valid.';
     private $violations;
 
-    public function __construct(array $params)
+    public function __construct($params)
     {
         $missing = array_flip((array) $this->getRequiredOptions());
 
-        if (!is_string(key($params))) {
+        if (!is_array($params) || !is_string(key($params))) {
             $default = $this->getDefaultOption();
             if (is_null($default)) {
                 $message = 'Default option is not set for this constraint.';
                 throw new ConstraintException($message);
             }
-            $params = array($default => array_shift($params));
+            $params = array($default => $params);
         }
 
         foreach ($params as $key => $value) {

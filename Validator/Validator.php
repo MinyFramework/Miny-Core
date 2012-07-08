@@ -34,13 +34,17 @@ class Validator
         $object->getValidationInfo($class);
 
         $valid = true;
-        $violations = new ConstraintViolationList;
+        $violations = array();
         foreach ($class->getConstraints('class') as $array) {
             foreach ($array as $constraint) {
                 $is_valid = $this->validateValue($object, $constraint, $scenario);
                 if ($is_valid !== true) {
-                    $violation_list = $constraint->getViolationList();
-                    $violations->addViolationList($violation_list);
+                    $list = $constraint->getViolationList();
+                    if (!isset($violations['class'])) {
+                        $violations['class'] = $list;
+                    } else {
+                        $violations['class']->addViolationList($list);
+                    }
                     $valid = false;
                 }
             }
@@ -51,8 +55,12 @@ class Validator
                 $data = call_user_func(array($object, $getter));
                 $is_valid = $this->validateValue($data, $constraint, $scenario);
                 if ($is_valid !== true) {
-                    $violation_list = $constraint->getViolationList();
-                    $violations->addViolationList($violation_list);
+                    $list = $constraint->getViolationList();
+                    if (!isset($violations[$getter])) {
+                        $violations[$getter] = $list;
+                    } else {
+                        $violations[$getter]->addViolationList($list);
+                    }
                     $valid = false;
                 }
             }
@@ -63,8 +71,12 @@ class Validator
                 $data = $object->$property;
                 $is_valid = $this->validateValue($data, $constraint, $scenario);
                 if ($is_valid !== true) {
-                    $violation_list = $constraint->getViolationList();
-                    $violations->addViolationList($violation_list);
+                    $list = $constraint->getViolationList();
+                    if (!isset($violations[$property])) {
+                        $violations[$property] = $list;
+                    } else {
+                        $violations[$property]->addViolationList($list);
+                    }
                     $valid = false;
                 }
             }

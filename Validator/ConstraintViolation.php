@@ -58,11 +58,12 @@ class ConstraintViolation
     {
         if (is_null($this->message)) {
             $parameters = $this->message_parameters;
+            $template = $this->message_template;
             $keys = array();
             foreach (array_keys($parameters) as $key) {
                 $keys[] = '{' . $key . '}';
             }
-            $this->message = str_replace($keys, $parameters, $this->message);
+            $this->message = str_replace($keys, $parameters, $template);
         }
         return $this->message;
     }
