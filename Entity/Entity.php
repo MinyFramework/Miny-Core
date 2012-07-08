@@ -75,16 +75,21 @@ class Entity implements \ArrayAccess, \Iterator
         return $this->$key;
     }
 
+    public function getKeyList()
+    {
+        return $this->keys;
+    }
+
     public function checkField($name)
     {
-        if (!property_exists($this, $name)) {
+        if (!in_array($name, $this->keys)) {
             throw new \InvalidArgumentException('Field not exists: ' . $name);
         }
     }
 
     public function __isset($name)
     {
-        return property_exists($this, $name);
+        return in_array($name, $this->keys);
     }
 
     public function __set($field, $value)
