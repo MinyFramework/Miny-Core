@@ -26,15 +26,18 @@
 
 namespace Miny\Entity;
 
-abstract class Entity implements \ArrayAccess
+class Entity implements \ArrayAccess, \Iterator
 {
     private $provider;
+    private $keys = array();
 
     public function __construct(array $data = array())
     {
         foreach ($data as $key => $value) {
             $this->$key = $value;
         }
+        $this->keys = array_diff(get_object_vars($this),
+                array('provider', 'keys'));
     }
 
     public function setProvider(EntityProvider $provider)
@@ -125,6 +128,32 @@ abstract class Entity implements \ArrayAccess
     public function offsetUnset($offset)
     {
         return $this->__set($offset, NULL);
+    }
+
+    public function current()
+    {
+        $key = $this->key();
+        return $this->$key;
+    }
+
+    public function key()
+    {
+        return current($this->keys);
+    }
+
+    public function next()
+    {
+        return next($this->keys);
+    }
+
+    public function rewind()
+    {
+        reset($this->keys);
+    }
+
+    public function valid()
+    {
+        return $this->key() !== false;
     }
 
 }
