@@ -107,9 +107,10 @@ abstract class Controller
         return $this->assigns;
     }
 
-    public function request($path, array $get = NULL, array $post = NULL)
+    public function request($path, array $get = NULL, array $post = NULL,
+                            array $cookie = NULL)
     {
-        $request = new Request($path, $get, $post, Request::SUB_REQUEST);
+        $request = new Request($path, $get, $post, $cookie, Request::SUB_REQUEST);
         //TODO: biztosítani kell, hogy ez egyáltalán létezzen
         $response = $this->dispatcher->dispatch($request);
 
@@ -124,7 +125,7 @@ abstract class Controller
         return $response;
     }
 
-    public function run($controller, $action, array $params = NULL)
+    public function run($controller, $action, Request $request)
     {
         if (!$action) {
             $action = $this->default_action ? : 'index';
@@ -135,7 +136,7 @@ abstract class Controller
         }
         $this->template = $controller . '/' . $action;
 
-        return $this->$fn($params ? : array());
+        return $this->$fn($request);
     }
 
 }

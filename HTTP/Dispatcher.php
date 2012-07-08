@@ -44,11 +44,9 @@ class Dispatcher
 
     private function getResponse(Request $r)
     {
-        $get = $r->get();
-        $params = $r->getHTTPParams();
-        $action = isset($get['action']) ? $get['action'] : NULL;
+        $action = isset($r->get['action']) ? $r->get['action'] : NULL;
         $resolver = $this->controller_resolver;
-        return $resolver->resolve($get['controller'], $action, $params);
+        return $resolver->resolve($r->get['controller'], $action, $r);
     }
 
     private function handle(Request $r)

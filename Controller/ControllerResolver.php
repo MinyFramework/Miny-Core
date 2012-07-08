@@ -28,6 +28,7 @@
 namespace Miny\Controller;
 
 use \Miny\HTTP\RedirectResponse;
+use \Miny\HTTP\Request;
 use \Miny\HTTP\Response;
 use \Miny\Template\Template;
 
@@ -57,7 +58,7 @@ class ControllerResolver
         $this->controllers[$name] = $controller;
     }
 
-    public function resolve($class, $action = NULL, array $params = array())
+    public function resolve($class, $action, Request $request)
     {
         if (!isset($this->controllers[$class])) {
             $controller = $this->getController($class);
@@ -72,7 +73,7 @@ class ControllerResolver
             $message = 'Controller must extend Controller: ' . $class;
             throw new \RuntimeException($message);
         }
-        return $this->runController($controller, $class, $action, $params);
+        return $this->runController($controller, $class, $action, $request);
     }
 
     private function getController($class)
@@ -85,11 +86,11 @@ class ControllerResolver
     }
 
     private function runController(Controller $controller, $class, $action,
-                                   array $params = NULL)
+                                   Request $request)
     {
         $this->templating->setScope('controller');
         $vars = $this->templating->getVariables();
-        $return = $controller->run($class, $action, $params);
+        $return = $controller->run($class, $action, $request);
 
         if (is_string($return)) {
             $response = new RedirectResponse($return);

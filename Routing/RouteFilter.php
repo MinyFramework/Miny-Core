@@ -54,7 +54,7 @@ class RouteFilter extends EventHandler
             throw new PageNotFoundException($message);
         }
         parse_str(parse_url($_SERVER['REQUEST_URI'], PHP_URL_QUERY), $_GET);
-        $request->get(NULL, $route->get() + $_GET);
+        $request->get = $route->get() + $_GET;
     }
 
     public function handleRequestException(Event $event)

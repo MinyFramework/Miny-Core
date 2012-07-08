@@ -53,7 +53,7 @@ class ForgeryFilter extends EventHandler
         if ($request->method == 'GET') {
             return;
         }
-        $token = $request->post('token');
+        $token = $request->post['token'];
         if (!in_array($token, $valid_tokens)) {
             throw new TokenException('Wrong token sent.');
         }

@@ -31,91 +31,58 @@ class Request
     const MASTER_REQUEST = 0;
     const SUB_REQUEST = 1;
 
-    private $params;
+    private static $request;
+
+    public static function getGlobal()
+    {
+        if (is_null(self::$request)) {
+            $path = parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH);
+            self::$request = new Request($path, $_GET, $_POST, $_COOKIE);
+        }
+        return self::$request;
+    }
+
+    public $path;
+    public $get;
+    public $post;
+    public $cookie;
+    private $method;
+    private $ip;
     private $type;
 
-    public function __construct($path = NULL, array $get = NULL,
-                                array $post = NULL, $type = self::MASTER_REQUEST)
+    public function __construct($path, array $get = array(),
+                                array $post = array(), array $cookie = array(),
+                                $type = self::MASTER_REQUEST)
     {
-        if ($path === NULL) {
-            $this->getFromGlobals();
-        } else {
-            $this->params = array(
-                'path' => $path,
-                'get'  => $get ? : array(),
-                'post' => $post ? : array()
-            );
-        }
-        if (!empty($this->params['post'])) {
-            if (isset($this->params['post']['_method'])) {
-                $method = $this->params['post']['_method'];
-            } else {
-                $method = 'POST';
-            }
-        } else {
-            $method = $_SERVER['REQUEST_METHOD'];
-        }
-        $this->params['method'] = $method;
+        $this->path = $path;
+        $this->get = $get;
+        $this->post = $post;
+        $this->cookie = $cookie;
         $this->type = $type;
-    }
 
-    private function getFromGlobals()
-    {
-        $this->params = array(
-            'path' => parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH),
-            'get'  => $_GET,
-            'post' => $_POST
-        );
-    }
-
-    public function getRemoteIp()
-    {
         if (isset($_SERVER['HTTP_X_FORWARDED_FOR'])) {
-            return $_SERVER['HTTP_X_FORWARDED_FOR'];
-        }
-        return $_SERVER['REMOTE_ADDR'];
-    }
-
-    public function getHTTPParams()
-    {
-        return array_merge($this->params['get'], $this->params['post']);
-    }
-
-    public function get($key = NULL, $value = NULL)
-    {
-        return $this->param('get', $key, $value);
-    }
-
-    public function post($key = NULL, $value = NULL)
-    {
-        return $this->param('post', $key, $value);
-    }
-
-    private function param($type, $key, $value)
-    {
-        if (is_null($value)) {
-            if (is_null($key)) {
-                return $this->params[$type];
-            }
-            if (!isset($this->params[$type][$key])) {
-                $message = 'Value not set: ' . $key . '(' . $type . ')';
-                throw new \OutOfBoundsException($message);
-            }
-            return $this->params[$type][$key];
-        }
-        if (is_array($value)) {
-            $this->params[$type] = $value + $this->params[$type];
+            $this->ip = $_SERVER['HTTP_X_FORWARDED_FOR'];
         } else {
-            $this->params[$type][$key] = $value;
+            $this->ip = $_SERVER['REMOTE_ADDR'];
+        }
+
+        if (!empty($this->post)) {
+            if (isset($this->post['_method'])) {
+                $this->method = $this->post['_method'];
+            } else {
+                $this->method = 'POST';
+            }
+        } else {
+            $this->method = $_SERVER['REQUEST_METHOD'];
         }
     }
 
-    public function __get($key)
+    public function __get($field)
     {
-        if (!isset($this->params[$key])) {
-            throw new \OutOfBoundsException('Parameter not set: ' . $key);
+        if (!property_exists($this, $field)) {
+            throw new \InvalidArgumentException('Field not exists: ' . $field);
         }
-        return $this->params[$key];
+        return $this->$field;
     }
 
     public function isSubRequest()

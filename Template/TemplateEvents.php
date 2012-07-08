@@ -53,7 +53,7 @@ class TemplateEvents extends EventHandler
     {
         $request = $event->getParameter('request');
         try {
-            $format = $request->get('format');
+            $format = $request->get['format'];
             $this->templating->setFormat($format);
         } catch (\OutOfBoundsException $e) {
 
@@ -70,7 +70,7 @@ class TemplateEvents extends EventHandler
         if ($rsp instanceof RedirectResponse) {
             return;
         }
-        $controller = $request->get('controller');
+        $controller = $request->get['controller'];
 
         $this->templating->setScope($this->scope);
         $this->templating->content = $rsp->getContent();
