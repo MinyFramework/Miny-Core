@@ -33,11 +33,13 @@ class Entity implements \ArrayAccess, \Iterator
 
     public function __construct(array $data = array())
     {
-        foreach ($data as $key => $value) {
-            $this->$key = $value;
-        }
         $this->keys = array_diff(array_keys(get_object_vars($this)),
                 array('provider', 'keys'));
+        foreach ($data as $key => $value) {
+            if ($this->__isset($key)) {
+                $this->$key = $value;
+            }
+        }
     }
 
     public function setProvider(EntityProvider $provider)
