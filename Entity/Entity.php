@@ -36,7 +36,7 @@ class Entity implements \ArrayAccess, \Iterator
         foreach ($data as $key => $value) {
             $this->$key = $value;
         }
-        $this->keys = array_diff(get_object_vars($this),
+        $this->keys = array_diff(array_keys(get_object_vars($this)),
                 array('provider', 'keys'));
     }
 
