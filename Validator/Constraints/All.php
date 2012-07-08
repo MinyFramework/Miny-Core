@@ -31,7 +31,6 @@ use Miny\Validator\Constraint;
 class All extends Constraint
 {
     public $constraints = array();
-    public $message = 'Some constraints have been violated.';
 
     public function validate($data)
     {
@@ -44,7 +43,6 @@ class All extends Constraint
                 throw new \UnexpectedValueException('Invalid parameter set.');
             }
             if (!$constraint->validate($data)) {
-                $this->addViolation($this->message);
                 $this->addViolationList($constraint->getViolationList());
                 $is_valid = false;
             }
