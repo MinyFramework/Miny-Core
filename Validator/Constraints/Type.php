@@ -28,7 +28,7 @@ namespace Miny\Validator\Constraints;
 
 use Miny\Validator\Constraint;
 
-class Type implements Constraint
+class Type extends Constraint
 {
     public $type;
     public $message = 'This value should be of type {type}';

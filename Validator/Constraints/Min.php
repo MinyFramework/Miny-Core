@@ -28,7 +28,7 @@ namespace Miny\Validator\Constraints;
 
 use Miny\Validator\Constraint;
 
-class Min implements Constraint
+class Min extends Constraint
 {
     public $limit;
     public $message = 'The number should be at least {limit}';

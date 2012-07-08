@@ -28,7 +28,7 @@ namespace Miny\Validator\Constraints;
 
 use Miny\Validator\Constraint;
 
-class Blank implements Constraint
+class Blank extends Constraint
 {
     public $message = 'This value should be blank.';
 

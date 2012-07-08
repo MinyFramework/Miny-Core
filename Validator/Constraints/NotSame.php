@@ -28,7 +28,7 @@ namespace Miny\Validator\Constraints;
 
 use Miny\Validator\Constraint;
 
-class NotSame implements Constraint
+class NotSame extends Constraint
 {
     public $data;
     public $message = 'The data are the same but they should not be.';

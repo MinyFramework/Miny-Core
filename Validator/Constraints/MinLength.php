@@ -28,7 +28,7 @@ namespace Miny\Validator\Constraints;
 
 use Miny\Validator\Constraint;
 
-class MinLength implements Constraint
+class MinLength extends Constraint
 {
     public $limit;
     public $message = 'The string should be at least {limit} characters long.';

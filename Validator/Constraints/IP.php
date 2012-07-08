@@ -29,7 +29,7 @@ namespace Miny\Validator\Constraints;
 use Miny\Validator\Constraint;
 use Miny\Validator\Exceptions\ConstraintException;
 
-class IP implements Constraint
+class IP extends Constraint
 {
     const V4 = 'v4';
     const V6 = 'v6';

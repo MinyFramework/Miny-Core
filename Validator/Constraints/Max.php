@@ -28,7 +28,7 @@ namespace Miny\Validator\Constraints;
 
 use Miny\Validator\Constraint;
 
-class Max implements Constraint
+class Max extends Constraint
 {
     public $limit;
     public $message = 'The number should be at most {limit}';

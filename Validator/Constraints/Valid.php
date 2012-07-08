@@ -28,7 +28,7 @@ namespace Miny\Validator\Constraints;
 
 use Miny\Validator\Constraint;
 
-class Valid implements Constraint
+class Valid extends Constraint
 {
     public $message = 'This value should be valid.';
 

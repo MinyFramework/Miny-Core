@@ -28,7 +28,7 @@ namespace Miny\Validator\Constraints;
 
 use Miny\Validator\Constraint;
 
-class NotEquals implements Constraint
+class NotEquals extends Constraint
 {
     public $data;
     public $message = 'The data match but they should not.';

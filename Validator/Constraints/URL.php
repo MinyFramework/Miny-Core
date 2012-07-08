@@ -28,7 +28,7 @@ namespace Miny\Validator\Constraints;
 
 use Miny\Validator\Constraint;
 
-class URL implements Constraint
+class URL extends Constraint
 {
     public $message = 'The URL "{address}" is not valid.';
     public $protocols = array('http', 'https');

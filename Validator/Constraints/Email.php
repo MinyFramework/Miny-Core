@@ -28,7 +28,7 @@ namespace Miny\Validator\Constraints;
 
 use Miny\Validator\Constraint;
 
-class Email implements Constraint
+class Email extends Constraint
 {
     public $message = 'The e-mail address "{address}" is not valid.';
     public $check_mx = false;

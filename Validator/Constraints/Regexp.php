@@ -28,7 +28,7 @@ namespace Miny\Validator\Constraints;
 
 use Miny\Validator\Constraint;
 
-class Regexp implements Constraint
+class Regexp extends Constraint
 {
     public $pattern;
     public $match = true;

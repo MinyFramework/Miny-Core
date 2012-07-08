@@ -29,7 +29,7 @@ namespace Miny\Validator\Constraints;
 use Miny\Validator\Constraint;
 use Miny\Validator\Exceptions\ConstraintException;
 
-class Choice implements Constraint
+class Choice extends Constraint
 {
     public $choices;
     public $callback;
