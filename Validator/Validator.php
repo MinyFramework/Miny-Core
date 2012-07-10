@@ -28,11 +28,16 @@ namespace Miny\Validator;
 
 class Validator
 {
-    public function validate(iValidable $object, $scenario = NULL)
+    protected function loadConstraints(iValidable $object)
     {
         $class = new Descriptor;
         $object->getValidationInfo($class);
+        return $class;
+    }
 
+    public function validate(iValidable $object, $scenario = NULL)
+    {
+        $class = $this->loadConstraints();
         $valid = true;
         $violations = array();
         foreach ($class->getConstraints('class') as $array) {
