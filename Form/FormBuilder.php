@@ -106,9 +106,15 @@ class FormBuilder
             $method_field = new Hidden('_method', array('value' => $method));
             $form .= $method_field->render();
         }
+        
         if ($this->descriptor->getOption('csrf')) {
             $token = $this->descriptor->getCSRFToken();
             $token_field = new Hidden('token', array('value' => $token));
+            if ($this->descriptor->hasOption('name')) {
+                $form_name = $this->descriptor->getOption('name');
+                $token_field->name = $form_name . '[token]';
+            }
+
             $form .= $token_field->render();
         }
         return $form;

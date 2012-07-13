@@ -63,7 +63,7 @@ class FormErrorList implements \IteratorAggregate
 
     public function getIterator()
     {
-        return new ArrayIterator($this->errors);
+        return new \ArrayIterator($this->errors);
     }
 
     public function getList()

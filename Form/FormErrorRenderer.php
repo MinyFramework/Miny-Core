@@ -56,7 +56,9 @@ class FormErrorRenderer implements iFormErrorRenderer
         $string = '<ul class="form_errors">';
         foreach ($form->getErrors() as $field => $list) {
             $string .= '<li class="error_field">';
-            $string .= $form->getField($field)->label;
+            if ($form->hasField($field)) {
+                $string .= $form->getField($field)->label;
+            }
             $string .= $this->renderFieldErrors($list);
             $string .= '</li>';
         }

@@ -42,7 +42,7 @@ class FormDescriptor extends Entity implements iValidable
 
     public function __construct(array $data = array())
     {
-        if ($this->hasOption('name')) {
+        if ($this->hasOption('name') && !empty($data)) {
             $data = $data[$this->getOption('name')];
         }
         $this->fields = $this->fields();
@@ -100,6 +100,16 @@ class FormDescriptor extends Entity implements iValidable
             throw new \OutOfBoundsException('Field not set: ' . $key);
         }
         return $this->fields[$key];
+    }
+
+    public function hasField($key)
+    {
+        return isset($this->fields[$key]);
+    }
+
+    public function __wakeup()
+    {
+        $this->token = sha1(mt_rand());
     }
 
     public function getCSRFToken()
