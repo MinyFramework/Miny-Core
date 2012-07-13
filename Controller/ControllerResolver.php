@@ -76,6 +76,11 @@ class ControllerResolver
         return $this->runController($controller, $class, $action, $request);
     }
 
+    public function getNextName()
+    {
+        return '_controller_' . count($this->controllers);
+    }
+
     private function getController($class)
     {
         if (!class_exists($class)) {
