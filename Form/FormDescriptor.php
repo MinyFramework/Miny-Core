@@ -29,7 +29,7 @@ namespace Miny\Form;
 use \Miny\Entity\Entity;
 use \Miny\Validator\iValidable;
 
-abstract class FormDescriptor extends Entity implements iValidable
+class FormDescriptor extends Entity implements iValidable, \IteratorAggregate
 {
     protected $fields = array();
     protected $options = array(
@@ -48,6 +48,16 @@ abstract class FormDescriptor extends Entity implements iValidable
         parent::__construct($data);
     }
 
+    public function getValidationInfo(Descriptor $class)
+    {
+
+    }
+
+    public function getIterator()
+    {
+        return new \ArrayIterator($this->fields);
+    }
+
     protected function privates()
     {
         $array = parent::privates();
@@ -55,7 +65,11 @@ abstract class FormDescriptor extends Entity implements iValidable
         return $array;
     }
 
-    public abstract function fields();
+    public function fields()
+    {
+        return array();
+    }
+
     public function getOption($key)
     {
         if (!isset($this->options[$key])) {
@@ -72,6 +86,11 @@ abstract class FormDescriptor extends Entity implements iValidable
     public function getFields()
     {
         return $this->fields;
+    }
+
+    public function addField(FormElement $field)
+    {
+        $this->fields[$field->name] = $field;
     }
 
     public function getField($key)
@@ -96,7 +115,7 @@ abstract class FormDescriptor extends Entity implements iValidable
 
     public function addErrors(array $errors)
     {
-        if(is_null($this->errors)) {
+        if (is_null($this->errors)) {
             $this->errors = new FormErrorList;
         }
         $this->errors->addList($errors);

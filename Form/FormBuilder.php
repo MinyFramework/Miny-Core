@@ -32,14 +32,22 @@ class FormBuilder
     private $error_renderer;
     private $errors_rendered = false;
 
-    public function __construct(FormDescriptor $form,
+    public function __construct(FormDescriptor $form = NULL,
                                 iFormErrorRenderer $renderer = NULL)
     {
-        $this->descriptor = $form;
+        if (is_null($form)) {
+            $form = new FormDescriptor;
+        }
         if (is_null($renderer)) {
             $renderer = new FormErrorRenderer;
         }
+        $this->descriptor = $form;
         $this->error_renderer = $renderer;
+    }
+
+    public function addField(FormElement $field)
+    {
+        $this->descriptor->addField($field);
     }
 
     public function getHTMLArgList(array $args)

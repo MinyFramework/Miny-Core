@@ -17,36 +17,23 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  *
- * @package   Miny/Form
+ * @package   Miny/Form/Elements
  * @copyright 2012 Dániel Buga <daniel@bugadani.hu>
  * @license   http://www.gnu.org/licenses/gpl.txt
  *            GNU General Public License
  * @version   1.0
  */
 
-namespace Miny\Form;
+namespace Miny\Form\Elements;
 
-use \Miny\Form\Elements\Button;
+use \Miny\Form\FormElement;
 
-class ButtonWidget extends Widget
+class Button extends Input
 {
-    public function run($action, $method, array $params = array())
+    public function render(array $options = array())
     {
-        $form_params = array();
-        if (isset($params['form'])) {
-            $form_params = array_merge($form, $params['form']);
-            unset($params['form']);
-        }
-        $form_params['action'] = $action;
-        $form_params['method'] = $method;
-        $form = new FormBuilder;
-        if (isset($params['src'])) {
-            $form->addElement(new Image($params));
-        } else {
-            $form->addElement(new Button($params));
-        }
-        echo $form->generate($form_params);
-        return false;
+        $options['type'] = 'button';
+        return parent::render($options);
     }
 
 }
