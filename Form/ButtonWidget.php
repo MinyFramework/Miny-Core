@@ -64,8 +64,9 @@ class ButtonWidget extends Widget
         if (is_null($this->session)) {
             $descriptor->setOption('csrf', false);
         } else {
-            $token = $descriptor->getCSRFToken();
-            //TODO: store token
+            $tokens = $this->session->getFlash('tokens', array());
+            $tokens[] = $login->getCSRFToken();
+            $this->session->setFlash('tokens', $tokens);
         }
 
         if (isset($params['src'])) {
