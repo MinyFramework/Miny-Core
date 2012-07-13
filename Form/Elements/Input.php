@@ -39,9 +39,12 @@ class Input extends FormElement
         return sprintf('<input%s />', $this->getHTMLArgList($options));
     }
 
+
     protected function requiredOptions()
     {
-        return array('type');
+        $arr = parent::requiredOptions();
+        $arr[] = 'type';
+        return $arr;
     }
 
 }

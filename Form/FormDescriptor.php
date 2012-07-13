@@ -28,8 +28,9 @@ namespace Miny\Form;
 
 use \Miny\Entity\Entity;
 use \Miny\Validator\iValidable;
+use \Miny\Validator\Descriptor;
 
-class FormDescriptor extends Entity implements iValidable, \IteratorAggregate
+class FormDescriptor extends Entity implements iValidable
 {
     protected $fields = array();
     protected $options = array(
@@ -51,11 +52,6 @@ class FormDescriptor extends Entity implements iValidable, \IteratorAggregate
     public function getValidationInfo(Descriptor $class)
     {
 
-    }
-
-    public function getIterator()
-    {
-        return new \ArrayIterator($this->fields);
     }
 
     protected function privates()

@@ -28,10 +28,10 @@ namespace Miny\Form\Elements;
 
 class Password extends Input
 {
-    public function render(array $options = array())
+    public function __construct(array $options, $label, $value = NULL)
     {
         $options['type'] = 'password';
-        return parent::render($options);
+        parent::__construct($options, $label, $value);
     }
 
 }

@@ -30,10 +30,10 @@ use \Miny\Form\FormElement;
 
 class Submit extends Input
 {
-    public function render(array $options = array())
+    public function __construct(array $options, $label, $value = NULL)
     {
-        $options['type'] = 'button';
-        return parent::render($options);
+        $options['type'] = 'submit';
+        parent::__construct($options, $label, $value);
     }
 
 }

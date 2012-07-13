@@ -28,10 +28,10 @@ namespace Miny\Form\Elements;
 
 class Text extends Input
 {
-    public function render(array $options = array())
+    public function __construct(array $options, $label, $value = NULL)
     {
         $options['type'] = 'text';
-        return parent::render($options);
+        parent::__construct($options, $label, $value);
     }
 
 }

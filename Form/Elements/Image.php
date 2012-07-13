@@ -28,12 +28,12 @@ namespace Miny\Form\Elements;
 
 use \Miny\Form\FormElement;
 
-class Button extends Input
+class Image extends Input
 {
-    public function render(array $options = array())
+    public function __construct(array $options, $label, $value = NULL)
     {
         $options['type'] = 'image';
-        return parent::render($options);
+        parent::__construct($options, $label, $value);
     }
 
     protected function requiredOptions()

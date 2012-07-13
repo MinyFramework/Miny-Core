@@ -26,6 +26,8 @@
 
 namespace Miny\Form;
 
+use \Miny\Validator\ConstraintViolationList;
+
 interface iFormErrorRenderer
 {
     public function renderList(FormDescriptor $form);

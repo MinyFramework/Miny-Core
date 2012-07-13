@@ -30,10 +30,10 @@ use \Miny\Form\FormElement;
 
 class Button extends Input
 {
-    public function render(array $options = array())
+    public function __construct(array $options, $label, $value = NULL)
     {
         $options['type'] = 'button';
-        return parent::render($options);
+        parent::__construct($options, $label, $value);
     }
 
 }

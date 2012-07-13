@@ -102,7 +102,7 @@ class FormBuilder
             $form .= sprintf($hidden, '_method', $method);
         }
         if ($this->descriptor->getOption('csrf')) {
-            $form .= sprintf($hidden, 'token', $descriptor->getCSRFToken());
+            $form .= sprintf($hidden, 'token', $this->descriptor->getCSRFToken());
         }
         return $form;
     }

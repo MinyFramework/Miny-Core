@@ -45,7 +45,7 @@ abstract class FormElement
             unset($required_options[$option]);
         }
         if (!empty($required_options)) {
-            $options = implode('", "', $required_options);
+            $options = implode('", "', array_keys($required_options));
             $message = sprintf('This element needs options "%s"', $options);
             throw new FormElementExeption($message);
         }
@@ -53,7 +53,7 @@ abstract class FormElement
 
     protected function requiredOptions()
     {
-        return array();
+        return array('id', 'name');
     }
 
     public function __set($key, $value)

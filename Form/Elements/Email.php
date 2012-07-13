@@ -28,10 +28,10 @@ namespace Miny\Form\Elements;
 
 class Email extends Input
 {
-    public function render(array $options = array())
+    public function __construct(array $options, $label, $value = NULL)
     {
         $options['type'] = 'email';
-        return parent::render($options);
+        parent::__construct($options, $label, $value);
     }
 
 }
