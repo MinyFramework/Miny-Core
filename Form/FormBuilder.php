@@ -27,6 +27,8 @@
 namespace Miny\Form;
 
 use \Miny\Form\Elements\Submit;
+use \Miny\Form\Elements\Reset;
+use \Miny\Form\Elements\Hidden;
 
 class FormBuilder
 {
@@ -80,7 +82,8 @@ class FormBuilder
         return $form;
     }
 
-    public function submit($id = 'submit', $label = NULL, array $options = array())
+    public function submit($id = 'submit', $label = NULL,
+                           array $options = array())
     {
         $submit = new Submit($id, $label);
         return $submit->render($options);
@@ -99,12 +102,14 @@ class FormBuilder
         $options['method'] = ($method == 'GET') ? 'GET' : 'POST';
 
         $form = sprintf('<form%s>', $this->getHTMLArgList($options));
-        $hidden = '<input type="hidden" name="%s" value ="%s">' . "\n";
         if ($method != $options['method']) {
-            $form .= sprintf($hidden, '_method', $method);
+            $method_field = new Hidden('_method', array('value' => $method));
+            $form .= $method_field->render();
         }
         if ($this->descriptor->getOption('csrf')) {
-            $form .= sprintf($hidden, 'token', $this->descriptor->getCSRFToken());
+            $token = $this->descriptor->getCSRFToken();
+            $token_field = new Hidden('token', array('value' => $token));
+            $form .= $token_field->render();
         }
         return $form;
     }

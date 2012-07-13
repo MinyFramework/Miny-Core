@@ -36,11 +36,13 @@ abstract class FormElement
 
     public function __construct($name, $label, array $options = array())
     {
-        $this->label = $label;
-        $this->options['name'] = $name;
-        foreach ($options as $option => $val) {
-            $this->options[$option] = $val;
+        if (isset($options['value'])) {
+            $this->value = $options['value'];
+            unset($options['value']);
         }
+        $this->label = $label;
+        $this->options = $options;
+        $this->options['name'] = $name;
     }
 
     public function __set($key, $value)
