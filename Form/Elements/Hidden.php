@@ -28,10 +28,10 @@ namespace Miny\Form\Elements;
 
 class Hidden extends Input
 {
-    public function __construct($id, array $options = array())
+    public function __construct($name, array $options = array())
     {
-        $options['type'] = 'hidden';
-        parent::__construct($id, NULL, $options);
+        parent::__construct($name, NULL, $options);
+        $this->type = 'hidden';
     }
 
 }

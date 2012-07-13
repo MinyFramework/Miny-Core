@@ -30,9 +30,9 @@ use \Miny\Form\FormElement;
 
 class Reset extends Button
 {
-    public function __construct($id, $label, array $options = array())
+    public function __construct($name, $label, array $options = array())
     {
-        parent::__construct($id, $label, $options);
+        parent::__construct($name, $label, $options);
         $this->type = 'reset';
     }
 

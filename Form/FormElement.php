@@ -34,11 +34,10 @@ abstract class FormElement
     private $value;
     private $label;
 
-    public function __construct($id, $label, array $options = array())
+    public function __construct($name, $label, array $options = array())
     {
         $this->label = $label;
-        $this->options['id'] = $id;
-        $this->options['name'] = $id;
+        $this->options['name'] = $name;
         foreach ($options as $option => $val) {
             $this->options[$option] = $val;
         }
@@ -83,6 +82,11 @@ abstract class FormElement
         if (is_null($this->label)) {
             return NULL;
         }
+
+        if (!isset($this->options['id'])) {
+            $this->options['id'] = $this->options['name'];
+        }
+
         $options['for'] = $this->options['id'];
         $options = $this->getHTMLArgList($options);
         return sprintf('<label%s>%s</label>', $options, $this->label);

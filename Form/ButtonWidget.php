@@ -27,26 +27,57 @@
 namespace Miny\Form;
 
 use \Miny\Widget\Widget;
+use \Miny\Session\Session;
 use \Miny\Form\Elements\Button;
+use \Miny\Form\Elements\Image;
 
 class ButtonWidget extends Widget
 {
-    public function run($action, $method = 'POST', array $params = array())
+    private $session;
+
+    public function setSession(Session $session)
     {
-        $form_params = array();
+        $this->session = $session;
+    }
+
+    public function run(array $params = array())
+    {
+        $required_keys = array('url', 'method');
+        $missing = array_diff($required_keys, array_keys($params));
+        if (!empty($missing)) {
+            $string = implode('", "', $missing);
+            $message = sprintf('Parameters "%s" are missing.', $string);
+            throw new \InvalidArgumentException($message);
+        }
+
         if (isset($params['form'])) {
-            $form_params = array_merge($form, $params['form']);
+            $form_params = $params['form'];
             unset($params['form']);
-        }
-        $form_params['action'] = $action;
-        $form_params['method'] = $method;
-        $form = new FormBuilder;
-        if (isset($params['src'])) {
-            $form->addField(new Image($params));
         } else {
-            $form->addField(new Button($params));
+            $form_params = array();
         }
-        echo $form->generate($form_params);
+        $form_params['action'] = $params['url'];
+        $form_params['method'] = $params['method'];
+        unset($params['url'], $params['method']);
+        $descriptor = new FormDescriptor;
+
+        if (is_null($this->session)) {
+            $descriptor->setOption('csrf', false);
+        } else {
+            $token = $descriptor->getCSRFToken();
+            //TODO: store token
+        }
+
+        if (isset($params['src'])) {
+            $descriptor->addField(new Image('button', $params['src'], $params));
+        } else {
+            $value = isset($params['value']) ? $params['value'] : NULL;
+            $descriptor->addField(new Button('button', $value, $params));
+        }
+        $form = new FormBuilder($descriptor);
+        echo $form->begin($form_params);
+        echo $form->render('button');
+        echo $form->end();
         return false;
     }
 

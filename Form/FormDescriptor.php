@@ -79,6 +79,11 @@ class FormDescriptor extends Entity implements iValidable
         return isset($this->options[$key]);
     }
 
+    public function setOption($key, $value)
+    {
+        $this->options[$key] = $value;
+    }
+
     public function getFields()
     {
         return $this->fields;

@@ -30,10 +30,10 @@ use \Miny\Form\FormElement;
 
 class Image extends Button
 {
-    public function __construct($id, $src, array $options = array())
+    public function __construct($name, $src, array $options = array())
     {
-        parent::__construct($id, NULL, $options);
-        $this->type = 'submit';
+        parent::__construct($name, NULL, $options);
+        $this->type = 'image';
         $this->src = $src;
     }
 

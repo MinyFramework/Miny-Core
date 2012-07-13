@@ -99,7 +99,7 @@ class FormBuilder
         $options['method'] = ($method == 'GET') ? 'GET' : 'POST';
 
         $form = sprintf('<form%s>', $this->getHTMLArgList($options));
-        $hidden = '<input type="hidden" name="" value ="%s">' . "\n";
+        $hidden = '<input type="hidden" name="%s" value ="%s">' . "\n";
         if ($method != $options['method']) {
             $form .= sprintf($hidden, '_method', $method);
         }
