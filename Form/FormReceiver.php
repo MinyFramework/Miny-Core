@@ -26,6 +26,7 @@
 
 namespace Miny\Form;
 
+use \Miny\Validator\Constraints\Choice;
 use \Miny\Validator\Descriptor;
 use \Miny\Validator\Validator;
 use \Miny\Validator\iValidable;
