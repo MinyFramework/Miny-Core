@@ -37,8 +37,8 @@ class FormDescriptor extends Entity implements iValidable
         'csrf'   => true,
         'method' => 'POST'
     );
+    protected $token;
     private $errors;
-    private $token;
 
     public function __construct(array $data = array())
     {
