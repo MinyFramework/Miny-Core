@@ -26,12 +26,14 @@
 
 namespace Miny\Form\Elements;
 
-class Hidden extends Input
+use \Miny\Form\FormElement;
+
+class Reset extends Button
 {
-    public function __construct($id, array $options = array())
+    public function __construct($id, $label, array $options = array())
     {
-        $options['type'] = 'hidden';
-        parent::__construct($id, NULL, $options);
+        parent::__construct($id, $label, $options);
+        $this->type = 'reset';
     }
 
 }

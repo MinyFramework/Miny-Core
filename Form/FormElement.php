@@ -34,31 +34,23 @@ abstract class FormElement
     private $value;
     private $label;
 
-    public function __construct(array $options, $label, $value = NULL)
+    public function __construct($id, $label, array $options = array())
     {
-        $required_options = array_flip((array) $this->requiredOptions());
-
-        $this->value = $value;
         $this->label = $label;
+        $this->options['id'] = $id;
+        $this->options['name'] = $id;
         foreach ($options as $option => $val) {
             $this->options[$option] = $val;
-            unset($required_options[$option]);
         }
-        if (!empty($required_options)) {
-            $options = implode('", "', array_keys($required_options));
-            $message = sprintf('This element needs options "%s"', $options);
-            throw new FormElementExeption($message);
-        }
-    }
-
-    protected function requiredOptions()
-    {
-        return array('id', 'name');
     }
 
     public function __set($key, $value)
     {
-        $this->options[$key] = $value;
+        if ($key == 'value') {
+            $this->value = $value;
+        } else {
+            $this->options[$key] = $value;
+        }
     }
 
     public function __get($key)

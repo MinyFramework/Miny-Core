@@ -28,12 +28,26 @@ namespace Miny\Form\Elements;
 
 use \Miny\Form\FormElement;
 
-class Button extends Input
+class Button extends FormElement
 {
-    public function __construct(array $options, $label, $value = NULL)
+    public function __construct($id, $label, array $options = array())
     {
-        $options['type'] = 'button';
-        parent::__construct($options, $label, $value);
+        parent::__construct($id, $label, $options);
+        $this->type = 'button';
+    }
+
+    public function renderLabel(array $options = array())
+    {
+
+    }
+
+    public function render(array $options = array())
+    {
+        $options = $options + $this->options;
+        if (!is_null($this->label)) {
+            $options['value'] = $this->label;
+        }
+        return sprintf('<input%s />', $this->getHTMLArgList($options));
     }
 
 }

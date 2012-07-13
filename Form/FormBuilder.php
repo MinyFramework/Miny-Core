@@ -26,6 +26,8 @@
 
 namespace Miny\Form;
 
+use \Miny\Form\Elements\Submit;
+
 class FormBuilder
 {
     private $descriptor;
@@ -78,16 +80,16 @@ class FormBuilder
         return $form;
     }
 
-    public function submit(array $options = array())
+    public function submit($id = 'submit', $label = NULL, array $options = array())
     {
-        $options['type'] = 'submit';
-        return sprintf('<input%s />', $this->getHTMLArgList($options));
+        $submit = new Submit($id, $label);
+        return $submit->render($options);
     }
 
-    public function reset(array $options = array())
+    public function reset($id = 'reset', $label = NULL, array $options = array())
     {
-        $options['type'] = 'reset';
-        return sprintf('<input%s />', $this->getHTMLArgList($options));
+        $submit = new Reset($id, $label);
+        return $submit->render($options);
     }
 
     public function begin(array $options = array())
@@ -137,6 +139,9 @@ class FormBuilder
             } else {
                 $element->name = $form_name . '[' . $element->name . ']';
             }
+        }
+        if (isset($this->descriptor->$field)) {
+            $element->value = $this->descriptor->$field;
         }
         if ($this->descriptor->hasErrors() && !$this->errors_rendered) {
             $form_errors = $this->descriptor->getErrors();

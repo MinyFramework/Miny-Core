@@ -26,11 +26,12 @@
 
 namespace Miny\Form;
 
+use \Miny\Widget\Widget;
 use \Miny\Form\Elements\Button;
 
 class ButtonWidget extends Widget
 {
-    public function run($action, $method, array $params = array())
+    public function run($action, $method = 'POST', array $params = array())
     {
         $form_params = array();
         if (isset($params['form'])) {
@@ -41,9 +42,9 @@ class ButtonWidget extends Widget
         $form_params['method'] = $method;
         $form = new FormBuilder;
         if (isset($params['src'])) {
-            $form->addElement(new Image($params));
+            $form->addField(new Image($params));
         } else {
-            $form->addElement(new Button($params));
+            $form->addField(new Button($params));
         }
         echo $form->generate($form_params);
         return false;

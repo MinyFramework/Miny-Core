@@ -28,12 +28,12 @@ namespace Miny\Form\Elements;
 
 use \Miny\Form\FormElement;
 
-class Submit extends Input
+class Submit extends Button
 {
-    public function __construct(array $options, $label, $value = NULL)
+    public function __construct($id, $label, array $options = array())
     {
-        $options['type'] = 'submit';
-        parent::__construct($options, $label, $value);
+        parent::__construct($id, $label, $options);
+        $this->type = 'submit';
     }
 
 }
