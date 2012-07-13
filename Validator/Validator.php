@@ -37,7 +37,7 @@ class Validator
 
     public function validate(iValidable $object, $scenario = NULL)
     {
-        $class = $this->loadConstraints();
+        $class = $this->loadConstraints($object);
         $valid = true;
         $violations = array();
         foreach ($class->getConstraints('class') as $array) {
