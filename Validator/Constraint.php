@@ -37,9 +37,13 @@ abstract class Constraint
     public $message = 'This value is not valid.';
     private $violations;
 
-    public function __construct($params)
+    public function __construct($params = NULL)
     {
         $missing = array_flip((array) $this->getRequiredOptions());
+
+        if (empty($missing) && empty($params)) {
+            return;
+        }
 
         if (!is_array($params) || !is_string(key($params))) {
             $default = $this->getDefaultOption();
