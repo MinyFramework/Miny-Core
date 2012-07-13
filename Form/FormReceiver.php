@@ -26,6 +26,7 @@
 
 namespace Miny\Form;
 
+use \Miny\Validator\Descriptor;
 use \Miny\Validator\Validator;
 use \Miny\Validator\iValidable;
 
@@ -57,7 +58,7 @@ class FormReceiver extends Validator
         return $class;
     }
 
-    public function validate()
+    public function validateForm()
     {
         $result = parent::validate($this->form);
         if ($result === true) {
