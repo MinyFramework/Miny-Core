@@ -41,7 +41,6 @@ class ResourceRoute
     private $singular_base_path = '';
     private $base_path = '';
     private $name_prefix = '';
-    private $nice_url;
 
     public function __construct($name, ResourceRoute $parent = NULL,
                                 $singular = false)
@@ -81,11 +80,6 @@ class ResourceRoute
                 'create' => 'POST'
             );
         }
-    }
-
-    public function niceUrl($nice = true)
-    {
-        $this->nice_url = $nice;
     }
 
     public function getName()
