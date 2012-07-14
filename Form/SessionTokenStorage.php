@@ -26,48 +26,19 @@
 
 namespace Miny\Form;
 
-use \Miny\Validator\Constraints\Choice;
-use \Miny\Validator\Descriptor;
-use \Miny\Validator\Validator;
-use \Miny\Validator\iValidable;
-
-class FormReceiver extends Validator
+class SessionTokenStorage
 {
-    private $form;
-    private $tokens = array();
+    private $session;
 
-    public function __construct(FormDescriptor $form)
+    public function __construct(Session $session)
     {
-        $this->form = $form;
+        $this->session = $session;
+        parent::__construct($session->getFlash('tokens', array()));
     }
 
-    public function addCSRFTokens(array $tokens)
+    public function __destruct()
     {
-        $this->tokens = $tokens;
-    }
-
-    protected function loadConstraints(iValidable $form)
-    {
-        $class = new Descriptor;
-        $form->getValidationInfo($class);
-
-        if ($this->form->getOption('csrf') && !empty($this->tokens)) {
-            $class->addGetterConstraint('getCSRFToken',
-                    new Choice($form->getTokenStorage()->getTokens()));
-        }
-
-        return $class;
-    }
-
-    public function validateForm()
-    {
-        $result = parent::validate($this->form);
-        if ($result === true) {
-            return true;
-        }
-
-        $this->form->addErrors($result);
-        return false;
+        $this->session->setFlash('tokens', $this->getTokens());
     }
 
 }

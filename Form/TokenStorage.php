@@ -26,48 +26,30 @@
 
 namespace Miny\Form;
 
-use \Miny\Validator\Constraints\Choice;
-use \Miny\Validator\Descriptor;
-use \Miny\Validator\Validator;
-use \Miny\Validator\iValidable;
-
-class FormReceiver extends Validator
+class TokenStorage
 {
-    private $form;
-    private $tokens = array();
+    private $tokens;
 
-    public function __construct(FormDescriptor $form)
-    {
-        $this->form = $form;
-    }
-
-    public function addCSRFTokens(array $tokens)
+    public function __construct(array $tokens = array())
     {
         $this->tokens = $tokens;
     }
 
-    protected function loadConstraints(iValidable $form)
+    public function addToken($token)
     {
-        $class = new Descriptor;
-        $form->getValidationInfo($class);
-
-        if ($this->form->getOption('csrf') && !empty($this->tokens)) {
-            $class->addGetterConstraint('getCSRFToken',
-                    new Choice($form->getTokenStorage()->getTokens()));
-        }
-
-        return $class;
+        $this->tokens[] = $token;
     }
 
-    public function validateForm()
+    public function getTokens()
     {
-        $result = parent::validate($this->form);
-        if ($result === true) {
-            return true;
-        }
+        return $this->tokens;
+    }
 
-        $this->form->addErrors($result);
-        return false;
+    public function generate()
+    {
+        $token = sha1(mt_rand());
+        $this->addToken($token);
+        return $token;
     }
 
 }
