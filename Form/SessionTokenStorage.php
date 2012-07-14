@@ -38,8 +38,9 @@ class SessionTokenStorage extends TokenStorage
         parent::__construct($session->getFlash('tokens', array()));
     }
 
-    public function __destruct()
+    public function addToken($token)
     {
+        parent::addToken($token);
         $this->session->setFlash('tokens', $this->getTokens());
     }
 
