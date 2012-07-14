@@ -57,6 +57,9 @@ class FormDescriptor extends Entity implements iValidable
 
     public function getTokenStorage()
     {
+        if (is_null($this->token_storage)) {
+            throw new \BadMethodCallException('TokenStorage must be set.');
+        }
         return $this->token_storage;
     }
 
@@ -120,7 +123,7 @@ class FormDescriptor extends Entity implements iValidable
 
     public function __wakeup()
     {
-        $this->token = $this->token_storage->generate();
+        $this->token = $this->getTokenStorage()->generate();
     }
 
     public function getCSRFToken()
@@ -130,7 +133,7 @@ class FormDescriptor extends Entity implements iValidable
         }
 
         if (is_null($this->token)) {
-            $this->token = $this->token_storage->generate();
+            $this->token = $this->getTokenStorage()->generate();
         }
         return $this->token;
     }
