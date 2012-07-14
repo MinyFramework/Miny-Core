@@ -34,16 +34,10 @@ use \Miny\Validator\iValidable;
 class FormReceiver extends Validator
 {
     private $form;
-    private $tokens = array();
 
     public function __construct(FormDescriptor $form)
     {
         $this->form = $form;
-    }
-
-    public function addCSRFTokens(array $tokens)
-    {
-        $this->tokens = $tokens;
     }
 
     protected function loadConstraints(iValidable $form)
@@ -51,9 +45,9 @@ class FormReceiver extends Validator
         $class = new Descriptor;
         $form->getValidationInfo($class);
 
-        if ($this->form->getOption('csrf') && !empty($this->tokens)) {
-            $class->addGetterConstraint('getCSRFToken',
-                    new Choice($form->getTokenStorage()->getTokens()));
+        if ($this->form->getOption('csrf')) {
+            $tokens = $form->getTokenStorage()->getTokens();
+            $class->addGetterConstraint('getCSRFToken', new Choice($tokens));
         }
 
         return $class;
