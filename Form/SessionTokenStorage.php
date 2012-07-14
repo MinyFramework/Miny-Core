@@ -28,7 +28,7 @@ namespace Miny\Form;
 
 use \Miny\Session\Session;
 
-class SessionTokenStorage
+class SessionTokenStorage extends TokenStorage
 {
     private $session;
 
