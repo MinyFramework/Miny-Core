@@ -39,7 +39,7 @@ class Resources extends RouteCollection
 
     public static function singularize($name)
     {
-        if (substr($name, -1, 0) == 's') {
+        if (substr($name, -1, 1) == 's') {
             return substr($name, 0, -1);
         }
         return $name;
