@@ -185,7 +185,7 @@ class ResourceRoute
             return '';
         }
         $parent = $this->parent;
-        return $parent->getBasePath . ':' . $parent->getSingularName() . '_id/';
+        return $parent->getBasePath() . ':' . $parent->getSingularName() . '_id/';
     }
 
     public function getBasePath()
