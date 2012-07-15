@@ -32,13 +32,16 @@ class Router extends RouteCollection
     private $generator;
     private $route_prefix;
     private $route_suffix;
+    private $default_parameters;
 
-    public function __construct($prefix = NULL, $suffix = NULL)
+    public function __construct($prefix = NULL, $suffix = NULL,
+                                array $parameters = array())
     {
         $this->matcher = new RouteMatcher($this);
         $this->generator = new RouteGenerator($this);
         $this->route_prefix = $prefix;
         $this->route_suffix = $suffix;
+        $this->default_parameters = $parameters;
     }
 
     public function getMatcher()
@@ -57,8 +60,10 @@ class Router extends RouteCollection
             $path = $route->getPath();
             $path = $this->route_prefix . $path . $this->route_suffix;
             $route->setPath($path);
+            $route->addParameters($this->default_parameters);
         }
         $this->addRoute($route, $name);
+        return $route;
     }
 
     public function resource(Resources $resource)
@@ -66,6 +71,7 @@ class Router extends RouteCollection
         foreach ($resource as $name => $route) {
             $this->route($route, $name);
         }
+        return $resource;
     }
 
     public function match($path, $method = NULL)

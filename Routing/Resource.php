@@ -30,7 +30,8 @@ class Resource extends Resources
 {
     public function __construct($name, array $parameters = array())
     {
-        parent::__construct($name, $name, $parameters);
+        parent::__construct($name, $parameters);
+        $this->singular($name);
     }
 
     public function member($method, $name)

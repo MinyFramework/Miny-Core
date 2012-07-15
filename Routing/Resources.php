@@ -45,14 +45,14 @@ class Resources extends RouteCollection
         return $name;
     }
 
-    public function __construct($name, $singular_name = NULL,
-                                array $parameters = array())
+    public function __construct($name, array $parameters = array())
     {
         $this->name = $name;
         $this->parameters = $parameters;
         $this->member_actions = $this->memberActions();
         $this->collection_actions = $this->collectionActions();
-        $this->singular($singular_name ? : self::singularize($name));
+        $this->singular(self::singularize($name));
+        $this->parameters['controller'] = $name;
     }
 
     public function specify($pattern)
