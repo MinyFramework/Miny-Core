@@ -48,13 +48,13 @@ class RouteFilter extends EventHandler
     public function filterRoutes(Event $event)
     {
         $request = $event->getParameter('request');
-        $route = $this->router->match($request->path, $request->method);
-        if (!$route) {
+        $match = $this->router->match($request->path, $request->method);
+        if (!$match) {
             $message = 'Page not found: ' . $request->path;
             throw new PageNotFoundException($message);
         }
         parse_str(parse_url($_SERVER['REQUEST_URI'], PHP_URL_QUERY), $_GET);
-        $request->get = $route->get() + $_GET;
+        $request->get = $match->getParameters() + $_GET;
     }
 
     public function handleRequestException(Event $event)
