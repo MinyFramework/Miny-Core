@@ -34,6 +34,7 @@ class Router extends RouteCollection
     private $route_suffix;
     private $default_parameters;
     private $resources = array();
+    private $resources_built = false;
 
     public function __construct($prefix = NULL, $suffix = NULL,
                                 array $parameters = array())
@@ -55,11 +56,23 @@ class Router extends RouteCollection
         return $this->generator;
     }
 
-    public function route(Route $route, $name = NULL)
+    public function root(array $parameters = array(), $prefix = true,
+                         $suffix = false)
+    {
+        $route = new Route('', 'GET', $parameters);
+        $this->route($route, 'root', $prefix, $suffix);
+    }
+
+    public function route(Route $route, $name, $prefix = true, $suffix = true)
     {
         if (!is_null($this->route_prefix) || !is_null($this->route_suffix)) {
             $path = $route->getPath();
-            $path = $this->route_prefix . $path . $this->route_suffix;
+            if ($prefix) {
+                $path = $this->route_prefix . $path;
+            }
+            if ($suffix) {
+                $path .= $this->route_suffix;
+            }
             $route->setPath($path);
             $route->addParameters($this->default_parameters);
         }
@@ -82,6 +95,10 @@ class Router extends RouteCollection
 
     private function buildResources()
     {
+        if ($this->resources_built) {
+            return;
+        }
+        $this->resources_built = true;
         foreach ($this->resources as $resource) {
             foreach ($resource as $name => $route) {
                 $this->route($route, $name);
