@@ -60,14 +60,13 @@ class RouteGenerator
             }
 
             $path = $route->getPath();
-            $first_http_param = strpos($path, '?') === false;
+            $glue = (strpos($path, '?') === false) ? '?' : '&';
             foreach ($parameters as $name => $value) {
                 if (strpos($path, ':' . $name) !== false) {
                     $path = str_replace(':' . $name, $value, $path);
-                } elseif ($first_http_param) {
-                    $path .= sprintf('?%s=%s', $name, $value);
                 } else {
-                    $path .= sprintf('&%s=%s', $name, $value);
+                    $path .= $glue . $name . '=' . $value;
+                    $glue = '&';
                 }
             }
             return $path;
