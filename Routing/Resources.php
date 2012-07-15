@@ -98,9 +98,7 @@ class Resources extends RouteCollection
     public function getName()
     {
         if ($this->hasParent()) {
-            $name = $this->getParent()->getName();
-            $name .= '_' . $this->name;
-            return $name;
+            return $this->getParent()->getName() . '_' . $this->name;
         }
         return $this->name;
     }
@@ -108,9 +106,7 @@ class Resources extends RouteCollection
     public function getSingularName()
     {
         if ($this->hasParent()) {
-            $name = $this->getParent()->getName();
-            $name .= '_' . $this->name;
-            return $name;
+            return $this->getParent()->getName() . '_' . $this->singular_name;
         }
         return $this->singular_name;
     }
@@ -136,33 +132,17 @@ class Resources extends RouteCollection
 
     public function only()
     {
-        $only = func_get_args();
-        foreach (array_keys($this->collection_actions) as $action) {
-            if (!in_array($action, $only)) {
-                unset($this->collection_actions[$action]);
-            }
-        }
-        foreach (array_keys($this->member_actions) as $action) {
-            if (!in_array($action, $only)) {
-                unset($this->member_actions[$action]);
-            }
-        }
+        $only = array_flip(func_get_args());
+        $this->collection_actions = array_intersect_key($this->collection_actions, $only);
+        $this->member_actions = array_intersect_key($this->member_actions, $only);
         return $this;
     }
 
     public function except()
     {
-        $except = func_get_args();
-        foreach (array_keys($this->collection_actions) as $action) {
-            if (in_array($action, $except)) {
-                unset($this->collection_actions[$action]);
-            }
-        }
-        foreach (array_keys($this->member_actions) as $action) {
-            if (in_array($action, $except)) {
-                unset($this->member_actions[$action]);
-            }
-        }
+        $except = array_flip(func_get_args());
+        $this->collection_actions = array_diff_key($this->collection_actions, $except);
+        $this->member_actions = array_diff_key($this->member_actions, $except);
         return $this;
     }
 
