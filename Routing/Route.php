@@ -106,7 +106,7 @@ class Route
 
     public function getParameterNames()
     {
-        if (is_null($this->parameter_names)) {
+        if (is_null($this->parameter_count)) {
             $this->build();
         }
         return $this->parameter_names;
@@ -114,7 +114,7 @@ class Route
 
     public function getParameterName($key)
     {
-        if (is_null($this->parameter_names)) {
+        if (is_null($this->parameter_count)) {
             $this->build();
         }
         if (!isset($this->parameter_names[$key])) {
