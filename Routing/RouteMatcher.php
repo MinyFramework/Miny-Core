@@ -39,10 +39,8 @@ class RouteMatcher
     {
         foreach ($this->routes as $route) {
             $route_method = $route->getMethod();
-            if ($method !== NULL && $route_method !== NULL) {
-                if ($method !== $route_method) {
-                    continue;
-                }
+            if ($method !== NULL && $route_method !== NULL && $method !== $route_method) {
+                continue;
             }
 
             if ($route->isStatic()) {
@@ -57,8 +55,7 @@ class RouteMatcher
                 $matched_params = array();
                 $parameter_count = $route->getParameterCount();
                 for ($i = 1; $i < $parameter_count; ++$i) {
-                    $value = $matched[$i];
-                    $matched_params[$route->getParameterName($i - 1)] = $value;
+                    $matched_params[$route->getParameterName($i - 1)] = $matched[$i];
                 }
                 return new Match($route, $matched_params);
             }

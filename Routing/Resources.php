@@ -28,6 +28,17 @@ namespace Miny\Routing;
 
 class Resources extends RouteCollection
 {
+    protected static $memberActions = array(
+        'show'             => 'GET',
+        'destroy'          => 'DELETE',
+        'edit'             => 'GET',
+        'update'           => 'PUT'
+    );
+    protected static $collectionActions = array(
+        'index'    => 'GET',
+        'new'      => 'GET',
+        'create'   => 'POST'
+    );
     private $name;
     private $singular_name;
     private $parameters;
@@ -53,8 +64,8 @@ class Resources extends RouteCollection
         }
         $this->name = $name;
         $this->parameters = $parameters;
-        $this->member_actions = $this->memberActions();
-        $this->collection_actions = $this->collectionActions();
+        $this->member_actions = static::$memberActions;
+        $this->collection_actions = static::$collectionActions;
         $this->singular(self::singularize($name));
     }
 
@@ -109,25 +120,6 @@ class Resources extends RouteCollection
             return $this->getParent()->getName() . '_' . $this->singular_name;
         }
         return $this->singular_name;
-    }
-
-    protected function memberActions()
-    {
-        return array(
-            'show'    => 'GET',
-            'destroy' => 'DELETE',
-            'edit'    => 'GET',
-            'update'  => 'PUT'
-        );
-    }
-
-    protected function collectionActions()
-    {
-        return array(
-            'index'  => 'GET',
-            'new'    => 'GET',
-            'create' => 'POST'
-        );
     }
 
     public function only()
@@ -195,50 +187,34 @@ class Resources extends RouteCollection
         }
     }
 
-    protected function generateMemberActions()
+    private function generateActions($actions, array $unnamed, $unnamed_route_name, $path)
     {
-        $unnamed = array('show', 'update', 'destroy');
         $parameters = $this->parameters;
-        $has_unnamed_action_route = false;
-        $path = $this->getPath() . '/:id';
-        foreach ($this->member_actions as $action => $method) {
+        $singular_name = $this->getSingularName();
+        foreach ($actions as $action => $method) {
             $parameters['action'] = $action;
             if (in_array($action, $unnamed)) {
-                $name = NULL;
-                if (!$has_unnamed_action_route) {
-                    $name = $this->getSingularName();
-                    $has_unnamed_action_route = true;
-                }
+                $name = $unnamed_route_name;
+                $unnamed_route_name = NULL;
                 $route = new Route($path, $method, $parameters);
             } else {
-                $name = $action . '_' . $this->getSingularName();
+                $name = $action . '_' . $singular_name;
                 $route = new Route($path . '/' . $action, $method, $parameters);
             }
             $this->addRoute($route, $name);
         }
     }
 
+    protected function generateMemberActions()
+    {
+        $unnamed = array('show', 'update', 'destroy');
+        $this->generateActions($this->member_actions, $unnamed, $this->getSingularName(), $this->getPath() . '/:id');
+    }
+
     protected function generateCollectionActions()
     {
         $unnamed = array('index', 'create');
-        $parameters = $this->parameters;
-        $has_unnamed_action_route = false;
-        $path = $this->getPath();
-        foreach ($this->collection_actions as $action => $method) {
-            $parameters['action'] = $action;
-            if (in_array($action, $unnamed)) {
-                $name = NULL;
-                if (!$has_unnamed_action_route) {
-                    $name = $this->getName();
-                    $has_unnamed_action_route = true;
-                }
-                $route = new Route($path, $method, $parameters);
-            } else {
-                $name = $action . '_' . $this->getSingularName();
-                $route = new Route($path . '/' . $action, $method, $parameters);
-            }
-            $this->addRoute($route, $name);
-        }
+        $this->generateActions($this->collection_actions, $unnamed, $this->getName(), $this->getPath());
     }
 
     public function getRoute($name)

@@ -28,6 +28,16 @@ namespace Miny\Routing;
 
 class Resource extends Resources
 {
+    protected static $memberActions = array();
+    protected static $collectionActions = array(
+        'show'    => 'GET',
+        'destroy' => 'DELETE',
+        'edit'    => 'GET',
+        'update'  => 'PUT',
+        'new'     => 'GET',
+        'create'  => 'POST'
+    );
+
     public function __construct($name, array $parameters = array())
     {
         parent::__construct($name, $parameters);
@@ -37,23 +47,6 @@ class Resource extends Resources
     public function member($method, $name)
     {
         throw new \BadMethodCall('Single resource can\'t have member action.');
-    }
-
-    protected function memberActions()
-    {
-        return array();
-    }
-
-    protected function collectionActions()
-    {
-        return array(
-            'show'    => 'GET',
-            'destroy' => 'DELETE',
-            'edit'    => 'GET',
-            'update'  => 'PUT',
-            'new'     => 'GET',
-            'create'  => 'POST'
-        );
     }
 
     protected function generateMemberActions()
