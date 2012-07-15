@@ -43,10 +43,20 @@ class RouteGenerator
             }
 
             $required_params = $route->getParameterNames();
-            $missing = array_diff($required_params, $parameters);
+            $missing = array_diff($required_params, array_keys($parameters));
+
             if (!empty($missing)) {
-                $message = 'Parameters not set: ' . join(', ', $missing);
-                throw new \InvalidArgumentException($message);
+                $route_params = $route->getParameters();
+                foreach ($missing as $i => $key) {
+                    if (isset($route_params[$key])) {
+                        $parameters[$key] = $route_params[$key];
+                        unset($missing[$i]);
+                    }
+                }
+                if (!empty($missing)) {
+                    $message = 'Parameters not set: ' . join(', ', $missing);
+                    throw new \InvalidArgumentException($message);
+                }
             }
 
             $path = $route->getPath();
