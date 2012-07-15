@@ -46,16 +46,6 @@ class Router extends RouteCollection
         $this->default_parameters = $parameters;
     }
 
-    public function getMatcher()
-    {
-        return $this->matcher;
-    }
-
-    public function getGenerator()
-    {
-        return $this->generator;
-    }
-
     public function root(array $parameters = array(), $prefix = true,
                          $suffix = false)
     {
@@ -109,13 +99,13 @@ class Router extends RouteCollection
     public function match($path, $method = NULL)
     {
         $this->buildResources();
-        return $this->getMatcher()->match($path, $method);
+        return $this->matcher->match($path, $method);
     }
 
     public function generate($route_name, array $parameters = array())
     {
         $this->buildResources();
-        return $this->getGenerator()->generate($route_name, $parameters);
+        return $this->generator->generate($route_name, $parameters);
     }
 
 }
