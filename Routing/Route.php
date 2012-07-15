@@ -60,7 +60,8 @@ class Route
         return $this->method;
     }
 
-    public function addParameters(array $parameters) {
+    public function addParameters(array $parameters)
+    {
         $this->parameters = $this->parameters + $parameters;
     }
 
@@ -135,7 +136,8 @@ class Route
         foreach ($arr[1] as $k => $name) {
             $tokens[$arr[0][$k]] = $this->getPattern($name);
         }
-        $this->regex = str_replace(array('#', '?'), array('\#', '\?'), $this->path);
+        $this->regex = str_replace(array('#', '?'), array('\#', '\?'),
+                $this->path);
         $this->regex = str_replace(array_keys($tokens), $tokens, $this->regex);
     }
 
