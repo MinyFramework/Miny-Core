@@ -47,6 +47,14 @@ class Route
         return $this->path;
     }
 
+    public function setPath($path)
+    {
+        if (!is_string($path)) {
+            throw new \InvalidArgumentException('Path must be a string.');
+        }
+        $this->path = $path;
+    }
+
     public function getMethod()
     {
         return $this->method;
