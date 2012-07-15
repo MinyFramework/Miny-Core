@@ -36,6 +36,7 @@ class Resources extends RouteCollection
     private $built = false;
     private $id_pattern;
     private $parent;
+    private $resources = array();
 
     public static function singularize($name)
     {
@@ -179,7 +180,8 @@ class Resources extends RouteCollection
 
     public function resource(Resources $resource)
     {
-        $this->resources[$resource->name] = $resource;
+        $this->resources[] = $resource;
+        $resource->setParent($this);
         return $resource;
     }
 
@@ -192,6 +194,11 @@ class Resources extends RouteCollection
 
         $this->generateMemberActions();
         $this->generateCollectionActions();
+
+        foreach ($this->resources as $resource) {
+            $resource->build();
+            $this->merge($resource);
+        }
     }
 
     public function getPath()
