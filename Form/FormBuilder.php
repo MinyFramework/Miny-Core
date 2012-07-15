@@ -82,6 +82,16 @@ class FormBuilder
         return $form;
     }
 
+    public function generatePartial()
+    {
+        $form = '';
+        foreach (func_get_args() as $key) {
+            $form .= $this->label($key);
+            $form .= $this->render($key);
+        }
+        return $form;
+    }
+
     public function submit($id = 'submit', $label = NULL,
                            array $options = array())
     {
@@ -106,7 +116,7 @@ class FormBuilder
             $method_field = new Hidden('_method', array('value' => $method));
             $form .= $method_field->render();
         }
-        
+
         if ($this->descriptor->getOption('csrf')) {
             $token = $this->descriptor->getCSRFToken();
             $token_field = new Hidden('token', array('value' => $token));
