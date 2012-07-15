@@ -26,9 +26,38 @@
 
 namespace Miny\Routing;
 
-interface iRoute
+class Resource extends Resources
 {
-    public function match($path, $method = NULL);
-    public function get($parameter = NULL);
-    public function generate($name, array $parameters = array());
+    public function __construct($name, array $parameters = array())
+    {
+        parent::__construct($name, $name, $parameters);
+    }
+
+    public function member($method, $name)
+    {
+        throw new \BadMethodCall('Single resource can\'t have member action.');
+    }
+
+    protected function memberActions()
+    {
+        return array();
+    }
+
+    protected function collectionActions()
+    {
+        return array(
+            'show'    => 'GET',
+            'destroy' => 'DELETE',
+            'edit'    => 'GET',
+            'update'  => 'PUT',
+            'new'     => 'GET',
+            'create'  => 'POST'
+        );
+    }
+
+    protected function generateMemberActions()
+    {
+
+    }
+
 }

@@ -26,129 +26,45 @@
 
 namespace Miny\Routing;
 
-class Router
+class Router extends RouteCollection
 {
-    private $routes = array();
-    private $url_prefix;
-    private $format;
+    private $matcher;
+    private $generator;
 
-    public function __construct($format = 'html', $prefix = NULL)
+    public function __construct()
     {
-        $this->url_prefix = $prefix;
-        $this->format = $format;
+        $this->matcher = new RouteMatcher($this);
+        $this->generator = new RouteGenerator($this);
     }
 
-    public function getUrlPrefix()
+    public function getMatcher()
     {
-        return $this->url_prefix;
+        return $this->matcher;
     }
 
-    public function resource($name)
+    public function getGenerator()
     {
-        $resource = new ResourceRoute($name, NULL, true);
-        $this->routes[$name] = $resource;
-        return $resource;
+        return $this->generator;
     }
 
-    public function resources($name)
+    public function route(Route $route, $name = NULL)
     {
-        $resource = new ResourceRoute($name);
-        $this->routes[$name] = $resource;
-        return $resource;
+        $this->addRoute($route, $name);
     }
 
-    public function get($path, $name = NULL, array $params = array())
+    public function resource(Resources $resource)
     {
-        return $this->add('GET', $path, $name, $params);
-    }
-
-    public function post($path, $name = NULL, array $params = array())
-    {
-        return $this->add('POST', $path, $name, $params);
-    }
-
-    public function put($path, $name = NULL, array $params = array())
-    {
-        return $this->add('PUT', $path, $name, $params);
-    }
-
-    public function delete($path, $name = NULL, array $params = array())
-    {
-        return $this->add('DELETE', $path, $name, $params);
-    }
-
-    public function add($method, $path, $name = NULL, array $params = array())
-    {
-        $route = new Route($path, $name, $method, $params);
-        if (is_null($name)) {
-            $this->routes[] = $route;
-        } else {
-            $this->routes[$name] = $route;
-        }
-        return $route;
-    }
-
-    public function matchCurrent()
-    {
-        parse_str(parse_url($_SERVER['REQUEST_URI'], PHP_URL_QUERY), $_GET);
-        if (isset($_POST['_method'])) {
-            $method = strtoupper($_POST['_method']);
-            if ($method != 'PUT' && $method != 'DELETE') {
-                $method = $_SERVER['REQUEST_METHOD'];
-            }
-        } else {
-            $method = $_SERVER['REQUEST_METHOD'];
-        }
-        if (($pos = strpos($_SERVER['QUERY_STRING'], '&')) !== false) {
-            $query_string = substr($_SERVER['QUERY_STRING'], 0, $pos);
-        } else {
-            $query_string = $_SERVER['QUERY_STRING'];
-        }
-        return $this->match($query_string, $method);
+        $this->merge($resource);
     }
 
     public function match($path, $method = NULL)
     {
-        if(substr($path, 0, strlen($this->url_prefix)) == $this->url_prefix) {
-            $path = substr($path, strlen($this->url_prefix));
-        }
-        foreach ($this->routes as $route) {
-            $route = $route->match($path, $method);
-            if ($route) {
-                return $route;
-            }
-        }
+        return $this->getMatcher()->match($path, $method);
     }
 
-    public function generate($name, array $params = array())
+    public function generate($route_name, array $parameters = array())
     {
-        foreach ($this->routes as $route) {
-            $path = $route->generate($name, $params);
-            if (!isset($params['format'])) {
-                $params['format'] = $this->format;
-            }
-            if ($path) {
-                $first_http_param = true;
-                if (!is_null($this->url_prefix)) {
-                    if (strpos($this->url_prefix, '?') !== false) {
-                        $first_http_param = false;
-                    }
-                    $path = $this->url_prefix . $path;
-                }
-                foreach ($params as $name => $value) {
-                    if (strpos($path, ':' . $name) !== false) {
-                        $path = str_replace(':' . $name, $value, $path);
-                    } else {
-                        if ($first_http_param) {
-                            $path .= sprintf('?%s=%s', $name, $value);
-                        } else {
-                            $path .= sprintf('&%s=%s', $name, $value);
-                        }
-                    }
-                }
-                return $path;
-            }
-        }
+        return $this->getGenerator()->generate($route_name, $parameters);
     }
 
 }

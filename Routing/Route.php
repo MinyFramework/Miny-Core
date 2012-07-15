@@ -26,51 +26,98 @@
 
 namespace Miny\Routing;
 
-class Route implements iRoute
+class Route
 {
-    private $name;
     private $path;
-    private $default_parameters;
-    private $matched_parameters = array();
+    private $parameters;
     private $parameter_names = array();
-    private $parameter_patterns = array();
+    private $patterns = array();
     private $regex;
-    private $static;
+    private $parameter_count;
 
-    public function __construct($path, $name = NULL, $method = NULL,
-                                array $default_parameters = NULL)
+    public function __construct($path, $method = NULL, array $params = array())
     {
         $this->method = $method;
         $this->path = $path;
-        $this->name = $name;
-        $this->default_parameters = $default_parameters ? : array();
+        $this->parameters = $params;
+    }
+
+    public function getPath()
+    {
+        return $this->path;
+    }
+
+    public function getMethod()
+    {
+        return $this->method;
+    }
+
+    public function getParameters()
+    {
+        return $this->parameters;
     }
 
     public function specify($parameter, $pattern)
     {
-        $this->parameter_patterns[$parameter] = $pattern;
+        $this->patterns[$parameter] = $pattern;
     }
 
-    private function getParameterPattern($parameter)
+    public function getPattern($parameter, $default = '(\w+)')
     {
-        if (isset($this->parameter_patterns[$parameter])) {
-            return $this->parameter_patterns[$parameter];
+        if (isset($this->patterns[$parameter])) {
+            return $this->patterns[$parameter];
         }
-        return '(\w+)';
+        return $default;
+    }
+
+    public function isStatic()
+    {
+        return $this->getParameterCount() === 0;
+    }
+
+    public function getRegex()
+    {
+        if ($this->isStatic()) {
+            return false;
+        }
+        return $this->regex;
+    }
+
+    public function getParameterCount()
+    {
+        if (is_null($this->parameter_count)) {
+            $this->build();
+        }
+        return $this->parameter_count;
+    }
+
+    public function getParameterNames()
+    {
+        if (is_null($this->parameter_names)) {
+            $this->build();
+        }
+        return $this->parameter_names;
+    }
+
+    public function getParameterName($key)
+    {
+        if (is_null($this->parameter_names)) {
+            $this->build();
+        }
+        if (!isset($this->parameter_names[$key])) {
+            $message = 'Parameter name not set for kes: ' . $key;
+            throw new \UnexpectedValueException($message);
+        }
+        return $this->parameter_names[$key];
     }
 
     private function build()
     {
-        if ($this->static !== NULL) {
+        $arr = array();
+        $this->parameter_count = preg_match_all('/:(\w+)/', $this->path, $arr);
+        if ($this->parameter_count === 0) {
             return;
         }
-        $arr = array();
-        if (!empty($this->path)) {
-            $path = $this->path . '.:format';
-        } else {
-            $path = '';
-        }
-        preg_match_all('/:(\w+)/', $path, $arr);
         $this->parameter_names = $arr[1];
         $tokens = array();
         foreach ($arr[1] as $k => $name) {
@@ -78,56 +125,6 @@ class Route implements iRoute
         }
         $this->regex = str_replace(array('#', '?'), array('\#', '\?'), $path);
         $this->regex = str_replace(array_keys($tokens), $tokens, $this->regex);
-    }
-
-    public function match($path, $method = NULL)
-    {
-        if ($method !== NULL && $this->method !== NULL) {
-            if ($method !== $this->method) {
-                return false;
-            }
-        }
-
-        $this->build();
-        $matched = array();
-        if (preg_match('#^' . $this->regex . '$#Du', $path, $matched)) {
-            unset($matched[0]);
-            foreach ($matched as $k => $v) {
-                $this->matched_parameters[$this->parameter_names[$k - 1]] = $v;
-            }
-            return $this;
-        }
-        return false;
-    }
-
-    public function get($parameter = NULL)
-    {
-        if ($parameter === NULL) {
-            return $this->default_parameters + $this->matched_parameters;
-        }
-        if (!isset($this->default_parameters[$parameter])) {
-            if (!isset($this->matched_parameters[$parameter])) {
-                $message = 'Parameter not set: ' . $parameter;
-                throw new \OutOfBoundsException($message);
-            }
-            return $this->matched_parameters[$parameter];
-        }
-        return $this->default_parameters[$parameter];
-    }
-
-    public function generate($name, array $parameters = array())
-    {
-        if ($this->name !== $name) {
-            return false;
-        }
-        $this->build();
-        foreach ($this->parameter_names as $param) {
-            if (!array_key_exists($param, $parameters)) {
-                $message = 'Parameter not set: ' . $param;
-                throw new \InvalidArgumentException($message);
-            }
-        }
-        return $this->path . '.:format';
     }
 
 }
