@@ -57,7 +57,8 @@ class RouteMatcher
                 $matched_params = array();
                 $parameter_count = $route->getParameterCount();
                 for ($i = 1; $i < $parameter_count; ++$i) {
-                    $matched_params[$route->getParameterName($i - 1)] = $v;
+                    $value = $matched[$i];
+                    $matched_params[$route->getParameterName($i - 1)] = $value;
                 }
                 return new Match($route, $matched_params);
             }
