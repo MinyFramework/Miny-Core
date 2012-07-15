@@ -34,12 +34,12 @@ class Match
     public function __construct(Route $route, array $parameters = array())
     {
         $this->route = $route;
-        $this->parameters = $parameters;
+        $this->parameters = array_merge($parameters, $route->getParameters());
     }
 
     public function getParameters()
     {
-        return array_merge($this->parameters, $this->route->getParameters());
+        return $this->parameters;
     }
 
     public function getRoute()

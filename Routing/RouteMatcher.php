@@ -54,7 +54,7 @@ class RouteMatcher
 
             $matched = array();
             if (preg_match('#^' . $route->getRegex() . '$#Du', $path, $matched)) {
-                $matched_params = $route->getParameters();
+                $matched_params = array();
                 $parameter_count = $route->getParameterCount();
                 for ($i = 1; $i < $parameter_count; ++$i) {
                     $value = $matched[$i];
