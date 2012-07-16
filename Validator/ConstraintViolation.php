@@ -32,8 +32,7 @@ class ConstraintViolation
     private $message_parameters;
     private $message;
 
-    public function __construct($message_template,
-                                array $message_parameters = array())
+    public function __construct($message_template, array $message_parameters = array())
     {
         $this->message_template = $message_template;
         $this->message_parameters = $message_parameters;
@@ -57,13 +56,11 @@ class ConstraintViolation
     public function getMessage()
     {
         if (is_null($this->message)) {
-            $parameters = $this->message_parameters;
-            $template = $this->message_template;
             $keys = array();
-            foreach (array_keys($parameters) as $key) {
+            foreach (array_keys($this->message_parameters) as $key) {
                 $keys[] = '{' . $key . '}';
             }
-            $this->message = str_replace($keys, $parameters, $template);
+            $this->message = str_replace($keys, $this->message_parameters, $this->message_template);
         }
         return $this->message;
     }
