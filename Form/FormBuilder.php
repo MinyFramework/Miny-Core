@@ -36,8 +36,7 @@ class FormBuilder
     private $error_renderer;
     private $errors_rendered = false;
 
-    public function __construct(FormDescriptor $form = NULL,
-                                iFormErrorRenderer $renderer = NULL)
+    public function __construct(FormDescriptor $form = NULL, iFormErrorRenderer $renderer = NULL)
     {
         if (is_null($form)) {
             $form = new FormDescriptor;
@@ -63,8 +62,7 @@ class FormBuilder
         return $arglist;
     }
 
-    public function generate(array $options = array(), $errors_first = true,
-                             $reset = false)
+    public function generate(array $options = array(), $errors_first = true, $reset = false)
     {
         $form = $this->begin($options);
         if ($errors_first) {
@@ -92,14 +90,13 @@ class FormBuilder
         return $form;
     }
 
-    public function submit($id = 'submit', $label = NULL,
-                           array $options = array())
+    public function submit($label = NULL, $id = 'submit', array $options = array())
     {
         $submit = new Submit($id, $label);
         return $submit->render($options);
     }
 
-    public function reset($id = 'reset', $label = NULL, array $options = array())
+    public function reset($label = NULL, $id = 'reset', array $options = array())
     {
         $submit = new Reset($id, $label);
         return $submit->render($options);
