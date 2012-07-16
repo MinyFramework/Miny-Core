@@ -43,7 +43,6 @@
  * @license   http://www.gnu.org/licenses/gpl.txt
  *            GNU General Public License
  * @version   1.0
- *
  */
 
 namespace Miny\Formatter;
@@ -180,7 +179,7 @@ class Markdown implements iFormatter
 
     private function insertImage($matches)
     {
-        $matches = array_map('Markdown::escape', $matches);
+        $matches = array_map('self::escape', $matches);
         if (isset($matches[3])) {
             $pattern = '<img src="%s" title="%s" alt="%s" />';
             return sprintf($pattern, $matches[2], $matches[3], $matches[1]);
