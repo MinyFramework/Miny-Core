@@ -187,7 +187,7 @@ class Resources extends RouteCollection
         }
     }
 
-    private function generateActions($actions, array $unnamed, $unnamed_route_name, $path)
+    protected function generateActions($actions, array $unnamed, $unnamed_route_name, $path)
     {
         $parameters = $this->parameters;
         $singular_name = $this->getSingularName();
