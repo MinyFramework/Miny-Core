@@ -39,11 +39,11 @@ class Resources extends RouteCollection
         'new'      => 'GET',
         'create'   => 'POST'
     );
-    private $name;
-    private $singular_name;
-    private $parameters;
     protected $member_actions;
     protected $collection_actions;
+    protected $name;
+    private $singular_name;
+    private $parameters;
     private $built = false;
     private $id_pattern;
     private $parent;
@@ -173,18 +173,17 @@ class Resources extends RouteCollection
         }
     }
 
-    public function getPath()
+    public function getPathBase()
     {
-        if ($this->hasParent()) {
-            $parent = $this->getParent();
-            $path = $parent->getPath() . '/';
-            if (!$parent instanceof Resource) {
-                $path .= ':' . $parent->name . '_id/';
-            }
-            return $path . $this->name;
-        } else {
-            return $this->name;
+        if (!$this->hasParent()) {
+            return '';
         }
+        $parent = $this->getParent();
+        $path = $parent->getPathBase() . '/';
+        if (!$parent instanceof Resource) {
+            $path .= ':' . $parent->name . '_id/';
+        }
+        return $path;
     }
 
     protected function generateActions($actions, array $unnamed, $unnamed_route_name, $path)
@@ -208,13 +207,14 @@ class Resources extends RouteCollection
     protected function generateMemberActions()
     {
         $unnamed = array('show', 'update', 'destroy');
-        $this->generateActions($this->member_actions, $unnamed, $this->getSingularName(), $this->getPath() . '/:id');
+        $this->generateActions($this->member_actions, $unnamed, $this->getSingularName(),
+                $this->getPathBase() . $this->singular_name . '/:id');
     }
 
     protected function generateCollectionActions()
     {
         $unnamed = array('index', 'create');
-        $this->generateActions($this->collection_actions, $unnamed, $this->getName(), $this->getPath());
+        $this->generateActions($this->collection_actions, $unnamed, $this->getName(), $this->getPathBase() . $this->name);
     }
 
     public function getRoute($name)
