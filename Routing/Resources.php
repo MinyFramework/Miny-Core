@@ -42,8 +42,8 @@ class Resources extends RouteCollection
     private $name;
     private $singular_name;
     private $parameters;
-    private $member_actions;
-    private $collection_actions;
+    protected $member_actions;
+    protected $collection_actions;
     private $built = false;
     private $id_pattern;
     private $parent;
