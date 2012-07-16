@@ -82,7 +82,7 @@ class FormBuilder
         return $form;
     }
 
-    public function generatePartial()
+    public function partial()
     {
         $form = '';
         foreach (func_get_args() as $key) {
