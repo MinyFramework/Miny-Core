@@ -104,10 +104,8 @@ class FormBuilder
 
     public function begin(array $options = array())
     {
-        $method = $this->descriptor->getOption('method');
-
+        $method = isset($options['method']) ? $options['method'] : $this->descriptor->getOption('method');
         $options['method'] = ($method == 'GET') ? 'GET' : 'POST';
-
         $form = sprintf('<form%s>', $this->getHTMLArgList($options));
         if ($method != $options['method']) {
             $method_field = new Hidden('_method', array('value' => $method));
