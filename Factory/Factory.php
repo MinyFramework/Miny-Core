@@ -292,7 +292,7 @@ class Factory
     }
 
     /**
-     * Processes a parameter string, which specifies an object or a method call.
+     * Processes a parameter string, which specifies an object, a property or a method call.
      *
      * @see Factory::getValue()
      * @param string $str
@@ -300,12 +300,16 @@ class Factory
      */
     private function getObjectParameter($str)
     {
-        if (($pos = strpos($str, '::')) !== false) {
+       if (($pos = strpos($str, '::')) !== false) {
             $arr = explode('::', $str);
             $obj_name = array_shift($arr);
             $method = array_shift($arr);
             $object = $this->get($obj_name);
             return call_user_func_array(array($object, $method), $arr);
+        } elseif (($pos = strpos($str, '->')) !== false) {
+            list($obj_name, $property) = explode('->', $str, 2);
+            $object = $this->get($obj_name);
+            return $object->$property;
         } else {
             return $this->get($str);
         }
