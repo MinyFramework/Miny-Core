@@ -38,7 +38,6 @@ class FormDescriptor extends Entity implements iValidable
         'method' => 'POST'
     );
     protected $token;
-    private $token_storage;
     private $errors;
 
     public function __construct(array $data = array())
@@ -50,19 +49,6 @@ class FormDescriptor extends Entity implements iValidable
         parent::__construct($data);
     }
 
-    public function setTokenStorage(TokenStorage $storage)
-    {
-        $this->token_storage = $storage;
-    }
-
-    public function getTokenStorage()
-    {
-        if (is_null($this->token_storage)) {
-            throw new \BadMethodCallException('TokenStorage must be set.');
-        }
-        return $this->token_storage;
-    }
-
     public function getValidationInfo(Descriptor $class)
     {
 
@@ -71,7 +57,7 @@ class FormDescriptor extends Entity implements iValidable
     protected function privates()
     {
         $array = parent::privates();
-        array_push($array, 'options', 'felds', 'errors', 'token_storage');
+        array_push($array, 'options', 'fields', 'errors');
         return $array;
     }
 
@@ -119,23 +105,6 @@ class FormDescriptor extends Entity implements iValidable
     public function hasField($key)
     {
         return isset($this->fields[$key]);
-    }
-
-    public function __wakeup()
-    {
-        $this->token = $this->getTokenStorage()->generate();
-    }
-
-    public function getCSRFToken()
-    {
-        if (!$this->getOption('csrf')) {
-            return NULL;
-        }
-
-        if (is_null($this->token)) {
-            $this->token = $this->getTokenStorage()->generate();
-        }
-        return $this->token;
     }
 
     public function addErrors(array $errors)

@@ -26,21 +26,30 @@
 
 namespace Miny\Form;
 
-use \Miny\Validator\Constraints\Choice;
+use \Miny\Validator\Constraints\Equals;
 use \Miny\Validator\Descriptor;
 use \Miny\Validator\Validator;
 use \Miny\Validator\iValidable;
 
 class FormValidator extends Validator
 {
+    private $token;
+
+    public function setCSRFToken($token)
+    {
+        $this->token = $token;
+    }
+
     protected function loadConstraints(iValidable $form)
     {
         $class = new Descriptor;
         $form->getValidationInfo($class);
 
         if ($form->getOption('csrf')) {
-            $tokens = $form->getTokenStorage()->getTokens();
-            $class->addGetterConstraint('getCSRFToken', new Choice($tokens));
+            if (is_null($this->token)) {
+                throw new \BadMethodCallException('CSRF token not set.');
+            }
+            $class->addPropertyConstraint('token', new Equals($this->token));
         }
 
         return $class;

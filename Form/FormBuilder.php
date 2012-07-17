@@ -113,8 +113,7 @@ class FormBuilder
         }
 
         if ($this->descriptor->getOption('csrf')) {
-            $token = $this->descriptor->getCSRFToken();
-            $token_field = new Hidden('token', array('value' => $token));
+            $token_field = new Hidden('token', array('value' => $this->descriptor->token));
             if ($this->descriptor->hasOption('name')) {
                 $form_name = $this->descriptor->getOption('name');
                 $token_field->name = $form_name . '[token]';
