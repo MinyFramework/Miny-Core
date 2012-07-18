@@ -70,7 +70,7 @@ class SQLCacheDriver implements \Miny\Cache\iCacheDriver
         return $this->driver->prepare($this->getQuery($query));
     }
 
-    public function exists($key)
+    public function has($key)
     {
         return array_key_exists($key, $this->keys) && $this->keys[$key] != 'r';
     }
