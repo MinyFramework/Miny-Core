@@ -26,15 +26,19 @@
 
 namespace Miny\Entity;
 
-class Entity implements \ArrayAccess, \Iterator
+class Entity implements \ArrayAccess, \IteratorAggregate
 {
     private $provider;
     private $keys = array();
 
+    public static function getKeyName()
+    {
+        return 'id';
+    }
+
     public function __construct(array $data = array())
     {
-        $this->keys = array_diff(array_keys(get_object_vars($this)),
-                $this->privates());
+        $this->keys = array_diff(array_keys(get_object_vars($this)), $this->privates());
         foreach ($data as $key => $value) {
             if ($this->__isset($key)) {
                 $this->$key = $value;
@@ -71,18 +75,13 @@ class Entity implements \ArrayAccess, \Iterator
         $this->provider->remove($this->getKey());
     }
 
-    public function getKeyName()
-    {
-        return 'id';
-    }
-
     public function getKey()
     {
-        $key = $this->getKeyName();
+        $key = static::getKeyName();
         return $this->$key;
     }
 
-    public function getKeyList()
+    public function getFieldList()
     {
         return $this->keys;
     }
@@ -92,6 +91,11 @@ class Entity implements \ArrayAccess, \Iterator
         if (!in_array($name, $this->keys)) {
             throw new \InvalidArgumentException('Field not exists: ' . $name);
         }
+    }
+
+    public function equals(Entity $ent)
+    {
+        return $this->toArray() == $ent->toArray();
     }
 
     public function __isset($name)
@@ -119,7 +123,7 @@ class Entity implements \ArrayAccess, \Iterator
 
     public function toArray()
     {
-        return get_object_vars($this);
+        return array_diff(get_object_vars($this), array_flip($this->privates()));
     }
 
     public function offsetExists($offset)
@@ -142,30 +146,9 @@ class Entity implements \ArrayAccess, \Iterator
         return $this->__set($offset, NULL);
     }
 
-    public function current()
+    public function getIterator()
     {
-        $key = $this->key();
-        return $this->$key;
-    }
-
-    public function key()
-    {
-        return current($this->keys);
-    }
-
-    public function next()
-    {
-        return next($this->keys);
-    }
-
-    public function rewind()
-    {
-        reset($this->keys);
-    }
-
-    public function valid()
-    {
-        return $this->key() !== false;
+        return new \ArrayIterator($this->toArray());
     }
 
 }
