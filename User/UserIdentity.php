@@ -43,9 +43,16 @@ class UserIdentity extends Entity
     /**
      * The primary key of the User entity.
      */
-    public function getKeyName()
+    public static function getKeyName()
     {
         return 'name';
+    }
+
+    protected function privates()
+    {
+        $arr = parent::privates();
+        $arr[] = 'permissions';
+        return $arr;
     }
 
     /**
@@ -56,6 +63,15 @@ class UserIdentity extends Entity
     public function hasPermission($permission)
     {
         return in_array($permission, $this->permissions);
+    }
+
+    /**
+     * Retrieves the list of permissions.
+     * @return array
+     */
+    public function getPermissions()
+    {
+        return $this->permissions;
     }
 
     /**
