@@ -177,7 +177,9 @@ class SQL extends UserProvider
         $key = $user->getKey();
         //update userdata
         $fields = array();
-        foreach ($user->getFieldList() as $name) {
+        $field_list = $user->getFieldList();
+        unset($field_list['permissions']);
+        foreach ($field_list as $name) {
             $fields[':' . $name] = '`' . $name . '`';
         }
         $fields = implode(', ', $fields);

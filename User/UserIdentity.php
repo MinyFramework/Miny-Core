@@ -48,13 +48,6 @@ class UserIdentity extends Entity
         return 'name';
     }
 
-    protected function privates()
-    {
-        $arr = parent::privates();
-        $arr[] = 'permissions';
-        return $arr;
-    }
-
     /**
      * Checks whether the user has the given permission or not.
      * @param string $permission
@@ -63,15 +56,6 @@ class UserIdentity extends Entity
     public function hasPermission($permission)
     {
         return in_array($permission, $this->permissions);
-    }
-
-    /**
-     * Retrieves the list of permissions.
-     * @return array
-     */
-    public function getPermissions()
-    {
-        return $this->permissions;
     }
 
     /**
