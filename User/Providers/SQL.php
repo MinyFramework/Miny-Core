@@ -127,7 +127,11 @@ class SQL extends UserProvider
     public function remove($key)
     {
         if (parent::remove($key)) {
-            $this->modified_users[$key] = 'r';
+            if (isset($this->modified_entities[$key]) && $this->modified_entities[$key] == 'a') {
+                unset($this->modified_entities[$key]);
+            } else {
+                $this->modified_entities[$key] = 'r';
+            }
             return true;
         }
     }
@@ -173,34 +177,32 @@ class SQL extends UserProvider
         $key = $user->getKey();
         //update userdata
         $fields = array();
-        $data = $user->toArray();
-        $data_keys = array_keys($data);
-        foreach ($data_keys as $name) {
-            $fields[] = '`' . $name . '`';
+        foreach ($user->getFieldList() as $name) {
+            $fields[':' . $name] = '`' . $name . '`';
         }
         $fields = implode(', ', $fields);
-        $values = implode(', ', $data_keys);
+        $values = implode(', ', array_keys($fields));
 
         $sql = 'REPLACE INTO `%s` (%s) VALUES (%s)';
         $sql = sprintf($sql, $this->table_name, $fields, $values);
-        $this->driver->prepare($sql)->execute($data);
+        $this->driver->prepare($sql)->execute($user->toArray());
 
         //delete removed permissions
-        $permissions = $user->permissions;
+        $permissions = $user->getPermissions();
         $permission_count = count($permissions);
 
         //no permissions - delete all old ones and return
         if ($permission_count == 0) {
-            $sql = 'DELETE FROM `%s` WHERE `name` = ?';
-            $sql = sprintf($sql, $this->permissions_table_name);
+            $sql = 'DELETE FROM `%s` WHERE `%s` = ?';
+            $sql = sprintf($sql, $this->permissions_table_name, $user::getKeyName());
             $this->driver->prepare($sql)->execute(array($key));
             return;
         }
         //delete only removed permissions
         $marks = array_fill(0, $permission_count, '?');
         $marks = implode(', ', $marks);
-        $sql = 'DELETE FROM `%s` WHERE `name` = ? AND `permission` NOT IN(%s)';
-        $sql = sprintf($sql, $this->permissions_table_name, $marks);
+        $sql = 'DELETE FROM `%s` WHERE `%s` = ? AND `permission` NOT IN(%s)';
+        $sql = sprintf($sql, $this->permissions_table_name, $user::getKeyName(), $marks);
 
         $array = $permissions;
         array_unshift($array, $key);
@@ -209,8 +211,8 @@ class SQL extends UserProvider
         //insert new permissions
         $marks = array_fill(0, $permission_count, '(?, ?)');
         $marks = implode(', ', $marks);
-        $sql = 'REPLACE INTO `%s` (`name`, `permission`) VALUES %s';
-        $sql = sprintf($sql, $this->permissions_table_name, $marks);
+        $sql = 'REPLACE INTO `%s` (`%s`, `permission`) VALUES %s';
+        $sql = sprintf($sql, $this->permissions_table_name, $user::getKeyName(), $marks);
 
         $array = array();
         foreach ($permissions as $permission) {
