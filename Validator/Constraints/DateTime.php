@@ -30,6 +30,8 @@ use Miny\Validator\Constraint;
 
 class DateTime extends Constraint
 {
+    public $format;
+
     public function validate($value)
     {
         if ($value instanceof \DateTime) {
@@ -37,12 +39,21 @@ class DateTime extends Constraint
         }
 
         try {
-            new \DateTime($value);
+            if (is_null($this->format)) {
+                new \DateTime($value);
+            } else {
+                \DateTime::createFromFormat($this->format, $value);
+            }
         } catch (Exception $e) {
             $this->addViolation($this->message, array('value' => $value));
             return false;
         }
         return true;
+    }
+
+    public function getDefaultOption()
+    {
+        return 'format';
     }
 
 }
