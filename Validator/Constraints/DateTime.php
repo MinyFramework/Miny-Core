@@ -38,17 +38,18 @@ class DateTime extends Constraint
             return true;
         }
 
-        try {
-            if (is_null($this->format)) {
+        if (is_null($this->format)) {
+            try {
                 new \DateTime($value);
-            } else {
-                \DateTime::createFromFormat($this->format, $value);
+                return true;
+            } catch (Exception $e) {
+
             }
-        } catch (Exception $e) {
-            $this->addViolation($this->message, array('value' => $value));
-            return false;
+        } elseif (\DateTime::createFromFormat($this->format, $value)) {
+            return true;
         }
-        return true;
+        $this->addViolation($this->message, array('value' => $value));
+        return false;
     }
 
     public function getDefaultOption()
