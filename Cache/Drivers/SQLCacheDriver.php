@@ -77,7 +77,7 @@ class SQLCacheDriver implements \Miny\Cache\iCacheDriver
 
     public function get($key)
     {
-        if (!$this->exists($key)) {
+        if (!$this->has($key)) {
             throw new \OutOfBoundsException('Key not found: ' . $key);
         }
         if (!array_key_exists($key, $this->data)) {
