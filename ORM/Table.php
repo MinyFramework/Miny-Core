@@ -42,6 +42,11 @@ class Table implements \ArrayAccess, \IteratorAggregate
         }
     }
 
+    public function newRow(array $data = array())
+    {
+        return new Row($this, $data);
+    }
+
     public function getTableName()
     {
         return sprintf($this->manager->table_format, $this->descriptor->name);

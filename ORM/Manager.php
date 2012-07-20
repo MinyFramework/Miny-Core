@@ -57,13 +57,16 @@ class Manager
         $tables = $this->connection->query('SHOW TABLES')->fetchAll();
         $table_ids = array();
         foreach ($tables as $name) {
+            $name = $name[0];
+            list($id) = sscanf($name, $this->table_format);
             $td = new TableDescriptor;
-            list($id) = sscanf($name[0], $this->table_format);
             $td->name = $id;
             $this->addTable($td, $id);
-            $table_ids[$id] = $name[0];
+            $table_ids[$id] = $name;
         }
+
         $foreign_pattern = '/' . str_replace('%s', '(.*)', $this->foreign_key) . '/';
+        
         foreach ($table_ids as $name => $table_name) {
             //TODO: many-many relations
             $stmt = $this->connection->query('DESCRIBE ' . $table_name);

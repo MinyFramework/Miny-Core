@@ -208,68 +208,75 @@ class Query implements \IteratorAggregate
                 return $return;
             }
         } else {
-            $table_fields = array();
-            $relations_fields = array();
-            $table = $this->table->descriptor->name;
-            $pk_field = $this->table->descriptor->primary_key;
-            foreach ($this->table->descriptor->fields as $name) {
-                $table_fields[$table] = $table . '_' . $name;
+            return $this->process($rows);
+        }
+    }
+
+    private function process(array $rows)
+    {
+        $table_fields = array();
+        $relations_fields = array();
+        $table = $this->table->descriptor->name;
+        $pk_field = $this->table->descriptor->primary_key;
+        foreach ($this->table->descriptor->fields as $name) {
+            $table_fields[$name] = $table . '_' . $name;
+        }
+        foreach ($this->with as $name) {
+            $relations_fields[$name] = array();
+            foreach ($this->table->getRelatedTable($name)->descriptor->fields as $field) {
+                $relations_fields[$name][$field] = $name . '_' . $field;
+            }
+        }
+        $return = array();
+        $last_pk = NULL;
+        $relation_last_pks = array();
+        $relations = array();
+        foreach ($rows as $row) {
+            if ($last_pk != $row[$table_fields[$pk_field]]) {
+                $rowdata = $this->getFieldsFromRow($row, $table_fields);
+                $last_pk = $rowdata[$pk_field];
+                $return[$last_pk] = new Row($rowdata);
+                $relations[$last_pk] = array();
             }
             foreach ($this->with as $name) {
-                $relations_fields[$name] = array();
-                foreach ($this->table->getRelatedTable($name)->descriptor->fields as $field) {
-                    $relations_fields[$name] = $name . '_' . $field;
-                }
-            }
-            $return = array();
-            $last_pk = NULL;
-            $relation_last_pks = array();
-            $relations = array();
-            foreach ($rows as $row) {
-                if ($last_pk != $row[$table_fields[$pk_field]]) {
-                    $rowdata = array();
-                    foreach ($table_fields as $field => $alias) {
-                        if (isset($row[$alias])) {
-                            $rowdata[$field] = $row[$alias];
-                        }
-                    }
-                    $last_pk = $rowdata[$pk_field];
-                    $return[$last_pk] = new Row($rowdata);
-                    $relations[$last_pk] = array();
-                }
-                foreach ($this->with as $name) {
-                    $relation = $this->table->descriptor->getRelation($name);
-                    $related = $relation->getTable();
-                    $relation_pk = $related->getPrimaryKey();
-                    $relation_pk_alias = $relations_fields[$relation_pk];
+                $relation = $this->table->descriptor->getRelation($name);
+                $relation_pk = $relation->getTable()->getPrimaryKey();
+                $relation_pk_alias = $relations_fields[$name][$relation_pk];
 
-                    if (!isset($relations[$last_pk][$name])) {
-                        $relations[$last_pk][$name] = array();
-                    }
+                $relation_pk_value = $row[$relation_pk_alias];
 
-                    if (!isset($relation_last_pks[$name]) || $relation_last_pks[$name] != $row[$relation_pk_alias]) {
-                        $relation_last_pks[$name] = $row[$relation_pk_alias];
-                        $relation_data = array();
-                        foreach ($relations_fields[$name] as $field => $alias) {
-                            if (isset($row[$alias])) {
-                                $relation_data[$field] = $row[$alias];
-                            }
+                if (!isset($relation_last_pks[$name]) || $relation_last_pks[$name] != $relation_pk_value) {
+                    $relation_last_pks[$name] = $relation_pk_value;
+                    $relation_row = new Row($this->getFieldsFromRow($row, $relations_fields[$name]));
+                    if ($relation->getType() == Relation::BELONGS_TO) {
+                        //no need to store it in $relations - assign directly
+                        $return[$last_pk]->$name = $relation_row;
+                    } else {
+                        if (!isset($relations[$last_pk][$name])) {
+                            $relations[$last_pk][$name] = array();
                         }
-                        if ($relation->getType() == Relation::BELONGS_TO) {
-                            $relations[$last_pk][$name] = new Row($relation_data);
-                        } else {
-                            $relations[$last_pk][$name][$row[$relation_pk_alias]] = new Row($relation_data);
-                        }
+                        $relations[$last_pk][$name][$relation_pk_value] = $relation_row;
                     }
                 }
             }
-            foreach ($relations as $pk => $array) {
-                foreach ($array as $name => $data) {
-                    $return[$pk]->$name = $data;
-                }
-            }
-            return $return;
         }
+        foreach ($relations as $pk => $array) {
+            foreach ($array as $name => $data) {
+                $return[$pk]->$name = $data;
+            }
+        }
+        return $return;
+    }
+
+    private function getFieldsFromRow(array $row, array $fields)
+    {
+        $rowdata = array();
+        foreach ($fields as $field => $alias) {
+            if (isset($row[$alias])) {
+                $rowdata[$field] = $row[$alias];
+            }
+        }
+        return $rowdata;
     }
 
     public function getIterator()
