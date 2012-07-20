@@ -122,16 +122,19 @@ class Query implements \IteratorAggregate
     public function getQuery()
     {
         $table = $this->table->getTableName();
-        $descriptor = $this->table->descriptor;
-        $table_name = $table;
-        $primary_key = $descriptor->primary_key;
         if (!empty($this->with)) {
+            $descriptor = $this->table->descriptor;
+            $table_name = $table;
             $columns = $this->columns ? : $this->table->descriptor->fields;
+
+            $table_join_field = $this->table->getForeignKey($descriptor->name);
+            $primary_key = $descriptor->primary_key;
             foreach ($columns as $k => $name) {
                 $columns[$k] = $table_name . '.' . $name . ' as ' . $table_name . '_' . $name;
             }
+
             foreach ($this->with as $name) {
-                $relation = $this->table->descriptor->getRelation($name);
+                $relation = $descriptor->getRelation($name);
                 $related = $this->table->getRelatedTable($name);
                 $related_table = $related->getTableName();
                 $related_descriptor = $related->descriptor;
@@ -146,8 +149,6 @@ class Query implements \IteratorAggregate
 
                 if ($relation->getType == Relation::MANY_MANY) {
                     $join_table = $this->table->getJoinTable($name);
-
-                    $table_join_field = $this->table->getForeignKey($descriptor->name);
 
                     $table .= sprintf($join_pattern, $join_table, $table_join_field, $table_name, $primary_key);
                     $table .= sprintf($join_pattern, $related_table, $related_primary, $join_table, $foreign_key);
