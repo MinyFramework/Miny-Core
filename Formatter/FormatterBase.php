@@ -53,7 +53,7 @@ class FormatterBase
     {
         if (!is_null($this->cache)) {
             $key = md5($text);
-            if (!$this->cache->exists($key)) {
+            if (!$this->cache->has($key)) {
                 $text = $this->doFormat($text);
                 $this->cache->store($key, $text, 3600);
             } else {
