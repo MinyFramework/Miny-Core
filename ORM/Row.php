@@ -36,8 +36,7 @@ class Row implements \ArrayAccess, \IteratorAggregate
     public function __construct(Table $table, array $data = array())
     {
         $this->table = $table;
-        $fields = array_flip($table->descriptor->fields);
-        $this->data = array_intersect_key($data, $fields);
+        $this->data = $data;
     }
 
     public function getTable()
