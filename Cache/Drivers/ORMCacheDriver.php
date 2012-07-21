@@ -42,7 +42,6 @@ class ORMCacheDriver implements \Miny\Cache\iCacheDriver
         $this->table = $manager->$table_name;
 
         $this->table->deleteRows('expiration < NOW()');
-
         foreach ($this->table as $row) {
             $this->keys[$row['id']] = 1;
         }
@@ -102,7 +101,7 @@ class ORMCacheDriver implements \Miny\Cache\iCacheDriver
                 switch ($state) {
                     case 'a':
                         $this->table->insert(array(
-                            'id'         => $key,
+                            'id'        => $key,
                             'expiration' => date('Y-m-d H:i:s', time() + $this->ttls[$key]),
                             'data'       => serialize($this->data[$key])
                         ));

@@ -31,11 +31,11 @@ class SQLCacheDriver implements \Miny\Cache\iCacheDriver
 {
     protected static $queries = array(
         'gc'     => 'DELETE FROM `%s` WHERE `expiration` < NOW()',
-        'index'  => 'SELECT `key` FROM `%s` WHERE `expiration` >= NOW()',
-        'select' => 'SELECT `data` FROM `%s` WHERE `key` = ?',
-        'delete' => 'DELETE FROM `%s` WHERE `key` = ?',
-        'modify' => 'REPLACE INTO `%s` (`key`, `data`, `expiration`)
-                VALUES(:key, :value, :expiration)'
+        'index'  => 'SELECT `id` FROM `%s` WHERE `expiration` >= NOW()',
+        'select' => 'SELECT `data` FROM `%s` WHERE `id` = ?',
+        'delete' => 'DELETE FROM `%s` WHERE `id` = ?',
+        'modify' => 'REPLACE INTO `%s` (`id`, `data`, `expiration`)
+                VALUES(:id, :value, :expiration)'
     );
     private $keys = array();
     private $data = array();
@@ -53,7 +53,7 @@ class SQLCacheDriver implements \Miny\Cache\iCacheDriver
         $driver->exec($this->getQuery('gc'));
 
         foreach ($driver->query($this->getQuery('index')) as $row) {
-            $this->keys[$row['key']] = 1;
+            $this->keys[$row['id']] = 1;
         }
     }
 
@@ -126,7 +126,7 @@ class SQLCacheDriver implements \Miny\Cache\iCacheDriver
                 if ($state == 'm') {
                     $ttl = $this->ttls[$key];
                     $array = array(
-                        'key'        => $key,
+                        'id'        => $key,
                         'expiration' => date('Y-m-d H:i:s', time() + $ttl),
                         'value'      => serialize($this->data[$key])
                     );
