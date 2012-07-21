@@ -112,7 +112,7 @@ class Manager
 
             foreach ($stmt->fetchAll() as $field) {
                 $td->fields[] = $field['Field'];
-                if ($field['Key'] == 'PK') {
+                if ($field['Key'] == 'PRI') {
                     $td->primary_key = $field['Field'];
                 }
 
