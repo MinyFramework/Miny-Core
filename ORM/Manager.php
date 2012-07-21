@@ -52,6 +52,40 @@ class Manager
         }
     }
 
+    private function processManyManyRelation($name)
+    {
+        if (strpos($name, '_') === false) {
+            return;
+        }
+        $parts = explode('_', $name);
+        $parts_count = count($parts);
+        $joins_tables = false;
+        if ($parts_count == 2) {
+            if (isset($this->tables[$parts[0]], $this->tables[$parts[1]])) {
+                $joins_tables = array($parts[0], $parts[1]);
+            }
+        } else {
+            for ($i = 1; $i < $parts_count; ++$i) {
+                $table1 = implode('_', array_slice($parts, 0, $i));
+                if (isset($this->tables[$table1])) {
+                    $table2 = implode('_', array_slice($parts, $i));
+                    if (isset($this->tables[$table2])) {
+                        $joins_tables = array($table1, $table2);
+                        break;
+                    }
+                }
+            }
+        }
+        if ($joins_tables) {
+            list($table1_name, $table2_name) = $joins_tables;
+            $table1 = $this->tables[$table1_name];
+            $table2 = $this->tables[$table2_name];
+
+            $table1->descriptor->relations[$table2_name] = new Relation($table2, Relation::MANY_MANY);
+            $table2->descriptor->relations[$table1_name] = new Relation($table1, Relation::MANY_MANY);
+        }
+    }
+
     public function discover()
     {
         if (!empty($this->tables)) {
@@ -61,52 +95,21 @@ class Manager
         $tables = $this->connection->query('SHOW TABLES')->fetchAll();
         $table_ids = array();
         foreach ($tables as $name) {
-            $name = $name[0];
-            list($id) = sscanf($name, $this->table_format);
+            list($id) = sscanf($name[0], $this->table_format);
             $td = new TableDescriptor;
             $td->name = $id;
             $this->addTable($td, $id);
-            $table_ids[$id] = $name;
+            $table_ids[$id] = $name[0];
         }
 
         $foreign_pattern = '/' . str_replace('%s', '(.*)', $this->foreign_key) . '/';
 
         foreach ($table_ids as $name => $table_name) {
+            $this->processManyManyRelation($name);
             $stmt = $this->connection->query('DESCRIBE ' . $table_name);
-            $fields = $stmt->fetchAll();
             $td = $this->tables[$name]->descriptor;
 
-            if (strpos('_', $name) !== false) {
-                $parts = explode('_', $name);
-                $parts_count = count($parts);
-                $joins_tables = false;
-                if ($parts_count == 2) {
-                    if (isset($table_ids[$parts[0]], $table_ids[$parts[1]])) {
-                        $joins_tables = array($parts[0], $parts[1]);
-                    }
-                } else {
-                    for ($i = 1; $i < $parts_count; ++$i) {
-                        $table1 = implode('_', array_slice($parts, 0, $i));
-                        if (isset($table_ids[$table1])) {
-                            $table2 = implode('_', array_slice($parts, $i));
-                            if (isset($table_ids[$table2])) {
-                                $joins_tables = array($table1, $table2);
-                                break;
-                            }
-                        }
-                    }
-                }
-                if ($joins_tables) {
-                    list($table1_name, $table2_name) = $joins_tables;
-                    $table1 = $this->tables[$table1_name];
-                    $table2 = $this->tables[$table2_name];
-
-                    $table1->descriptor->relations[$table2_name] = new Relation($table2, Relation::MANY_MANY);
-                    $table2->descriptor->relations[$table1_name] = new Relation($table1, Relation::MANY_MANY);
-                }
-            }
-
-            foreach ($fields as $field) {
+            foreach ($stmt->fetchAll() as $field) {
                 $td->fields[] = $field['Field'];
                 if ($field['Key'] == 'PK') {
                     $td->primary_key = $field['Field'];
