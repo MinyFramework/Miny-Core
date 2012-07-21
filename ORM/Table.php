@@ -121,11 +121,17 @@ class Table implements \ArrayAccess, \IteratorAggregate
 
     public function delete($pk)
     {
-        $pattern = 'DELETE FROM %s WHERE %s = :pk';
+        $condition = sprintf('%s = :pk', $this->getPrimaryKey());
+        $this->deleteRows($condition, array('pk' => $pk));
+    }
 
-        $sql = sprintf($pattern, $this->getTableName(), $this->getPrimaryKey());
+    public function deleteRows($condition, array $parameters = NULL)
+    {
+        $pattern = 'DELETE FROM %s WHERE %s';
+
+        $sql = sprintf($pattern, $this->getTableName(), $condition);
         $stmt = $this->manager->connection->prepare($sql);
-        $stmt->execute(array('pk' => $pk));
+        $stmt->execute($parameters);
     }
 
     public function offsetExists($offset)
