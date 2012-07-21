@@ -54,6 +54,10 @@ class Manager
 
     public function discover()
     {
+        if (!empty($this->tables)) {
+            //Let's assume that the DB is already discovered (e.g. comes from cache)
+            return;
+        }
         $tables = $this->connection->query('SHOW TABLES')->fetchAll();
         $table_ids = array();
         foreach ($tables as $name) {
@@ -66,12 +70,41 @@ class Manager
         }
 
         $foreign_pattern = '/' . str_replace('%s', '(.*)', $this->foreign_key) . '/';
-        
+
         foreach ($table_ids as $name => $table_name) {
-            //TODO: many-many relations
             $stmt = $this->connection->query('DESCRIBE ' . $table_name);
             $fields = $stmt->fetchAll();
             $td = $this->tables[$name]->descriptor;
+
+            if (strpos('_', $name) !== false) {
+                $parts = explode('_', $name);
+                $parts_count = count($parts);
+                $joins_tables = false;
+                if ($parts_count == 2) {
+                    if (isset($table_ids[$parts[0]], $table_ids[$parts[1]])) {
+                        $joins_tables = array($parts[0], $parts[1]);
+                    }
+                } else {
+                    for ($i = 1; $i < $parts_count; ++$i) {
+                        $table1 = implode('_', array_slice($parts, 0, $i));
+                        if (isset($table_ids[$table1])) {
+                            $table2 = implode('_', array_slice($parts, $i));
+                            if (isset($table_ids[$table2])) {
+                                $joins_tables = array($table1, $table2);
+                                break;
+                            }
+                        }
+                    }
+                }
+                if ($joins_tables) {
+                    list($table1_name, $table2_name) = $joins_tables;
+                    $table1 = $this->tables[$table1_name];
+                    $table2 = $this->tables[$table2_name];
+
+                    $table1->descriptor->relations[$table2_name] = new Relation($table2, Relation::MANY_MANY);
+                    $table2->descriptor->relations[$table1_name] = new Relation($table1, Relation::MANY_MANY);
+                }
+            }
 
             foreach ($fields as $field) {
                 $td->fields[] = $field['Field'];
