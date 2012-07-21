@@ -63,7 +63,7 @@ class Row implements \ArrayAccess, \IteratorAggregate
 
     public function delete()
     {
-        $this->table->delete($this->data[$this->table->descriptor->primary_key]);
+        $this->table->delete($this->data[$this->table->getPrimaryKey()]);
     }
 
     public function offsetExists($offset)
@@ -81,7 +81,7 @@ class Row implements \ArrayAccess, \IteratorAggregate
 
     public function offsetSet($offset, $value)
     {
-        if (in_array($this->table->descriptor->fields)) {
+        if (in_array($offset, $this->table->descriptor->fields)) {
             if (!in_array($offset, $this->changed)) {
                 $this->changed[] = $offset;
             }

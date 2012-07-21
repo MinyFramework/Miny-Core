@@ -281,7 +281,12 @@ class Query implements \IteratorAggregate
 
     public function getIterator()
     {
-        return new \ArrayIterator($this->execute());
+        $rows = $this->execute();
+        if ($rows instanceof Row) {
+            return $rows->getIterator();
+        } else {
+            return new \ArrayIterator($rows);
+        }
     }
 
 }
