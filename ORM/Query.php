@@ -195,7 +195,7 @@ class Query implements \IteratorAggregate
         $stmt->execute();
         $rows = $stmt->fetchAll();
         if (empty($rows)) {
-            return false;
+            return array();
         }
         if (empty($this->with)) {
             if (count($rows) == 1) {

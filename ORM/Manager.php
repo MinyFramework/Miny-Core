@@ -95,11 +95,12 @@ class Manager
         $tables = $this->connection->query('SHOW TABLES')->fetchAll();
         $table_ids = array();
         foreach ($tables as $name) {
-            list($id) = sscanf($name[0], $this->table_format);
+            $name = current($name);
+            list($id) = sscanf($name, $this->table_format);
             $td = new TableDescriptor;
             $td->name = $id;
             $this->addTable($td, $id);
-            $table_ids[$id] = $name[0];
+            $table_ids[$id] = $name;
         }
 
         $foreign_pattern = '/' . str_replace('%s', '(.*)', $this->foreign_key) . '/';
@@ -119,15 +120,16 @@ class Manager
                 if (preg_match($foreign_pattern, $field['Field'], $matches)) {
                     $referenced_table = $matches[1];
                     $referencing_table = $name;
+                    if (isset($this->tables[$referenced_table])) {
+                        $referenced = $this->tables[$referenced_table];
+                        $referencing = $this->tables[$referencing_table];
 
-                    $referenced = $this->tables[$referenced_table];
-                    $referencing = $this->tables[$referencing_table];
+                        $referenced_relation = new Relation($referenced, Relation::HAS);
+                        $referencing_relation = new Relation($referencing, Relation::BELONGS_TO);
 
-                    $referenced_relation = new Relation($referenced, Relation::HAS);
-                    $referencing_relation = new Relation($referencing, Relation::BELONGS_TO);
-
-                    $referencing->descriptor->relations[$referenced_table] = $referenced_relation;
-                    $referenced->descriptor->relations[$referencing_table] = $referencing_relation;
+                        $referencing->descriptor->relations[$referenced_table] = $referenced_relation;
+                        $referenced->descriptor->relations[$referencing_table] = $referencing_relation;
+                    }
                 }
             }
         }

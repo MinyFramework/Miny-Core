@@ -95,8 +95,8 @@ class Table implements \ArrayAccess, \IteratorAggregate
         foreach (array_keys($data) as $key) {
             $fields[$key] = ':' . $key;
         }
-        $fields = implode(', ', array_keys($fields));
         $placeholders = implode(', ', $fields);
+        $fields = implode(', ', array_keys($fields));
 
         $pattern = 'INSERT INTO %s (%s) VALUES (%s)';
         $sql = sprintf($pattern, $this->getTableName(), $fields, $placeholders);
@@ -163,6 +163,12 @@ class Table implements \ArrayAccess, \IteratorAggregate
 
         $row[$this->getPrimaryKey()] = $offset;
         $row->save();
+    }
+
+    public function __call($method, $args)
+    {
+        $query = new Query($this);
+        return call_user_func_array(array($query, $method), $args);
     }
 
     public function offsetUnset($offset)
