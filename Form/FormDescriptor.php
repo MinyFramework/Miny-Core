@@ -26,18 +26,17 @@
 
 namespace Miny\Form;
 
-use \Miny\Entity\Entity;
 use \Miny\Validator\iValidable;
 use \Miny\Validator\Descriptor;
 
-class FormDescriptor extends Entity implements iValidable
+class FormDescriptor implements iValidable
 {
     protected $fields = array();
     protected $options = array(
         'csrf'   => true,
         'method' => 'POST'
     );
-    protected $token;
+    public $token;
     private $errors;
 
     public function __construct(array $data = array())
@@ -46,19 +45,14 @@ class FormDescriptor extends Entity implements iValidable
             $data = $data[$this->getOption('name')];
         }
         $this->fields = $this->fields();
-        parent::__construct($data);
+        foreach ($data as $key => $value) {
+            $this->$key = $value;
+        }
     }
 
     public function getValidationInfo(Descriptor $class)
     {
 
-    }
-
-    protected function privates()
-    {
-        $array = parent::privates();
-        array_push($array, 'options', 'fields', 'errors');
-        return $array;
     }
 
     public function fields()
