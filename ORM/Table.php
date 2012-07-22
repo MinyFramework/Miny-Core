@@ -110,9 +110,9 @@ class Table implements \ArrayAccess, \Iterator
         $data = array_intersect_key($data, array_flip($this->descriptor->fields));
         $fields = array();
         foreach (array_keys($data) as $key) {
-            $fields[] = sprintf('SET %1$s = :%1$s', $key);
+            $fields[] = sprintf('%1$s = :%1$s', $key);
         }
-        $pattern = 'UPDATE %s %s WHERE %s = :pk';
+        $pattern = 'UPDATE %s SET %s WHERE %s = :pk';
         $data['pk'] = $pk;
 
         $sql = sprintf($pattern, $this->getTableName(), implode(', ', $fields), $this->getPrimaryKey());
