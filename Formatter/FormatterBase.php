@@ -26,12 +26,14 @@
 
 namespace Miny\Formatter;
 
+use \Miny\Cache\iCacheDriver;
+
 class FormatterBase
 {
     private $formatters = array();
     private $cache;
 
-    public function setCacheDriver(\Miny\Cache\iCacheDriver $driver)
+    public function __construct(iCacheDriver $driver = NULL)
     {
         $this->cache = $driver;
     }
