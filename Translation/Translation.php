@@ -31,12 +31,13 @@ class Translation
     private $strings = array();
     private $rules = array();
 
-    public function __construct(array $rules)
+    public function __construct($lang, Loader $loader)
     {
-        foreach ($rules as $name => $rule) {
+        foreach (LanguageRules::getRules($lang) as $name => $rule) {
             $rule = preg_replace('/[^n0-9\w=\-+%<>]/', '', $rule);
             $this->rules[$name] = $rule;
         }
+        $this->strings = $this->strings + $loader->load($lang);
     }
 
     public function addString($key, $string)

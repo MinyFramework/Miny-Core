@@ -28,12 +28,5 @@ namespace Miny\Translation;
 
 abstract class Loader
 {
-    public function __construct($lang, Translation $t)
-    {
-        foreach ($this->load($lang) as $key => $string) {
-            $t->addString($key, $string);
-        }
-    }
-
-    protected abstract function load($lang);
+    public abstract function load($lang);
 }

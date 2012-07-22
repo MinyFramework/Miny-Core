@@ -33,10 +33,16 @@ class LanguageRules
         'en' => array(),
     );
 
+    public static function addRules($lang, array $rules)
+    {
+        return self::$rules[$lang] = $rules;
+    }
+
     public static function getRules($lang)
     {
         if (!isset(self::$rules[$lang])) {
-            throw new \OutOfBoundsException('Language data not set: ' . $lang);
+            //throw new \OutOfBoundsException('Language data not set: ' . $lang);
+            return array();
         }
         return self::$rules[$lang];
     }

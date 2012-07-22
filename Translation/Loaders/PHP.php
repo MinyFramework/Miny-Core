@@ -33,13 +33,12 @@ class PHP extends Loader
 {
     private $strings_dir;
 
-    public function __construct($dir, $lang, Translation $t)
+    public function __construct($dir)
     {
         $this->strings_dir = $dir;
-        parent::__construct($lang, $t);
     }
 
-    protected function load($lang)
+    public function load($lang)
     {
         $file = $this->strings_dir . '/' . $lang . '.php';
         if (!file_exists($file)) {
