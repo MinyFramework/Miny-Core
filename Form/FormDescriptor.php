@@ -39,8 +39,14 @@ class FormDescriptor implements iValidable
     public $token;
     private $errors;
 
-    public function __construct(array $data = array())
+    public function __construct($data = array())
     {
+        if(!is_array($data)) {
+            if(!($data instanceof \ArrayAccess && $data instanceof \Traversable)) {
+                throw new \InvalidArgumentException('Data should be an array or array-like object.');
+            }
+        }
+
         if ($this->hasOption('name') && !empty($data)) {
             $data = $data[$this->getOption('name')];
         }
