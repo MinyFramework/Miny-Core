@@ -37,6 +37,7 @@ class Choice extends Constraint
     public $max;
     public $multiple = false;
     public $strict = false;
+    public $allow_empty = false;
     public $message = 'The value should only be one of the following elements: {elements}';
     public $multiple_invalid_message = 'The value should be an array.';
     public $multiple_message = 'The array should only contain the following elements: {elements}';
@@ -46,6 +47,12 @@ class Choice extends Constraint
     public function validate($data)
     {
         $valid = true;
+
+        if (empty($data)) {
+            if ($this->allow_empty) {
+                return true;
+            }
+        }
 
         if (is_null($this->choices)) {
 
