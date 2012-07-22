@@ -41,6 +41,7 @@ class Query implements \Iterator, \Countable
     private $offset;
     private $lock = false;
     private $rows = array();
+    private $single = false;
 
     public function __construct(Table $table)
     {
@@ -125,30 +126,32 @@ class Query implements \Iterator, \Countable
         $table = $this->table->getTableName();
         if (!empty($this->with)) {
             $descriptor = $this->table->descriptor;
+            $table_id = $descriptor->name;
             $table_name = $table;
             $columns = $this->columns ? : $this->table->descriptor->fields;
 
             $table_join_field = $this->table->getForeignKey($descriptor->name);
             $primary_key = $descriptor->primary_key;
             foreach ($columns as $k => $name) {
-                $columns[$k] = $table_name . '.' . $name . ' as ' . $table_name . '_' . $name;
+                $columns[$k] = $table_name . '.' . $name . ' as ' . $table_id . '_' . $name;
             }
 
             foreach ($this->with as $name) {
                 $relation = $descriptor->getRelation($name);
                 $related = $this->table->getRelatedTable($name);
-                $related_table = $related->getTableName();
                 $related_descriptor = $related->descriptor;
+                $related_table = $related->getTableName();
+                $related_table_id = $related_descriptor->name;
                 $related_primary = $related_descriptor->primary_key;
 
                 foreach ($related_descriptor->fields as $related_field) {
-                    $columns[] = $related_table . '.' . $related_field . ' as ' . $related_table . '_' . $related_field;
+                    $columns[] = $related_table . '.' . $related_field . ' as ' . $related_table_id . '_' . $related_field;
                 }
 
                 $join_pattern = ' LEFT JOIN %1$s ON (%1$s.%2$s = %3$s.%4$s)';
                 $foreign_key = $this->table->getForeignKey($name);
 
-                if ($relation->getType == Relation::MANY_MANY) {
+                if ($relation->getType() == Relation::MANY_MANY) {
                     $join_table = $this->table->getJoinTable($name);
 
                     $table .= sprintf($join_pattern, $join_table, $table_join_field, $table_name, $primary_key);
@@ -199,7 +202,7 @@ class Query implements \Iterator, \Countable
             return array();
         }
         if (empty($this->with)) {
-            if (count($rows) == 1) {
+            if ($this->single || count($rows) == 1) {
                 return new Row($this->table, current($rows));
             } else {
                 $return = array();
@@ -236,7 +239,7 @@ class Query implements \Iterator, \Countable
             if ($last_pk != $row[$table_fields[$pk_field]]) {
                 $rowdata = $this->getFieldsFromRow($row, $table_fields);
                 $last_pk = $rowdata[$pk_field];
-                $return[$last_pk] = new Row($rowdata);
+                $return[$last_pk] = new Row($this->table, $rowdata);
                 $relations[$last_pk] = array();
             }
             foreach ($this->with as $name) {
@@ -248,7 +251,8 @@ class Query implements \Iterator, \Countable
 
                 if (!isset($relation_last_pks[$name]) || $relation_last_pks[$name] != $relation_pk_value) {
                     $relation_last_pks[$name] = $relation_pk_value;
-                    $relation_row = new Row($this->getFieldsFromRow($row, $relations_fields[$name]));
+                    $data = $this->getFieldsFromRow($row, $relations_fields[$name]);
+                    $relation_row = new Row($relation->getTable(), $data);
                     if ($relation->getType() == Relation::BELONGS_TO) {
                         //no need to store it in $relations - assign directly
                         $return[$last_pk]->$name = $relation_row;
@@ -266,6 +270,9 @@ class Query implements \Iterator, \Countable
                 $return[$pk]->$name = $data;
             }
         }
+        if ($this->single) {
+            $return = current($return);
+        }
         return $return;
     }
 
@@ -278,6 +285,12 @@ class Query implements \Iterator, \Countable
             }
         }
         return $rowdata;
+    }
+
+    public function get($single = true)
+    {
+        $this->single = $single;
+        return $this->execute();
     }
 
     public function current()
@@ -299,7 +312,7 @@ class Query implements \Iterator, \Countable
     {
         if (empty($this->rows)) {
             $this->rows = $this->execute();
-            if(!is_array($this->rows)) {
+            if (!is_array($this->rows)) {
                 $this->rows = array($this->rows);
             }
         }
@@ -316,7 +329,7 @@ class Query implements \Iterator, \Countable
     {
         if (empty($this->rows)) {
             $this->rows = $this->execute();
-            if(!is_array($this->rows)) {
+            if (!is_array($this->rows)) {
                 $this->rows = array($this->rows);
             }
         }

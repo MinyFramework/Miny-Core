@@ -145,7 +145,7 @@ class Table implements \ArrayAccess, \IteratorAggregate
         if (!isset($this->loaded_records[$offset])) {
             $query = new Query($this);
             $condition = sprintf('%s = ?', $this->descriptor->primary_key);
-            $this->loaded_records[$offset] = $query->where($condition, $offset)->execute();
+            $this->loaded_records[$offset] = $query->where($condition, $offset)->get();
         }
         return $this->loaded_records[$offset];
     }
