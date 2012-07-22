@@ -26,7 +26,7 @@
 
 namespace Miny\ORM;
 
-class Query implements \IteratorAggregate
+class Query implements \Iterator
 {
     private $table;
     private $with;
@@ -40,6 +40,7 @@ class Query implements \IteratorAggregate
     private $limit;
     private $offset;
     private $lock = false;
+    private $rows = array();
 
     public function __construct(Table $table)
     {
@@ -287,6 +288,38 @@ class Query implements \IteratorAggregate
         } else {
             return new \ArrayIterator($rows);
         }
+    }
+
+    public function current()
+    {
+        return current($this->rows);
+    }
+
+    public function key()
+    {
+        return key($this->rows);
+    }
+
+    public function next()
+    {
+        return next($this->rows);
+    }
+
+    public function rewind()
+    {
+        if (empty($this->rows)) {
+            $this->rows = $this->execute();
+            if(!is_array($this->rows)) {
+                $this->rows = array($this->rows);
+            }
+        }
+        reset($this->rows);
+    }
+
+    public function valid()
+    {
+        $val = key($this->rows);
+        return $val !== NULL && $val !== false;
     }
 
 }

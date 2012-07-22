@@ -85,8 +85,8 @@ class Row implements \ArrayAccess, \IteratorAggregate
             if (!in_array($offset, $this->changed)) {
                 $this->changed[] = $offset;
             }
-            $this->data[$offset] = $value;
         }
+        $this->data[$offset] = $value;
     }
 
     public function offsetUnset($offset)
