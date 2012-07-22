@@ -81,10 +81,11 @@ class Table implements \ArrayAccess, \IteratorAggregate
 
     public function save(Row $row, $force_insert = false)
     {
-        if (!isset($row[$this->getPrimaryKey()]) || $force_insert) {
+        $pk = $this->getPrimaryKey();
+        if (!isset($row[$pk]) || $force_insert) {
             $this->insert($row->toArray());
         } else {
-            $this->update($row[$this->getPrimaryKey()], $row->toArray());
+            $this->update($row[$pk], $row->getChangedValues());
         }
     }
 

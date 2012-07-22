@@ -44,6 +44,15 @@ class Row implements \ArrayAccess, \IteratorAggregate
         return $this->table;
     }
 
+    public function getChangedValues()
+    {
+        $return = array();
+        foreach ($this->changed as $key) {
+            $return[$key] = $this->data[$key];
+        }
+        return $return;
+    }
+
     public function __get($related)
     {
         if (!isset($this->related[$related])) {
