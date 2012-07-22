@@ -26,7 +26,7 @@
 
 namespace Miny\ORM;
 
-class Query implements \Iterator
+class Query implements \Iterator, \Countable
 {
     private $table;
     private $with;
@@ -280,16 +280,6 @@ class Query implements \Iterator
         return $rowdata;
     }
 
-    public function getIterator()
-    {
-        $rows = $this->execute();
-        if ($rows instanceof Row) {
-            return $rows->getIterator();
-        } else {
-            return new \ArrayIterator($rows);
-        }
-    }
-
     public function current()
     {
         return current($this->rows);
@@ -320,6 +310,17 @@ class Query implements \Iterator
     {
         $val = key($this->rows);
         return $val !== NULL && $val !== false;
+    }
+
+    public function count()
+    {
+        if (empty($this->rows)) {
+            $this->rows = $this->execute();
+            if(!is_array($this->rows)) {
+                $this->rows = array($this->rows);
+            }
+        }
+        return count($this->rows);
     }
 
 }
