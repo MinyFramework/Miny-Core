@@ -35,6 +35,7 @@ class AutoLoader
 {
     public static $extension = '.php';
     private static $map = array();
+    private static $classes = array();
 
     public static function init()
     {
@@ -70,6 +71,11 @@ class AutoLoader
         }
     }
 
+    public static function registerClass($class, $path)
+    {
+        self::$classes[$class] = $path;
+    }
+
     private static function getPathToNamespace($class)
     {
         $temp = '\\' . $class;
@@ -79,17 +85,14 @@ class AutoLoader
          */
         while (!isset(self::$map[$temp])) {
             if (($pos = strrpos($temp, '\\')) === false) {
-                break;
+                throw new ClassNotFoundException('Class not registered: ' . $class);
             }
             $temp = substr($temp, 0, $pos);
         }
-        if ($pos === false) {
-            throw new ClassNotFoundException('Class not registered: ' . $class);
-        }
-        foreach (self::$map[$temp] as $part) {
-            $path = $part . substr('\\' . $class, $pos) . self::$extension;
+        foreach (self::$map[$temp] as $path) {
+            $path .= substr($class, $pos - 1) . self::$extension;
             $path = str_replace('\\', DIRECTORY_SEPARATOR, $path);
-            if (file_exists($path)) {
+            if (is_file($path)) {
                 return $path;
             }
         }
@@ -98,17 +101,14 @@ class AutoLoader
 
     public static function load($class)
     {
-        if (isset(self::$map[$class])) {
-            $path = self::$map[$class];
-            if (!file_exists($path)) {
+        if (isset(self::$classes[$class])) {
+            $path = self::$classes[$class];
+            if (!is_file($path)) {
                 $message = 'Class file not found: ' . $path;
                 throw new ClassNotFoundException($message);
             }
-        } elseif (strpos($class, '\\') !== false) {
-            $path = self::getPathToNamespace($class);
         } else {
-            $message = 'Class not registered: ' . $class;
-            throw new ClassNotFoundException($message);
+            $path = self::getPathToNamespace($class);
         }
 
         include_once $path;
