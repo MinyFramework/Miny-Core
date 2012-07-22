@@ -247,12 +247,17 @@ class Query implements \Iterator, \Countable
                 $relation_pk = $relation->getTable()->getPrimaryKey();
                 $relation_pk_alias = $relations_fields[$name][$relation_pk];
 
-                $relation_pk_value = $row[$relation_pk_alias];
-                
-                if (empty($relation_pk_value)) {
+                $relation_pk_value = $row[$relation_pk_alias] ? : NULL;
+
+                if (isset($relation_last_pks[$name]) && $relation_last_pks[$name] == $relation_pk_value) {
                     continue;
                 }
-                if (isset($relation_last_pks[$name]) && $relation_last_pks[$name] == $relation_pk_value) {
+
+                if (!isset($relations[$last_pk][$name])) {
+                    $relations[$last_pk][$name] = array();
+                }
+
+                if(empty($relation_pk_value)) {
                     continue;
                 }
 
@@ -263,9 +268,6 @@ class Query implements \Iterator, \Countable
                     //no need to store it in $relations - assign directly
                     $return[$last_pk]->$name = $relation_row;
                 } else {
-                    if (!isset($relations[$last_pk][$name])) {
-                        $relations[$last_pk][$name] = array();
-                    }
                     $relations[$last_pk][$name][$relation_pk_value] = $relation_row;
                 }
             }
