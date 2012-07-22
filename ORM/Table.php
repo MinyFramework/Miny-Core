@@ -26,7 +26,7 @@
 
 namespace Miny\ORM;
 
-class Table implements \ArrayAccess, \IteratorAggregate
+class Table implements \ArrayAccess, \Iterator
 {
     public $manager;
     public $descriptor;
@@ -177,11 +177,34 @@ class Table implements \ArrayAccess, \IteratorAggregate
         $this->delete($offset);
     }
 
-    public function getIterator()
+    public function current()
     {
-        $query = new Query($this);
-        $this->loaded_records = $query->execute();
-        return new \ArrayIterator($this->loaded_records);
+        return current($this->loaded_records);
+    }
+
+    public function key()
+    {
+        return key($this->loaded_records);
+    }
+
+    public function next()
+    {
+        return next($this->loaded_records);
+    }
+
+    public function rewind()
+    {
+        if (empty($this->loaded_records)) {
+            $query = new Query($this);
+            $this->loaded_records = $query->execute();
+        }
+        reset($this->loaded_records);
+    }
+
+    public function valid()
+    {
+        $val = key($this->loaded_records);
+        return $val !== NULL && $val !== false;
     }
 
 }
