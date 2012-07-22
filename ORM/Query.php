@@ -248,20 +248,25 @@ class Query implements \Iterator, \Countable
                 $relation_pk_alias = $relations_fields[$name][$relation_pk];
 
                 $relation_pk_value = $row[$relation_pk_alias];
+                
+                if (empty($relation_pk_value)) {
+                    continue;
+                }
+                if (isset($relation_last_pks[$name]) && $relation_last_pks[$name] == $relation_pk_value) {
+                    continue;
+                }
 
-                if (!isset($relation_last_pks[$name]) || $relation_last_pks[$name] != $relation_pk_value) {
-                    $relation_last_pks[$name] = $relation_pk_value;
-                    $data = $this->getFieldsFromRow($row, $relations_fields[$name]);
-                    $relation_row = new Row($relation->getTable(), $data);
-                    if ($relation->getType() == Relation::BELONGS_TO) {
-                        //no need to store it in $relations - assign directly
-                        $return[$last_pk]->$name = $relation_row;
-                    } else {
-                        if (!isset($relations[$last_pk][$name])) {
-                            $relations[$last_pk][$name] = array();
-                        }
-                        $relations[$last_pk][$name][$relation_pk_value] = $relation_row;
+                $relation_last_pks[$name] = $relation_pk_value;
+                $data = $this->getFieldsFromRow($row, $relations_fields[$name]);
+                $relation_row = new Row($relation->getTable(), $data);
+                if ($relation->getType() == Relation::BELONGS_TO) {
+                    //no need to store it in $relations - assign directly
+                    $return[$last_pk]->$name = $relation_row;
+                } else {
+                    if (!isset($relations[$last_pk][$name])) {
+                        $relations[$last_pk][$name] = array();
                     }
+                    $relations[$last_pk][$name][$relation_pk_value] = $relation_row;
                 }
             }
         }
