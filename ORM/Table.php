@@ -197,6 +197,10 @@ class Table implements \ArrayAccess, \Iterator
         if (empty($this->loaded_records)) {
             $query = new Query($this);
             $this->loaded_records = $query->execute();
+            if (!is_array($this->loaded_records)) {
+                $pk = $this->loaded_records[$this->getPrimaryKey()];
+                $this->loaded_records = array($pk => $this->loaded_records);
+            }
         }
         reset($this->loaded_records);
     }

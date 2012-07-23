@@ -206,8 +206,13 @@ class Query implements \Iterator, \Countable
                 return new Row($this->table, current($rows));
             } else {
                 $return = array();
+                $pkfield = $this->table->getPrimaryKey();
                 foreach ($rows as $row) {
-                    $return[] = new Row($this->table, $row);
+                    if (isset($row[$pkfield])) {
+                        $return[$row[$pkfield]] = new Row($this->table, $row);
+                    } else {
+                        $return[] = new Row($this->table, $row);
+                    }
                 }
                 return $return;
             }
@@ -257,7 +262,7 @@ class Query implements \Iterator, \Countable
                     $relations[$last_pk][$name] = array();
                 }
 
-                if(empty($relation_pk_value)) {
+                if (empty($relation_pk_value)) {
                     continue;
                 }
 
