@@ -36,7 +36,7 @@ namespace Miny\Factory;
  *
  * @author  Dániel Buga
  */
-class Factory
+class Factory implements \ArrayAccess
 {
     /**
      * A name => object array of stored objects
@@ -452,6 +452,26 @@ class Factory
     public function getDescriptors()
     {
         return $this->descriptors;
+    }
+
+    public function offsetExists($offset)
+    {
+        return $this->hasParameter($offset);
+    }
+
+    public function offsetGet($offset)
+    {
+        return $this->getParameter($offset);
+    }
+
+    public function offsetSet($offset, $value)
+    {
+        $this->addParameter($offset, $value);
+    }
+
+    public function offsetUnset($offset)
+    {
+        $this->removeParameter($offset);
     }
 
 }
