@@ -190,6 +190,7 @@ class Resources extends RouteCollection
     {
         $parameters = $this->parameters;
         $singular_name = $this->getSingularName();
+        $parent = $this->getParent();
         foreach ($actions as $action => $method) {
             $parameters['action'] = $action;
             if (in_array($action, $unnamed)) {
@@ -199,6 +200,10 @@ class Resources extends RouteCollection
             } else {
                 $name = $action . '_' . $singular_name;
                 $route = new Route($path . '/' . $action, $method, $parameters);
+            }
+            $route->specify('id', $this->id_pattern);
+            if ($this->hasParent()) {
+                $route->specify($parent->name . '_id', $parent->id_pattern);
             }
             $this->addRoute($route, $name);
         }
