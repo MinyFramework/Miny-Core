@@ -35,14 +35,14 @@ class AutoLoader
 {
     public $extension = '.php';
     private $map = array();
-    private $classes = array();
 
-    public function __construct()
+    public function __construct(array $map = array())
     {
         spl_autoload_register(array($this, 'load'));
+        $this->register($map);
     }
 
-    private function addNamespacePath($namespace, $path)
+    private function addNamespace($namespace, $path)
     {
         if (is_array($path)) {
             if (isset($this->map[$namespace])) {
@@ -59,21 +59,16 @@ class AutoLoader
 
     public function register($namespace, $path = NULL)
     {
-        if (is_array($namespace)) {
+        if (is_null($path)) {
+            if (!is_array($namespace)) {
+                throw new \InvalidArgumentException('Argument must be an array');
+            }
             foreach ($namespace as $ns => $path) {
-                $this->addNamespacePath($ns, $path);
+                $this->addNamespace($ns, $path);
             }
         } else {
-            if (is_null($path)) {
-                throw new \InvalidArgumentException('Missing argument: path');
-            }
-            $this->addNamespacePath($namespace, $path);
+            $this->addNamespace($namespace, $path);
         }
-    }
-
-    public function registerClass($class, $path)
-    {
-        $this->classes[$class] = $path;
     }
 
     private function getPathToNamespace($class)
@@ -101,15 +96,7 @@ class AutoLoader
 
     public function load($class)
     {
-        if (isset($this->classes[$class])) {
-            $path = $this->classes[$class];
-            if (!is_file($path)) {
-                $message = 'Class file not found: ' . $path;
-                throw new ClassNotFoundException($message);
-            }
-        } else {
-            $path = $this->getPathToNamespace($class);
-        }
+        $path = $this->getPathToNamespace($class);
 
         include_once $path;
         if (!class_exists($class) && !interface_exists($class)) {
@@ -117,11 +104,6 @@ class AutoLoader
             $message = sprintf($message, $path, $class);
             throw new ClassNotFoundException($message);
         }
-    }
-
-    public function getMap()
-    {
-        return $this->map;
     }
 
 }
