@@ -52,14 +52,12 @@ class Application extends Factory
     const ENV_DEV = 1;
 
     private $directory;
-    private $module_directory;
     private $modules = array();
     private $environment;
 
-    public function __construct($directory, $environment = self::ENV_PROD, $module_directory = '../Miny/Modules')
+    public function __construct($directory, $environment = self::ENV_PROD)
     {
         $this->directory = $directory;
-        $this->module_directory = $module_directory;
         $this->environment = $environment;
 
         if (is_file($directory . '/config/config.common.php')) {
@@ -101,17 +99,13 @@ class Application extends Factory
         if (isset($this->modules[$module])) {
             return;
         }
-        $file = $this->module_directory . '/' . ucfirst($module) . '/Module.php';
-        if (!is_file($file)) {
-            throw new \InvalidArgumentException('Module descriptor not found: ' . $module);
-        }
-        $class = ucfirst($module) . 'Module';
+        $class = '\Modules\\' . ucfirst($module) . '\Module';
         $module_class = new $class;
         if (!$module_class instanceof Module) {
             throw new \UnexpectedValueException('Module descriptor should extend Module class.');
         }
         $this->modules[$module] = $module_class;
-        foreach (array_keys($module->getDependencies()) as $name) {
+        foreach (array_keys($module_class->getDependencies()) as $name) {
             $this->module($name);
         }
         $module_class->init($this);
@@ -131,7 +125,7 @@ class Application extends Factory
         $session = new \Miny\Session\Session;
         $session->open();
 
-        if(!isset($session['token'])) {
+        if (!isset($session['token'])) {
             $session['token'] = sha1(mt_rand());
         }
 
@@ -150,7 +144,8 @@ class Application extends Factory
         $controller_name = $this->resolver->getNextName();
         $parameters['controller'] = $controller_name;
         if (!in_array($method, array(NULL, 'GET', 'POST', 'PUT', 'DELETE'))) {
-            throw new \UnexpectedValueException(sprintf('Unexpected route method: ' . $method));
+            throw new \UnexpectedValueException(sprintf('Unexpected route method:
+        ' . $method));
         }
         $route = new Route($path, $method, $parameters);
         $this->router->route($route, $name);

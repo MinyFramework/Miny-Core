@@ -28,9 +28,9 @@ namespace Miny\Application;
 
 abstract class Module
 {
-    public function getDepencencies()
+    public function getDependencies()
     {
-        return false;
+        return array();
     }
 
     public function getVersion()
