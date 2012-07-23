@@ -75,8 +75,8 @@ class Application extends Factory
         $env_config = include $config_file;
         $this->setParameters($env_config);
 
-        if ($this->hasParameter('default_timezone')) {
-            date_default_timezone_set($this->getParameter('default_timezone'));
+        if (isset($this['default_timezone'])) {
+            date_default_timezone_set($this['default_timezone']);
         }
         $this->registerDefaultServices();
         if (is_file($directory . '/config/routes.php')) {
@@ -133,7 +133,7 @@ class Application extends Factory
         $this->request = Request::getGlobal();
 
         $router = $this->add('router', '\Miny\Routing\Router');
-        if ($this->hasParameter('router')) {
+        if (isset($this['router'])) {
             $router->setArguments('@router:prefix', '@router:suffix', '@router:defaults');
         }
     }
@@ -144,8 +144,7 @@ class Application extends Factory
         $controller_name = $this->resolver->getNextName();
         $parameters['controller'] = $controller_name;
         if (!in_array($method, array(NULL, 'GET', 'POST', 'PUT', 'DELETE'))) {
-            throw new \UnexpectedValueException(sprintf('Unexpected route method:
-        ' . $method));
+            throw new \UnexpectedValueException('Unexpected route method:' . $method);
         }
         $route = new Route($path, $method, $parameters);
         $this->router->route($route, $name);
