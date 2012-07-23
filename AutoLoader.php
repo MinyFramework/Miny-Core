@@ -33,64 +33,64 @@ namespace Miny;
  */
 class AutoLoader
 {
-    public static $extension = '.php';
-    private static $map = array();
-    private static $classes = array();
+    public $extension = '.php';
+    private $map = array();
+    private $classes = array();
 
-    public static function init()
+    public function __construct()
     {
-        spl_autoload_register('\Miny\AutoLoader::load');
+        spl_autoload_register(array($this, 'load'));
     }
 
-    private static function addNamespacePath($namespace, $path)
+    private function addNamespacePath($namespace, $path)
     {
         if (is_array($path)) {
-            if (isset(self::$map[$namespace])) {
-                $path = array_merge(self::$map[$namespace], $path);
+            if (isset($this->map[$namespace])) {
+                $path = array_merge($this->map[$namespace], $path);
             }
-            self::$map[$namespace] = $path;
+            $this->map[$namespace] = $path;
         } else {
-            if (!isset(self::$map[$namespace])) {
-                self::$map[$namespace] = array();
+            if (!isset($this->map[$namespace])) {
+                $this->map[$namespace] = array();
             }
-            self::$map[$namespace][] = $path;
+            $this->map[$namespace][] = $path;
         }
     }
 
-    public static function register($namespace, $path = NULL)
+    public function register($namespace, $path = NULL)
     {
         if (is_array($namespace)) {
             foreach ($namespace as $ns => $path) {
-                self::addNamespacePath($ns, $path);
+                $this->addNamespacePath($ns, $path);
             }
         } else {
             if (is_null($path)) {
                 throw new \InvalidArgumentException('Missing argument: path');
             }
-            self::addNamespacePath($namespace, $path);
+            $this->addNamespacePath($namespace, $path);
         }
     }
 
-    public static function registerClass($class, $path)
+    public function registerClass($class, $path)
     {
-        self::$classes[$class] = $path;
+        $this->classes[$class] = $path;
     }
 
-    private static function getPathToNamespace($class)
+    private function getPathToNamespace($class)
     {
         $temp = '\\' . $class;
         /*
          * We look for the longest matching namespace so we are trimming
          * from the right.
          */
-        while (!isset(self::$map[$temp])) {
+        while (!isset($this->map[$temp])) {
             if (($pos = strrpos($temp, '\\')) === false) {
                 throw new ClassNotFoundException('Class not registered: ' . $class);
             }
             $temp = substr($temp, 0, $pos);
         }
-        foreach (self::$map[$temp] as $path) {
-            $path .= substr($class, $pos - 1) . self::$extension;
+        foreach ($this->map[$temp] as $path) {
+            $path .= substr($class, $pos - 1) . $this->extension;
             $path = str_replace('\\', DIRECTORY_SEPARATOR, $path);
             if (is_file($path)) {
                 return $path;
@@ -99,16 +99,16 @@ class AutoLoader
         throw new ClassNotFoundException('Class not found: ' . $class);
     }
 
-    public static function load($class)
+    public function load($class)
     {
-        if (isset(self::$classes[$class])) {
-            $path = self::$classes[$class];
+        if (isset($this->classes[$class])) {
+            $path = $this->classes[$class];
             if (!is_file($path)) {
                 $message = 'Class file not found: ' . $path;
                 throw new ClassNotFoundException($message);
             }
         } else {
-            $path = self::getPathToNamespace($class);
+            $path = $this->getPathToNamespace($class);
         }
 
         include_once $path;
@@ -119,9 +119,9 @@ class AutoLoader
         }
     }
 
-    public static function getMap()
+    public function getMap()
     {
-        return self::$map;
+        return $this->map;
     }
 
 }
