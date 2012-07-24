@@ -123,7 +123,6 @@ class Application extends Factory
         $this->add('validator', '\Miny\Validator\Validator');
         $this->add('form_validator', '\Miny\Form\FormValidator');
 
-        $this->add('token_storage', '\Miny\Form\SessionTokenStorage')->setArguments('&session');
         $this->add('templating', '\Miny\Template\Template')->setArguments('@template_dir');
         $this->add('resolver', '\Miny\Controller\ControllerResolver')->setArguments('&templating');
         $this->add('dispatcher', '\Miny\HTTP\Dispatcher')->setArguments('&events', '&resolver');
