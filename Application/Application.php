@@ -50,43 +50,49 @@ class Application extends Factory
 {
     const ENV_PROD = 0;
     const ENV_DEV = 1;
+    const ENV_COMMON = 2;
 
     private $directory;
     private $modules = array();
     private $environment;
 
-    public function __construct($directory, $environment = self::ENV_PROD)
+    public function __construct($directory, $environment = self::ENV_PROD, $include_configs = true)
     {
         $this->directory = $directory;
         $this->environment = $environment;
 
-        if (is_file($directory . '/config/config.common.php')) {
-            $config = include $directory . '/config/config.common.php';
-        } else {
-            $config = array();
-        }
-        parent::__construct($config);
-        if ($environment == self::ENV_DEV && is_file($directory . '/config/config.dev.php')) {
-            $config_file = $directory . '/config/config.dev.php';
-        } else {
-            $config_file = $directory . '/config/config.php';
-        }
-
-        $env_config = include $config_file;
-        $this->setParameters($env_config);
-
-        if (isset($this['default_timezone'])) {
-            date_default_timezone_set($this['default_timezone']);
+        $this->setInstance('app', $this);
+        if ($include_configs) {
+            $config_files = array(
+                $directory . '/config/config.common.php' => self::ENV_COMMON,
+                $directory . '/config/config.dev.php'    => self::ENV_DEV,
+                $directory . '/config/config.php'        => self::ENV_PROD
+            );
+            $this->loadConfigs($config_files);
         }
         $this->registerDefaultServices();
-        if (is_file($directory . '/config/routes.php')) {
-            $router = $this->router;
-            include $directory . '/config/routes.php';
+    }
+
+    public function loadConfigs(array $files)
+    {
+        foreach ($files as $file => $env) {
+            $this->loadConfig($file, $env);
         }
-        if (is_file($directory . '/config/services.php')) {
-            $factory = $this;
-            include $directory . '/config/services.php';
+    }
+
+    public function loadConfig($file, $env = self::ENV_COMMON)
+    {
+        if ($env != $this->environment && $env != self::ENV_COMMON) {
+            return;
         }
+        if (!is_file($file)) {
+            throw new \InvalidArgumentException('Configuration file not found: ' . $file);
+        }
+        $config = include $file;
+        if (!is_array($config)) {
+            throw new \UnexpectedValueException('Invalid configuration file: ' . $file);
+        }
+        $this->setParameters($config);
     }
 
     public function getEnvironment()
@@ -154,6 +160,9 @@ class Application extends Factory
 
     public function run()
     {
+        if (isset($this['default_timezone'])) {
+            date_default_timezone_set($this['default_timezone']);
+        }
         $this->dispatcher->dispatch($this->request)->send();
     }
 
