@@ -105,7 +105,7 @@ class Application extends Factory
         if (isset($this->modules[$module])) {
             return;
         }
-        $class = '\Modules\\' . ucfirst($module) . '\Module';
+        $class = '\Modules\\' . $module . '\Module';
         $module_class = new $class;
         if (!$module_class instanceof Module) {
             throw new \UnexpectedValueException('Module descriptor should extend Module class.');
@@ -114,7 +114,14 @@ class Application extends Factory
         foreach (array_keys($module_class->getDependencies()) as $name) {
             $this->module($name);
         }
-        $module_class->init($this);
+        $args = func_get_args();
+        array_shift($args);
+        if (empty($args)) {
+            $module_class->init($this);
+        } else {
+            array_unshift($args, $this);
+            call_user_func_array(array($module_class, 'init'), $args);
+        }
     }
 
     private function registerDefaultServices()
