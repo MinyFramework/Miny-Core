@@ -150,7 +150,7 @@ class Application extends Factory
         }
     }
 
-    public function route($path, $controller, $method = NULL, $name = NULL, array $parameters = array())
+    public function route($path, $controller, $method = NULL, $name = NULL)
     {
         $method = strtolower($method);
         $controller_name = $this->resolver->getNextName();
@@ -158,30 +158,30 @@ class Application extends Factory
         if (!in_array($method, array(NULL, 'GET', 'POST', 'PUT', 'DELETE'))) {
             throw new \UnexpectedValueException('Unexpected route method:' . $method);
         }
-        $route = new Route($path, $method, $parameters);
+        $route = new Route($path, $method);
         $this->router->route($route, $name);
         $this->resolver->register($controller_name, $controller);
         return $route;
     }
 
-    public function get($path, $controller, $name = NULL, array $parameters = array())
+    public function get($path, $controller, $name = NULL)
     {
-        return $this->route($path, $controller, 'GET', $name, $parameters);
+        return $this->route($path, $controller, 'GET', $name);
     }
 
-    public function post($path, $controller, $name = NULL, array $parameters = array())
+    public function post($path, $controller, $name = NULL)
     {
-        return $this->route($path, $controller, 'POST', $name, $parameters);
+        return $this->route($path, $controller, 'POST', $name);
     }
 
-    public function put($path, $controller, $name = NULL, array $parameters = array())
+    public function put($path, $controller, $name = NULL)
     {
-        return $this->route($path, $controller, 'PUT', $name, $parameters);
+        return $this->route($path, $controller, 'PUT', $name);
     }
 
-    public function delete($path, $controller, $name = NULL, array $parameters = array())
+    public function delete($path, $controller, $name = NULL)
     {
-        return $this->route($path, $controller, 'DELETE', $name, $parameters);
+        return $this->route($path, $controller, 'DELETE', $name);
     }
 
     public function run()
