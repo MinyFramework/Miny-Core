@@ -42,6 +42,7 @@
 
 namespace Miny\Application;
 
+use \Miny\Log;
 use \Miny\Event\Event;
 use \Miny\Factory\Factory;
 use \Miny\Routing\Route;
@@ -74,11 +75,6 @@ class Application extends Factory
         $this->registerDefaultServices();
         $env = ($environment == self::ENV_PROD) ? 'production' : 'development';
         $this->log->write(sprintf('Starting up Miny in %s environment', $env));
-        $ŧhis = $this;
-        set_exception_handler(function(\Exception $e) use($ŧhis) {
-                    $ŧhis->events->raiseEvent(new Event('exception', array('exception' => $e)));
-                    $ŧhis->log->write(sprintf("%s \n Trace: %s", $e->getMessage(), $e->getTraceAsString()), 'Exception');
-                });
     }
 
     public function loadConfigs(array $files)
@@ -134,9 +130,20 @@ class Application extends Factory
 
     private function registerDefaultServices()
     {
+        $ŧhis = $this;
+        set_exception_handler(function(\Exception $e) use($ŧhis) {
+                    $event = new Event('uncaught_exception', array('exception' => $e));
+                    $ŧhis->events->raiseEvent($event);
+                });
+                
         $log_path = isset($this['log_path']) ? $this['log_path'] : $this->directory . '/logs';
-        $this->add('log', '\Miny\Log')->setArguments($log_path);
-        $this->add('events', '\Miny\Event\EventDispatcher');
+        $this->log = new Log($log_path);
+        $eh = new ExceptionHandler($this->log);
+        $this->add('events', '\Miny\Event\EventDispatcher')
+                ->addMethodCall('setHandler', 'handle_exception', $eh)
+                ->addMethodCall('setHandler', 'uncaught_exception', $eh);
+
+
         $this->add('validator', '\Miny\Validator\Validator');
         $this->add('form_validator', '\Miny\Form\FormValidator');
 
