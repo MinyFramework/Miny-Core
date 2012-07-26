@@ -29,6 +29,7 @@ namespace Miny;
 class Log
 {
     private $path;
+    private $messages = array();
 
     public function __construct($path)
     {
@@ -51,9 +52,17 @@ class Log
 
     public function write($message, $level = 'info')
     {
-        $log = sprintf("[%s] %s: %s\n", date('Y-m-d H:i:s'), $level, $message);
+        $this->messages[] = sprintf("[%s] %s: %s\n", date('Y-m-d H:i:s'), $level, $message);
+    }
+
+    public function __destruct()
+    {
+        if (empty($this->messages)) {
+            return;
+        }
         $file = $this->getLogFileName();
-        if (file_put_contents($file, $log, FILE_APPEND) === false) {
+        $data = implode('', $this->messages);
+        if (file_put_contents($file, $data, FILE_APPEND) === false) {
             throw new \RuntimeException('Could not write log file: ' . $file);
         }
     }
