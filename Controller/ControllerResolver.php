@@ -35,40 +35,17 @@ use \Miny\Template\Template;
 class ControllerResolver
 {
     private $templating;
-    private $controllers = array();
+    private $collection;
 
-    public function __construct(Template $templating)
+    public function __construct(Template $templating, ControllerCollection $collection = NULL)
     {
         $this->templating = $templating;
-    }
-
-    public function register($name, $controller)
-    {
-        if (!is_string($controller)
-                && !is_callable($controller)
-                && !$controller instanceof \Closure) {
-            $type = gettype($controller);
-            $message = sprintf('Invalid controller: %s (%s)', $name, $type);
-            throw new \InvalidArgumentException($message);
-        }
-        if (!is_string($controller)) {
-            $controller = func_get_args();
-            array_shift($controller);
-        }
-        $this->controllers[$name] = $controller;
+        $this->collection = $collection;
     }
 
     public function resolve($class, $action, Request $request)
     {
-        if (!isset($this->controllers[$class])) {
-            $controller = $this->getController($class);
-        } elseif (is_string($this->controllers[$class])) {
-            $controller = $this->getController($this->controllers[$class]);
-        } else {
-            $factory_params = $this->controllers[$class];
-            $callable = array_shift($factory_params);
-            $controller = call_user_func_array($callable, $factory_params);
-        }
+        $controller = $this->collection->getController($class);
         if (!$controller instanceof Controller) {
             $message = 'Controller must extend Controller: ' . $class;
             throw new \RuntimeException($message);
@@ -76,22 +53,7 @@ class ControllerResolver
         return $this->runController($controller, $class, $action, $request);
     }
 
-    public function getNextName()
-    {
-        return '_controller_' . count($this->controllers);
-    }
-
-    private function getController($class)
-    {
-        if (!class_exists($class)) {
-            $message = 'Controller not found: ' . $class;
-            throw new \InvalidArgumentException($message);
-        }
-        return new $class;
-    }
-
-    private function runController(Controller $controller, $class, $action,
-                                   Request $request)
+    private function runController(Controller $controller, $class, $action, Request $request)
     {
         $this->templating->setScope('controller');
         $vars = $this->templating->getVariables();
