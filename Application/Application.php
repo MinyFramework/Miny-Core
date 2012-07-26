@@ -131,7 +131,8 @@ class Application extends Factory
         $this->add('form_validator', '\Miny\Form\FormValidator');
 
         $this->add('templating', '\Miny\Template\Template')->setArguments('@template_dir');
-        $this->add('resolver', '\Miny\Controller\ControllerResolver')->setArguments('&templating');
+        $this->add('controllers', '\Miny\Controller\ControllerCollection');
+        $this->add('resolver', '\Miny\Controller\ControllerResolver')->setArguments('&templating', '&controllers');
         $this->add('dispatcher', '\Miny\HTTP\Dispatcher')->setArguments('&events', '&resolver');
 
         $session = new \Miny\Session\Session;
@@ -153,14 +154,14 @@ class Application extends Factory
     public function route($path, $controller, $method = NULL, $name = NULL, array $parameters = array())
     {
         $method = strtolower($method);
-        $controller_name = $this->resolver->getNextName();
+        $controller_name = $this->controllers->getNextName();
         if (!in_array($method, array(NULL, 'GET', 'POST', 'PUT', 'DELETE'))) {
             throw new \UnexpectedValueException('Unexpected route method:' . $method);
         }
         $parameters['controller'] = $controller_name;
         $route = new Route($path, $method, $parameters);
         $this->router->route($route, $name);
-        $this->resolver->register($controller_name, $controller);
+        $this->controllers->register($controller_name, $controller);
         return $route;
     }
 
