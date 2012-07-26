@@ -55,6 +55,7 @@ class Factory implements \ArrayAccess
      * @var array
      */
     protected $parameters = array();
+    protected $aliasses = array();
 
     /**
      *
@@ -64,6 +65,19 @@ class Factory implements \ArrayAccess
     {
         $this->setParameters($params);
         $this->setInstance('factory', $this);
+    }
+
+    public function addAlias($alias, $target)
+    {
+        $this->aliasses[$alias] = $target;
+    }
+
+    public function getAlias($alias)
+    {
+        if (isset($this->aliasses[$alias])) {
+            $alias = $this->aliasses[$alias];
+        }
+        return $alias;
     }
 
     /**
@@ -141,6 +155,7 @@ class Factory implements \ArrayAccess
      */
     public function __get($alias)
     {
+        $alias = $this->getAlias($alias);
         if (isset($this->objects[$alias])) {
             return $this->objects[$alias];
         }
@@ -292,7 +307,7 @@ class Factory implements \ArrayAccess
      */
     private function getObjectParameter($str)
     {
-       if (($pos = strpos($str, '::')) !== false) {
+        if (($pos = strpos($str, '::')) !== false) {
             $arr = explode('::', $str);
             $obj_name = array_shift($arr);
             $method = array_shift($arr);
