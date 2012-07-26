@@ -139,7 +139,7 @@ class Factory implements \ArrayAccess
      * @param string $alias
      * @return object
      */
-    public function get($alias)
+    public function __get($alias)
     {
         if (isset($this->objects[$alias])) {
             return $this->objects[$alias];
@@ -154,14 +154,6 @@ class Factory implements \ArrayAccess
 
         $this->injectDependencies($obj, $descriptor);
         return $obj;
-    }
-
-    /**
-     * Shorthand function for {get}
-     */
-    public function __get($alias)
-    {
-        return $this->get($alias);
     }
 
     /**
@@ -198,7 +190,7 @@ class Factory implements \ArrayAccess
     {
         $class = $descriptor->getClassName();
         if ($class[0] == '@') {
-            $class = $this->getParameter(substr($class, 1));
+            $class = $this->offsetGet(substr($class, 1));
         }
 
         if (!class_exists($class)) {
@@ -262,7 +254,7 @@ class Factory implements \ArrayAccess
         $str = substr($var, 1);
         switch ($var[0]) {
             case '@'://param
-                $var = $this->getParameter($str);
+                $var = $this->offsetGet($str);
                 break;
             case '&':
                 /*
@@ -274,7 +266,7 @@ class Factory implements \ArrayAccess
             case '*'://callback
                 if (strpos($var, '::') !== false) {
                     list($obj_name, $method) = explode('::', $str);
-                    $var = array($this->get($obj_name), $method);
+                    $var = array($this->__get($obj_name), $method);
                 }
                 break;
             case '\\':
@@ -304,14 +296,14 @@ class Factory implements \ArrayAccess
             $arr = explode('::', $str);
             $obj_name = array_shift($arr);
             $method = array_shift($arr);
-            $object = $this->get($obj_name);
+            $object = $this->__get($obj_name);
             return call_user_func_array(array($object, $method), $arr);
         } elseif (($pos = strpos($str, '->')) !== false) {
             list($obj_name, $property) = explode('->', $str, 2);
-            $object = $this->get($obj_name);
+            $object = $this->__get($obj_name);
             return $object->$property;
         } else {
-            return $this->get($str);
+            return $this->__get($str);
         }
     }
 
@@ -333,7 +325,7 @@ class Factory implements \ArrayAccess
      * @return mixed The parameter value
      * @throws LogicException
      */
-    public function getParameter($key)
+    public function offsetGet($key)
     {
         if (strpos($key, ':') !== false) {
             $parts = explode(':', $key);
@@ -359,7 +351,7 @@ class Factory implements \ArrayAccess
      * @param string $key
      * @param mixed $value
      */
-    public function addParameter($key, $value)
+    public function offsetSet($key, $value)
     {
         if (strpos($key, ':') !== false) {
             $parts = explode(':', $key);
@@ -391,7 +383,7 @@ class Factory implements \ArrayAccess
      *
      * @param string $key
      */
-    public function removeParameter($key)
+    public function offsetUnset($key)
     {
         if (strpos($key, ':') !== false) {
             $parts = explode(':', $key);
@@ -417,7 +409,7 @@ class Factory implements \ArrayAccess
      * @param string $key
      * @return boolean
      */
-    public function hasParameter($key)
+    public function offsetExists($key)
     {
         if (strpos($key, ':') !== false) {
             $parts = explode(':', $key);
@@ -452,26 +444,6 @@ class Factory implements \ArrayAccess
     public function getDescriptors()
     {
         return $this->descriptors;
-    }
-
-    public function offsetExists($offset)
-    {
-        return $this->hasParameter($offset);
-    }
-
-    public function offsetGet($offset)
-    {
-        return $this->getParameter($offset);
-    }
-
-    public function offsetSet($offset, $value)
-    {
-        $this->addParameter($offset, $value);
-    }
-
-    public function offsetUnset($offset)
-    {
-        $this->removeParameter($offset);
     }
 
 }
