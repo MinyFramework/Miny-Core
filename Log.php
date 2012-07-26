@@ -62,6 +62,7 @@ class Log
         }
         $file = $this->getLogFileName();
         $data = implode('', $this->messages);
+        $data .= "\n";
         if (file_put_contents($file, $data, FILE_APPEND) === false) {
             throw new \RuntimeException('Could not write log file: ' . $file);
         }
