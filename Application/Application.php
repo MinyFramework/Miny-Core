@@ -150,37 +150,38 @@ class Application extends Factory
         }
     }
 
-    public function route($path, $controller, $method = NULL, $name = NULL)
+    public function route($path, $controller, $method = NULL, $name = NULL, array $parameters = array())
     {
         $method = strtolower($method);
         $controller_name = $this->resolver->getNextName();
         if (!in_array($method, array(NULL, 'GET', 'POST', 'PUT', 'DELETE'))) {
             throw new \UnexpectedValueException('Unexpected route method:' . $method);
         }
-        $route = new Route($path, $method, array('controller' => $controller_name));
+        $parameters['controller'] = $controller_name;
+        $route = new Route($path, $method, $parameters);
         $this->router->route($route, $name);
         $this->resolver->register($controller_name, $controller);
         return $route;
     }
 
-    public function get($path, $controller, $name = NULL)
+    public function get($path, $controller, $name = NULL, array $parameters = array())
     {
-        return $this->route($path, $controller, 'GET', $name);
+        return $this->route($path, $controller, 'GET', $name, $parameters);
     }
 
-    public function post($path, $controller, $name = NULL)
+    public function post($path, $controller, $name = NULL, array $parameters = array())
     {
-        return $this->route($path, $controller, 'POST', $name);
+        return $this->route($path, $controller, 'POST', $name, $parameters);
     }
 
-    public function put($path, $controller, $name = NULL)
+    public function put($path, $controller, $name = NULL, array $parameters = array())
     {
-        return $this->route($path, $controller, 'PUT', $name);
+        return $this->route($path, $controller, 'PUT', $name, $parameters);
     }
 
-    public function delete($path, $controller, $name = NULL)
+    public function delete($path, $controller, $name = NULL, array $parameters = array())
     {
-        return $this->route($path, $controller, 'DELETE', $name);
+        return $this->route($path, $controller, 'DELETE', $name, $parameters);
     }
 
     public function run()
