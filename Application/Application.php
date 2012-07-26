@@ -42,6 +42,7 @@
 
 namespace Miny\Application;
 
+use \Miny\Event\Event;
 use \Miny\Factory\Factory;
 use \Miny\Routing\Route;
 use \Miny\HTTP\Request;
@@ -71,6 +72,13 @@ class Application extends Factory
             $this->loadConfigs($config_files);
         }
         $this->registerDefaultServices();
+        $env = ($environment == self::ENV_PROD) ? 'production' : 'development';
+        $this->log->write(sprintf('Starting up Miny in %s environment', $env));
+        $ŧhis = $this;
+        set_exception_handler(function(\Exception $e) use($ŧhis) {
+                    $ŧhis->events->raiseEvent(new Event('exception', array('exception' => $e)));
+                    $ŧhis->log->write(sprintf("%s \n Trace: %s", $e->getMessage(), $e->getTraceAsString()), 'Exception');
+                });
     }
 
     public function loadConfigs(array $files)
@@ -126,6 +134,8 @@ class Application extends Factory
 
     private function registerDefaultServices()
     {
+        $log_path = isset($this['log_path']) ? $this['log_path'] : $this->directory . '/logs';
+        $this->add('log', '\Miny\Log')->setArguments($log_path);
         $this->add('events', '\Miny\Event\EventDispatcher');
         $this->add('validator', '\Miny\Validator\Validator');
         $this->add('form_validator', '\Miny\Form\FormValidator');
@@ -190,7 +200,9 @@ class Application extends Factory
         if (isset($this['default_timezone'])) {
             date_default_timezone_set($this['default_timezone']);
         }
-        $this->dispatcher->dispatch($this->request)->send();
+        $request = $this->request;
+        $this->log->write('Request: ' . $request->path . ' Method: ' . $request->method . ' Source: ' . $request->ip);
+        $this->dispatcher->dispatch($request)->send();
     }
 
 }
