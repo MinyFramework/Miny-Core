@@ -50,8 +50,7 @@ class Request
     private $ip;
     private $type;
 
-    public function __construct($path, array $get = array(),
-                                array $post = array(), array $cookie = array(),
+    public function __construct($path, array $get = array(), array $post = array(), array $cookie = array(),
                                 $type = self::MASTER_REQUEST)
     {
         $this->path = $path;
@@ -60,18 +59,10 @@ class Request
         $this->cookie = $cookie;
         $this->type = $type;
 
-        if (isset($_SERVER['HTTP_X_FORWARDED_FOR'])) {
-            $this->ip = $_SERVER['HTTP_X_FORWARDED_FOR'];
-        } else {
-            $this->ip = $_SERVER['REMOTE_ADDR'];
-        }
+        $this->ip = isset($_SERVER['HTTP_X_FORWARDED_FOR']) ? $_SERVER['HTTP_X_FORWARDED_FOR'] : $_SERVER['REMOTE_ADDR'];
 
         if (!empty($this->post)) {
-            if (isset($this->post['_method'])) {
-                $this->method = $this->post['_method'];
-            } else {
-                $this->method = 'POST';
-            }
+            $this->method = isset($this->post['_method']) ? $this->post['_method'] : 'POST';
         } else {
             $this->method = $_SERVER['REQUEST_METHOD'];
         }
