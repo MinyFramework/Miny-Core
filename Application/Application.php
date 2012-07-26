@@ -154,11 +154,10 @@ class Application extends Factory
     {
         $method = strtolower($method);
         $controller_name = $this->resolver->getNextName();
-        $parameters['controller'] = $controller_name;
         if (!in_array($method, array(NULL, 'GET', 'POST', 'PUT', 'DELETE'))) {
             throw new \UnexpectedValueException('Unexpected route method:' . $method);
         }
-        $route = new Route($path, $method);
+        $route = new Route($path, $method, array('controller' => $controller_name));
         $this->router->route($route, $name);
         $this->resolver->register($controller_name, $controller);
         return $route;
