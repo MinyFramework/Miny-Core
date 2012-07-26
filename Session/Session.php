@@ -55,8 +55,6 @@ class Session implements \ArrayAccess, \IteratorAggregate, \Countable
         $this->is_open = session_start();
         session_regenerate_id(true);
 
-        register_shutdown_function(array($this, 'close'));
-
         if (!isset($_SESSION['data']) || !is_array($_SESSION['data'])) {
             $_SESSION['data'] = array();
         }
