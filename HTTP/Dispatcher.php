@@ -35,8 +35,7 @@ class Dispatcher
     private $events;
     private $controller_resolver;
 
-    public function __construct(EventDispatcher $evts,
-                                ControllerResolver $resolver)
+    public function __construct(EventDispatcher $evts, ControllerResolver $resolver)
     {
         $this->events = $evts;
         $this->controller_resolver = $resolver;
@@ -59,7 +58,8 @@ class Dispatcher
                         'request'   => $r,
                         'exception' => $e
                     ));
-            if ($this->events->raiseEvent($event)) {
+            $this->events->raiseEvent($event);
+            if ($event->isHandled()) {
                 //Let's retry with the fallback-request
                 $event = new Event('filter_request', array('request' => $r));
                 $this->events->raiseEvent($event);
@@ -76,10 +76,13 @@ class Dispatcher
 
     private function getEventResponse(Event $event)
     {
+        if (!$event->isHandled()) {
+            throw new \InvalidArgumentException('Event was not handled: ' . $event);
+        }
         $response = $event->getResponse();
         if (!$response instanceof Response) {
-            $message = 'Invalid response, (%s) %s given.';
-            $message = sprintf($message, gettype($response), $response);
+            $message = 'Event %s has an invalid response, (%s) %s given.';
+            $message = sprintf($message, $event->getName(), gettype($response), $response);
             throw new \RuntimeException($message);
         }
         return $response;
