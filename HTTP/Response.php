@@ -88,6 +88,9 @@ class Response
 
     public function setCode($code)
     {
+        if (!isset(self::$status_codes[$code])) {
+            throw new \InvalidArgumentException('Invalid status code: ' . $code);
+        }
         $this->status_code = $code;
     }
 
@@ -119,7 +122,7 @@ class Response
             if (!is_array($this->headers[$name])) {
                 return;
             }
-            if(!is_array($value)) {
+            if (!is_array($value)) {
                 $value = array($value);
             }
             $this->headers[$name] = array_diff($this->headers[$name], $value);
@@ -146,16 +149,18 @@ class Response
         return $this->content;
     }
 
+    public function getStatus()
+    {
+        return self::$status_codes[$this->status_code];
+    }
+
     private function sendHTTPStatus()
     {
         if (is_null($this->status_code)) {
             return;
         }
-        if (isset(self::$status_codes[$this->status_code])) {
-            $code = self::$status_codes[$this->status_code];
-            $header = sprintf('HTTP/1.1 %d: %s', $this->status_code, $code);
-            header($header, true, $this->status_code);
-        }
+        $header = sprintf('HTTP/1.1 %d: %s', $this->status_code, $this->getStatus());
+        header($header, true, $this->status_code);
     }
 
     protected function sendHeaders()
