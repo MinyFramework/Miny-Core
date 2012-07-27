@@ -48,7 +48,7 @@ class EventDispatcher
     {
         $name = $event->getName();
         if (isset($this->handlers[$name])) {
-            $count = count($this->handlers[$name]);
+            $this->log->write(sprintf('Triggering event: %s Handlers: %d', $name, count($this->handlers[$name])));
             foreach ($this->handlers[$name] as $handler) {
                 list($evt_handler, $method) = $handler;
                 if (method_exists($evt_handler, $method)) {
@@ -58,9 +58,8 @@ class EventDispatcher
                 }
             }
         } else {
-            $count = 0;
+            $this->log->write(sprintf('Triggering event: %s Handlers: %d', $name, 0));
         }
-        $this->log->write(sprintf('Triggering event: %s Handlers: %d', $name, $count));
     }
 
 }
