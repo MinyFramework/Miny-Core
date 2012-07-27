@@ -52,11 +52,8 @@ class TemplateEvents extends EventHandler
     public function filterRequestFormat(Event $event)
     {
         $request = $event->getParameter('request');
-        try {
-            $format = $request->get['format'];
-            $this->templating->setFormat($format);
-        } catch (\OutOfBoundsException $e) {
-
+        if (isset($request->get['format'])) {
+            $this->templating->setFormat($request->get['format']);
         }
     }
 
