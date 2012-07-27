@@ -210,7 +210,9 @@ class Application extends Factory
         }
         $request = $this->request;
         $this->log->write('Request: ' . $request->path . ' Method: ' . $request->method . ' Source: ' . $request->ip);
-        $this->dispatcher->dispatch($request)->send();
+        $response = $this->dispatcher->dispatch($request);
+        $this->log->write('Response: ' . $response->getStatus());
+        $response->send();
     }
 
 }
