@@ -29,10 +29,9 @@ namespace Miny\Event;
 
 abstract class EventHandler
 {
-    public function handle(Event $event, $handling_method = NULL)
+    public function handle(Event $event)
     {
-        $message = 'Handler not exists: ' . $handling_method;
-        throw new \BadMethodCallException($message);
+        throw new \BadMethodCallException('Handler not implemented.');
     }
 
 }

@@ -27,9 +27,17 @@
 
 namespace Miny\Event;
 
+use \Miny\Log;
+
 class EventDispatcher
 {
     private $handlers = array();
+    private $log;
+
+    public function __construct(Log $log)
+    {
+        $this->log = $log;
+    }
 
     public function setHandler($event, EventHandler $handler, $method = NULL)
     {
@@ -40,17 +48,19 @@ class EventDispatcher
     {
         $name = $event->getName();
         if (isset($this->handlers[$name])) {
+            $count = count($this->handlers[$name]);
             foreach ($this->handlers[$name] as $handler) {
                 list($evt_handler, $method) = $handler;
                 if (method_exists($evt_handler, $method)) {
                     $evt_handler->$method($event);
                 } else {
-                    $evt_handler->handle($event, $method);
+                    $evt_handler->handle($event);
                 }
             }
-            return true;
+        } else {
+            $count = 0;
         }
-        return false;
+        $this->log->write(sprintf('Triggering event: %s Handlers: %d', $name, $count));
     }
 
 }
