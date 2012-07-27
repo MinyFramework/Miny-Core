@@ -74,7 +74,7 @@ class Application extends Factory
         }
         $this->registerDefaultServices();
         $env = ($environment == self::ENV_PROD) ? 'production' : 'development';
-        $this->log->write(sprintf('Starting up Miny in %s environment', $env));
+        $this->log->write(sprintf('Starting Miny in %s environment', $env));
     }
 
     public function loadConfigs(array $files)
@@ -135,11 +135,12 @@ class Application extends Factory
                     $event = new Event('uncaught_exception', array('exception' => $e));
                     $ŧhis->events->raiseEvent($event);
                 });
-                
+
         $log_path = isset($this['log_path']) ? $this['log_path'] : $this->directory . '/logs';
         $this->log = new Log($log_path);
         $eh = new ExceptionHandler($this->log);
         $this->add('events', '\Miny\Event\EventDispatcher')
+                ->setArguments('&log')
                 ->addMethodCall('setHandler', 'handle_exception', $eh)
                 ->addMethodCall('setHandler', 'uncaught_exception', $eh);
 
