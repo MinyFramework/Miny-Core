@@ -60,6 +60,7 @@ class EventDispatcher
         } else {
             $this->log->write(sprintf('Triggering event: %s Handlers: %d', $name, 0));
         }
+        $this->log->write(sprintf('Finished event: %s', $name));
     }
 
 }
