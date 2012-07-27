@@ -156,9 +156,6 @@ class Response
 
     private function sendHTTPStatus()
     {
-        if (is_null($this->status_code)) {
-            return;
-        }
         $header = sprintf('HTTP/1.1 %d: %s', $this->status_code, $this->getStatus());
         header($header, true, $this->status_code);
     }
