@@ -147,8 +147,7 @@ class Application extends Factory
 
         $this->add('validator', '\Miny\Validator\Validator');
         $this->add('form_validator', '\Miny\Form\FormValidator');
-
-        $this->add('templating', '\Miny\Template\Template')->setArguments('@template_dir');
+        $this->add('templating', '\Miny\Template\Template')->setArguments('@template:dir', '@template:default_format');
         $this->add('controllers', '\Miny\Controller\ControllerCollection');
         $this->add('resolver', '\Miny\Controller\ControllerResolver')->setArguments('&templating', '&controllers');
         $this->add('dispatcher', '\Miny\HTTP\Dispatcher')->setArguments('&events', '&resolver');
