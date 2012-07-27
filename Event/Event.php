@@ -32,11 +32,22 @@ class Event
     private $parameters;
     private $name;
     private $response;
+    private $is_handled = false;
 
     public function __construct($name, array $parameters = array())
     {
         $this->name = $name;
         $this->parameters = $parameters;
+    }
+
+    public function isHandled()
+    {
+        return $this->is_handled;
+    }
+
+    public function setHandled()
+    {
+        $this->is_handled = true;
     }
 
     public function getName()

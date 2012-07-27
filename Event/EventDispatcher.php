@@ -57,6 +57,7 @@ class EventDispatcher
                     $evt_handler->handle($event);
                 }
             }
+            $event->setHandled();
         } else {
             $this->log->write(sprintf('Triggering event: %s Handlers: %d', $name, 0));
         }
