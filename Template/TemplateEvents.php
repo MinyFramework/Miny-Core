@@ -31,8 +31,9 @@ use \Miny\Event\EventHandler;
 
 class TemplateEvents extends EventHandler
 {
-    public $layout = 'layouts/layout';
+    public $layout = 'layouts/application';
     public $exception = 'layouts/exception';
+    public $formats = array('html');
     private $templating;
     private $scope;
 
@@ -62,6 +63,9 @@ class TemplateEvents extends EventHandler
     {
         $request = $event->getParameter('request');
         if ($request->isSubRequest()) {
+            return;
+        }
+        if(!empty($this->formats) && !in_array($request->get['format'], $this->formats)) {
             return;
         }
         $rsp = $event->getParameter('response');
