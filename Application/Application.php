@@ -114,10 +114,13 @@ class Application extends Factory
 
     private function registerDefaultServices()
     {
-        $ŧhis = $this;
-        set_exception_handler(function(\Exception $e) use($ŧhis) {
+        $app = $this;
+        set_exception_handler(function(\Exception $e) use($app) {
                     $event = new Event('uncaught_exception', array('exception' => $e));
-                    $ŧhis->events->raiseEvent($event);
+                    $app->events->raiseEvent($event);
+                });
+        set_error_handler(function($errno, $errstr, $errfile, $errline ) {
+                    throw new \ErrorException($errstr, $errno, 0, $errfile, $errline);
                 });
 
         $log_path = isset($this['log_path']) ? $this['log_path'] : $this->directory . '/logs';
@@ -133,7 +136,7 @@ class Application extends Factory
         $this->add('form_validator', '\Miny\Form\FormValidator');
         $this->add('templating', '\Miny\Template\Template')->setArguments('@template:dir', '@template:default_format');
         $this->add('controllers', '\Miny\Controller\ControllerCollection');
-        $this->add('resolver', '\Miny\Controller\ControllerResolver')->setArguments('&templating', '&controllers');
+        $this->add('resolver', '\Miny\Controller\ControllerResolver')->setArguments('&app', '&controllers');
         $this->add('dispatcher', '\Miny\HTTP\Dispatcher')->setArguments('&events', '&resolver');
 
         $session = new \Miny\Session\Session;
