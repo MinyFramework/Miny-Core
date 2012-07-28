@@ -26,7 +26,9 @@
 
 namespace Miny\Routing\Exceptions;
 
-class PageNotFoundException extends \RuntimeException
+use RuntimeException;
+
+class PageNotFoundException extends RuntimeException
 {
 
 }

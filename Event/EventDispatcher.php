@@ -22,12 +22,11 @@
  * @license   http://www.gnu.org/licenses/gpl.txt
  *            GNU General Public License
  * @version   1.0
- *
  */
 
 namespace Miny\Event;
 
-use \Miny\Log;
+use Miny\Log;
 
 class EventDispatcher
 {

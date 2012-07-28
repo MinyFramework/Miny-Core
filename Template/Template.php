@@ -26,6 +26,11 @@
 
 namespace Miny\Template;
 
+use Closure;
+use InvalidArgumentException;
+use OutOfBoundsException;
+use RuntimeException;
+
 class Template
 {
     private $path;
@@ -53,7 +58,7 @@ class Template
     public function leaveScope($clean = false)
     {
         if (empty($this->scopes)) {
-            throw new \OutOfBoundsException('There are no scopes to leave.');
+            throw new OutOfBoundsException('There are no scopes to leave.');
         }
         if ($clean) {
             unset($this->template_vars[$this->scope]);
@@ -63,8 +68,8 @@ class Template
 
     public function addPlugin($key, $plugin)
     {
-        if (!is_callable($plugin) && !$plugin instanceof \Closure) {
-            throw new \InvalidArgumentException('Invalid plugin: ' . $key);
+        if (!is_callable($plugin) && !$plugin instanceof Closure) {
+            throw new InvalidArgumentException('Invalid plugin: ' . $key);
         }
         $this->plugins[$key] = $plugin;
     }
@@ -72,7 +77,7 @@ class Template
     public function getPlugin($key)
     {
         if (!isset($this->plugins[$key])) {
-            throw new \InvalidArgumentException('Plugin not found: ' . $key);
+            throw new InvalidArgumentException('Plugin not found: ' . $key);
         }
         return $this->plugins[$key];
     }
@@ -91,7 +96,7 @@ class Template
     public function __get($key)
     {
         if (!isset($this->template_vars[$this->scope][$key])) {
-            throw new \OutOfBoundsException(sprintf('Key %s is not set in scope "%s"', $key, $this->scope));
+            throw new OutOfBoundsException(sprintf('Key %s is not set in scope "%s"', $key, $this->scope));
         }
         return $this->template_vars[$this->scope][$key];
     }
@@ -126,7 +131,7 @@ class Template
         $filename = $template . $this->getFormat($format);
         $file = $this->path . '/' . $filename . '.php';
         if (!is_file($file)) {
-            throw new \RuntimeException('Template not found: ' . $filename);
+            throw new RuntimeException('Template not found: ' . $filename);
         }
         return $file;
     }

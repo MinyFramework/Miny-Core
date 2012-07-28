@@ -26,6 +26,8 @@
 
 namespace Miny\HTTP;
 
+use InvalidArgumentException;
+
 class Request
 {
     const MASTER_REQUEST = 0;
@@ -71,7 +73,7 @@ class Request
     public function __get($field)
     {
         if (!property_exists($this, $field)) {
-            throw new \InvalidArgumentException('Field not exists: ' . $field);
+            throw new InvalidArgumentException('Field not exists: ' . $field);
         }
         return $this->$field;
     }

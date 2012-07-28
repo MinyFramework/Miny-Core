@@ -26,6 +26,9 @@
 
 namespace Miny\Routing;
 
+use InvalidArgumentException;
+use UnexpectedValueException;
+
 class Route
 {
     private $path;
@@ -50,7 +53,7 @@ class Route
     public function setPath($path)
     {
         if (!is_string($path)) {
-            throw new \InvalidArgumentException('Path must be a string.');
+            throw new InvalidArgumentException('Path must be a string.');
         }
         $this->path = $path;
     }
@@ -119,7 +122,7 @@ class Route
         }
         if (!isset($this->parameter_names[$key])) {
             $message = 'Parameter name not set for kes: ' . $key;
-            throw new \UnexpectedValueException($message);
+            throw new UnexpectedValueException($message);
         }
         return $this->parameter_names[$key];
     }

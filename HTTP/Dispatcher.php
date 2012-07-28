@@ -26,9 +26,12 @@
 
 namespace Miny\HTTP;
 
-use \Miny\Controller\ControllerResolver;
-use \Miny\Event\Event;
-use \Miny\Event\EventDispatcher;
+use Exception;
+use InvalidArgumentException;
+use Miny\Controller\ControllerResolver;
+use Miny\Event\Event;
+use Miny\Event\EventDispatcher;
+use RuntimeException;
 
 class Dispatcher
 {
@@ -53,7 +56,7 @@ class Dispatcher
         try {
             $event = new Event('filter_request', array('request' => $r));
             $this->events->raiseEvent($event);
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             $event = new Event('handle_request_exception', array(
                         'request'   => $r,
                         'exception' => $e
@@ -77,18 +80,18 @@ class Dispatcher
     private function getEventResponse(Event $event)
     {
         if (!$event->isHandled()) {
-            throw new \InvalidArgumentException('Event was not handled: ' . $event);
+            throw new InvalidArgumentException('Event was not handled: ' . $event);
         }
         $response = $event->getResponse();
         if (!$response instanceof Response) {
             $message = 'Event %s has an invalid response, (%s) %s given.';
             $message = sprintf($message, $event->getName(), gettype($response), $response);
-            throw new \RuntimeException($message);
+            throw new RuntimeException($message);
         }
         return $response;
     }
 
-    private function handleException(\Exception $e)
+    private function handleException(Exception $e)
     {
         $event = new Event('handle_exception', array('exception' => $e));
         $this->events->raiseEvent($event);
@@ -103,7 +106,7 @@ class Dispatcher
     {
         try {
             $rsp = $this->handle($r);
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             $rsp = $this->handleException($e);
         }
 

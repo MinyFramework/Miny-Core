@@ -26,9 +26,12 @@
 
 namespace Miny\Controller;
 
+use BadMethodCallException;
+use Closure;
+use InvalidArgumentException;
 use Miny\Application\Application;
-use \Miny\HTTP\Request;
-use \Miny\HTTP\Response;
+use Miny\HTTP\Request;
+use Miny\HTTP\Response;
 
 abstract class Controller
 {
@@ -56,8 +59,8 @@ abstract class Controller
 
     public function addMethod($method, $callback)
     {
-        if (!is_callable($callback) || !$callback instanceof \Closure) {
-            throw new \InvalidArgumentException('Callback must be callable');
+        if (!is_callable($callback) || !$callback instanceof Closure) {
+            throw new InvalidArgumentException('Callback must be callable');
         }
         $this->method_map[$method] = $callback;
     }
@@ -65,7 +68,7 @@ abstract class Controller
     public function __call($method, $args)
     {
         if (!isset($this->method_map[$method])) {
-            throw new \BadMethodCallException('Method not found: ' . $method);
+            throw new BadMethodCallException('Method not found: ' . $method);
         }
         return call_user_func_array($this->method_map[$method], $args);
     }
@@ -106,7 +109,7 @@ abstract class Controller
         $action = $action ? : $this->default_action;
         $fn = $action . 'Action';
         if (!method_exists($this, $fn)) {
-            throw new \InvalidArgumentException('Action not found: ' . $fn);
+            throw new InvalidArgumentException('Action not found: ' . $fn);
         }
 
         $this->templating->setScope('controller');

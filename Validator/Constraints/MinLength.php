@@ -38,8 +38,7 @@ class MinLength extends Constraint
     {
         if (!is_string($data) && !method_exists($data, '__toString')) {
 
-            $this->addViolation($this->invalid_message,
-                    array('limit' => $this->limit));
+            $this->addViolation($this->invalid_message, array('limit' => $this->limit));
         } else {
             if (strlen((string) $data) >= $this->limit) {
                 return true;

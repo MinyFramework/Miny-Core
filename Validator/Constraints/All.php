@@ -27,6 +27,7 @@
 namespace Miny\Validator\Constraints;
 
 use Miny\Validator\Constraint;
+use UnexpectedValueException;
 
 class All extends Constraint
 {
@@ -40,7 +41,7 @@ class All extends Constraint
         $is_valid = true;
         foreach ($this->constraints as $constraint) {
             if (!$constraint instanceof Constraint) {
-                throw new \UnexpectedValueException('Invalid parameter set.');
+                throw new UnexpectedValueException('Invalid parameter set.');
             }
             if (!$constraint->validate($data)) {
                 $this->addViolationList($constraint->getViolationList());

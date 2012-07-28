@@ -26,7 +26,11 @@
 
 namespace Miny\Validator\Constraints;
 
+use ArrayAccess;
+use InvalidArgumentException;
 use Miny\Validator\Constraint;
+use Traversable;
+use UnexpectedValueException;
 
 class Collection extends Constraint
 {
@@ -51,8 +55,8 @@ class Collection extends Constraint
 
     public function validate($data)
     {
-        if (!is_array($data) || !($data instanceof \ArrayAccess && $data instanceof \Traversable)) {
-            throw new \InvalidArgumentException('Data should be an array.');
+        if (!is_array($data) || !($data instanceof ArrayAccess && $data instanceof Traversable)) {
+            throw new InvalidArgumentException('Data should be an array.');
         }
 
         $is_valid = true;
@@ -83,7 +87,7 @@ class Collection extends Constraint
             $constraint = $this->fields[$key];
 
             if (!$constraint instanceof Constraint) {
-                throw new \UnexpectedValueException('Expected a constraint.');
+                throw new UnexpectedValueException('Expected a constraint.');
             }
 
             if (!$constraint->validate($value)) {

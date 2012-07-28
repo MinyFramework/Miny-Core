@@ -26,7 +26,13 @@
 
 namespace Miny\Session;
 
-class Session implements \ArrayAccess, \IteratorAggregate, \Countable
+use ArrayAccess;
+use ArrayIterator;
+use Countable;
+use InvalidArgumentException;
+use IteratorAggregate;
+
+class Session implements ArrayAccess, IteratorAggregate, Countable
 {
     /**
      * Indicates whether the session is started.
@@ -134,7 +140,7 @@ class Session implements \ArrayAccess, \IteratorAggregate, \Countable
 
     /**
      * @return Whether a flashdata with $key key is set.
-     * @param unknown_type $key
+     * @param bool $key
      */
     public function hasFlash($key)
     {
@@ -220,7 +226,7 @@ class Session implements \ArrayAccess, \IteratorAggregate, \Countable
             return session_save_path();
         } elseif (!$this->is_open) {
             if (!is_dir($path)) {
-                throw new \InvalidArgumentException('Path not found: ' . $path);
+                throw new InvalidArgumentException('Path not found: ' . $path);
             }
             session_save_path($path);
         }
@@ -290,7 +296,7 @@ class Session implements \ArrayAccess, \IteratorAggregate, \Countable
 
     public function getIterator()
     {
-        return new \ArrayIterator($_SESSION['data']);
+        return new ArrayIterator($_SESSION['data']);
     }
 
     public function count()

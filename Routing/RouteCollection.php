@@ -26,7 +26,11 @@
 
 namespace Miny\Routing;
 
-class RouteCollection implements \IteratorAggregate
+use ArrayIterator;
+use IteratorAggregate;
+use OutOfBoundsException;
+
+class RouteCollection implements IteratorAggregate
 {
     private $routes = array();
 
@@ -54,14 +58,14 @@ class RouteCollection implements \IteratorAggregate
     public function getRoute($name)
     {
         if (!isset($this->routes[$name])) {
-            throw new \OutOfBoundsException('Route not set: ' . $name);
+            throw new OutOfBoundsException('Route not set: ' . $name);
         }
         return $this->routes[$name];
     }
 
     public function getIterator()
     {
-        return new \ArrayIterator($this->routes);
+        return new ArrayIterator($this->routes);
     }
 
 }

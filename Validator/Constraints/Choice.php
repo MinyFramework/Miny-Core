@@ -26,6 +26,7 @@
 
 namespace Miny\Validator\Constraints;
 
+use Closure;
 use Miny\Validator\Constraint;
 use Miny\Validator\Exceptions\ConstraintException;
 
@@ -57,7 +58,7 @@ class Choice extends Constraint
         if (is_null($this->choices)) {
 
             $callback = $this->callback;
-            if (!is_callable($callback) && !$callback instanceof \Closure) {
+            if (!is_callable($callback) && !$callback instanceof Closure) {
                 $exception = 'There are no choices set to choose from.';
                 throw new ConstraintException($exception);
             }

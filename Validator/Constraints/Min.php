@@ -37,8 +37,7 @@ class Min extends Constraint
     public function validate($data)
     {
         if (!is_numeric($data)) {
-            $this->addViolation($this->invalid_message,
-                    array('limit' => $this->limit));
+            $this->addViolation($this->invalid_message, array('limit' => $this->limit));
         } else {
             if ($data >= $this->limit) {
                 return true;

@@ -26,6 +26,8 @@
 
 namespace Miny\Routing;
 
+use BadMethodCallException;
+
 class Resource extends Resources
 {
     protected static $memberActions = array();
@@ -46,7 +48,7 @@ class Resource extends Resources
 
     public function member($method, $name)
     {
-        throw new \BadMethodCall('Single resource can\'t have member action.');
+        throw new BadMethodCallException('Single resource can\'t have member action.');
     }
 
     protected function generateMemberActions()

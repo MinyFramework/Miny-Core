@@ -26,13 +26,16 @@
 
 namespace Miny\Application;
 
-use \Miny\Log;
-use \Miny\Event\Event;
-use \Miny\Factory\Factory;
-use \Miny\Routing\Route;
-use \Miny\Routing\Resource;
-use \Miny\Routing\Resources;
-use \Miny\HTTP\Request;
+use ErrorException;
+use Exception;
+use InvalidArgumentException;
+use Miny\Event\Event;
+use Miny\Factory\Factory;
+use Miny\HTTP\Request;
+use Miny\Log;
+use Miny\Routing\Route;
+use Miny\Session\Session;
+use UnexpectedValueException;
 
 class Application extends Factory
 {
@@ -90,11 +93,11 @@ class Application extends Factory
             return;
         }
         if (!is_file($file)) {
-            throw new \InvalidArgumentException('Configuration file not found: ' . $file);
+            throw new InvalidArgumentException('Configuration file not found: ' . $file);
         }
         $config = include $file;
         if (!is_array($config)) {
-            throw new \UnexpectedValueException('Invalid configuration file: ' . $file);
+            throw new UnexpectedValueException('Invalid configuration file: ' . $file);
         }
         $this->setParameters($config);
     }
@@ -112,7 +115,7 @@ class Application extends Factory
         $class = '\Modules\\' . $module . '\Module';
         $module_class = new $class;
         if (!$module_class instanceof Module) {
-            throw new \UnexpectedValueException('Module descriptor should extend Module class.');
+            throw new UnexpectedValueException('Module descriptor should extend Module class.');
         }
         $this->modules[$module] = $module_class;
         foreach (array_keys($module_class->getDependencies()) as $name) {
@@ -132,12 +135,12 @@ class Application extends Factory
     {
         $app = $this;
 
-        set_exception_handler(function(\Exception $e) use($app) {
+        set_exception_handler(function(Exception $e) use($app) {
                     $event = new Event('uncaught_exception', array('exception' => $e));
                     $app->events->raiseEvent($event);
                 });
         set_error_handler(function($errno, $errstr, $errfile, $errline ) {
-                    throw new \ErrorException($errstr, $errno, 0, $errfile, $errline);
+                    throw new ErrorException($errstr, $errno, 0, $errfile, $errline);
                 });
 
         $this->log = new Log($this['log_path']);
@@ -164,7 +167,7 @@ class Application extends Factory
         $this->add('dispatcher', '\Miny\HTTP\Dispatcher')
                 ->setArguments('&events', '&resolver');
 
-        $session = new \Miny\Session\Session;
+        $session = new Session;
         $session->open();
 
         if (!isset($session['token'])) {
@@ -182,7 +185,7 @@ class Application extends Factory
     {
         $controller_name = $this->controllers->getNextName();
         if (!in_array($method, array(NULL, 'GET', 'POST', 'PUT', 'DELETE'))) {
-            throw new \UnexpectedValueException('Unexpected route method:' . $method);
+            throw new UnexpectedValueException('Unexpected route method:' . $method);
         }
         $parameters['controller'] = $controller_name;
         $route = new Route($path, $method, $parameters, $name);

@@ -36,7 +36,7 @@ class URL extends Constraint
     public function validate($data)
     {
         $protocol_pattern = implode('|', (array) $this->protocols);
-        if (preg_match('/^('.$protocol_pattern.')/', $data)) {
+        if (preg_match('/^(' . $protocol_pattern . ')/', $data)) {
             if (filter_var($data, FILTER_VALIDATE_URL)) {
                 return true;
             }

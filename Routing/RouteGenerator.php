@@ -26,6 +26,9 @@
 
 namespace Miny\Routing;
 
+use InvalidArgumentException;
+use OutOfBoundsException;
+
 class RouteGenerator
 {
     private $routes;
@@ -55,7 +58,7 @@ class RouteGenerator
                 }
                 if (!empty($missing)) {
                     $message = 'Parameters not set: ' . join(', ', $missing);
-                    throw new \InvalidArgumentException($message);
+                    throw new InvalidArgumentException($message);
                 }
             }
 
@@ -71,7 +74,7 @@ class RouteGenerator
             }
             return $path;
         }
-        throw new \OutOfBoundsException('Route not found: ' . $route_name);
+        throw new OutOfBoundsException('Route not found: ' . $route_name);
     }
 
 }

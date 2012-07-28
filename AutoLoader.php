@@ -26,6 +26,9 @@
 
 namespace Miny;
 
+use InvalidArgumentException;
+use OutOfBoundsException;
+
 /**
  * AutoLoader is a simple autoloader class to be used with the Miny framework.
  *
@@ -61,7 +64,7 @@ class AutoLoader
     {
         if (is_null($path)) {
             if (!is_array($namespace)) {
-                throw new \InvalidArgumentException('Argument must be an array');
+                throw new InvalidArgumentException('Argument must be an array');
             }
             foreach ($namespace as $ns => $path) {
                 $this->addNamespace($ns, $path);
@@ -107,7 +110,7 @@ class AutoLoader
 
 }
 
-class ClassNotFoundException extends \OutOfBoundsException
+class ClassNotFoundException extends OutOfBoundsException
 {
     public function __construct($path, $class)
     {

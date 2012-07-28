@@ -26,7 +26,9 @@
 
 namespace Miny\Validator\Exceptions;
 
-class ConstraintException extends \BadMethodCallException
+use BadMethodCallException;
+
+class ConstraintException extends BadMethodCallException
 {
 
 }

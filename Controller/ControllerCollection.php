@@ -26,13 +26,18 @@
 
 namespace Miny\Controller;
 
+use Closure;
+use InvalidArgumentException;
+use Miny\Controller\Controller;
+use UnexpectedValueException;
+
 class ControllerCollection
 {
     private $controllers = array();
 
     public function register($name, $controller)
     {
-        if ($controller instanceof \Closure || $controller instanceof Controller || is_string($controller)) {
+        if ($controller instanceof Closure || $controller instanceof Controller || is_string($controller)) {
             $this->controllers[$name] = $controller;
         } elseif (is_callable($controller)) {
             $controller = func_get_args();
@@ -40,7 +45,7 @@ class ControllerCollection
             $this->controllers[$name] = $controller;
         } else {
             $type = gettype($controller);
-            throw new \InvalidArgumentException(sprintf('Invalid controller: %s (%s)', $name, $type));
+            throw new InvalidArgumentException(sprintf('Invalid controller: %s (%s)', $name, $type));
         }
     }
 
@@ -60,11 +65,11 @@ class ControllerCollection
         if (!class_exists($class)) {
             $class = '\Application\Controllers\\' . ucfirst($class) . 'Controller';
             if (!class_exists($class)) {
-                throw new \UnexpectedValueException('Class not exists: ' . $class);
+                throw new UnexpectedValueException('Class not exists: ' . $class);
             }
         }
         if (!is_subclass_of($class, __NAMESPACE__ . '\Controller')) {
-            throw new \UnexpectedValueException('Class does not extend Controller: ' . $class);
+            throw new UnexpectedValueException('Class does not extend Controller: ' . $class);
         }
         return $class;
     }

@@ -22,16 +22,17 @@
  * @license   http://www.gnu.org/licenses/gpl.txt
  *            GNU General Public License
  * @version   1.0
- *
  */
 
 namespace Miny\Event;
+
+use BadMethodCallException;
 
 abstract class EventHandler
 {
     public function handle(Event $event)
     {
-        throw new \BadMethodCallException('Handler not implemented.');
+        throw new BadMethodCallException('Handler not implemented.');
     }
 
 }

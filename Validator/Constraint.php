@@ -27,7 +27,6 @@
 namespace Miny\Validator;
 
 use Miny\Validator\Exceptions\ConstraintException;
-use Miny\Validator\ConstraintViolation;
 
 abstract class Constraint
 {

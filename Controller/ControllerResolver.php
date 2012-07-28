@@ -26,8 +26,10 @@
 
 namespace Miny\Controller;
 
-use \Miny\HTTP\Request;
-use \Miny\Application\Application;
+use Closure;
+use InvalidArgumentException;
+use Miny\Application\Application;
+use Miny\HTTP\Request;
 
 class ControllerResolver
 {
@@ -53,10 +55,10 @@ class ControllerResolver
         }
         if ($controller instanceof Controller) {
             return $controller->run($action, $request);
-        } elseif ($controller instanceof \Closure) {
+        } elseif ($controller instanceof Closure) {
             return $controller($request, $action);
         }
-        throw new \InvalidArgumentException('Invalid controller: ' . $class);
+        throw new InvalidArgumentException('Invalid controller: ' . $class);
     }
 
 }

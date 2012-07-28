@@ -26,7 +26,10 @@
 
 namespace Miny\Validator;
 
-class ConstraintViolationList implements \IteratorAggregate
+use ArrayIterator;
+use IteratorAggregate;
+
+class ConstraintViolationList implements IteratorAggregate
 {
     private $violations = array();
 
@@ -47,7 +50,7 @@ class ConstraintViolationList implements \IteratorAggregate
 
     public function getIterator()
     {
-        return new \ArrayIterator($this->violations);
+        return new ArrayIterator($this->violations);
     }
 
 }

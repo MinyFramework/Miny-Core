@@ -26,6 +26,8 @@
 
 namespace Miny\Validator;
 
+use UnexpectedValueException;
+
 class Validator
 {
     protected function loadConstraints(iValidable $object)
@@ -93,8 +95,7 @@ class Validator
         return $violations;
     }
 
-    public function validateValue($data, Constraint $constraint,
-                                  $scenario = NULL)
+    public function validateValue($data, Constraint $constraint, $scenario = NULL)
     {
         if (!$constraint->constraintApplies($scenario)) {
             return true;
@@ -102,7 +103,7 @@ class Validator
         if (!method_exists($constraint, 'validate')) {
             if (!$data instanceof iValidable) {
                 $message = 'Cannot validate variable.';
-                throw new \UnexpectedValueException($message);
+                throw new UnexpectedValueException($message);
             }
             if (!$this->validate($data, $scenario)) {
                 $constraint->addViolation($constraint->message);

@@ -22,10 +22,11 @@
  * @license   http://www.gnu.org/licenses/gpl.txt
  *            GNU General Public License
  * @version   1.0
- *
  */
 
 namespace Miny\Factory;
+
+use InvalidArgumentException;
 
 /**
  * ObjectDescriptor class
@@ -86,7 +87,7 @@ class ObjectDescriptor
     public function __construct($classname, $singleton = true)
     {
         if (!is_string($classname)) {
-            throw new \InvalidArgumentException('Classname must be string.');
+            throw new InvalidArgumentException('Classname must be string.');
         }
         $this->classname = $classname;
         $this->singleton = $singleton;

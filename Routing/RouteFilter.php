@@ -26,9 +26,9 @@
 
 namespace Miny\Routing;
 
-use \Miny\Event\Event;
-use \Miny\Event\EventHandler;
-use \Miny\Routing\Exceptions\PageNotFoundException;
+use Miny\Event\Event;
+use Miny\Event\EventHandler;
+use Miny\Routing\Exceptions\PageNotFoundException;
 
 class RouteFilter extends EventHandler
 {
@@ -68,7 +68,6 @@ class RouteFilter extends EventHandler
         if (!isset($this->handled_exceptions[$class])) {
             throw $ex;
         }
-        $request = $event->getParameter('request');
         $request->path = $this->handled_exceptions[$class];
     }
 

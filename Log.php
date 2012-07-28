@@ -26,6 +26,10 @@
 
 namespace Miny;
 
+use Exception;
+use InvalidArgumentException;
+use RuntimeException;
+
 class Log
 {
     private $path;
@@ -37,7 +41,7 @@ class Log
         $path = realpath($path);
         try {
             $this->checkPath($path);
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             if ($force_log) {
                 throw $e;
             } else {
@@ -51,11 +55,11 @@ class Log
     {
         if (!is_dir($path)) {
             if (!mkdir($path, 0777, true)) {
-                throw new \InvalidArgumentException('Path not exists: ' . $path);
+                throw new InvalidArgumentException('Path not exists: ' . $path);
             }
         }
         if (!is_writable($path)) {
-            throw new \InvalidArgumentException('Path is not writable: ' . $path);
+            throw new InvalidArgumentException('Path is not writable: ' . $path);
         }
     }
 
@@ -81,7 +85,7 @@ class Log
         $data = implode('', $this->messages);
         $data .= "\n";
         if (file_put_contents($file, $data, FILE_APPEND) === false) {
-            throw new \RuntimeException('Could not write log file: ' . $file);
+            throw new RuntimeException('Could not write log file: ' . $file);
         }
     }
 

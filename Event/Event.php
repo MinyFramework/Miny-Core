@@ -22,10 +22,11 @@
  * @license   http://www.gnu.org/licenses/gpl.txt
  *            GNU General Public License
  * @version   1.0
- *
  */
 
 namespace Miny\Event;
+
+use InvalidArgumentException;
 
 class Event
 {
@@ -64,7 +65,7 @@ class Event
     {
         if (!$this->hasParameter($key)) {
             $message = 'Event parameter not set: ' . $key;
-            throw new \InvalidArgumentException($message);
+            throw new InvalidArgumentException($message);
         }
         return $this->parameters[$key];
     }

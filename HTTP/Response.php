@@ -26,6 +26,8 @@
 
 namespace Miny\HTTP;
 
+use InvalidArgumentException;
+
 class Response
 {
     public static $status_codes = array(
@@ -102,7 +104,7 @@ class Response
     public function setCode($code)
     {
         if (!isset(self::$status_codes[$code])) {
-            throw new \InvalidArgumentException('Invalid status code: ' . $code);
+            throw new InvalidArgumentException('Invalid status code: ' . $code);
         }
         $this->status_code = $code;
     }

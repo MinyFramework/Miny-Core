@@ -26,8 +26,8 @@
 
 namespace Miny\Template;
 
-use \Miny\Event\Event;
-use \Miny\Event\EventHandler;
+use Miny\Event\Event;
+use Miny\Event\EventHandler;
 
 class TemplateEvents extends EventHandler
 {

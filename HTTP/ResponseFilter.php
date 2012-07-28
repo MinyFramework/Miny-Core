@@ -26,9 +26,9 @@
 
 namespace Miny\HTTP;
 
-use \Miny\Event\Event;
-use \Miny\Event\EventHandler;
-use \Miny\HTTP\Response;
+use Miny\Event\Event;
+use Miny\Event\EventHandler;
+use Miny\HTTP\Response;
 
 class ResponseFilter extends EventHandler
 {

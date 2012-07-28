@@ -22,10 +22,15 @@
  * @license   http://www.gnu.org/licenses/gpl.txt
  *            GNU General Public License
  * @version   1.0
- *
  */
 
 namespace Miny\Factory;
+
+use ArrayAccess;
+use InvalidArgumentException;
+use LogicException;
+use OutOfBoundsException;
+use ReflectionClass;
 
 /**
  * Factory class
@@ -36,7 +41,7 @@ namespace Miny\Factory;
  *
  * @author  Dániel Buga
  */
-class Factory implements \ArrayAccess
+class Factory implements ArrayAccess
 {
     /**
      * A name => object array of stored objects
@@ -140,7 +145,7 @@ class Factory implements \ArrayAccess
     {
         if (!isset($this->descriptors[$alias])) {
             $message = 'Object descriptor not found: ' . $alias;
-            throw new \OutOfBoundsException($message);
+            throw new OutOfBoundsException($message);
         }
         return $this->descriptors[$alias];
     }
@@ -175,7 +180,7 @@ class Factory implements \ArrayAccess
      * Injects the object with it's dependencies.
      *
      * @param object $object
-     * @param ObjectDesciptor $descriptor
+     * @param ObjectDescriptor $descriptor
      */
     private function injectDependencies($object, ObjectDescriptor $descriptor)
     {
@@ -221,7 +226,7 @@ class Factory implements \ArrayAccess
                 $obj = new $class($arg);
                 break;
             default:
-                $ref = new \ReflectionClass($class);
+                $ref = new ReflectionClass($class);
                 $args = array_map(array($this, 'getValue'), $args);
                 $obj = $ref->newInstanceArgs($args);
         }
@@ -370,7 +375,7 @@ class Factory implements \ArrayAccess
             foreach ($parts as $k) {
                 if (!array_key_exists($k, $arr)) {
                     $message = 'Parameter not set: ' . $key;
-                    throw new \OutOfBoundsException($message);
+                    throw new OutOfBoundsException($message);
                 }
                 $arr = $arr[$k];
             }
@@ -379,7 +384,7 @@ class Factory implements \ArrayAccess
             $return = $this->parameters[$key];
         } else {
             $message = 'Parameter not set: ' . $key;
-            throw new \OutOfBoundsException($message);
+            throw new OutOfBoundsException($message);
         }
         $return = $this->resolveLinks($return);
         return $return;
