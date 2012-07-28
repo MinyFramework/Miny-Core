@@ -26,70 +26,32 @@
 
 namespace Miny\Controller;
 
-use \Miny\HTTP\RedirectResponse;
 use \Miny\HTTP\Request;
-use \Miny\HTTP\Response;
-use \Miny\Template\Template;
+use \Miny\Application\Application;
 
 class ControllerResolver
 {
-    private $templating;
+    private $application;
     private $collection;
 
-    public function __construct(Template $templating, ControllerCollection $collection = NULL)
+    public function __construct(Application $application, ControllerCollection $collection = NULL)
     {
-        $this->templating = $templating;
+        $this->application = $application;
         $this->collection = $collection;
     }
 
     public function resolve($class, $action, Request $request)
     {
         $controller = $this->collection->getController($class);
-        if (!$controller instanceof Controller) {
-            $message = 'Controller must extend Controller: ' . $class;
-            throw new \RuntimeException($message);
+        if (is_string($controller)) {
+            $controller = new $controller($this->application);
         }
-        return $this->runController($controller, $class, $action, $request);
-    }
-
-    private function runController(Controller $controller, $class, $action, Request $request)
-    {
-        $this->templating->setScope('controller');
-        $vars = $this->templating->getVariables();
-        $return = $controller->run($class, $action, $request);
-
-        $response = $this->getResponse($controller, $return);
-
-        $this->templating->leaveScope(true);
-        foreach ($vars as $k => $v) {
-            $this->templating->assign($k, $v, 'controller');
+        if ($controller instanceof Controller) {
+            return $controller->run($action, $request);
+        } elseif ($controller instanceof \Closure) {
+            return $controller($request, $action);
         }
-        return $response;
-    }
-
-    private function getResponse(Controller $controller, $return)
-    {
-        $response = new Response;
-        if (is_string($return)) {
-            $response->redirect($return);
-        } else {
-            $this->templating->controller = $controller;
-            foreach ($controller->getAssigns() as $key => $array) {
-                list($value, $scope) = $array;
-                $this->templating->assign($key, $value, $scope);
-            }
-            $output = $this->templating->render($controller->template);
-            $response->setCode($controller->status);
-            $response->setContent($output);
-        }
-
-        foreach ($controller->getHeaders() as $name => $value) {
-            $response->setHeader($name, $value);
-        }
-        foreach ($controller->getCookies() as $name => $value) {
-            $response->setCookie($name, $value);
-        }
-        return $response;
+        throw new \InvalidArgumentException('Invalid controller: ' . $class);
     }
 
 }

@@ -22,97 +22,58 @@
  * @license   http://www.gnu.org/licenses/gpl.txt
  *            GNU General Public License
  * @version   1.0
- *
  */
 
 namespace Miny\Controller;
 
+use Miny\Application\Application;
 use \Miny\HTTP\Request;
+use \Miny\HTTP\Response;
 
 abstract class Controller
 {
-    private $default_action;
-    private $assigns = array();
-    private $services = array();
-    private $headers = array();
-    private $cookies = array();
+    protected $app;
+    protected $templating;
+    protected $name;
+    protected $default_action = 'index';
+    private $method_map = array();
 
-    /**
-     * HTTP status code
-     * @var int
-     */
-    public $status = 200;
-
-    /**
-     * The template file to render
-     * @var string
-     */
-    public $template;
-
-    public function __construct($default_action = NULL)
+    public function __construct(Application $app)
     {
-        $this->default_action = $default_action;
+        $this->app = $app;
+        $this->templating = $app->templating;
     }
 
     public function __set($key, $value)
     {
-        $this->assign($key, $value);
-    }
-
-    public function assign($key, $value, $scope = NULL)
-    {
-        $this->assigns[$key] = array($value, $scope);
-    }
-
-    public function service($key, $service)
-    {
-        $this->services[$key] = $service;
+        $this->templating->assign($key, $value);
     }
 
     public function __get($key)
     {
-        if (isset($this->services[$key])) {
-            return $this->services[$key];
-        } elseif (array_key_exists($key, $this->assigns)) {
-            if (is_null($this->assigns[$key][1])) {
-                //Only get variables assigned to current scope.
-                return $this->assigns[$key][0];
-            }
+        return $this->templating->$key;
+    }
+
+    public function addMethod($method, $callback)
+    {
+        if (!is_callable($callback) || !$callback instanceof \Closure) {
+            throw new \InvalidArgumentException('Callback must be callable');
         }
-        throw new \OutOfBoundsException('Variable not set: ' . $key);
+        $this->method_map[$method] = $callback;
     }
 
-    public function cookie($name, $value)
+    public function __call($method, $args)
     {
-        $this->cookies[$name] = $value;
+        if (!isset($this->method_map[$method])) {
+            throw new \BadMethodCallException('Method not found: ' . $method);
+        }
+        return call_user_func_array($this->method_map[$method], $args);
     }
 
-    public function header($name, $value)
-    {
-        $this->headers[$name] = $value;
-    }
-
-    public function getCookies()
-    {
-        return $this->cookies;
-    }
-
-    public function getHeaders()
-    {
-        return $this->headers;
-    }
-
-    public function getAssigns()
-    {
-        return $this->assigns;
-    }
-
-    public function request($path, array $get = NULL, array $post = NULL,
-                            array $cookie = NULL)
+    public function request($path, array $get = NULL, array $post = NULL, array $cookie = NULL)
     {
         $request = new Request($path, $get, $post, $cookie, Request::SUB_REQUEST);
-        //TODO: biztosítani kell, hogy ez egyáltalán létezzen
-        $response = $this->dispatcher->dispatch($request);
+        $response = $this->app->dispatcher->dispatch($request);
 
         foreach ($response->getHeaders() as $name => $value) {
             $this->header($name, $value);
@@ -125,18 +86,43 @@ abstract class Controller
         return $response;
     }
 
-    public function run($controller, $action, Request $request)
+    public function run($action, Request $request)
     {
-        if (!$action) {
-            $action = $this->default_action ? : 'index';
-        }
+        $response = new Response;
+
+        $this->method_map['setCode'] = array($response, 'setCode');
+        $this->method_map['header'] = array($response, 'setHeader');
+        $this->method_map['cookie'] = array($response, 'setCookie');
+        $this->method_map['redirect'] = array($response, 'redirect');
+        $this->method_map['assign'] = array($this->templating, 'assign');
+        $this->method_map['service'] = array($this->app, '__get');
+
+        $action = $action ? : $this->default_action;
         $fn = $action . 'Action';
         if (!method_exists($this, $fn)) {
             throw new \InvalidArgumentException('Action not found: ' . $fn);
         }
-        $this->template = $controller . '/' . $action;
 
-        return $this->$fn($request);
+        $this->templating->setScope('controller');
+        $vars = $this->templating->getVariables();
+        $return = $this->$fn($request);
+        if (!$response->isRedirect() && $return !== false) {
+
+            if (is_string($return)) {
+                $template = $return;
+            } else {
+                $template = $this->name . '/' . $action;
+            }
+
+            $this->__set('controller', $this);
+            $output = $this->templating->render($template);
+            $response->setContent($output);
+        }
+        $this->templating->leaveScope(true);
+        foreach ($vars as $k => $v) {
+            $this->templating->assign($k, $v, 'controller');
+        }
+        return $response;
     }
 
 }

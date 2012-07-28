@@ -32,18 +32,16 @@ class ControllerCollection
 
     public function register($name, $controller)
     {
-        if (!is_string($controller)
-                && !is_callable($controller)
-                && !$controller instanceof \Closure) {
-            $type = gettype($controller);
-            $message = sprintf('Invalid controller: %s (%s)', $name, $type);
-            throw new \InvalidArgumentException($message);
-        }
-        if (!is_string($controller)) {
+        if ($controller instanceof \Closure || $controller instanceof Controller || is_string($controller)) {
+            $this->controllers[$name] = $controller;
+        } elseif (is_callable($controller)) {
             $controller = func_get_args();
             array_shift($controller);
+            $this->controllers[$name] = $controller;
+        } else {
+            $type = gettype($controller);
+            throw new \InvalidArgumentException(sprintf('Invalid controller: %s (%s)', $name, $type));
         }
-        $this->controllers[$name] = $controller;
     }
 
     public function getNextName()
@@ -53,28 +51,25 @@ class ControllerCollection
 
     public function getController($class)
     {
-        if (!isset($this->controllers[$class])) {
-            $controller = $this->getControllerFromClass($class);
-        } elseif (is_string($this->controllers[$class])) {
-            $controller = $this->getControllerFromClass($this->controllers[$class]);
-        } else {
-            $factory_params = $this->controllers[$class];
-            $callable = array_shift($factory_params);
-            $controller = call_user_func_array($callable, $factory_params);
+        if (isset($this->controllers[$class])) {
+            if (is_string($this->controllers[$class])) {
+                if (class_exists($this->controllers[$class])) {
+                    $class = $this->controllers[$class];
+                }
+            } else {
+                return $this->controllers[$class];
+            }
         }
-        return $controller;
-    }
-
-    public function getControllerFromClass($class)
-    {
-        if (class_exists($class)) {
-            return new $class;
+        if (!class_exists($class)) {
+            $class = '\Application\Controllers\\' . ucfirst($class) . 'Controller';
+            if (!class_exists($class)) {
+                throw new \UnexpectedValueException('Class not exists: ' . $class);
+            }
         }
-        $fallback = '\Application\Controllers\\' . $class . 'Controller';
-        if (class_exists($fallback)) {
-            return new $fallback;
+        if (!is_subclass_of($class, __NAMESPACE__ . '\Controller')) {
+            throw new \UnexpectedValueException('Class does not extend Controller: ' . $class);
         }
-        throw new \InvalidArgumentException('Controller not found: ' . $class);
+        return $class;
     }
 
 }
