@@ -40,16 +40,14 @@ class Application extends Factory
     const ENV_DEV = 1;
     const ENV_COMMON = 2;
 
-    private $directory;
     private $modules = array();
     private $environment;
 
     public function __construct($directory, $environment = self::ENV_PROD, $include_configs = true)
     {
-        $this->directory = $directory;
         $this->environment = $environment;
-
         $this->setParameters(array(
+            'root'     => $directory,
             'log_path' => $directory . '/logs',
             'template' => array(
                 'dir'               => $directory . '/views',
@@ -57,12 +55,12 @@ class Application extends Factory
                 'default_scope'     => 'layout',
                 'layout'            => 'layouts/application',
                 'exception'         => 'layouts/exception',
-                'decorated_formats' => array('html')
+                'decorated_formats' => array('{@template:default_format}')
             ),
             'router' => array(
                 'prefix'   => '/',
                 'suffix'   => '.:format',
-                'defaults' => array('format' => 'html')
+                'defaults' => array('format' => '{@template:default_format}')
             )
         ));
         $this->setInstance('app', $this);
