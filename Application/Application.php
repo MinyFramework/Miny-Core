@@ -133,6 +133,7 @@ class Application extends Factory
     private function registerDefaultServices()
     {
         $app = $this;
+
         set_exception_handler(function(\Exception $e) use($app) {
                     $event = new Event('uncaught_exception', array('exception' => $e));
                     $app->events->raiseEvent($event);
@@ -143,14 +144,12 @@ class Application extends Factory
 
         $this->log = new Log($this['log_path']);
         $eh = new ExceptionHandler($this->log);
+
         $this->add('events', '\Miny\Event\EventDispatcher')
                 ->setArguments('&log')
                 ->addMethodCall('setHandler', 'handle_exception', $eh)
                 ->addMethodCall('setHandler', 'uncaught_exception', $eh);
 
-        $this->add('validator', '\Miny\Validator\Validator');
-        $this->add('form_validator', '\Miny\Form\FormValidator');
-        $this->add('controllers', '\Miny\Controller\ControllerCollection');
         $this->add('templating', '\Miny\Template\Template')
                 ->setArguments('@template:dir', '@template:default_format');
 
@@ -160,6 +159,8 @@ class Application extends Factory
                 ->setProperty('exception', '@template:exception')
                 ->setProperty('formats', '@template:decorated_formats');
 
+        $this->add('validator', '\Miny\Validator\Validator');
+        $this->add('controllers', '\Miny\Controller\ControllerCollection');
         $this->add('resolver', '\Miny\Controller\ControllerResolver')
                 ->setArguments('&app', '&controllers');
         $this->add('dispatcher', '\Miny\HTTP\Dispatcher')
@@ -175,10 +176,8 @@ class Application extends Factory
         $this->session = $session;
         $this->request = Request::getGlobal();
 
-        $router = $this->add('router', '\Miny\Routing\Router');
-        if (isset($this['router'])) {
-            $router->setArguments('@router:prefix', '@router:suffix', '@router:defaults');
-        }
+        $this->add('router', '\Miny\Routing\Router')
+                ->setArguments('@router:prefix', '@router:suffix', '@router:defaults');
     }
 
     public function route($path, $controller, $method = NULL, $name = NULL, array $parameters = array())
