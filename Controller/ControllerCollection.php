@@ -52,13 +52,10 @@ class ControllerCollection
     public function getController($class)
     {
         if (isset($this->controllers[$class])) {
-            if (is_string($this->controllers[$class])) {
-                if (class_exists($this->controllers[$class])) {
-                    $class = $this->controllers[$class];
-                }
-            } else {
+            if (!is_string($this->controllers[$class])) {
                 return $this->controllers[$class];
             }
+            $class = $this->controllers[$class];
         }
         if (!class_exists($class)) {
             $class = '\Application\Controllers\\' . ucfirst($class) . 'Controller';

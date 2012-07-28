@@ -45,6 +45,11 @@ class ControllerResolver
         $controller = $this->collection->getController($class);
         if (is_string($controller)) {
             $controller = new $controller($this->application);
+        } elseif (is_array($controller)) {
+            if (isset($controller[0]) && is_callable($controller[0])) {
+                $callback = array_shift($controller);
+                $controller = call_user_func_array($callback, $controller);
+            }
         }
         if ($controller instanceof Controller) {
             return $controller->run($action, $request);
