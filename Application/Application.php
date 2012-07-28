@@ -54,6 +54,7 @@ class Application extends Factory
             'template' => array(
                 'dir'               => $directory . '/views',
                 'default_format'    => 'html',
+                'default_scope'     => 'layout',
                 'layout'            => 'layouts/application',
                 'exception'         => 'layouts/exception',
                 'decorated_formats' => array('html')
@@ -154,6 +155,7 @@ class Application extends Factory
                 ->setArguments('@template:dir', '@template:default_format');
 
         $this->add('template_events', '\Miny\Template\TemplateEvents')
+                ->setArguments('&templating', '@template:default_scope')
                 ->setProperty('layout', '@template:layout')
                 ->setProperty('exception', '@template:exception')
                 ->setProperty('formats', '@template:decorated_formats');
