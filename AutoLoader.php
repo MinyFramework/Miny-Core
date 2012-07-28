@@ -80,7 +80,7 @@ class AutoLoader
          */
         while (!isset($this->map[$temp])) {
             if (($pos = strrpos($temp, '\\')) === false) {
-                throw new ClassNotFoundException('Class not registered: ' . $class);
+                return;
             }
             $temp = substr($temp, 0, $pos);
         }
@@ -91,18 +91,17 @@ class AutoLoader
                 return $path;
             }
         }
-        throw new ClassNotFoundException('Class not found: ' . $class);
     }
 
     public function load($class)
     {
         $path = $this->getPathToNamespace($class);
-
+        if (!$path) {
+            return;
+        }
         include_once $path;
         if (!class_exists($class) && !interface_exists($class)) {
-            $message = 'File %s does not contain class %s.';
-            $message = sprintf($message, $path, $class);
-            throw new ClassNotFoundException($message);
+            throw new ClassNotFoundException($path, $class);
         }
     }
 
@@ -110,5 +109,9 @@ class AutoLoader
 
 class ClassNotFoundException extends \OutOfBoundsException
 {
+    public function __construct($path, $class)
+    {
+        parent::__construct(sprintf('File %s does not contain class %s.', $path, $class));
+    }
 
 }
