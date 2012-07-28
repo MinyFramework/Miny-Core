@@ -374,12 +374,30 @@ class Factory implements \ArrayAccess
                 }
                 $arr = $arr[$k];
             }
-            return $arr;
-        } elseif (!isset($this->parameters[$key])) {
+            $return = $arr;
+        } elseif (isset($this->parameters[$key])) {
+            $return = $this->parameters[$key];
+        } else {
             $message = 'Parameter not set: ' . $key;
             throw new \OutOfBoundsException($message);
         }
-        return $this->parameters[$key];
+        $return = $this->resolveLinks($return);
+        return $return;
+    }
+
+    private function resolveLinks($value)
+    {
+        if (is_array($value)) {
+            $value = array_map(array($this, 'resolveLinks'), $value);
+        }
+        if (is_string($value)) {
+            $factory = $this;
+            return preg_replace_callback('/(?<!\\\){@(.*?)}/',
+                            function($matches) use($factory) {
+                                return $factory->offsetGet($matches[1]);
+                            }, $value);
+        }
+        return $value;
     }
 
     /**
