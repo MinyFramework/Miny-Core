@@ -90,12 +90,18 @@ abstract class Controller
     {
         $response = new Response;
 
+        $router = $this->app->router;
         $this->method_map['setCode'] = array($response, 'setCode');
         $this->method_map['header'] = array($response, 'setHeader');
         $this->method_map['cookie'] = array($response, 'setCookie');
         $this->method_map['redirect'] = array($response, 'redirect');
+        $this->method_map['route'] = array($router, 'generate');
         $this->method_map['assign'] = array($this->templating, 'assign');
         $this->method_map['service'] = array($this->app, '__get');
+        $this->method_map['redirectRoute'] = function($route, array $params = array()) use($response, $router) {
+                    $path = $router->generate($route, $params);
+                    $response->redirect($path);
+                };
 
         $action = $action ? : $this->default_action;
         $fn = $action . 'Action';
