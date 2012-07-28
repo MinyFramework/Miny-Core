@@ -322,6 +322,28 @@ class Factory implements \ArrayAccess
         }
     }
 
+    private function merge($array1, $array2)
+    {
+        foreach ($array2 as $key => $value) {
+            if (isset($array1[$key]) && is_array($array1[$key]) && is_array($value)) {
+                $array1[$key] = $this->merge($array1[$key], $value);
+            } else {
+                $array1[$key] = $value;
+            }
+        }
+        return $array1;
+    }
+
+    /**
+     * Stores an array of parameters.
+     *
+     * @param array $parameters A name => value array of parameters to store.
+     */
+    public function setParameters(array $parameters)
+    {
+        $this->parameters = $this->merge($this->parameters, $parameters);
+    }
+
     /**
      * Processes a parameter string, which specifies a stored parameter.
      * The method is capable of indexing arrays. To get a value from an array,
@@ -381,16 +403,6 @@ class Factory implements \ArrayAccess
         } else {
             $this->parameters[$key] = $value;
         }
-    }
-
-    /**
-     * Stores an array of parameters.
-     *
-     * @param array $parameters A name => value array of parameters to store.
-     */
-    public function setParameters(array $parameters)
-    {
-        $this->parameters = $parameters + $this->parameters;
     }
 
     /**
