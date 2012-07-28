@@ -74,10 +74,18 @@ class Response
     private $cookies = array();
     private $headers = array();
     private $status_code;
+    private $is_redirect = false;
 
     public function __construct($content = '', $code = 200)
     {
         $this->setContent($content);
+        $this->setCode($code);
+    }
+
+    public function redirect($url, $code = 301)
+    {
+        $this->is_redirect = true;
+        $this->setHeader('Location', $url);
         $this->setCode($code);
     }
 
@@ -180,7 +188,9 @@ class Response
     public function send()
     {
         $this->sendHeaders();
-        echo $this->content;
+        if (!$this->is_redirect) {
+            echo $this->content;
+        }
     }
 
 }
