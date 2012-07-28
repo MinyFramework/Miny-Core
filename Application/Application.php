@@ -49,6 +49,21 @@ class Application extends Factory
         $this->directory = $directory;
         $this->environment = $environment;
 
+        $this->setParameters(array(
+            'log_path' => $directory . '/logs',
+            'template' => array(
+                'dir'               => $directory . '/views',
+                'default_format'    => 'html',
+                'layout'            => 'layouts/application',
+                'exception'         => 'layouts/exception',
+                'decorated_formats' => array('html')
+            ),
+            'router' => array(
+                'prefix'   => '/',
+                'suffix'   => '.:format',
+                'defaults' => array('format' => 'html')
+            )
+        ));
         $this->setInstance('app', $this);
         if ($include_configs) {
             $config_files = array(
@@ -125,21 +140,28 @@ class Application extends Factory
                     throw new \ErrorException($errstr, $errno, 0, $errfile, $errline);
                 });
 
-        $log_path = isset($this['log_path']) ? $this['log_path'] : $this->directory . '/logs';
-        $this->log = new Log($log_path);
+        $this->log = new Log($this['log_path']);
         $eh = new ExceptionHandler($this->log);
         $this->add('events', '\Miny\Event\EventDispatcher')
                 ->setArguments('&log')
                 ->addMethodCall('setHandler', 'handle_exception', $eh)
                 ->addMethodCall('setHandler', 'uncaught_exception', $eh);
 
-
         $this->add('validator', '\Miny\Validator\Validator');
         $this->add('form_validator', '\Miny\Form\FormValidator');
-        $this->add('templating', '\Miny\Template\Template')->setArguments('@template:dir', '@template:default_format');
         $this->add('controllers', '\Miny\Controller\ControllerCollection');
-        $this->add('resolver', '\Miny\Controller\ControllerResolver')->setArguments('&app', '&controllers');
-        $this->add('dispatcher', '\Miny\HTTP\Dispatcher')->setArguments('&events', '&resolver');
+        $this->add('templating', '\Miny\Template\Template')
+                ->setArguments('@template:dir', '@template:default_format');
+
+        $this->add('template_events', '\Miny\Template\TemplateEvents')
+                ->setProperty('layout', '@template:layout')
+                ->setProperty('exception', '@template:exception')
+                ->setProperty('formats', '@template:decorated_formats');
+
+        $this->add('resolver', '\Miny\Controller\ControllerResolver')
+                ->setArguments('&app', '&controllers');
+        $this->add('dispatcher', '\Miny\HTTP\Dispatcher')
+                ->setArguments('&events', '&resolver');
 
         $session = new \Miny\Session\Session;
         $session->open();
