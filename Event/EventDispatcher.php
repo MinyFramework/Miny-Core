@@ -38,9 +38,21 @@ class EventDispatcher
         $this->log = $log;
     }
 
-    public function setHandler($event, EventHandler $handler, $method = NULL)
+    public function setHandler($event, EventHandler $handler, $method = NULL, $place = NULL)
     {
-        $this->handlers[$event][] = array($handler, $method);
+        if (!isset($this->handlers[$event])) {
+            $this->handlers[$event] = array(array($handler, $method));
+        } else {
+            $count = count($this->handlers[$event]);
+            if ($place === NULL || $place > $count) {
+                $this->handlers[$event][] = array($handler, $method);
+            } else {
+                for ($i = $count; $i > $place; --$i) {
+                    $this->handlers[$event][$i + 1] = $this->handlers[$event][$i];
+                }
+                $this->handlers[$event][$place] = array($handler, $method);
+            }
+        }
     }
 
     public function raiseEvent(Event $event)
