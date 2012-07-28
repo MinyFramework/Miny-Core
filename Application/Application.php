@@ -149,7 +149,11 @@ class Application extends Factory
         $this->add('events', '\Miny\Event\EventDispatcher')
                 ->setArguments('&log')
                 ->addMethodCall('setHandler', 'handle_exception', $eh)
-                ->addMethodCall('setHandler', 'uncaught_exception', $eh);
+                ->addMethodCall('setHandler', 'uncaught_exception', $eh)
+                ->addMethodCall('setHandler', 'handle_request_exception', '&route_filter', 'handleRequestException')
+                ->addMethodCall('setHandler', 'filter_request', '&route_filter', 'filterRoutes')
+                ->addMethodCall('setHandler', 'filter_request', '&template_events', 'filterRequestFormat')
+                ->addMethodCall('setHandler', 'filter_response', '&template_events', 'filterResponse');
 
         $this->add('templating', '\Miny\Template\Template')
                 ->setArguments('@template:dir', '@template:default_format');
@@ -176,6 +180,9 @@ class Application extends Factory
 
         $this->session = $session;
         $this->request = Request::getGlobal();
+
+        $this->add('route_filter', '\Miny\Routing\RouteFilter')
+                ->setArguments('&router');
 
         $this->add('router', '\Miny\Routing\Router')
                 ->setArguments('@router:prefix', '@router:suffix', '@router:defaults');
