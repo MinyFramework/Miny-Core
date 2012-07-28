@@ -71,6 +71,7 @@ class RouteGenerator
             }
             return $path;
         }
+        throw new \OutOfBoundsException('Route not found: ' . $route_name);
     }
 
 }
