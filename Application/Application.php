@@ -30,6 +30,8 @@ use \Miny\Log;
 use \Miny\Event\Event;
 use \Miny\Factory\Factory;
 use \Miny\Routing\Route;
+use \Miny\Routing\Resource;
+use \Miny\Routing\Resources;
 use \Miny\HTTP\Request;
 
 class Application extends Factory
@@ -157,16 +159,30 @@ class Application extends Factory
 
     public function route($path, $controller, $method = NULL, $name = NULL, array $parameters = array())
     {
-        $method = strtolower($method);
         $controller_name = $this->controllers->getNextName();
         if (!in_array($method, array(NULL, 'GET', 'POST', 'PUT', 'DELETE'))) {
             throw new \UnexpectedValueException('Unexpected route method:' . $method);
         }
         $parameters['controller'] = $controller_name;
-        $route = new Route($path, $method, $parameters);
+        $route = new Route($path, $method, $parameters, $name);
         $this->router->route($route, $name);
         $this->controllers->register($controller_name, $controller);
         return $route;
+    }
+
+    public function resource($name, $controller = NULL, array $parameters = array(), $singular = false)
+    {
+        $controller_name = $this->controllers->getNextName();
+        $parameters['controller'] = $controller_name;
+        $controller = $controller ? : $name;
+        $this->controllers->register($controller_name, $controller);
+        return $this->router->resource($name, $parameters, $singular);
+    }
+
+    public function root($controller, array $parameters = array())
+    {
+        $parameters['controller'] = $controller;
+        $this->router->root($parameters);
     }
 
     public function get($path, $controller, $name = NULL, array $parameters = array())
