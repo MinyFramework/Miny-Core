@@ -28,10 +28,11 @@ namespace Miny\Template;
 
 use \Miny\Event\Event;
 use \Miny\Event\EventHandler;
-use \Miny\HTTP\RedirectResponse;
 
 class TemplateEvents extends EventHandler
 {
+    public $layout = 'layouts/layout';
+    public $exception = 'layouts/exception';
     private $templating;
     private $scope;
 
@@ -45,7 +46,7 @@ class TemplateEvents extends EventHandler
     {
         $this->templating->setScope($this->scope);
         $this->templating->exception = $event->getParameter('exception');
-        $event->setResponse($this->templating->render('layouts/exception'));
+        $event->setResponse($this->templating->render($this->exception));
         $this->templating->leaveScope();
     }
 
@@ -64,17 +65,14 @@ class TemplateEvents extends EventHandler
             return;
         }
         $rsp = $event->getParameter('response');
-        if ($rsp instanceof RedirectResponse) {
+        if ($rsp->isRedirect()) {
             return;
         }
-        $controller = $request->get['controller'];
 
         $this->templating->setScope($this->scope);
         $this->templating->content = $rsp->getContent();
-        $this->templating->stylesheets = array('application', $controller);
 
-        //TODO: make this customizable
-        $rsp->setContent($this->templating->render('layouts/application'));
+        $rsp->setContent($this->templating->render($this->layout));
         $this->templating->leaveScope();
         $event->setResponse($rsp);
     }
