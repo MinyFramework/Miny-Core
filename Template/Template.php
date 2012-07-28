@@ -79,18 +79,21 @@ class Template
 
     public function __call($key, $args)
     {
-        try {
-            $plugin = $this->getPlugin($key);
-            return call_user_func_array($plugin, $args);
-        } catch (\InvalidArgumentException $e) {
-            $message = 'Method not found: ' . $key;
-            throw new \BadMethodCallException($message, 0, $e);
-        }
+        $plugin = $this->getPlugin($key);
+        return call_user_func_array($plugin, $args);
     }
 
     public function __set($key, $value)
     {
         $this->assign($key, $value);
+    }
+
+    public function __get($key)
+    {
+        if (!isset($this->template_vars[$this->scope][$key])) {
+            throw new \OutOfBoundsException(sprintf('Key %s is not set in scope "%s"', $key, $this->scope));
+        }
+        return $this->template_vars[$this->scope][$key];
     }
 
     public function assign($key, $value, $scope = NULL)
