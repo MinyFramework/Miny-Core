@@ -22,7 +22,6 @@
  * @license   http://www.gnu.org/licenses/gpl.txt
  *            GNU General Public License
  * @version   1.0
- *
  */
 
 namespace Miny\Controller;
@@ -59,8 +58,20 @@ class ControllerResolver
         $vars = $this->templating->getVariables();
         $return = $controller->run($class, $action, $request);
 
+        $response = $this->getResponse($controller, $return);
+
+        $this->templating->leaveScope(true);
+        foreach ($vars as $k => $v) {
+            $this->templating->assign($k, $v, 'controller');
+        }
+        return $response;
+    }
+
+    private function getResponse(Controller $controller, $return)
+    {
+        $response = new Response;
         if (is_string($return)) {
-            $response = new RedirectResponse($return);
+            $response->redirect($return);
         } else {
             $this->templating->controller = $controller;
             foreach ($controller->getAssigns() as $key => $array) {
@@ -68,7 +79,8 @@ class ControllerResolver
                 $this->templating->assign($key, $value, $scope);
             }
             $output = $this->templating->render($controller->template);
-            $response = new Response($output, $controller->status);
+            $response->setCode($controller->status);
+            $response->setContent($output);
         }
 
         foreach ($controller->getHeaders() as $name => $value) {
@@ -76,11 +88,6 @@ class ControllerResolver
         }
         foreach ($controller->getCookies() as $name => $value) {
             $response->setCookie($name, $value);
-        }
-
-        $this->templating->leaveScope(true);
-        foreach ($vars as $k => $v) {
-            $this->templating->assign($k, $v, 'controller');
         }
         return $response;
     }
