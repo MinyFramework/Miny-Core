@@ -23,22 +23,6 @@
  *            GNU General Public License
  * @version   1.0
  */
-/*
- * App modulok: Module.php, Module class kiterjesztése
- * __construct: autoloader bizergálása
- *
- * Components
- *  - Application
- *  - Cache
- *  - ...
- * Modules
- *  - News
- *     - Module.php
- *     - Controllers
- *     - Models
- *     - Forms
- *     - ...
- */
 
 namespace Miny\Application;
 
@@ -208,7 +192,7 @@ class Application extends Factory
             date_default_timezone_set($this['default_timezone']);
         }
         $request = $this->request;
-        $this->log->write('Request: ' . $request->path . ' Method: ' . $request->method . ' Source: ' . $request->ip);
+        $this->log->write(sprintf('Request: [%s] %s Source: %s', $request->method, $request->path, $request->ip));
         $response = $this->dispatcher->dispatch($request);
         $this->log->write('Response: ' . $response->getStatus());
         $response->send();
