@@ -89,6 +89,11 @@ class Response
         $this->setCode($code);
     }
 
+    public function isRedirect()
+    {
+        return $this->is_redirect;
+    }
+
     public function setCookie($name, $value)
     {
         $this->cookies[$name] = $value;
