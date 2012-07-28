@@ -172,10 +172,8 @@ class Application extends Factory
 
     public function resource($name, $controller = NULL, array $parameters = array(), $singular = false)
     {
-        $controller_name = $this->controllers->getNextName();
-        $parameters['controller'] = $controller_name;
         $controller = $controller ? : $name;
-        $this->controllers->register($controller_name, $controller);
+        $parameters['controller'] = $controller;
         return $this->router->resource($name, $parameters, $singular);
     }
 
