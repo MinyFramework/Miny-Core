@@ -39,10 +39,10 @@ class ExceptionHandler extends EventHandler
         $this->log = $log;
     }
 
-    public function handle(Event $event, $handling_method = NULL)
+    public function handle(Event $event)
     {
         $e = $event->getParameter('exception');
-        $this->log->write(sprintf("%s \n Trace: %s", $e->getMessage(), $e->getTraceAsString()), 'Exception');
+        $this->log->write(sprintf("%s \n Trace: %s", $e->getMessage(), $e->getTraceAsString()), get_class($e));
     }
 
 }
