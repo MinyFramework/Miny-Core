@@ -52,18 +52,18 @@ class Application extends Factory
         $this->setParameters(array(
             'root'     => $directory,
             'log_path' => $directory . '/logs',
-            'template' => array(
+            'view'     => array(
                 'dir'               => $directory . '/views',
                 'default_format'    => 'html',
-                'default_scope'     => 'layout',
+                'layout_params'     => array(),
                 'layout'            => 'layouts/application',
                 'exception'         => 'layouts/exception',
-                'decorated_formats' => array('{@template:default_format}')
+                'decorated_formats' => array('{@view:default_format}')
             ),
             'router' => array(
                 'prefix'   => '/',
                 'suffix'   => '.:format',
-                'defaults' => array('format' => '{@template:default_format}')
+                'defaults' => array('format' => '{@view:default_format}')
             )
         ));
         $this->setInstance('app', $this);
@@ -152,17 +152,32 @@ class Application extends Factory
                 ->addMethodCall('setHandler', 'uncaught_exception', $eh)
                 ->addMethodCall('setHandler', 'handle_request_exception', '&route_filter', 'handleRequestException')
                 ->addMethodCall('setHandler', 'filter_request', '&route_filter', 'filterRoutes')
-                ->addMethodCall('setHandler', 'filter_request', '&template_events', 'filterRequestFormat')
-                ->addMethodCall('setHandler', 'filter_response', '&template_events', 'filterResponse');
+                ->addMethodCall('setHandler', 'filter_request', '&view_events', 'filterRequestFormat')
+                ->addMethodCall('setHandler', 'filter_response', '&response_filter', 'filterStringToResponse')
+                ->addMethodCall('setHandler', 'filter_response', '&view_events', 'filterResponse');
 
-        $this->add('templating', '\Miny\Template\Template')
-                ->setArguments('@template:dir', '@template:default_format');
+        $this->add('view', '\Miny\View\View')
+                ->setArguments('@view:dir', '@view:default_format')
+                ->addMethodCall('addMethod', 'filter_escape', 'htmlspecialchars')
+                ->addMethodCall('addMethod', 'filter_json', 'json_encode')
+                ->addMethodCall('addMethod', 'anchor',
+                        function($url, $label) {
+                            return '<a href="' . $url . '">' . $label . '</a>';
+                        })
+                ->addMethodCall('addMethod', 'arguments',
+                        function(array $args) {
+                            $arglist = '';
+                            foreach ($args as $name => $value) {
+                                $arglist .= sprintf(' %s="%s"', $name, $value);
+                            }
+                            return $arglist;
+                        });
 
-        $this->add('template_events', '\Miny\Template\TemplateEvents')
-                ->setArguments('&templating', '@template:default_scope')
-                ->setProperty('layout', '@template:layout')
-                ->setProperty('exception', '@template:exception')
-                ->setProperty('formats', '@template:decorated_formats');
+        $this->add('view_events', '\Miny\View\ViewEvents')
+                ->setArguments('&view', '@view:layout_params')
+                ->setProperty('layout', '@view:layout')
+                ->setProperty('exception', '@view:exception')
+                ->setProperty('formats', '@view:decorated_formats');
 
         $this->add('validator', '\Miny\Validator\Validator');
         $this->add('controllers', '\Miny\Controller\ControllerCollection');
@@ -181,6 +196,7 @@ class Application extends Factory
         $this->session = $session;
         $this->request = Request::getGlobal();
 
+        $this->add('response_filter', '\Miny\HTTP\ResponseFilter');
         $this->add('route_filter', '\Miny\Routing\RouteFilter')
                 ->setArguments('&router');
 
