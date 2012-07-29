@@ -26,20 +26,18 @@
 
 namespace Miny\Controller;
 
-use BadMethodCallException;
-use Closure;
 use InvalidArgumentException;
 use Miny\Application\Application;
+use Miny\Extendable;
 use Miny\HTTP\Request;
 use Miny\HTTP\Response;
 
-abstract class Controller
+abstract class Controller extends Extendable
 {
     protected $app;
     protected $templating;
     protected $name;
     protected $default_action = 'index';
-    private $method_map = array();
 
     public function __construct(Application $app)
     {
@@ -55,22 +53,6 @@ abstract class Controller
     public function __get($key)
     {
         return $this->templating->$key;
-    }
-
-    public function addMethod($method, $callback)
-    {
-        if (!is_callable($callback) || !$callback instanceof Closure) {
-            throw new InvalidArgumentException('Callback must be callable');
-        }
-        $this->method_map[$method] = $callback;
-    }
-
-    public function __call($method, $args)
-    {
-        if (!isset($this->method_map[$method])) {
-            throw new BadMethodCallException('Method not found: ' . $method);
-        }
-        return call_user_func_array($this->method_map[$method], $args);
     }
 
     public function request($path, array $get = NULL, array $post = NULL, array $cookie = NULL)
@@ -94,17 +76,19 @@ abstract class Controller
         $response = new Response;
 
         $router = $this->app->router;
-        $this->method_map['setCode'] = array($response, 'setCode');
-        $this->method_map['header'] = array($response, 'setHeader');
-        $this->method_map['cookie'] = array($response, 'setCookie');
-        $this->method_map['redirect'] = array($response, 'redirect');
-        $this->method_map['route'] = array($router, 'generate');
-        $this->method_map['assign'] = array($this->templating, 'assign');
-        $this->method_map['service'] = array($this->app, '__get');
-        $this->method_map['redirectRoute'] = function($route, array $params = array()) use($response, $router) {
+        $this->addMethods($response, array(
+            'setCode', 'redirect',
+            'header' => 'setHeader',
+            'cookie' => 'setCookie'
+        ));
+        $this->addMethod('route', array($router, 'generate'));
+        $this->addMethod('assign', array($this->templating, 'assign'));
+        $this->addMethod('service', array($this->app, '__get'));
+        $this->addMethod('redirectRoute',
+                function($route, array $params = array()) use($response, $router) {
                     $path = $router->generate($route, $params);
                     $response->redirect($path);
-                };
+                });
 
         $action = $action ? : $this->default_action;
         $fn = $action . 'Action';
