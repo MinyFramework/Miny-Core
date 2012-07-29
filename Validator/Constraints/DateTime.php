@@ -26,7 +26,6 @@
 
 namespace Miny\Validator\Constraints;
 
-use DateTime;
 use Exception;
 use Miny\Validator\Constraint;
 
@@ -36,18 +35,18 @@ class DateTime extends Constraint
 
     public function validate($value)
     {
-        if ($value instanceof DateTime) {
+        if ($value instanceof \DateTime) {
             return true;
         }
 
         if (is_null($this->format)) {
             try {
-                new DateTime($value);
+                new \DateTime($value);
                 return true;
             } catch (Exception $e) {
 
             }
-        } elseif (DateTime::createFromFormat($this->format, $value)) {
+        } elseif (\DateTime::createFromFormat($this->format, $value)) {
             return true;
         }
         $this->addViolation($this->message, array('value' => $value));

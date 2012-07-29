@@ -47,7 +47,7 @@ class EventDispatcher
             if ($place === NULL || $place > $count) {
                 $this->handlers[$event][] = array($handler, $method);
             } else {
-                for ($i = $count; $i > $place; --$i) {
+                for ($i = $count; $i >= $place; --$i) {
                     $this->handlers[$event][$i + 1] = $this->handlers[$event][$i];
                 }
                 $this->handlers[$event][$place] = array($handler, $method);
