@@ -30,9 +30,6 @@ use OutOfBoundsException;
 
 class ViewDescriptor
 {
-    const APPEND_BLOCK = 0;
-    const REPLACE_BLOCK = 1;
-
     public $file;
     private $vars = array();
     private $filters = array();
@@ -94,21 +91,27 @@ class ViewDescriptor
     public function renderBlock($name, $default = '')
     {
         if (isset($this->blocks[$name])) {
-            if ($this->block_modes[$name] == self::REPLACE_BLOCK) {
-                return $this->blocks[$name];
-            } else {
+            if ($this->block_modes[$name] == 'append') {
                 return $default . $this->blocks[$name];
+            } else {
+                return $this->blocks[$name];
             }
         } else {
             return $default;
         }
     }
 
-    public function beginBlock($name, $mode = self::REPLACE_BLOCK)
+    public function beginBlock($name, $mode = NULL)
     {
         ob_start();
         $this->block_stack[] = $name;
-        $this->block_modes[$name] = $mode;
+        if (!$mode) {
+            if (!isset($this->block_modes[$name])) {
+                $this->block_modes[$name] = 'replace';
+            }
+        } else {
+            $this->block_modes[$name] = $mode;
+        }
     }
 
     public function endBlock()
