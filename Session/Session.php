@@ -28,9 +28,11 @@ namespace Miny\Session;
 
 use ArrayAccess;
 use ArrayIterator;
+use BadMethodCallException;
 use Countable;
 use InvalidArgumentException;
 use IteratorAggregate;
+use OutOfBoundsException;
 
 class Session implements ArrayAccess, IteratorAggregate, Countable
 {
@@ -45,9 +47,8 @@ class Session implements ArrayAccess, IteratorAggregate, Countable
     {
         if ($register_custom_storage) {
             session_set_save_handler(
-                    array($this, 'openSession'), array($this, 'closeSession'),
-                    array($this, 'readSession'), array($this, 'writeSession'),
-                    array($this, 'destroySession'), array($this, 'gcSession')
+                    array($this, 'openSession'), array($this, 'closeSession'), array($this, 'readSession'),
+                    array($this, 'writeSession'), array($this, 'destroySession'), array($this, 'gcSession')
             );
         }
     }
@@ -107,52 +108,6 @@ class Session implements ArrayAccess, IteratorAggregate, Countable
                 unset($_SESSION['flash'][$key]);
             }
         }
-    }
-
-    /**
-     * Sets a flash variable.
-     *
-     * A flash variable is a session variable that is only available
-     * for a limited number of requests.
-     *
-     * @param string $key The key of the stored flashdata.
-     * @param mixed $value The value to be stored
-     * @param int $ttl The number of requests for the variable to be set.
-     */
-    public function setFlash($key, $value, $ttl = 1)
-    {
-        $_SESSION['flash'][$key] = array('data' => $value, 'ttl'  => $ttl);
-    }
-
-    /**
-     * Gets a flash variable.
-     *
-     * @param string $key The key of the accessed flashdata.
-     * @param mixed $default
-     */
-    public function getFlash($key, $default = NULL)
-    {
-        if ($this->hasFlash($key)) {
-            return $_SESSION['flash'][$key]['data'];
-        }
-        return $default;
-    }
-
-    /**
-     * @return Whether a flashdata with $key key is set.
-     * @param bool $key
-     */
-    public function hasFlash($key)
-    {
-        return isset($_SESSION['flash'][$key]);
-    }
-
-    /**
-     * Removes the specified flashdata
-     */
-    public function removeFlash($key)
-    {
-        unset($_SESSION['flash'][$key]);
     }
 
     //Session handling methods
@@ -241,8 +196,7 @@ class Session implements ArrayAccess, IteratorAggregate, Countable
         if (!is_null($new_params) && !$this->is_open) {
             $params = $new_params + $params;
             session_set_cookie_params(
-                    $params['lifetime'], $params['path'], $params['domain'],
-                    $params['secure'], $params['http_only']
+                    $params['lifetime'], $params['path'], $params['domain'], $params['secure'], $params['http_only']
             );
         }
         return $params;
@@ -250,46 +204,45 @@ class Session implements ArrayAccess, IteratorAggregate, Countable
 
     //Session data methods
 
-    public function keys()
+    public function __set($key, $data)
     {
-        return array_keys($_SESSION['data']);
+        $_SESSION['flash'][$key] = array('data' => $data, 'ttl'  => 1);
     }
 
-    public function toArray()
+    public function __get($key)
     {
-        return $_SESSION['data'];
-    }
-
-    public function clean()
-    {
-        $_SESSION['data'] = array();
-    }
-
-    public function set($key, $value)
-    {
-        if (is_null($key)) {
-            $_SESSION['data'][] = $value;
-        } else {
-            $_SESSION['data'][$key] = $value;
+        if (!isset($_SESSION['flash'][$key])) {
+            throw new OutOfBoundsException('Session flash key not set: ' . $key);
         }
+        return $_SESSION['flash'][$key]['data'];
     }
 
-    public function has($key)
+    public function __isset($key)
     {
-        return isset($_SESSION['data'][$key]);
+        return isset($_SESSION['flash'][$key]);
     }
 
-    public function get($key, $default = NULL)
+    public function __unset($key)
     {
-        if (isset($_SESSION['data'][$key])) {
-            return $_SESSION['data'][$key];
+        unset($_SESSION['flash'][$key]);
+    }
+
+    public function __call($key, $arguments)
+    {
+        $count = count($arguments);
+        switch ($count) {
+            case 0:
+                throw new BadMethodCallException('Method must have at least one argument.');
+            case 1:
+                $arguments[1] = 1;
+                break;
+            default:
+                if (!is_numeric($arguments[1])) {
+                    throw new \InvalidArgumentException('Secound argument must be a number.');
+                }
         }
-        return $default;
-    }
 
-    public function remove($key)
-    {
-        unset($_SESSION['data'][$key]);
+        $_SESSION['flash'][$key] = array('data' => $arguments[0], 'ttl'  => $arguments[1]);
     }
 
     //Interfaces
@@ -306,22 +259,29 @@ class Session implements ArrayAccess, IteratorAggregate, Countable
 
     public function offsetSet($key, $value)
     {
-        $this->set($key, $value);
+        if (is_null($key)) {
+            $_SESSION['data'][] = $value;
+        } else {
+            $_SESSION['data'][$key] = $value;
+        }
     }
 
     public function offsetExists($key)
     {
-        return $this->has($key);
+        return isset($_SESSION['data'][$key]);
     }
 
     public function offsetUnset($key)
     {
-        $this->remove($key);
+        unset($_SESSION['data'][$key]);
     }
 
     public function offsetGet($key)
     {
-        return $this->get($key);
+        if (!isset($_SESSION['data'][$key])) {
+            throw new OutOfBoundsException('Session key not set: ' . $key);
+        }
+        return $_SESSION['data'][$key];
     }
 
 }
