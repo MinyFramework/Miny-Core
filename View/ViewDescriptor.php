@@ -94,6 +94,23 @@ class ViewDescriptor
         $this->extend = $extend;
     }
 
+    public function renderBlock($name, $default = '')
+    {
+        if ($this->state != self::RENDER_EXTENDED) {
+            return;
+        }
+        if (isset($this->blocks[$name])) {
+            $mode = $this->block_modes[$name];
+            if ($mode == self::REPLACE_BLOCK) {
+                return $this->blocks[$name];
+            } else {
+                return $default . $this->blocks[$name];
+            }
+        } else {
+            return $default;
+        }
+    }
+
     public function beginBlock($name, $mode = self::REPLACE_BLOCK)
     {
         ob_start();
