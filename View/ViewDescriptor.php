@@ -30,11 +30,21 @@ use OutOfBoundsException;
 
 class ViewDescriptor
 {
+    const APPEND_BLOCK = 0;
+    const REPLACE_BLOCK = 1;
+    const RENDER_NORMAL = 0;
+    const RENDER_EXTENDED = 1;
+
     public $file;
     private $vars = array();
     private $filters = array();
     private $default_filters = array();
     private $view;
+    private $blocks = array();
+    private $block_modes = array();
+    private $in_block;
+    private $extend;
+    private $state;
 
     public function __construct($file, View $view, array $default_filters = array())
     {
@@ -69,7 +79,7 @@ class ViewDescriptor
 
     public function getVars()
     {
-        $vars = array();
+        $vars = array('view' => $this);
         foreach ($this->vars as $key => $data) {
             foreach ($this->filters[$key] as $filter) {
                 $data = $this->view->filter($data, $filter);
@@ -79,9 +89,48 @@ class ViewDescriptor
         return $vars;
     }
 
+    public function extend($extend)
+    {
+        $this->extend = $extend;
+    }
+
+    public function beginBlock($name, $mode = self::REPLACE_BLOCK)
+    {
+        ob_start();
+        $this->in_block = $name;
+        $this->block_modes[$name] = $mode;
+    }
+
+    public function endBlock()
+    {
+        $name = $this->in_block;
+        $this->in_block = NULL;
+        $content = ob_get_clean();
+        if ($this->state == self::RENDER_NORMAL) {
+            $this->blocks[$name] = $content;
+        } else {
+            if (isset($this->blocks[$name])) {
+                $mode = $this->block_modes[$name];
+                if ($mode == self::REPLACE_BLOCK) {
+                    return $this->blocks[$name];
+                } else {
+                    return $content . $this->blocks[$name];
+                }
+            } else {
+                return $content;
+            }
+        }
+    }
+
     public function render($format = NULL)
     {
-        return $this->view->render($this->file, $format, $this->getVars());
+        $this->state = self::RENDER_NORMAL;
+        $content = $this->view->render($this->file, $format, $this->getVars());
+        if ($this->extend) {
+            $this->state = self::RENDER_EXTENDED;
+            $content = $this->view->render($this->extend, $format, $this->getVars());
+        }
+        return $content;
     }
 
 }

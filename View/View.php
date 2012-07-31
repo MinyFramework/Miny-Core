@@ -35,8 +35,6 @@ class View extends Extendable
     private $path;
     private $format;
     private $descriptors = array();
-    private $blocks = array();
-    private $block_stack = array();
 
     public function __construct($path, $format = NULL)
     {
@@ -82,23 +80,6 @@ class View extends Extendable
             throw new RuntimeException('Template not found: ' . $filename);
         }
         return $file;
-    }
-
-    public function beginBlock($name)
-    {
-        ob_start();
-        $this->block_stack[] = $name;
-    }
-
-    public function endBlock()
-    {
-        $name = array_pop($this->block_stack);
-        $this->blocks[$name] = ob_get_clean();
-    }
-
-    public function block($name, $default = '')
-    {
-        return isset($this->blocks[$name]) ? $this->blocks[$name] : $default;
     }
 
     public function render($file, $format = NULL, array $params = array())
