@@ -386,14 +386,18 @@ class Factory implements ArrayAccess
             $message = 'Parameter not set: ' . $key;
             throw new OutOfBoundsException($message);
         }
-        $return = $this->resolveLinks($return);
-        return $return;
+        return $this->resolveLinks($return);
     }
 
     private function resolveLinks($value)
     {
         if (is_array($value)) {
-            $value = array_map(array($this, 'resolveLinks'), $value);
+            $return = array();
+            foreach($value as $k => $v) {
+                $k = $this->resolveLinks($k);
+                $return[$k] = $this->resolveLinks($v);
+            }
+            return $return;
         }
         if (is_string($value)) {
             $factory = $this;
