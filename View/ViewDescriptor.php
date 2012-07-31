@@ -32,8 +32,6 @@ class ViewDescriptor
 {
     const APPEND_BLOCK = 0;
     const REPLACE_BLOCK = 1;
-    const RENDER_NORMAL = 0;
-    const RENDER_EXTENDED = 1;
 
     public $file;
     private $vars = array();
@@ -42,9 +40,8 @@ class ViewDescriptor
     private $view;
     private $blocks = array();
     private $block_modes = array();
-    private $in_block;
+    private $block_stack = array();
     private $extend;
-    private $state;
 
     public function __construct($file, View $view, array $default_filters = array())
     {
@@ -96,12 +93,8 @@ class ViewDescriptor
 
     public function renderBlock($name, $default = '')
     {
-        if ($this->state != self::RENDER_EXTENDED) {
-            return;
-        }
         if (isset($this->blocks[$name])) {
-            $mode = $this->block_modes[$name];
-            if ($mode == self::REPLACE_BLOCK) {
+            if ($this->block_modes[$name] == self::REPLACE_BLOCK) {
                 return $this->blocks[$name];
             } else {
                 return $default . $this->blocks[$name];
@@ -114,39 +107,25 @@ class ViewDescriptor
     public function beginBlock($name, $mode = self::REPLACE_BLOCK)
     {
         ob_start();
-        $this->in_block = $name;
+        $this->block_stack[] = $name;
         $this->block_modes[$name] = $mode;
     }
 
     public function endBlock()
     {
-        $name = $this->in_block;
-        $this->in_block = NULL;
         $content = ob_get_clean();
-        if ($this->state == self::RENDER_NORMAL) {
-            $this->blocks[$name] = $content;
-        } else {
-            if (isset($this->blocks[$name])) {
-                $mode = $this->block_modes[$name];
-                if ($mode == self::REPLACE_BLOCK) {
-                    return $this->blocks[$name];
-                } else {
-                    return $content . $this->blocks[$name];
-                }
-            } else {
-                return $content;
-            }
-        }
+        $name = array_pop($this->block_stack);
+        $this->blocks[$name] = $this->renderBlock($name, $content);
+        return $this->blocks[$name];
     }
 
     public function render($format = NULL)
     {
-        $this->state = self::RENDER_NORMAL;
-        $content = $this->view->render($this->file, $format, $this->getVars());
-        if ($this->extend) {
-            $this->state = self::RENDER_EXTENDED;
-            $content = $this->view->render($this->extend, $format, $this->getVars());
-        }
+        $file = $this->file;
+        do {
+            $this->extend = NULL;
+            $content = $this->view->render($file, $format, $this->getVars());
+        } while ($file = $this->extend);
         return $content;
     }
 
