@@ -153,11 +153,17 @@ class Application extends Factory
 
         $this->add('view', '\Miny\View\View')
                 ->setArguments('@view:dir', '@view:default_format')
+                ->addMethodCall('addMethod', 'route', '*router::generate')
                 ->addMethodCall('addMethod', 'filter_escape', 'htmlspecialchars')
                 ->addMethodCall('addMethod', 'filter_json', 'json_encode')
                 ->addMethodCall('addMethod', 'anchor',
                         function($url, $label) {
                             return '<a href="' . $url . '">' . $label . '</a>';
+                        })
+                ->addMethodCall('addMethod', 'routeAnchor',
+                        function($url, $label, array $params = array()) use($app) {
+                            $route = $app->router->generate($url, $params);
+                            return '<a href="' . $route . '">' . $label . '</a>';
                         })
                 ->addMethodCall('addMethod', 'arguments',
                         function(array $args) {
