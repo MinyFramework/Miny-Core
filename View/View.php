@@ -34,7 +34,6 @@ class View extends Extendable
     public $default_filters = array();
     private $path;
     private $format;
-    private $descriptors = array();
 
     public function __construct($path, $format = NULL)
     {
@@ -42,15 +41,9 @@ class View extends Extendable
         $this->format = $format;
     }
 
-    public function get($name = NULL, $file = NULL)
+    public function get($file = NULL)
     {
-        if (!$name) {
-            return new ViewDescriptor($file, $this, $this->default_filters);
-        }
-        if (!isset($this->descriptors[$name])) {
-            $this->descriptors[$name] = new ViewDescriptor($file, $this, $this->default_filters);
-        }
-        return $this->descriptors[$name];
+        return new ViewDescriptor($file, $this, $this->default_filters);
     }
 
     public function setFormat($format)

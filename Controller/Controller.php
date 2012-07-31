@@ -98,18 +98,17 @@ abstract class Controller extends Extendable
             throw new InvalidArgumentException('Action not found: ' . $fn);
         }
 
-        $view = $this->view->get('controller', $this->name . '/' . $action);
+        $view = $this->view->get($this->name . '/' . $action);
         $this->view_descriptor = $view;
         $return = $this->$fn($request);
         if (!$response->isRedirect() && $return !== false) {
-
             if (is_string($return)) {
                 $view->file = $return;
             }
 
+            $view->app = $this->app;
             $view->controller = $this;
-            $output = $view->render();
-            $response->setContent($output);
+            $response->setContent($view->render());
         }
         return $response;
     }

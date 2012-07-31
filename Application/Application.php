@@ -53,14 +53,10 @@ class Application extends Factory
             'root'     => $directory,
             'log_path' => $directory . '/logs',
             'view'     => array(
-                'dir'               => $directory . '/views',
-                'default_format'    => 'html',
-                'layout_params'     => array(),
-                'layout'            => 'layouts/application',
-                'exception'         => 'layouts/exception',
-                'decorated_formats' => array('{@view:default_format}')
+                'dir'            => $directory . '/views',
+                'default_format' => 'html'
             ),
-            'router' => array(
+            'router'         => array(
                 'prefix'   => '/',
                 'suffix'   => '.:format',
                 'defaults' => array('format' => '{@view:default_format}')
@@ -153,8 +149,7 @@ class Application extends Factory
                 ->addMethodCall('setHandler', 'handle_request_exception', '&route_filter', 'handleRequestException')
                 ->addMethodCall('setHandler', 'filter_request', '&route_filter', 'filterRoutes')
                 ->addMethodCall('setHandler', 'filter_request', '&view_events', 'filterRequestFormat')
-                ->addMethodCall('setHandler', 'filter_response', '&response_filter', 'filterStringToResponse')
-                ->addMethodCall('setHandler', 'filter_response', '&view_events', 'filterResponse');
+                ->addMethodCall('setHandler', 'filter_response', '&response_filter', 'filterStringToResponse');
 
         $this->add('view', '\Miny\View\View')
                 ->setArguments('@view:dir', '@view:default_format')
@@ -174,10 +169,7 @@ class Application extends Factory
                         });
 
         $this->add('view_events', '\Miny\View\ViewEvents')
-                ->setArguments('&view', '@view:layout_params')
-                ->setProperty('layout', '@view:layout')
-                ->setProperty('exception', '@view:exception')
-                ->setProperty('formats', '@view:decorated_formats');
+                ->setArguments('&view');
 
         $this->add('validator', '\Miny\Validator\Validator');
         $this->add('controllers', '\Miny\Controller\ControllerCollection');

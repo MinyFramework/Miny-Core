@@ -31,26 +31,11 @@ use Miny\Event\EventHandler;
 
 class ViewEvents extends EventHandler
 {
-    public $layout = 'layouts/application';
-    public $exception = 'layouts/exception';
-    public $formats = array('html');
     private $view;
 
-    public function __construct(View $view, array $params = array())
+    public function __construct(View $view)
     {
         $this->view = $view;
-        $layout = $view->get('layout');
-        foreach ($params as $k => $v) {
-            $layout->$k = $v;
-        }
-    }
-
-    public function handleException(Event $event)
-    {
-        $view = $this->view->get('layout');
-        $view->file = $this->exception;
-        $view->exception = $event->getParameter('exception');
-        $event->setResponse($view->render());
     }
 
     public function filterRequestFormat(Event $event)
@@ -59,28 +44,6 @@ class ViewEvents extends EventHandler
         if (isset($request->get['format'])) {
             $this->view->setFormat($request->get['format']);
         }
-    }
-
-    public function filterResponse(Event $event)
-    {
-        $request = $event->getParameter('request');
-        if ($request->isSubRequest()) {
-            return;
-        }
-        if (!empty($this->formats) && !in_array($request->get['format'], $this->formats)) {
-            return;
-        }
-        $rsp = $event->getParameter('response');
-        if ($rsp->isRedirect()) {
-            return;
-        }
-
-        $view = $this->view->get('layout');
-        $view->file = $this->layout;
-        $view->content = $rsp->getContent();
-
-        $rsp->setContent($view->render());
-        $event->setResponse($rsp);
     }
 
 }
