@@ -32,38 +32,26 @@ class ViewDescriptor
 {
     public $file;
     private $vars = array();
-    private $filters = array();
-    private $default_filters = array();
+    //private $filters = array();
+    //private $default_filters = array();
     private $view;
     private $blocks = array();
     private $block_modes = array();
     private $block_stack = array();
     private $extend;
 
-    public function __construct($file, View $view, array $default_filters = array())
+    public function __construct($file, View $view)
     {
         $this->file = $file;
-        $this->default_filters = $default_filters;
         $this->view = $view;
     }
 
     public function __set($key, $value)
     {
         $this->vars[$key] = $value;
-        $this->filters[$key] = $this->default_filters;
     }
 
     public function __get($key)
-    {
-        $data = $this->getRaw($key);
-        $filters = $this->filters[$key];
-        foreach ($filters as $filter) {
-            $data = $this->view->filter($data, $filter);
-        }
-        return $data;
-    }
-
-    public function getRaw($key)
     {
         if (!isset($this->vars[$key])) {
             throw new OutOfBoundsException('Key not set: ' . $key);
@@ -73,13 +61,8 @@ class ViewDescriptor
 
     public function getVars()
     {
-        $vars = array('view' => $this);
-        foreach ($this->vars as $key => $data) {
-            foreach ($this->filters[$key] as $filter) {
-                $data = $this->view->filter($data, $filter);
-            }
-            $vars[$key] = $data;
-        }
+        $vars = $this->vars;
+        $vars['view'] = $this;
         return $vars;
     }
 

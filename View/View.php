@@ -31,7 +31,6 @@ use RuntimeException;
 
 class View extends Extendable
 {
-    public $default_filters = array();
     private $path;
     private $format;
 
@@ -43,7 +42,7 @@ class View extends Extendable
 
     public function get($file = NULL)
     {
-        return new ViewDescriptor($file, $this, $this->default_filters);
+        return new ViewDescriptor($file, $this);
     }
 
     public function setFormat($format)
