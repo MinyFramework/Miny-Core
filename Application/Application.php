@@ -149,7 +149,7 @@ class Application extends Factory
                 ->addMethodCall('setHandler', 'handle_request_exception', '&route_filter', 'handleRequestException')
                 ->addMethodCall('setHandler', 'filter_request', '&route_filter', 'filterRoutes')
                 ->addMethodCall('setHandler', 'filter_request', '&view_events', 'filterRequestFormat')
-                ->addMethodCall('setHandler', 'filter_response', '&response_filter', 'filterStringToResponse');
+                ->addMethodCall('setHandler', 'invalid_response', '&response_filter', 'filterStringToResponse');
 
         $this->add('view', '\Miny\View\View')
                 ->setArguments('@view:dir', '@view:default_format')
@@ -209,7 +209,7 @@ class Application extends Factory
             throw new UnexpectedValueException('Unexpected route method:' . $method);
         }
         $parameters['controller'] = $controller_name;
-        $route = new Route($path, $method, $parameters, $name);
+        $route = new Route($path, $method, $parameters);
         $this->router->route($route, $name);
         $this->controllers->register($controller_name, $controller);
         return $route;
@@ -224,8 +224,10 @@ class Application extends Factory
 
     public function root($controller, array $parameters = array())
     {
-        $parameters['controller'] = $controller;
-        $this->router->root($parameters);
+        $controller_name = $this->controllers->getNextName();
+        $parameters['controller'] = $controller_name;
+        $this->controllers->register($controller_name, $controller);
+        return $this->router->root($parameters);
     }
 
     public function get($path, $controller, $name = NULL, array $parameters = array())

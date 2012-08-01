@@ -56,6 +56,11 @@ class Event
         return $this->name;
     }
 
+    public function __toString()
+    {
+        return $this->name;
+    }
+
     public function hasParameter($key)
     {
         return array_key_exists($key, $this->parameters);

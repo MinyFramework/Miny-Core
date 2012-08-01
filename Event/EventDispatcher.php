@@ -69,10 +69,10 @@ class EventDispatcher
                 }
             }
             $event->setHandled();
+            $this->log->write(sprintf('Finished event: %s', $name));
         } else {
-            $this->log->write(sprintf('Triggering event: %s Handlers: %d', $name, 0));
+            $this->log->write(sprintf('Event has no handlers: %s', $name));
         }
-        $this->log->write(sprintf('Finished event: %s', $name));
     }
 
 }

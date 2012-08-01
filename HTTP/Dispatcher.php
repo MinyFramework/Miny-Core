@@ -85,8 +85,7 @@ class Dispatcher
         $response = $event->getResponse();
         if (!$response instanceof Response) {
             $message = 'Event %s has an invalid response, (%s) %s given.';
-            $message = sprintf($message, $event->getName(), gettype($response), $response);
-            throw new RuntimeException($message);
+            throw new RuntimeException(sprintf($message, $event, gettype($response), $response));
         }
         return $response;
     }
