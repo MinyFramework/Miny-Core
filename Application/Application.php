@@ -50,11 +50,13 @@ class Application extends Factory
     {
         $this->environment = $environment;
         $this->setParameters(array(
-            'root'     => $directory,
-            'log_path' => $directory . '/logs',
-            'view'     => array(
+            'default_timezone' => date_default_timezone_get(),
+            'root'             => $directory,
+            'log_path'         => $directory . '/logs',
+            'view'             => array(
                 'dir'            => $directory . '/views',
-                'default_format' => 'html'
+                'default_format' => 'html',
+                'exception'      => 'layouts/exception'
             ),
             'router'         => array(
                 'prefix'   => '/',
@@ -145,6 +147,7 @@ class Application extends Factory
         $this->add('events', '\Miny\Event\EventDispatcher')
                 ->setArguments('&log')
                 ->addMethodCall('setHandler', 'handle_exception', $eh)
+                ->addMethodCall('setHandler', 'handle_exception', '&view_events', 'displayExceptionPage')
                 ->addMethodCall('setHandler', 'uncaught_exception', $eh)
                 ->addMethodCall('setHandler', 'handle_request_exception', '&route_filter', 'handleRequestException')
                 ->addMethodCall('setHandler', 'filter_request', '&route_filter', 'filterRoutes')
@@ -169,13 +172,15 @@ class Application extends Factory
                         function(array $args) {
                             $arglist = '';
                             foreach ($args as $name => $value) {
-                                $arglist .= sprintf(' %s="%s"', $name, $value);
+                                $arglist .= ' ' . $name . '="' . $value . '"';
                             }
                             return $arglist;
                         });
 
         $this->add('view_events', '\Miny\View\ViewEvents')
-                ->setArguments('&view');
+                ->setArguments('&view')
+                ->setProperty('environment', '&app::getEnvironment')
+                ->setProperty('exception', '@view:exception');
 
         $this->add('validator', '\Miny\Validator\Validator');
         $this->add('controllers', '\Miny\Controller\ControllerCollection');
@@ -252,9 +257,7 @@ class Application extends Factory
 
     public function run()
     {
-        if (isset($this['default_timezone'])) {
-            date_default_timezone_set($this['default_timezone']);
-        }
+        date_default_timezone_set($this['default_timezone']);
         $request = $this->request;
         $this->log->write(sprintf('Request: [%s] %s Source: %s', $request->method, $request->path, $request->ip));
         $response = $this->dispatcher->dispatch($request);

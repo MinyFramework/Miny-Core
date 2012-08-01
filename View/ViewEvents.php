@@ -26,16 +26,27 @@
 
 namespace Miny\View;
 
+use Miny\Application\Application;
 use Miny\Event\Event;
 use Miny\Event\EventHandler;
 
 class ViewEvents extends EventHandler
 {
     private $view;
+    public $environment = Application::ENV_PROD;
+    public $exception = 'layouts/exception';
 
     public function __construct(View $view)
     {
         $this->view = $view;
+    }
+
+    public function displayExceptionPage(Event $event)
+    {
+        $view = $this->view->get($this->exception);
+        $view->env = $this->environment;
+        $view->exception = $event->getParameter('exception');
+        $event->setResponse($view->render());
     }
 
     public function filterRequestFormat(Event $event)

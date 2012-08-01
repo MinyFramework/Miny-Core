@@ -31,7 +31,6 @@ use InvalidArgumentException;
 use Miny\Controller\ControllerResolver;
 use Miny\Event\Event;
 use Miny\Event\EventDispatcher;
-use RuntimeException;
 
 class Dispatcher
 {
@@ -82,12 +81,7 @@ class Dispatcher
         if (!$event->isHandled()) {
             throw new InvalidArgumentException('Event was not handled: ' . $event);
         }
-        $response = $event->getResponse();
-        if (!$response instanceof Response) {
-            $message = 'Event %s has an invalid response, (%s) %s given.';
-            throw new RuntimeException(sprintf($message, $event, gettype($response), $response));
-        }
-        return $response;
+        return $event->getResponse();
     }
 
     private function handleException(Exception $e)
