@@ -89,7 +89,7 @@ class Application extends Factory
 
     public function isDeveloperEnvironment()
     {
-        return $this->environment !== self::ENV_DEV;
+        return $this->environment == self::ENV_DEV;
     }
 
     public function isProductionEnvironment()
