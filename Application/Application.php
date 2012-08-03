@@ -136,6 +136,9 @@ class Application extends Factory
         set_exception_handler(function(Exception $e) use($app) {
                     $event = new Event('uncaught_exception', array('exception' => $e));
                     $app->events->raiseEvent($event);
+                    if(!$event->isHandled()) {
+                        throw $e;
+                    }
                 });
         set_error_handler(function($errno, $errstr, $errfile, $errline ) {
                     throw new ErrorException($errstr, $errno, 0, $errfile, $errline);
@@ -178,7 +181,7 @@ class Application extends Factory
                         });
 
         $this->add('view_events', '\Miny\View\ViewEvents')
-                ->setArguments('&view')
+                ->setArguments('&app')
                 ->setProperty('environment', '&app::getEnvironment')
                 ->setProperty('exception', '@view:exception');
 
