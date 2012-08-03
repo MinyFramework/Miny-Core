@@ -32,19 +32,18 @@ use Miny\Event\EventHandler;
 
 class ViewEvents extends EventHandler
 {
-    private $view;
-    public $environment = Application::ENV_PROD;
+    private $app;
     public $exception = 'layouts/exception';
 
-    public function __construct(View $view)
+    public function __construct(Application $app)
     {
-        $this->view = $view;
+        $this->app = $app;
     }
 
     public function displayExceptionPage(Event $event)
     {
-        $view = $this->view->get($this->exception);
-        $view->env = $this->environment;
+        $view = $this->app->view->get($this->exception);
+        $view->app = $this->app;
         $view->exception = $event->getParameter('exception');
         $event->setResponse($view->render());
     }
@@ -53,7 +52,7 @@ class ViewEvents extends EventHandler
     {
         $request = $event->getParameter('request');
         if (isset($request->get['format'])) {
-            $this->view->setFormat($request->get['format']);
+            $this->app->view->setFormat($request->get['format']);
         }
     }
 
