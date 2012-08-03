@@ -2,26 +2,9 @@
 
 /**
  * This file is part of the Miny framework.
+ * (c) Dániel Buga <daniel@bugadani.hu>
  *
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * any later version accepted by the author in accordance with section
- * 14 of the GNU General Public License.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <http://www.gnu.org/licenses/>.
- *
- * @package   Miny/Application
- * @copyright 2012 Dániel Buga <daniel@bugadani.hu>
- * @license   http://www.gnu.org/licenses/gpl.txt
- *            GNU General Public License
- * @version   1.0-dev
+ * For licensing information see the LICENSE file.
  */
 
 namespace Miny\Application;
@@ -71,18 +54,17 @@ class Application extends Factory
                 $directory . '/config/config.dev.php'    => self::ENV_DEV,
                 $directory . '/config/config.php'        => self::ENV_PROD
             );
-            $this->loadConfigs($config_files);
+            foreach ($config_files as $file => $env) {
+                try {
+                    $this->loadConfig($file, $env);
+                } catch (InvalidArgumentException $e) {
+
+                }
+            }
         }
         $this->registerDefaultServices();
         $env = ($environment == self::ENV_PROD) ? 'production' : 'development';
         $this->log->write(sprintf('Starting Miny in %s environment', $env));
-    }
-
-    public function loadConfigs(array $files)
-    {
-        foreach ($files as $file => $env) {
-            $this->loadConfig($file, $env);
-        }
     }
 
     public function loadConfig($file, $env = self::ENV_COMMON)
@@ -103,6 +85,16 @@ class Application extends Factory
     public function getEnvironment()
     {
         return $this->environment;
+    }
+
+    public function isDeveloperEnvironment()
+    {
+        return $this->environment !== self::ENV_DEV;
+    }
+
+    public function isProductionEnvironment()
+    {
+        return $this->environment == self::ENV_PROD;
     }
 
     public function module($module)
@@ -136,7 +128,7 @@ class Application extends Factory
         set_exception_handler(function(Exception $e) use($app) {
                     $event = new Event('uncaught_exception', array('exception' => $e));
                     $app->events->raiseEvent($event);
-                    if(!$event->isHandled()) {
+                    if (!$event->isHandled()) {
                         throw $e;
                     }
                 });

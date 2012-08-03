@@ -2,26 +2,9 @@
 
 /**
  * This file is part of the Miny framework.
+ * (c) Dániel Buga <daniel@bugadani.hu>
  *
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * any later version accepted by the author in accordance with section
- * 14 of the GNU General Public License.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <http://www.gnu.org/licenses/>.
- *
- * @package   Miny/Validator
- * @copyright 2012 Dániel Buga <daniel@bugadani.hu>
- * @license   http://www.gnu.org/licenses/gpl.txt
- *            GNU General Public License
- * @version   1.0-dev
+ * For licensing information see the LICENSE file.
  */
 
 namespace Miny\Validator;
@@ -47,8 +30,7 @@ abstract class Constraint
         if (!is_array($params) || !is_string(key($params))) {
             $default = $this->getDefaultOption();
             if (is_null($default)) {
-                $message = 'Default option is not set for this constraint.';
-                throw new ConstraintException($message);
+                throw new ConstraintException('Default option is not set for this constraint.');
             }
             $params = array($default => $params);
         }
@@ -60,8 +42,7 @@ abstract class Constraint
             }
         }
         if (!empty($missing)) {
-            $message = sprintf('Options "%s" must be set for this constraint.',
-                    implode('", "', $missing));
+            $message = sprintf('Options "%s" must be set for this constraint.', implode('", "', $missing));
             throw new ConstraintException($message);
         }
     }
