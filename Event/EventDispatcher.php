@@ -33,7 +33,7 @@ class EventDispatcher
     private $handlers = array();
     private $log;
 
-    public function __construct(Log $log)
+    public function __construct(Log $log = NULL)
     {
         $this->log = $log;
     }
@@ -47,8 +47,8 @@ class EventDispatcher
             if ($place === NULL || $place > $count) {
                 $this->handlers[$event][] = array($handler, $method);
             } else {
-                for ($i = $count; $i >= $place; --$i) {
-                    $this->handlers[$event][$i + 1] = $this->handlers[$event][$i];
+                for ($i = $count; $i > $place; --$i) {
+                    $this->handlers[$event][$i] = $this->handlers[$event][$i - 1];
                 }
                 $this->handlers[$event][$place] = array($handler, $method);
             }
@@ -59,7 +59,9 @@ class EventDispatcher
     {
         $name = $event->getName();
         if (isset($this->handlers[$name])) {
-            $this->log->write(sprintf('Triggering event: %s Handlers: %d', $name, count($this->handlers[$name])));
+            if ($this->log) {
+                $this->log->write(sprintf('Triggering event: %s Handlers: %d', $name, count($this->handlers[$name])));
+            }
             foreach ($this->handlers[$name] as $handler) {
                 list($evt_handler, $method) = $handler;
                 if (method_exists($evt_handler, $method)) {
@@ -69,8 +71,10 @@ class EventDispatcher
                 }
             }
             $event->setHandled();
-            $this->log->write(sprintf('Finished event: %s', $name));
-        } else {
+            if ($this->log) {
+                $this->log->write(sprintf('Finished event: %s', $name));
+            }
+        } elseif ($this->log) {
             $this->log->write(sprintf('Event has no handlers: %s', $name));
         }
     }

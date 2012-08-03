@@ -26,7 +26,7 @@
 
 namespace Miny\Event;
 
-use InvalidArgumentException;
+use OutOfBoundsException;
 
 class Event
 {
@@ -69,8 +69,7 @@ class Event
     public function getParameter($key)
     {
         if (!$this->hasParameter($key)) {
-            $message = 'Event parameter not set: ' . $key;
-            throw new InvalidArgumentException($message);
+            throw new OutOfBoundsException('Event parameter not set: ' . $key);
         }
         return $this->parameters[$key];
     }
