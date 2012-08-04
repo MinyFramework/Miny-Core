@@ -9,7 +9,6 @@
 
 namespace Miny;
 
-use InvalidArgumentException;
 use OutOfBoundsException;
 
 /**

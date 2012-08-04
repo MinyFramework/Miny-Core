@@ -16,10 +16,5 @@ abstract class Module
         return array();
     }
 
-    public function getVersion()
-    {
-        return '1.0';
-    }
-
     public abstract function init(Application $app);
 }

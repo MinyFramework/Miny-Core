@@ -27,6 +27,14 @@ class ApplicationEventHandlers extends EventHandler
         $this->app->log->write(sprintf("%s \n Trace: %s", $e->getMessage(), $e->getTraceAsString()), get_class($e));
     }
 
+    public function displayExceptionPage(Event $event)
+    {
+        $view = $this->app->view->get($this->app['view:exception']);
+        $view->app = $this->app;
+        $view->exception = $event->getParameter('exception');
+        $event->setResponse($view->render());
+    }
+
     public function handleRequestException(Event $event)
     {
         $request = $event->getParameter('request');
@@ -50,6 +58,9 @@ class ApplicationEventHandlers extends EventHandler
         }
         parse_str(parse_url($_SERVER['REQUEST_URI'], PHP_URL_QUERY), $_GET);
         $request->get = $match->getParameters() + $_GET;
+        if (isset($request->get['format'])) {
+            $this->app->view->setFormat($request->get['format']);
+        }
     }
 
     public function filterStringToResponse(Event $event)
@@ -57,22 +68,6 @@ class ApplicationEventHandlers extends EventHandler
         $response = $event->getParameter('response');
         if (!$response instanceof Response) {
             $event->setResponse(new Response($response));
-        }
-    }
-
-    public function displayExceptionPage(Event $event)
-    {
-        $view = $this->app->view->get($this->app['view:exception']);
-        $view->app = $this->app;
-        $view->exception = $event->getParameter('exception');
-        $event->setResponse($view->render());
-    }
-
-    public function filterRequestFormat(Event $event)
-    {
-        $request = $event->getParameter('request');
-        if (isset($request->get['format'])) {
-            $this->app->view->setFormat($request->get['format']);
         }
     }
 

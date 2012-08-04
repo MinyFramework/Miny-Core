@@ -149,7 +149,6 @@ class Application extends Factory
                 ->addMethodCall('setHandler', 'uncaught_exception', $eh)
                 ->addMethodCall('setHandler', 'handle_request_exception', $eh, 'handleRequestException')
                 ->addMethodCall('setHandler', 'filter_request', $eh, 'filterRoutes')
-                ->addMethodCall('setHandler', 'filter_request', $eh, 'filterRequestFormat')
                 ->addMethodCall('setHandler', 'invalid_response', $eh, 'filterStringToResponse');
 
         $this->add('view', '\Miny\View\View')
@@ -175,17 +174,14 @@ class Application extends Factory
                             return $arglist;
                         });
 
-        $this->add('view_events', '\Miny\View\ViewEvents')
-                ->setArguments('&app')
-                ->setProperty('environment', '&app::getEnvironment')
-                ->setProperty('exception', '@view:exception');
-
         $this->add('validator', '\Miny\Validator\Validator');
         $this->add('controllers', '\Miny\Controller\ControllerCollection');
         $this->add('resolver', '\Miny\Controller\ControllerResolver')
                 ->setArguments('&app', '&controllers');
         $this->add('dispatcher', '\Miny\HTTP\Dispatcher')
                 ->setArguments('&events', '&resolver');
+        $this->add('router', '\Miny\Routing\Router')
+                ->setArguments('@router:prefix', '@router:suffix', '@router:defaults');
 
         $session = new Session;
         $session->open();
@@ -196,13 +192,6 @@ class Application extends Factory
 
         $this->session = $session;
         $this->request = Request::getGlobal();
-
-        $this->add('response_filter', '\Miny\HTTP\ResponseFilter');
-        $this->add('route_filter', '\Miny\Routing\RouteFilter')
-                ->setArguments('&router');
-
-        $this->add('router', '\Miny\Routing\Router')
-                ->setArguments('@router:prefix', '@router:suffix', '@router:defaults');
     }
 
     public function route($path, $controller, $method = NULL, $name = NULL, array $parameters = array())
