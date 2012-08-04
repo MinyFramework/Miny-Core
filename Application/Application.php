@@ -44,7 +44,10 @@ class Application extends Factory
             'router'         => array(
                 'prefix'   => '/',
                 'suffix'   => '.:format',
-                'defaults' => array('format' => '{@view:default_format}')
+                'defaults' => array(
+                    'format'          => '{@view:default_format}'
+                ),
+                'exception_paths' => array()
             )
         ));
         $this->setInstance('app', $this);
@@ -137,17 +140,17 @@ class Application extends Factory
                 });
 
         $this->log = new Log($this['log_path']);
-        $eh = new ExceptionHandler($this->log);
+        $eh = new ApplicationEventHandlers($this);
 
         $this->add('events', '\Miny\Event\EventDispatcher')
                 ->setArguments('&log')
                 ->addMethodCall('setHandler', 'handle_exception', $eh)
-                ->addMethodCall('setHandler', 'handle_exception', '&view_events', 'displayExceptionPage')
+                ->addMethodCall('setHandler', 'handle_exception', $eh, 'displayExceptionPage')
                 ->addMethodCall('setHandler', 'uncaught_exception', $eh)
-                ->addMethodCall('setHandler', 'handle_request_exception', '&route_filter', 'handleRequestException')
-                ->addMethodCall('setHandler', 'filter_request', '&route_filter', 'filterRoutes')
-                ->addMethodCall('setHandler', 'filter_request', '&view_events', 'filterRequestFormat')
-                ->addMethodCall('setHandler', 'invalid_response', '&response_filter', 'filterStringToResponse');
+                ->addMethodCall('setHandler', 'handle_request_exception', $eh, 'handleRequestException')
+                ->addMethodCall('setHandler', 'filter_request', $eh, 'filterRoutes')
+                ->addMethodCall('setHandler', 'filter_request', $eh, 'filterRequestFormat')
+                ->addMethodCall('setHandler', 'invalid_response', $eh, 'filterStringToResponse');
 
         $this->add('view', '\Miny\View\View')
                 ->setArguments('@view:dir', '@view:default_format')

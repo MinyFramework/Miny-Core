@@ -50,10 +50,7 @@ class AutoLoader
 
     public function register($namespace, $path = NULL)
     {
-        if (is_null($path)) {
-            if (!is_array($namespace)) {
-                throw new InvalidArgumentException('Argument must be an array');
-            }
+        if (is_array($namespace)) {
             foreach ($namespace as $ns => $path) {
                 $this->addNamespace($ns, $path);
             }
