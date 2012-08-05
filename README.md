@@ -19,12 +19,16 @@ use Miny\AutoLoader;
 use Miny\Application\Application;
 include __DIR__ . '/../Miny/Core/AutoLoader.php';
 new AutoLoader();
+
 $app = new Application(__DIR__);
 $app->root(function() {
     echo 'Hello, world!';
 });
+$app->run();
 
 ```
+
+This is the simplest application for Miny. It prints Hello, world! for the root level route.
 
 Documentation
 ------------
