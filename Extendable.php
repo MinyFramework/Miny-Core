@@ -10,7 +10,6 @@
 namespace Miny;
 
 use BadMethodCallException;
-use Closure;
 use InvalidArgumentException;
 
 class Extendable
@@ -19,7 +18,7 @@ class Extendable
 
     public function addMethod($method, $callback)
     {
-        if (!is_callable($callback) && !$callback instanceof Closure) {
+        if (!is_callable($callback)) {
             throw new InvalidArgumentException('Callback must be callable');
         }
         $this->plugins[$method] = $callback;
@@ -31,13 +30,14 @@ class Extendable
             throw new InvalidArgumentException('First argument must be an object');
         }
         foreach ($method_aliasses as $alias => $method) {
-            if (!method_exists($object, $method)) {
+            $callable = array($object, $method);
+            if (!is_callable($callable)) {
                 throw new InvalidArgumentException('Method not found: ' . $method);
             }
             if (is_numeric($alias)) {
                 $alias = $method;
             }
-            $this->plugins[$alias] = array($object, $method);
+            $this->plugins[$alias] = $callable;
         }
     }
 
