@@ -39,7 +39,9 @@ class ControllerResolver
         if ($controller instanceof Controller) {
             return $controller->run($action, $request);
         } elseif ($controller instanceof Closure) {
-            return $controller($request, $action);
+            ob_start();
+            $controller($request, $action);
+            return ob_get_clean();
         }
         throw new InvalidArgumentException('Invalid controller: ' . $class);
     }
