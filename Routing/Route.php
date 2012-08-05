@@ -39,6 +39,9 @@ class Route
             throw new InvalidArgumentException('Path must be a string.');
         }
         $this->path = $path;
+        $this->parameter_count = NULL;
+        $this->parameter_names = array();
+        $this->regex = NULL;
     }
 
     public function getMethod()
