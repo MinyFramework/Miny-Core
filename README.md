@@ -32,4 +32,27 @@ This is the simplest application for Miny. It prints Hello, world! for the root 
 
 Documentation
 ------------
-Later.
+This is not a full API documentation. Full docs coming later.
+
+### Application
+#### Methods
+
+ * `__construct($directory, $environment = self::ENV_PROD, $include_configs = true)`:
+ * `loadConfig($file, $env = self::ENV_COMMON)`: loads a configuration file if the environment matches.
+ * `route($path, $controller, $method = NULL, $name = NULL, array $parameters = array())`
+ * `root()`, `get()`, `post()`, `put()`, `delete()`: Shorthand methods for `route()`.
+ * `run()`: Executes the application.
+ * `module($module)`: Loads a module.
+ * array operators: access configuration parameters
+ * magic properties: set or access services
+
+#### Services
+ * Router
+ * View
+ * Events
+ * Dispatcher
+ * Validator
+ * ControllerCollection (controllers)
+ * ControllerResolver (resolver)
+ * Session
+ * Log
