@@ -12,13 +12,12 @@ namespace Miny\Factory;
 use InvalidArgumentException;
 
 /**
- * ObjectDescriptor class
+ * Blueprint class
  * Responsible for statically descripting objects and their dependencies.
- * For usage, see @link http://prominence.bugadani.hu/packages/factory
  *
  * @author  Dániel Buga
  */
-class ObjectDescriptor
+class Blueprint
 {
     /**
      * @see ObjectDescriptor::isSingleton()
@@ -80,7 +79,7 @@ class ObjectDescriptor
      * Sets constructor arguments.
      *
      * @param array $arg
-     * @return ObjectDescriptor
+     * @return Blueprint
      */
     public function setArguments()
     {
@@ -105,7 +104,7 @@ class ObjectDescriptor
      *
      * @param string $method
      * @param array $arguments
-     * @return ObjectDescriptor
+     * @return Blueprint
      */
     public function addMethodCall()
     {
@@ -120,7 +119,7 @@ class ObjectDescriptor
      *
      * @param string $name
      * @param mixed $value
-     * @return ObjectDescriptor
+     * @return Blueprint
      */
     public function setProperty($name, $value)
     {

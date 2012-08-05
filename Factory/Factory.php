@@ -17,10 +17,9 @@ use ReflectionClass;
 
 /**
  * Factory class
- * Responsible for storing ObjectDescriptors and their dependencies, parameters.
+ * Responsible for storing Blueprint and their dependencies, parameters.
  * Factory instantiates stored objects on demand and injects them with specified
  * dependencies.
- * For usage, see @link http://prominence.bugadani.hu/packages/factory
  *
  * @author  Dániel Buga
  */
@@ -36,7 +35,7 @@ class Factory implements ArrayAccess
      * A name => object array of stored ObjectDescriptors
      * @var array
      */
-    protected $descriptors = array();
+    protected $blueprints = array();
 
     /**
      * A name => value array of stored parameters
@@ -73,25 +72,25 @@ class Factory implements ArrayAccess
      * @param string $alias
      * @param string $classname
      * @param boolean $singleton
-     * @return ObjectDescriptor
+     * @return Blueprint
      */
     public function add($alias, $classname, $singleton = true)
     {
-        $object = new ObjectDescriptor($classname, $singleton);
+        $object = new Blueprint($classname, $singleton);
         return $this->register($alias, $object);
     }
 
     /**
-     * Registers an ObjectDescriptor with the given alias.
+     * Registers an Blueprint with the given alias.
      * Unsets any existing instances for the given alias.
      *
      * @param string $alias
      * @param ObjectDescriptor $object
-     * @return ObjectDescriptor
+     * @return Blueprint
      */
-    public function register($alias, ObjectDescriptor $object)
+    public function register($alias, Blueprint $object)
     {
-        $this->descriptors[$alias] = $object;
+        $this->blueprints[$alias] = $object;
         unset($this->objects[$alias]);
         return $object;
     }
@@ -110,7 +109,7 @@ class Factory implements ArrayAccess
 
     public function __set($alias, $object)
     {
-        if ($object instanceof ObjectDescriptor) {
+        if ($object instanceof Blueprint) {
             $this->register($alias, $object);
         } else {
             $this->setInstance($alias, $object);
@@ -124,17 +123,16 @@ class Factory implements ArrayAccess
      * @return ObjectDescriptor
      * @throws OutOfBoundsException
      */
-    public function getDescriptor($alias)
+    public function getBlueprint($alias)
     {
-        if (!isset($this->descriptors[$alias])) {
-            $message = 'Object descriptor not found: ' . $alias;
-            throw new OutOfBoundsException($message);
+        if (!isset($this->blueprints[$alias])) {
+            throw new OutOfBoundsException('Object descriptor not found: ' . $alias);
         }
-        return $this->descriptors[$alias];
+        return $this->blueprints[$alias];
     }
 
     /**
-     * Creates an object using information stored in ObjectDescriptor class.
+     * Creates an object using information stored in Blueprint class.
      * If an object for the given $alias already exists,
      * returns with the stored object.
      *
@@ -148,7 +146,7 @@ class Factory implements ArrayAccess
             return $this->objects[$alias];
         }
 
-        $descriptor = $this->getDescriptor($alias);
+        $descriptor = $this->getBlueprint($alias);
         $obj = $this->instantiate($descriptor);
 
         if ($descriptor->isSingleton()) {
@@ -163,12 +161,12 @@ class Factory implements ArrayAccess
      * Injects the object with it's dependencies.
      *
      * @param object $object
-     * @param ObjectDescriptor $descriptor
+     * @param Blueprint $descriptor
      */
-    private function injectDependencies($object, ObjectDescriptor $descriptor)
+    private function injectDependencies($object, Blueprint $descriptor)
     {
         if ($descriptor->hasParent()) {
-            $parent = $this->getDescriptor($descriptor->getParent());
+            $parent = $this->getBlueprint($descriptor->getParent());
             $this->injectDependencies($object, $parent);
         }
         foreach ($descriptor->getProperties() as $name => $value) {
@@ -182,14 +180,14 @@ class Factory implements ArrayAccess
     }
 
     /**
-     * Instantiates the given ObjectDescriptor and injects it with the
+     * Instantiates the given Blueprint and injects it with the
      * constructor's parameters.
      *
      * @param ObjectDescriptor $descriptor
      * @return object
      * @throws InvalidArgumentException
      */
-    private function instantiate(ObjectDescriptor $descriptor)
+    private function instantiate(Blueprint $descriptor)
     {
         $class = $descriptor->getClassName();
         if ($class[0] == '@') {
@@ -220,7 +218,7 @@ class Factory implements ArrayAccess
      * Resolves parameter references.
      * If the parameter is a string, the first character specifies the value
      * type:
-     *  - @: A parameter, @see Factory::getParameter()
+     *  - @: A parameter, @see Factory::offsetGet()
      *  - &: An instance or the return value of a method call.
      *       Syntax to define a method call:
      *       object::method[::parameter1::parameter2...]
@@ -348,7 +346,7 @@ class Factory implements ArrayAccess
      *
      * @param string $key The parameter to get.
      * @return mixed The parameter value
-     * @throws LogicException
+     * @throws OutOfBoundsException
      */
     public function offsetGet($key)
     {
@@ -474,13 +472,13 @@ class Factory implements ArrayAccess
     }
 
     /**
-     * Retrieves all stored ObjectDescriptors.
+     * Retrieves all stored Blueprint.
      *
      * @return array
      */
-    public function getDescriptors()
+    public function getBlueprints()
     {
-        return $this->descriptors;
+        return $this->blueprints;
     }
 
 }
