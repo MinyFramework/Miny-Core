@@ -121,7 +121,7 @@ class Application extends Factory
             throw new UnexpectedValueException('Module descriptor should extend Module class.');
         }
         $this->modules[$module] = $module_class;
-        foreach (array_keys($module_class->getDependencies()) as $name) {
+        foreach ($module_class->getDependencies() as $name) {
             $this->module($name);
         }
         $args = func_get_args();
@@ -184,7 +184,6 @@ class Application extends Factory
                             return $arglist;
                         });
 
-        $this->add('validator', '\Miny\Validator\Validator');
         $this->add('controllers', '\Miny\Controller\ControllerCollection');
         $this->add('resolver', '\Miny\Controller\ControllerResolver')
                 ->setArguments('&app', '&controllers');
