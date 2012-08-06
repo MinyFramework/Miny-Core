@@ -33,12 +33,10 @@ class RouteMatcher
                 return new Match($route);
             }
 
-            $matched = array();
             if (preg_match('#^' . $route->getRegex() . '$#Du', $path, $matched)) {
                 $matched_params = array();
-                $parameter_count = $route->getParameterCount();
-                for ($i = 1; $i < $parameter_count; ++$i) {
-                    $matched_params[$route->getParameterName($i - 1)] = $matched[$i];
+                foreach ($route->getParameterNames() as $i => $name) {
+                    $matched_params[$name] = $matched[$i + 1];
                 }
                 return new Match($route, $matched_params);
             }

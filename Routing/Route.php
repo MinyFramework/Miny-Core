@@ -10,7 +10,6 @@
 namespace Miny\Routing;
 
 use InvalidArgumentException;
-use UnexpectedValueException;
 
 class Route
 {
@@ -79,10 +78,9 @@ class Route
 
     public function getRegex()
     {
-        if ($this->isStatic()) {
-            return false;
+        if ($this->getParameterCount()) {
+            return $this->regex;
         }
-        return $this->regex;
     }
 
     public function getParameterCount()
@@ -101,18 +99,6 @@ class Route
         return $this->parameter_names;
     }
 
-    public function getParameterName($key)
-    {
-        if (is_null($this->parameter_count)) {
-            $this->build();
-        }
-        if (!isset($this->parameter_names[$key])) {
-            $message = 'Parameter name not set for kes: ' . $key;
-            throw new UnexpectedValueException($message);
-        }
-        return $this->parameter_names[$key];
-    }
-
     private function build()
     {
         $arr = array();
@@ -125,8 +111,7 @@ class Route
         foreach ($arr[1] as $k => $name) {
             $tokens[$arr[0][$k]] = $this->getPattern($name);
         }
-        $this->regex = str_replace(array('#', '?'), array('\#', '\?'),
-                $this->path);
+        $this->regex = str_replace(array('#', '?'), array('\#', '\?'), $this->path);
         $this->regex = str_replace(array_keys($tokens), $tokens, $this->regex);
     }
 

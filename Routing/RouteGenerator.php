@@ -40,8 +40,7 @@ class RouteGenerator
                     }
                 }
                 if (!empty($missing)) {
-                    $message = 'Parameters not set: ' . join(', ', $missing);
-                    throw new InvalidArgumentException($message);
+                    throw new InvalidArgumentException('Parameters not set: ' . join(', ', $missing));
                 }
             }
 
