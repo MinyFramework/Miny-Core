@@ -24,12 +24,7 @@ class AutoLoader
     public function __construct(array $map = array())
     {
         spl_autoload_register(array($this, 'load'));
-        $defaults = array(
-            '\Miny'        => '../Miny/Core',
-            '\Modules'     => '../Miny/Modules',
-            '\Application' => '.',
-        );
-        $this->register($map + $defaults);
+        $this->register($map);
     }
 
     private function addNamespace($namespace, $path)

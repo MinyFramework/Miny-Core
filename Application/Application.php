@@ -9,9 +9,13 @@
 
 namespace Miny\Application;
 
+require_once __DIR__ . '/../AutoLoader.php';
+require_once __DIR__ . '/../Factory/Factory.php';
+
 use ErrorException;
 use Exception;
 use InvalidArgumentException;
+use Miny\AutoLoader;
 use Miny\Event\Event;
 use Miny\Factory\Factory;
 use Miny\HTTP\Request;
@@ -32,6 +36,12 @@ class Application extends Factory
     public function __construct($directory, $environment = self::ENV_PROD, $include_configs = true)
     {
         $this->environment = $environment;
+        $this->autoloader = new AutoLoader(
+                        array(
+                            '\Application' => $directory,
+                            '\Miny'        => __DIR__ . '/../',
+                            '\Modules'     => __DIR__ . '/../../Modules'
+                ));
         $this->setParameters(array(
             'default_timezone' => date_default_timezone_get(),
             'root'             => $directory,
