@@ -39,7 +39,7 @@ class Application extends Factory
         $this->autoloader = new AutoLoader(
                         array(
                             '\Application' => $directory,
-                            '\Miny'        => __DIR__ . '/../',
+                            '\Miny'        => __DIR__ . '/..',
                             '\Modules'     => __DIR__ . '/../../Modules'
                 ));
         $this->setParameters(array(
