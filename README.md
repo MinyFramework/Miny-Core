@@ -15,12 +15,9 @@ Basic usage:
 
 ```php
 <?php
-use Miny\AutoLoader;
-use Miny\Application\Application;
-include __DIR__ . '/../Miny/Core/AutoLoader.php';
-new AutoLoader();
+include __DIR__ . '/../Miny/Core/Application/Application.php';
 
-$app = new Application(__DIR__);
+$app = new Miny\Application\Application(__DIR__);
 $app->root(function() {
     echo 'Hello, world!';
 });
