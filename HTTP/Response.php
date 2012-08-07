@@ -55,16 +55,15 @@ class Response
         504      => 'Gateway Timeout',
         505      => 'HTTP Version Not Supported'
     );
-    private $content;
     private $cookies = array();
     private $headers = array();
-    private $status_code;
+    private $status_code = 200;
     private $is_redirect = false;
+    public $content_type = 'text/html';
 
-    public function __construct($content = '', $code = 200)
+    public function __construct()
     {
-        $this->setContent($content);
-        $this->setCode($code);
+        ob_start();
     }
 
     public function redirect($url, $code = 301)
@@ -137,14 +136,9 @@ class Response
         return $this->cookies;
     }
 
-    public function setContent($content)
+    public function getContent($clean = false)
     {
-        $this->content = $content;
-    }
-
-    public function getContent()
-    {
-        return $this->content;
+        return $clean ? ob_get_clean() : ob_get_contents();
     }
 
     public function getStatus()
@@ -170,6 +164,7 @@ class Response
                 }
             }
         }
+        header('Content-Type: ' . $this->content_type);
         foreach ($this->cookies as $name => $value) {
             setcookie($name, $value);
         }
@@ -179,7 +174,7 @@ class Response
     {
         $this->sendHeaders();
         if (!$this->is_redirect) {
-            echo $this->content;
+            ob_flush();
         }
     }
 
