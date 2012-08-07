@@ -48,7 +48,9 @@ class ApplicationEventHandlers extends EventHandler
         if (!isset($this->app['router:exception_paths'][$class])) {
             throw $ex;
         }
-        $request->path = $this->app['router:exception_paths'][$class];
+        $path = $this->app['router:exception_paths'][$class];
+        $this->app->log->write(sprintf('Redirect exception %s to %s', $class, $path));
+        $request->path = $path;
     }
 
     private function setResponseContentType($format)
@@ -80,6 +82,7 @@ class ApplicationEventHandlers extends EventHandler
             'html'  => 'text/html',
         );
         if (isset($content_types[$format])) {
+            $this->app->log->write(sprintf('Content type %s set for format %s', $content_types[$format], $format));
             $this->app->request->content_type = $content_types[$format];
         }
     }
@@ -91,6 +94,7 @@ class ApplicationEventHandlers extends EventHandler
         if (!$match) {
             throw new PageNotFoundException('Page not found: ' . $request->path);
         }
+        $this->app->log->write(sprintf('Matched route %s', $match->getRoute()->getPath()));
         parse_str(parse_url($_SERVER['REQUEST_URI'], PHP_URL_QUERY), $_GET);
         $request->get = $match->getParameters() + $_GET;
         if (isset($request->get['format'])) {
@@ -101,11 +105,8 @@ class ApplicationEventHandlers extends EventHandler
 
     public function filterStringToResponse(Event $event)
     {
-        $response = $event->getParameter('response');
-        if (!$response instanceof Response) {
-            echo $response;
-            $event->setResponse($this->app->response);
-        }
+        echo $event->getParameter('response');
+        $event->setResponse($this->app->response);
     }
 
 }
