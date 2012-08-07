@@ -18,7 +18,6 @@ use OutOfBoundsException;
  */
 class AutoLoader
 {
-    public $extension = '.php';
     private $map = array();
 
     public function __construct(array $map = array())
@@ -27,9 +26,13 @@ class AutoLoader
         $this->register($map);
     }
 
-    private function addNamespace($namespace, $path)
+    public function register($namespace, $path = NULL)
     {
-        if (is_array($path)) {
+        if (is_array($namespace)) {
+            foreach ($namespace as $ns => $path) {
+                $this->register($ns, $path);
+            }
+        } elseif (is_array($path)) {
             if (isset($this->map[$namespace])) {
                 $path = array_merge($this->map[$namespace], $path);
             }
@@ -39,17 +42,6 @@ class AutoLoader
                 $this->map[$namespace] = array();
             }
             $this->map[$namespace][] = $path;
-        }
-    }
-
-    public function register($namespace, $path = NULL)
-    {
-        if (is_array($namespace)) {
-            foreach ($namespace as $ns => $path) {
-                $this->addNamespace($ns, $path);
-            }
-        } else {
-            $this->addNamespace($namespace, $path);
         }
     }
 
@@ -67,7 +59,7 @@ class AutoLoader
             $temp = substr($temp, 0, $pos);
         }
         foreach ($this->map[$temp] as $path) {
-            $path .= substr($class, $pos - 1) . $this->extension;
+            $path .= substr($class, $pos - 1) . '.php';
             $path = str_replace('\\', DIRECTORY_SEPARATOR, $path);
             if (is_file($path)) {
                 return $path;
