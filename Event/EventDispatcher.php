@@ -17,16 +17,10 @@ class EventDispatcher
     {
         if (!isset($this->handlers[$event])) {
             $this->handlers[$event] = array(array($handler, $method));
+        } elseif ($place === NULL) {
+            $this->handlers[$event][] = array($handler, $method);
         } else {
-            $count = count($this->handlers[$event]);
-            if ($place === NULL || $place > $count) {
-                $this->handlers[$event][] = array($handler, $method);
-            } else {
-                for ($i = $count; $i > $place; --$i) {
-                    $this->handlers[$event][$i] = $this->handlers[$event][$i - 1];
-                }
-                $this->handlers[$event][$place] = array($handler, $method);
-            }
+            array_splice($this->handlers[$event], $place, 0, array(array($handler, $method)));
         }
     }
 
@@ -37,12 +31,13 @@ class EventDispatcher
             return;
         }
         foreach ($this->handlers[$name] as $handler) {
-            list($evt_handler, $method) = $handler;
-            if (method_exists($evt_handler, $method)) {
-                $evt_handler->$method($event);
-            } else {
-                $evt_handler->handle($event);
+            if (!$handler[1]) {
+                $handler[1] = 'handle';
             }
+            if (!is_callable($handler)) {
+                throw new \UnexpectedValueException('Not callable handler set for event ' . $name);
+            }
+            call_user_func($handler, $event);
         }
         $event->setHandled();
     }
