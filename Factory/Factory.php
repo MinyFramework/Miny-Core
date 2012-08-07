@@ -117,16 +117,16 @@ class Factory implements ArrayAccess
     }
 
     /**
-     * Gets the ObjectDescriptor stored for $alias.
+     * Gets the Blueprint stored for $alias.
      *
      * @param string $alias
-     * @return ObjectDescriptor
+     * @return Blueprint
      * @throws OutOfBoundsException
      */
     public function getBlueprint($alias)
     {
         if (!isset($this->blueprints[$alias])) {
-            throw new OutOfBoundsException('Object descriptor not found: ' . $alias);
+            throw new OutOfBoundsException('Blueprint not found: ' . $alias);
         }
         return $this->blueprints[$alias];
     }
@@ -355,8 +355,7 @@ class Factory implements ArrayAccess
             $arr = $this->parameters;
             foreach ($parts as $k) {
                 if (!array_key_exists($k, $arr)) {
-                    $message = 'Parameter not set: ' . $key;
-                    throw new OutOfBoundsException($message);
+                    throw new OutOfBoundsException('Parameter not set: ' . $key);
                 }
                 $arr = $arr[$k];
             }
@@ -374,7 +373,7 @@ class Factory implements ArrayAccess
     {
         if (is_array($value)) {
             $return = array();
-            foreach($value as $k => $v) {
+            foreach ($value as $k => $v) {
                 $k = $this->resolveLinks($k);
                 $return[$k] = $this->resolveLinks($v);
             }
