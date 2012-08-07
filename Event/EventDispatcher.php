@@ -9,17 +9,9 @@
 
 namespace Miny\Event;
 
-use Miny\Log;
-
 class EventDispatcher
 {
     private $handlers = array();
-    private $log;
-
-    public function __construct(Log $log = NULL)
-    {
-        $this->log = $log;
-    }
 
     public function setHandler($event, EventHandler $handler, $method = NULL, $place = NULL)
     {
@@ -41,25 +33,18 @@ class EventDispatcher
     public function raiseEvent(Event $event)
     {
         $name = $event->getName();
-        if (isset($this->handlers[$name])) {
-            if ($this->log) {
-                $this->log->write(sprintf('Triggering event: %s Handlers: %d', $name, count($this->handlers[$name])));
-            }
-            foreach ($this->handlers[$name] as $handler) {
-                list($evt_handler, $method) = $handler;
-                if (method_exists($evt_handler, $method)) {
-                    $evt_handler->$method($event);
-                } else {
-                    $evt_handler->handle($event);
-                }
-            }
-            $event->setHandled();
-            if ($this->log) {
-                $this->log->write(sprintf('Finished event: %s', $name));
-            }
-        } elseif ($this->log) {
-            $this->log->write(sprintf('Event has no handlers: %s', $name));
+        if (!isset($this->handlers[$name])) {
+            return;
         }
+        foreach ($this->handlers[$name] as $handler) {
+            list($evt_handler, $method) = $handler;
+            if (method_exists($evt_handler, $method)) {
+                $evt_handler->$method($event);
+            } else {
+                $evt_handler->handle($event);
+            }
+        }
+        $event->setHandled();
     }
 
 }
