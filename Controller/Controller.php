@@ -39,6 +39,20 @@ abstract class Controller extends Extendable
         return $this->view_descriptor->$key;
     }
 
+    public function request($path, array $get = NULL, array $post = NULL, array $cookie = NULL)
+    {
+        $response = $this->app->dispatch(
+                new Request($path, $get, $post, $cookie, Request::SUB_REQUEST));
+
+        foreach ($response->getHeaders() as $name => $value) {
+            $this->header($name, $value);
+        }
+        foreach ($response->getCookies() as $name => $value) {
+            $this->cookie($name, $value);
+        }
+        return $response;
+    }
+
     public function run($action, Request $request, Response $response)
     {
         $router = $this->app->router;
