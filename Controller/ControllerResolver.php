@@ -13,6 +13,7 @@ use Closure;
 use InvalidArgumentException;
 use Miny\Application\Application;
 use Miny\HTTP\Request;
+use Miny\HTTP\Response;
 
 class ControllerResolver
 {
@@ -25,7 +26,7 @@ class ControllerResolver
         $this->collection = $collection;
     }
 
-    public function resolve($class, $action, Request $request)
+    public function resolve($class, $action, Request $request, Response $response)
     {
         $controller = $this->collection->getController($class);
         if (is_string($controller)) {
@@ -37,13 +38,12 @@ class ControllerResolver
             }
         }
         if ($controller instanceof Controller) {
-            return $controller->run($action, $request);
+            $controller->run($action, $request, $response);
         } elseif ($controller instanceof Closure) {
-            ob_start();
-            $controller($request, $action);
-            return ob_get_clean();
+            $controller($request, $action, $response);
+        } else {
+            throw new InvalidArgumentException('Invalid controller: ' . $class);
         }
-        throw new InvalidArgumentException('Invalid controller: ' . $class);
     }
 
 }

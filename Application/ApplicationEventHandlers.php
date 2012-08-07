@@ -11,7 +11,6 @@ namespace Miny\Application;
 
 use Miny\Event\Event;
 use Miny\Event\EventHandler;
-use Miny\HTTP\Response;
 use Miny\Routing\Exceptions\PageNotFoundException;
 
 class ApplicationEventHandlers extends EventHandler

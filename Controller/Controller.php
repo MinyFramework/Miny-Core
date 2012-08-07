@@ -13,6 +13,7 @@ use InvalidArgumentException;
 use Miny\Application\Application;
 use Miny\Extendable;
 use Miny\HTTP\Request;
+use Miny\HTTP\Response;
 
 abstract class Controller extends Extendable
 {
@@ -38,9 +39,8 @@ abstract class Controller extends Extendable
         return $this->view_descriptor->$key;
     }
 
-    public function run($action, Request $request)
+    public function run($action, Request $request, Response $response)
     {
-        $response = $this->app->response;
         $router = $this->app->router;
 
         $this->addMethods($response,
@@ -76,7 +76,6 @@ abstract class Controller extends Extendable
             $view->controller = $this;
             echo $view->render();
         }
-        return $response;
     }
 
 }

@@ -144,6 +144,11 @@ class Application extends Factory
                     $app->events->raiseEvent($event);
                     if (!$event->isHandled()) {
                         throw $e;
+                    } else {
+                        $response = new Response;
+                        echo $event->getResponse();
+                        $response->setCode(500);
+                        $response->send();
                     }
                 });
         set_error_handler(function($errno, $errstr, $errfile, $errline ) {
@@ -155,9 +160,8 @@ class Application extends Factory
 
         $this->add('events', '\Miny\Event\EventDispatcher')
                 ->setArguments('&log')
-                ->addMethodCall('setHandler', 'handle_exception', $eh)
-                ->addMethodCall('setHandler', 'handle_exception', $eh, 'displayExceptionPage')
                 ->addMethodCall('setHandler', 'uncaught_exception', $eh)
+                ->addMethodCall('setHandler', 'uncaught_exception', $eh, 'displayExceptionPage')
                 ->addMethodCall('setHandler', 'handle_request_exception', $eh, 'handleRequestException')
                 ->addMethodCall('setHandler', 'filter_request', $eh, 'filterRoutes')
                 ->addMethodCall('setHandler', 'invalid_response', $eh, 'filterStringToResponse');
@@ -188,8 +192,6 @@ class Application extends Factory
         $this->add('controllers', '\Miny\Controller\ControllerCollection');
         $this->add('resolver', '\Miny\Controller\ControllerResolver')
                 ->setArguments('&app', '&controllers');
-        $this->add('dispatcher', '\Miny\HTTP\Dispatcher')
-                ->setArguments('&events', '&resolver');
         $this->add('router', '\Miny\Routing\Router')
                 ->setArguments('@router:prefix', '@router:suffix', '@router:defaults');
 
@@ -202,12 +204,11 @@ class Application extends Factory
 
         $this->session = $session;
         $this->request = Request::getGlobal();
-        $this->response = new Response;
     }
 
     public function route($path, $controller, $method = NULL, $name = NULL, array $parameters = array())
     {
-        $controller_name = $this->controllers->getNextName();
+        $controller_name = is_string($controller) ? $controller : $this->controllers->getNextName();
         if (!in_array($method, array(NULL, 'GET', 'POST', 'PUT', 'DELETE'))) {
             throw new UnexpectedValueException('Unexpected route method:' . $method);
         }
@@ -227,7 +228,7 @@ class Application extends Factory
 
     public function root($controller, array $parameters = array())
     {
-        $controller_name = $this->controllers->getNextName();
+        $controller_name = is_string($controller) ? $controller : $this->controllers->getNextName();
         $parameters['controller'] = $controller_name;
         $this->controllers->register($controller_name, $controller);
         return $this->router->root($parameters);
@@ -258,9 +259,47 @@ class Application extends Factory
         date_default_timezone_set($this['default_timezone']);
         $request = $this->request;
         $this->log->write(sprintf('Request: [%s] %s Source: %s', $request->method, $request->path, $request->ip));
-        $response = $this->dispatcher->dispatch($request);
+
+        $response = $this->dispatch($request);
+
         $this->log->write('Response: ' . $response->getStatus());
         $response->send();
+    }
+
+    public function dispatch(Request $request)
+    {
+        $response = new Response;
+        try {
+            $event = new Event('filter_request', array('request' => $request));
+            $this->events->raiseEvent($event);
+        } catch (Exception $e) {
+            $event = new Event('handle_request_exception', array(
+                        'request'   => $request,
+                        'exception' => $e
+                    ));
+            $this->events->raiseEvent($event);
+            if ($event->isHandled()) {
+                //Let's retry with the fallback-request
+                $event = new Event('filter_request', array('request' => $request));
+                $this->events->raiseEvent($event);
+            }
+        }
+        if ($event->hasResponse()) {
+            $rsp = $event->getResponse();
+            if ($rsp instanceof Response) {
+                $response = $rsp;
+            }
+        }
+        $action = isset($request->get['action']) ? $request->get['action'] : NULL;
+        $this->resolver->resolve($request->get['controller'], $action, $request, $response);
+
+        $this->events->raiseEvent(new Event('filter_response',
+                        array(
+                            'response' => $response,
+                            'request'  => $request
+                        )
+        ));
+        return $response;
     }
 
 }
