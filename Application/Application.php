@@ -19,6 +19,7 @@ use Miny\AutoLoader;
 use Miny\Event\Event;
 use Miny\Factory\Factory;
 use Miny\HTTP\Request;
+use Miny\HTTP\Response;
 use Miny\Log;
 use Miny\Routing\Route;
 use Miny\Session\Session;
@@ -201,6 +202,7 @@ class Application extends Factory
 
         $this->session = $session;
         $this->request = Request::getGlobal();
+        $this->response = new Response;
     }
 
     public function route($path, $controller, $method = NULL, $name = NULL, array $parameters = array())
