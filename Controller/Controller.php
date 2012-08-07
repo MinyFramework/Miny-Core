@@ -13,7 +13,6 @@ use InvalidArgumentException;
 use Miny\Application\Application;
 use Miny\Extendable;
 use Miny\HTTP\Request;
-use Miny\HTTP\Response;
 
 abstract class Controller extends Extendable
 {
@@ -39,27 +38,11 @@ abstract class Controller extends Extendable
         return $this->view_descriptor->$key;
     }
 
-    public function request($path, array $get = NULL, array $post = NULL, array $cookie = NULL)
-    {
-        $request = new Request($path, $get, $post, $cookie, Request::SUB_REQUEST);
-        $response = $this->app->dispatcher->dispatch($request);
-
-        foreach ($response->getHeaders() as $name => $value) {
-            $this->header($name, $value);
-        }
-
-        foreach ($response->getCookies() as $name => $value) {
-            $this->cookie($name, $value);
-        }
-
-        return $response;
-    }
-
     public function run($action, Request $request)
     {
-        $response = new Response;
-
+        $response = $this->app->response;
         $router = $this->app->router;
+
         $this->addMethods($response,
                 array(
             'setCode', 'redirect',
@@ -91,7 +74,7 @@ abstract class Controller extends Extendable
 
             $view->app = $this->app;
             $view->controller = $this;
-            $response->setContent($view->render());
+            echo $view->render();
         }
         return $response;
     }
