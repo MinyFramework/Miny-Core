@@ -69,7 +69,8 @@ class ApplicationEventHandlers extends EventHandler
     {
         $response = $event->getParameter('response');
         if (!$response instanceof Response) {
-            $event->setResponse(new Response($response));
+            echo $response;
+            $event->setResponse($this->app->response);
         }
     }
 
