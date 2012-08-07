@@ -59,7 +59,7 @@ class Response
     private $headers = array();
     private $status_code = 200;
     private $is_redirect = false;
-    public $content_type = 'text/html';
+    public $content_type;
 
     public function __construct()
     {
@@ -164,7 +164,9 @@ class Response
                 }
             }
         }
-        header('Content-Type: ' . $this->content_type);
+        if ($this->content_type) {
+            header('Content-Type: ' . $this->content_type);
+        }
         foreach ($this->cookies as $name => $value) {
             setcookie($name, $value);
         }
