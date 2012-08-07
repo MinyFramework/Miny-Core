@@ -43,6 +43,7 @@ class EventDispatcherTest extends \PHPUnit_Framework_TestCase
 
     public function testHandleEventWithHandler()
     {
+        $this->expectOutputString('01');
         $this->object->setHandler('event', new TestHandler(0));
         $this->object->setHandler('event', new TestHandler(1));
 
