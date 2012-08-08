@@ -31,13 +31,6 @@ class RouteCollection implements IteratorAggregate
         }
     }
 
-    public function addRoutes(array $routes)
-    {
-        foreach ($routes as $name => $route) {
-            $this->addRoute($name, $route);
-        }
-    }
-
     public function getRoute($name)
     {
         if (!isset($this->routes[$name])) {
