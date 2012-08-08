@@ -11,7 +11,6 @@ namespace Miny\Factory;
 
 use ArrayAccess;
 use InvalidArgumentException;
-use LogicException;
 use OutOfBoundsException;
 use ReflectionClass;
 
@@ -129,6 +128,16 @@ class Factory implements ArrayAccess
             throw new OutOfBoundsException('Blueprint not found: ' . $alias);
         }
         return $this->blueprints[$alias];
+    }
+
+    /**
+     * Retrieves all stored Blueprint.
+     *
+     * @return array
+     */
+    public function getBlueprints()
+    {
+        return $this->blueprints;
     }
 
     /**
@@ -298,7 +307,7 @@ class Factory implements ArrayAccess
             $obj_name = array_shift($arr);
             $method = array_shift($arr);
             $object = $this->__get($obj_name);
-            return call_user_func_array(array($object, $method), $arr);
+            return call_user_func_array(array($object, $method), $this->resolveLinks($arr));
         } elseif (($pos = strpos($str, '->')) !== false) {
             list($obj_name, $property) = explode('->', $str, 2);
             $object = $this->__get($obj_name);
@@ -331,6 +340,26 @@ class Factory implements ArrayAccess
     }
 
     /**
+     * Retrieves all stored parameters.
+     *
+     * @return array
+     */
+    public function getParameters()
+    {
+        return $this->parameters;
+    }
+
+    /**
+     * Retrieves all stored parameters with their links resolved.
+     *
+     * @return array
+     */
+    public function getResolvedParameters()
+    {
+        return $this->resolveLinks($this->parameters);
+    }
+
+    /**
      * Processes a parameter string, which specifies a stored parameter.
      * The method is capable of indexing arrays. To get a value from an array,
      * separate the array name and index with a colon (:)
@@ -351,15 +380,13 @@ class Factory implements ArrayAccess
     public function offsetGet($key)
     {
         if (strpos($key, ':') !== false) {
-            $parts = explode(':', $key);
-            $arr = $this->parameters;
-            foreach ($parts as $k) {
-                if (!array_key_exists($k, $arr)) {
+            $return = $this->parameters;
+            foreach (explode(':', $key) as $k) {
+                if (!array_key_exists($k, $return)) {
                     throw new OutOfBoundsException('Parameter not set: ' . $key);
                 }
-                $arr = $arr[$k];
+                $return = $return[$k];
             }
-            $return = $arr;
         } elseif (isset($this->parameters[$key])) {
             $return = $this->parameters[$key];
         } else {
@@ -398,9 +425,8 @@ class Factory implements ArrayAccess
     public function offsetSet($key, $value)
     {
         if (strpos($key, ':') !== false) {
-            $parts = explode(':', $key);
             $arr = & $this->parameters;
-            foreach ($parts as $k) {
+            foreach (explode(':', $key) as $k) {
                 if (!array_key_exists($k, $arr)) {
                     $arr[$k] = array();
                 }
@@ -421,7 +447,7 @@ class Factory implements ArrayAccess
     {
         if (strpos($key, ':') !== false) {
             $parts = explode(':', $key);
-            $last = count($parts)-1;
+            $last = count($parts) - 1;
             $arr = & $this->parameters;
             foreach ($parts as $i => $k) {
                 if (!array_key_exists($k, $arr)) {
@@ -447,9 +473,8 @@ class Factory implements ArrayAccess
     public function offsetExists($key)
     {
         if (strpos($key, ':') !== false) {
-            $parts = explode(':', $key);
             $arr = $this->parameters;
-            foreach ($parts as $k) {
+            foreach (explode(':', $key) as $k) {
                 if (!array_key_exists($k, $arr)) {
                     return false;
                 }
@@ -459,26 +484,6 @@ class Factory implements ArrayAccess
         } else {
             return isset($this->parameters[$key]);
         }
-    }
-
-    /**
-     * Retrieves all stored parameters.
-     *
-     * @return array
-     */
-    public function getParameters()
-    {
-        return $this->parameters;
-    }
-
-    /**
-     * Retrieves all stored Blueprint.
-     *
-     * @return array
-     */
-    public function getBlueprints()
-    {
-        return $this->blueprints;
     }
 
 }
