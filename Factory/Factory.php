@@ -342,7 +342,7 @@ class Factory implements ArrayAccess
      * );
      *
      * In order to receive the value contained under bar, use
-     * $factory->getParameter('foo:bar');
+     * $factory['foo:bar'];
      *
      * @param string $key The parameter to get.
      * @return mixed The parameter value
@@ -363,8 +363,7 @@ class Factory implements ArrayAccess
         } elseif (isset($this->parameters[$key])) {
             $return = $this->parameters[$key];
         } else {
-            $message = 'Parameter not set: ' . $key;
-            throw new OutOfBoundsException($message);
+            throw new OutOfBoundsException('Parameter not set: ' . $key);
         }
         return $this->resolveLinks($return);
     }
@@ -380,13 +379,14 @@ class Factory implements ArrayAccess
             return $return;
         }
         if (is_string($value)) {
-            $factory = $this;
-            return preg_replace_callback('/(?<!\\\){@(.*?)}/',
-                            function($matches) use($factory) {
-                                return $factory->offsetGet($matches[1]);
-                            }, $value);
+            return preg_replace_callback('/(?<!\\\){@(.*?)}/', array($this, 'resolveLinksCallback'), $value);
         }
         return $value;
+    }
+
+    private function resolveLinksCallback($matches)
+    {
+        return $this->offsetExists($matches[1]) ? $this->offsetGet($matches[1]) : $matches[0];
     }
 
     /**
@@ -421,12 +421,13 @@ class Factory implements ArrayAccess
     {
         if (strpos($key, ':') !== false) {
             $parts = explode(':', $key);
+            $last = count($parts)-1;
             $arr = & $this->parameters;
-            foreach ($parts as $k) {
+            foreach ($parts as $i => $k) {
                 if (!array_key_exists($k, $arr)) {
                     return;
                 }
-                if ($k !== end($parts)) {
+                if ($i !== $last) {
                     $arr = & $arr[$k];
                 } else {
                     unset($arr[$k]);
