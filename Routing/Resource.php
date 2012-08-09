@@ -42,7 +42,7 @@ class Resource extends Resources
     protected function generateCollectionActions()
     {
         $unnamed = array('create', 'show', 'destroy', 'update');
-        $this->generateActions($this->collection_actions, $unnamed, $this->getName(), $this->getPathBase() . $this->name);
+        $this->generateActions($this->collection_actions, $unnamed, $this->getName(), $this->getPathBase());
     }
 
 }
