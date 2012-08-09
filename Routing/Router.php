@@ -45,7 +45,11 @@ class Router extends RouteCollection
                 $path .= $this->route_suffix;
             }
             $route->setPath($path);
+        }
+        if (!empty($this->default_parameters)) {
+            $parameters = $route->getParameters();
             $route->addParameters($this->default_parameters);
+            $route->addParameters($parameters);
         }
         $this->addRoute($route, $name);
         return $route;
