@@ -17,30 +17,43 @@ class RouteMatcherTest extends \PHPUnit_Framework_TestCase
     protected function setUp()
     {
         $collection = new RouteCollection;
+
         $this->static_route = new Route('static_path');
         $this->static_route_post = new Route('other_static_path', 'POST');
         $this->route = new Route('path/:parameter', 'POST');
         $this->route->specify('parameter', '(\d+)');
+
         $collection->addRoute($this->route);
         $collection->addRoute($this->static_route);
         $collection->addRoute($this->static_route_post);
+
         $this->object = new RouteMatcher($collection);
     }
 
-    public function testMatch()
+    public function testShouldNotMatchRouteWhenPathDoesNotMatch()
     {
-        //path not found
         $this->assertFalse($this->object->match('path'));
-        //wrong method
+    }
+
+    public function testShouldNotMatchRouteWhenMethodDoesNotMatch()
+    {
         $this->assertFalse($this->object->match('path/5', 'PUT'));
-        //wrong pattern
+    }
+
+    public function testShouldNotMatchRouteWhenParameterValueDoesNotMatchPattern()
+    {
         $this->assertFalse($this->object->match('path/foo'));
-        //match NULL method
+    }
+
+    public function testShouldMatchRouteWithMethodWhenMethodIsNotSuppliedToMatch()
+    {
         $this->assertInstanceOf(__NAMESPACE__ . '\Match', $this->object->match('path/5'));
-        //match specific method
+    }
+
+    public function testShouldMatchRouteWhenTheSpecifiedMethodIsPassed()
+    {
         $match = $this->object->match('path/5', 'POST');
         $this->assertInstanceOf(__NAMESPACE__ . '\Match', $match);
-        //check if match has the expected route
         $this->assertSame($this->route, $match->getRoute());
         $this->assertEquals(array('parameter' => 5), $match->getParameters());
     }

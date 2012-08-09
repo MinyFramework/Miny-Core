@@ -13,15 +13,25 @@ class ResourceTest extends \PHPUnit_Framework_TestCase
 
     protected function setUp()
     {
-        //$this->object = new Resource;
+        $this->object = new Resource('foo');
     }
 
-    public function testMember()
+    public function testResourceNameShouldBeItsSingularName()
     {
-        // Remove the following lines when you implement this test.
-        $this->markTestIncomplete(
-                'This test has not been implemented yet.'
-        );
+        $this->assertEquals($this->object->getName(), $this->object->getSingularName());
+    }
+
+    /**
+     * @expectedException \BadMethodCallException
+     */
+    public function testShouldNotBeAbleToCallMember()
+    {
+        $this->object->member('foo', 'bar');
+    }
+
+    public function testShouldGenerateMethods()
+    {
+
     }
 
 }
