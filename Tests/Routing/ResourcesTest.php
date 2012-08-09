@@ -9,10 +9,12 @@ require_once dirname(__FILE__) . '/../../Routing/Route.php';
 class ResourcesTest extends \PHPUnit_Framework_TestCase
 {
     protected $object;
+    protected $sub_resources;
 
     protected function setUp()
     {
         $this->object = new Resources('resources');
+        $this->sub_resources = new Resources('sub_resources');
     }
 
     public function singularizeProvider()
@@ -34,90 +36,144 @@ class ResourcesTest extends \PHPUnit_Framework_TestCase
     public function testResourcesShouldAlsoHaveSingularizedName()
     {
         $this->assertEquals('resource', $this->object->getSingularName());
+        $this->object->resource($this->sub_resources);
+        $this->assertEquals('resource', $this->object->getSingularName());
+        $this->assertEquals('resources_sub_resource', $this->sub_resources->getSingularName());
     }
 
-    public function testResourcesShouldNotHaveParentByDefault()
+    public function testResourcesShouldHavePathBase()
     {
-        $this->assertFalse($this->object->hasParent());
-    }
-
-    public function testResourcesShouldReturnEmptyPathBaseIfItHasNoParent()
-    {
-        $this->assertEmpty($this->object->getPathBase());
+        $this->assertEquals('resources', $this->object->getPathBase());
+        $this->object->resource($this->sub_resources);
+        $this->assertEquals('resources', $this->object->getPathBase());
+        $this->assertEquals('resources/:resource_id/sub_resources', $this->sub_resources->getPathBase());
     }
 
     public function testResourcesShouldCreate7RoutesByDefault()
     {
         $expected_paths_and_methods = array(
-            array('resource/:id', 'GET'),
-            array('resource/:id', 'DELETE'),
-            array('resource/:id/edit', 'GET'),
-            array('resource/:id', 'PUT'),
+            array('resources/:id', 'GET'),
+            array('resources/:id', 'DELETE'),
+            array('resources/:id/edit', 'GET'),
+            array('resources/:id', 'PUT'),
             array('resources', 'GET'),
             array('resources/new', 'GET'),
             array('resources', 'POST'),
         );
-        $this->checkGeneratedRoutes(7, $expected_paths_and_methods);
+        $this->checkGeneratedRoutes($this->object, 7, $expected_paths_and_methods);
+    }
+
+    public function testChildResourcesShouldHaveParentsPathInThem()
+    {
+        $this->object->resource($this->sub_resources);
+        $expected_paths_and_methods_for_sub_resources = array(
+            array('resources/:resource_id/sub_resources/:id', 'GET'),
+            array('resources/:resource_id/sub_resources/:id', 'DELETE'),
+            array('resources/:resource_id/sub_resources/:id/edit', 'GET'),
+            array('resources/:resource_id/sub_resources/:id', 'PUT'),
+            array('resources/:resource_id/sub_resources', 'GET'),
+            array('resources/:resource_id/sub_resources/new', 'GET'),
+            array('resources/:resource_id/sub_resources', 'POST'),
+        );
+        $this->checkGeneratedRoutes($this->sub_resources, 7, $expected_paths_and_methods_for_sub_resources);
+    }
+
+    public function testParentResourcesShouldHaveChildsRoutesInThem()
+    {
+        $this->object->resource($this->sub_resources);
+        $expected_paths_and_methods_with_parent = array(
+            array('resources/:id', 'GET'),
+            array('resources/:id', 'DELETE'),
+            array('resources/:id/edit', 'GET'),
+            array('resources/:id', 'PUT'),
+            array('resources', 'GET'),
+            array('resources/new', 'GET'),
+            array('resources', 'POST'),
+            array('resources/:resource_id/sub_resources/:id', 'GET'),
+            array('resources/:resource_id/sub_resources/:id', 'DELETE'),
+            array('resources/:resource_id/sub_resources/:id/edit', 'GET'),
+            array('resources/:resource_id/sub_resources/:id', 'PUT'),
+            array('resources/:resource_id/sub_resources', 'GET'),
+            array('resources/:resource_id/sub_resources/new', 'GET'),
+            array('resources/:resource_id/sub_resources', 'POST'),
+        );
+        $this->checkGeneratedRoutes($this->object, 14, $expected_paths_and_methods_with_parent);
+    }
+
+    public function testResourcesPathShouldNotContainIdParameterForParentWhenItIsSingular()
+    {
+        $resource = new Resource('singular_resource');
+        $resource->resource($this->object);
+        $expected_paths_and_methods = array(
+            array('singular_resource/resources/:id', 'GET'),
+            array('singular_resource/resources/:id', 'DELETE'),
+            array('singular_resource/resources/:id/edit', 'GET'),
+            array('singular_resource/resources/:id', 'PUT'),
+            array('singular_resource/resources', 'GET'),
+            array('singular_resource/resources/new', 'GET'),
+            array('singular_resource/resources', 'POST'),
+        );
+        $this->checkGeneratedRoutes($this->object, 7, $expected_paths_and_methods);
     }
 
     public function testResourcesShouldCreateRoutesSpecifiedInOnly()
     {
         $this->object->only('index', 'update');
         $expected_paths_and_methods = array(
-            array('resource/:id', 'PUT'),
+            array('resources/:id', 'PUT'),
             array('resources', 'GET')
         );
-        $this->checkGeneratedRoutes(2, $expected_paths_and_methods);
+        $this->checkGeneratedRoutes($this->object, 2, $expected_paths_and_methods);
     }
 
     public function testResourcesShouldNotCreateRoutesSpecifiedInExcept()
     {
         $this->object->except('index', 'update');
         $expected_paths_and_methods = array(
-            array('resource/:id', 'GET'),
-            array('resource/:id', 'DELETE'),
-            array('resource/:id/edit', 'GET'),
+            array('resources/:id', 'GET'),
+            array('resources/:id', 'DELETE'),
+            array('resources/:id/edit', 'GET'),
             array('resources/new', 'GET'),
             array('resources', 'POST'),
         );
-        $this->checkGeneratedRoutes(5, $expected_paths_and_methods);
+        $this->checkGeneratedRoutes($this->object, 5, $expected_paths_and_methods);
     }
 
     public function testResourcesShouldCreateRoutesSpecifiedWithMember()
     {
         $this->object->member('GET', 'get_member_method');
         $expected_paths_and_methods = array(
-            array('resource/:id', 'GET'),
-            array('resource/:id', 'DELETE'),
-            array('resource/:id/edit', 'GET'),
-            array('resource/:id', 'PUT'),
-            array('resource/:id/get_member_method', 'GET'),
+            array('resources/:id', 'GET'),
+            array('resources/:id', 'DELETE'),
+            array('resources/:id/edit', 'GET'),
+            array('resources/:id', 'PUT'),
+            array('resources/:id/get_member_method', 'GET'),
             array('resources', 'GET'),
             array('resources/new', 'GET'),
             array('resources', 'POST')
         );
-        $this->checkGeneratedRoutes(8, $expected_paths_and_methods);
+        $this->checkGeneratedRoutes($this->object, 8, $expected_paths_and_methods);
     }
 
     public function testResourcesShouldCreateRoutesSpecifiedWithCollection()
     {
         $this->object->collection('GET', 'get_collection_method');
         $expected_paths_and_methods = array(
-            array('resource/:id', 'GET'),
-            array('resource/:id', 'DELETE'),
-            array('resource/:id/edit', 'GET'),
-            array('resource/:id', 'PUT'),
+            array('resources/:id', 'GET'),
+            array('resources/:id', 'DELETE'),
+            array('resources/:id/edit', 'GET'),
+            array('resources/:id', 'PUT'),
             array('resources', 'GET'),
             array('resources/new', 'GET'),
             array('resources', 'POST'),
             array('resources/get_collection_method', 'GET'),
         );
-        $this->checkGeneratedRoutes(8, $expected_paths_and_methods);
+        $this->checkGeneratedRoutes($this->object, 8, $expected_paths_and_methods);
     }
 
-    private function checkGeneratedRoutes($expected_count, array $expected_paths_and_methods)
+    private function checkGeneratedRoutes(Resources $resources, $expected_count, array $expected_paths_and_methods)
     {
-        $routes_iterator = $this->object->getIterator();
+        $routes_iterator = $resources->getIterator();
         $this->assertEquals($expected_count, $routes_iterator->count());
         $actual_paths_and_methods = array();
         foreach ($routes_iterator as $route) {
