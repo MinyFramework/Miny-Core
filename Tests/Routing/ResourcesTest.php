@@ -48,8 +48,6 @@ class ResourcesTest extends \PHPUnit_Framework_TestCase
 
     public function testResourcesShouldCreate7RoutesByDefault()
     {
-        $routes_iterator = $this->object->getIterator();
-        $this->assertEquals(7, $routes_iterator->count());
         $expected_paths_and_methods = array(
             array('resource/:id', 'GET'),
             array('resource/:id', 'DELETE'),
@@ -59,34 +57,22 @@ class ResourcesTest extends \PHPUnit_Framework_TestCase
             array('resources/new', 'GET'),
             array('resources', 'POST'),
         );
-        $actual_paths_and_methods = array();
-        foreach ($routes_iterator as $route) {
-            $actual_paths_and_methods[] = array($route->getPath(), $route->getMethod());
-        }
-        $this->assertEquals($expected_paths_and_methods, $actual_paths_and_methods);
+        $this->checkGeneratedRoutes(7, $expected_paths_and_methods);
     }
 
     public function testResourcesShouldCreateRoutesSpecifiedInOnly()
     {
         $this->object->only('index', 'update');
-        $routes_iterator = $this->object->getIterator();
-        $this->assertEquals(2, $routes_iterator->count());
         $expected_paths_and_methods = array(
             array('resource/:id', 'PUT'),
             array('resources', 'GET')
         );
-        $actual_paths_and_methods = array();
-        foreach ($routes_iterator as $route) {
-            $actual_paths_and_methods[] = array($route->getPath(), $route->getMethod());
-        }
-        $this->assertEquals($expected_paths_and_methods, $actual_paths_and_methods);
+        $this->checkGeneratedRoutes(2, $expected_paths_and_methods);
     }
 
     public function testResourcesShouldNotCreateRoutesSpecifiedInExcept()
     {
         $this->object->except('index', 'update');
-        $routes_iterator = $this->object->getIterator();
-        $this->assertEquals(5, $routes_iterator->count());
         $expected_paths_and_methods = array(
             array('resource/:id', 'GET'),
             array('resource/:id', 'DELETE'),
@@ -94,6 +80,45 @@ class ResourcesTest extends \PHPUnit_Framework_TestCase
             array('resources/new', 'GET'),
             array('resources', 'POST'),
         );
+        $this->checkGeneratedRoutes(5, $expected_paths_and_methods);
+    }
+
+    public function testResourcesShouldCreateRoutesSpecifiedWithMember()
+    {
+        $this->object->member('GET', 'get_member_method');
+        $expected_paths_and_methods = array(
+            array('resource/:id', 'GET'),
+            array('resource/:id', 'DELETE'),
+            array('resource/:id/edit', 'GET'),
+            array('resource/:id', 'PUT'),
+            array('resource/:id/get_member_method', 'GET'),
+            array('resources', 'GET'),
+            array('resources/new', 'GET'),
+            array('resources', 'POST')
+        );
+        $this->checkGeneratedRoutes(8, $expected_paths_and_methods);
+    }
+
+    public function testResourcesShouldCreateRoutesSpecifiedWithCollection()
+    {
+        $this->object->collection('GET', 'get_collection_method');
+        $expected_paths_and_methods = array(
+            array('resource/:id', 'GET'),
+            array('resource/:id', 'DELETE'),
+            array('resource/:id/edit', 'GET'),
+            array('resource/:id', 'PUT'),
+            array('resources', 'GET'),
+            array('resources/new', 'GET'),
+            array('resources', 'POST'),
+            array('resources/get_collection_method', 'GET'),
+        );
+        $this->checkGeneratedRoutes(8, $expected_paths_and_methods);
+    }
+
+    private function checkGeneratedRoutes($expected_count, array $expected_paths_and_methods)
+    {
+        $routes_iterator = $this->object->getIterator();
+        $this->assertEquals($expected_count, $routes_iterator->count());
         $actual_paths_and_methods = array();
         foreach ($routes_iterator as $route) {
             $actual_paths_and_methods[] = array($route->getPath(), $route->getMethod());
