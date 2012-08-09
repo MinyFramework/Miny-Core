@@ -20,7 +20,7 @@ use InvalidArgumentException;
 class Blueprint
 {
     /**
-     * @see ObjectDescriptor::isSingleton()
+     * @see Blueprint::isSingleton()
      * @access private
      * @var boolean
      */
@@ -91,7 +91,7 @@ class Blueprint
      * Sets parent object's name.
      *
      * @param string $parent
-     * @return ObjectDescriptor
+     * @return Blueprint
      */
     public function setParent($parent)
     {

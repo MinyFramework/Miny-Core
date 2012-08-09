@@ -31,7 +31,7 @@ class Factory implements ArrayAccess
     protected $objects = array();
 
     /**
-     * A name => object array of stored ObjectDescriptors
+     * A name => object array of stored Blueprints
      * @var array
      */
     protected $blueprints = array();
@@ -75,8 +75,7 @@ class Factory implements ArrayAccess
      */
     public function add($alias, $classname, $singleton = true)
     {
-        $object = new Blueprint($classname, $singleton);
-        return $this->register($alias, $object);
+        return $this->register($alias, new Blueprint($classname, $singleton));
     }
 
     /**
@@ -84,7 +83,7 @@ class Factory implements ArrayAccess
      * Unsets any existing instances for the given alias.
      *
      * @param string $alias
-     * @param ObjectDescriptor $object
+     * @param Blueprint $object
      * @return Blueprint
      */
     public function register($alias, Blueprint $object)
@@ -192,7 +191,7 @@ class Factory implements ArrayAccess
      * Instantiates the given Blueprint and injects it with the
      * constructor's parameters.
      *
-     * @param ObjectDescriptor $descriptor
+     * @param Blueprint $descriptor
      * @return object
      * @throws InvalidArgumentException
      */

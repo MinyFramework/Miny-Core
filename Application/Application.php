@@ -125,12 +125,11 @@ class Application extends Factory
         foreach ($module_class->getDependencies() as $name) {
             $this->module($name);
         }
-        $args = func_get_args();
-        array_shift($args);
-        if (empty($args)) {
+        if (func_num_args() == 1) {
             $module_class->init($this);
         } else {
-            array_unshift($args, $this);
+            $args = func_get_args();
+            $args[0] = $this;
             call_user_func_array(array($module_class, 'init'), $args);
         }
     }

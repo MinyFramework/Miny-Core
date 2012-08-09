@@ -20,7 +20,7 @@ class ControllerResolver
     private $application;
     private $collection;
 
-    public function __construct(Application $application, ControllerCollection $collection = NULL)
+    public function __construct(Application $application, ControllerCollection $collection)
     {
         $this->application = $application;
         $this->collection = $collection;
