@@ -41,6 +41,12 @@ class RouterTest extends \PHPUnit_Framework_TestCase
         $this->assertEquals('prefix/path.suffix', $this->object->getRoute('name')->getPath());
     }
 
+    public function testRouteShouldReturnTheGivenRoute()
+    {
+        $route = new Route('path');
+        $this->assertSame($route, $this->object->route($route, 'name'));
+    }
+
     public function testRouterShouldAllowDisablingPrefixAndSuffix()
     {
         $route = new Route('path');

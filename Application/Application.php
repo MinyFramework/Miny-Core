@@ -206,19 +206,6 @@ class Application extends Factory
         $this->request = Request::getGlobal();
     }
 
-    public function route($path, $controller, $method = NULL, $name = NULL, array $parameters = array())
-    {
-        $controller_name = is_string($controller) ? $controller : $this->controllers->getNextName();
-        if (!in_array($method, array(NULL, 'GET', 'POST', 'PUT', 'DELETE'))) {
-            throw new UnexpectedValueException('Unexpected route method:' . $method);
-        }
-        $parameters['controller'] = $controller_name;
-        $route = new Route($path, $method, $parameters);
-        $this->router->route($route, $name);
-        $this->controllers->register($controller_name, $controller);
-        return $route;
-    }
-
     public function resource($name, $controller = NULL, array $parameters = array(), $singular = false)
     {
         $controller = $controller ? : $name;
@@ -232,6 +219,19 @@ class Application extends Factory
         $parameters['controller'] = $controller_name;
         $this->controllers->register($controller_name, $controller);
         return $this->router->root($parameters);
+    }
+
+    public function route($path, $controller, $method = NULL, $name = NULL, array $parameters = array())
+    {
+        if (!in_array($method, array(NULL, 'GET', 'POST', 'PUT', 'DELETE'))) {
+            throw new UnexpectedValueException('Unexpected route method:' . $method);
+        }
+        $controller_name = is_string($controller) ? $controller : $this->controllers->getNextName();
+        $parameters['controller'] = $controller_name;
+        $this->controllers->register($controller_name, $controller);
+
+        $route = new Route($path, $method, $parameters);
+        return $this->router->route($route, $name);
     }
 
     public function get($path, $controller, $name = NULL, array $parameters = array())
