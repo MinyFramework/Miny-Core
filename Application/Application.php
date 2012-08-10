@@ -188,9 +188,10 @@ class Application extends Factory
                             return $arglist;
                         });
 
-        $this->add('controllers', '\Miny\Controller\ControllerCollection');
+        $this->add('controllers', '\Miny\Controller\ControllerCollection')
+                ->setArguments('&app');
         $this->add('resolver', '\Miny\Controller\ControllerResolver')
-                ->setArguments('&app', '&controllers');
+                ->setArguments('&controllers');
         $this->add('router', '\Miny\Routing\Router')
                 ->setArguments('@router:prefix', '@router:suffix', '@router:defaults');
 

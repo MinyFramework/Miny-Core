@@ -11,20 +11,23 @@ namespace Miny\Controller;
 
 use Closure;
 use InvalidArgumentException;
+use Miny\Application\Application;
 use Miny\Controller\Controller;
 use UnexpectedValueException;
 
 class ControllerCollection
 {
     private $controllers = array();
+    private $application;
+
+    public function __construct(Application $application)
+    {
+        $this->application = $application;
+    }
 
     public function register($name, $controller)
     {
         if ($controller instanceof Closure || $controller instanceof Controller || is_string($controller)) {
-            $this->controllers[$name] = $controller;
-        } elseif (is_callable($controller)) {
-            $controller = func_get_args();
-            array_shift($controller);
             $this->controllers[$name] = $controller;
         } else {
             $type = gettype($controller);
@@ -54,7 +57,7 @@ class ControllerCollection
         if (!is_subclass_of($class, __NAMESPACE__ . '\Controller')) {
             throw new UnexpectedValueException('Class does not extend Controller: ' . $class);
         }
-        return $class;
+        return new $class($this->application);
     }
 
 }
