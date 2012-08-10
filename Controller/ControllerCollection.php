@@ -27,12 +27,10 @@ class ControllerCollection
 
     public function register($name, $controller)
     {
-        if ($controller instanceof Closure || $controller instanceof Controller || is_string($controller)) {
-            $this->controllers[$name] = $controller;
-        } else {
-            $type = gettype($controller);
-            throw new InvalidArgumentException(sprintf('Invalid controller: %s (%s)', $name, $type));
+        if (!$controller instanceof Closure && !$controller instanceof Controller && !is_string($controller)) {
+            throw new InvalidArgumentException(sprintf('Invalid controller: %s (%s)', $name, gettype($controller)));
         }
+        $this->controllers[$name] = $controller;
     }
 
     public function getNextName()
