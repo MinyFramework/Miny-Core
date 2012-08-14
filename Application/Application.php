@@ -15,6 +15,7 @@ require_once __DIR__ . '/../Factory/Factory.php';
 use ErrorException;
 use Exception;
 use InvalidArgumentException;
+use Miny\Application\Exceptions\BadModuleException;
 use Miny\AutoLoader;
 use Miny\Event\Event;
 use Miny\Factory\Factory;
@@ -117,10 +118,10 @@ class Application extends Factory
             return;
         }
         $class = '\Modules\\' . $module . '\Module';
-        $module_class = new $class;
-        if (!$module_class instanceof Module) {
-            throw new UnexpectedValueException('Module descriptor should extend Module class.');
+        if (!is_subclass_of($class, __NAMESPACE__ . '\Module')) {
+            throw new BadModuleException('Module descriptor should extend Module class: ' . $class);
         }
+        $module_class = new $class;
         $this->modules[$module] = $module_class;
         foreach ($module_class->getDependencies() as $name) {
             $this->module($name);
