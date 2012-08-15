@@ -261,7 +261,7 @@ class Factory implements ArrayAccess
             $this->injectDependencies($object, $var);
             return $object;
         }
-        if (!is_string($var) || strlen($var) === 1) {
+        if (!is_string($var) || strlen($var) <= 1) {
             return $var;
         }
         //see if $var is a reference to something
