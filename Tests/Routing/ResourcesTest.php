@@ -52,13 +52,13 @@ class ResourcesTest extends \PHPUnit_Framework_TestCase
     public function testResourcesShouldCreate7RoutesByDefault()
     {
         $expected_paths_and_methods = array(
+            array('resources', 'GET'),
+            array('resources/new', 'GET'),
+            array('resources', 'POST'),
             array('resources/:id', 'GET'),
             array('resources/:id', 'DELETE'),
             array('resources/:id/edit', 'GET'),
             array('resources/:id', 'PUT'),
-            array('resources', 'GET'),
-            array('resources/new', 'GET'),
-            array('resources', 'POST'),
         );
         $this->checkGeneratedRoutes($this->object, 7, $expected_paths_and_methods);
     }
@@ -67,13 +67,13 @@ class ResourcesTest extends \PHPUnit_Framework_TestCase
     {
         $this->object->resource($this->sub_resources);
         $expected_paths_and_methods_for_sub_resources = array(
+            array('resources/:resource_id/sub_resources', 'GET'),
+            array('resources/:resource_id/sub_resources/new', 'GET'),
+            array('resources/:resource_id/sub_resources', 'POST'),
             array('resources/:resource_id/sub_resources/:id', 'GET'),
             array('resources/:resource_id/sub_resources/:id', 'DELETE'),
             array('resources/:resource_id/sub_resources/:id/edit', 'GET'),
             array('resources/:resource_id/sub_resources/:id', 'PUT'),
-            array('resources/:resource_id/sub_resources', 'GET'),
-            array('resources/:resource_id/sub_resources/new', 'GET'),
-            array('resources/:resource_id/sub_resources', 'POST'),
         );
         $this->checkGeneratedRoutes($this->sub_resources, 7, $expected_paths_and_methods_for_sub_resources);
     }
@@ -82,20 +82,20 @@ class ResourcesTest extends \PHPUnit_Framework_TestCase
     {
         $this->object->resource($this->sub_resources);
         $expected_paths_and_methods_with_parent = array(
+            array('resources', 'GET'),
+            array('resources/new', 'GET'),
+            array('resources', 'POST'),
             array('resources/:id', 'GET'),
             array('resources/:id', 'DELETE'),
             array('resources/:id/edit', 'GET'),
             array('resources/:id', 'PUT'),
-            array('resources', 'GET'),
-            array('resources/new', 'GET'),
-            array('resources', 'POST'),
+            array('resources/:resource_id/sub_resources', 'GET'),
+            array('resources/:resource_id/sub_resources/new', 'GET'),
+            array('resources/:resource_id/sub_resources', 'POST'),
             array('resources/:resource_id/sub_resources/:id', 'GET'),
             array('resources/:resource_id/sub_resources/:id', 'DELETE'),
             array('resources/:resource_id/sub_resources/:id/edit', 'GET'),
             array('resources/:resource_id/sub_resources/:id', 'PUT'),
-            array('resources/:resource_id/sub_resources', 'GET'),
-            array('resources/:resource_id/sub_resources/new', 'GET'),
-            array('resources/:resource_id/sub_resources', 'POST'),
         );
         $this->checkGeneratedRoutes($this->object, 14, $expected_paths_and_methods_with_parent);
     }
@@ -105,13 +105,13 @@ class ResourcesTest extends \PHPUnit_Framework_TestCase
         $resource = new Resource('singular_resource');
         $resource->resource($this->object);
         $expected_paths_and_methods = array(
+            array('singular_resource/resources', 'GET'),
+            array('singular_resource/resources/new', 'GET'),
+            array('singular_resource/resources', 'POST'),
             array('singular_resource/resources/:id', 'GET'),
             array('singular_resource/resources/:id', 'DELETE'),
             array('singular_resource/resources/:id/edit', 'GET'),
             array('singular_resource/resources/:id', 'PUT'),
-            array('singular_resource/resources', 'GET'),
-            array('singular_resource/resources/new', 'GET'),
-            array('singular_resource/resources', 'POST'),
         );
         $this->checkGeneratedRoutes($this->object, 7, $expected_paths_and_methods);
     }
@@ -120,8 +120,8 @@ class ResourcesTest extends \PHPUnit_Framework_TestCase
     {
         $this->object->only('index', 'update');
         $expected_paths_and_methods = array(
+            array('resources', 'GET'),
             array('resources/:id', 'PUT'),
-            array('resources', 'GET')
         );
         $this->checkGeneratedRoutes($this->object, 2, $expected_paths_and_methods);
     }
@@ -130,11 +130,11 @@ class ResourcesTest extends \PHPUnit_Framework_TestCase
     {
         $this->object->except('index', 'update');
         $expected_paths_and_methods = array(
+            array('resources/new', 'GET'),
+            array('resources', 'POST'),
             array('resources/:id', 'GET'),
             array('resources/:id', 'DELETE'),
             array('resources/:id/edit', 'GET'),
-            array('resources/new', 'GET'),
-            array('resources', 'POST'),
         );
         $this->checkGeneratedRoutes($this->object, 5, $expected_paths_and_methods);
     }
@@ -143,14 +143,14 @@ class ResourcesTest extends \PHPUnit_Framework_TestCase
     {
         $this->object->member('GET', 'get_member_method');
         $expected_paths_and_methods = array(
+            array('resources', 'GET'),
+            array('resources/new', 'GET'),
+            array('resources', 'POST'),
             array('resources/:id', 'GET'),
             array('resources/:id', 'DELETE'),
             array('resources/:id/edit', 'GET'),
             array('resources/:id', 'PUT'),
             array('resources/:id/get_member_method', 'GET'),
-            array('resources', 'GET'),
-            array('resources/new', 'GET'),
-            array('resources', 'POST')
         );
         $this->checkGeneratedRoutes($this->object, 8, $expected_paths_and_methods);
     }
@@ -159,14 +159,14 @@ class ResourcesTest extends \PHPUnit_Framework_TestCase
     {
         $this->object->collection('GET', 'get_collection_method');
         $expected_paths_and_methods = array(
-            array('resources/:id', 'GET'),
-            array('resources/:id', 'DELETE'),
-            array('resources/:id/edit', 'GET'),
-            array('resources/:id', 'PUT'),
             array('resources', 'GET'),
             array('resources/new', 'GET'),
             array('resources', 'POST'),
             array('resources/get_collection_method', 'GET'),
+            array('resources/:id', 'GET'),
+            array('resources/:id', 'DELETE'),
+            array('resources/:id/edit', 'GET'),
+            array('resources/:id', 'PUT'),
         );
         $this->checkGeneratedRoutes($this->object, 8, $expected_paths_and_methods);
     }

@@ -147,8 +147,8 @@ class Resources extends RouteCollection
         }
         $this->built = true;
 
-        $this->generateMemberActions();
         $this->generateCollectionActions();
+        $this->generateMemberActions();
 
         foreach ($this->resources as $resource) {
             $resource->build();
