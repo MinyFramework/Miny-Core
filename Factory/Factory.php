@@ -256,6 +256,11 @@ class Factory implements ArrayAccess
             }
         }
         //direct injection for non-string values
+        if ($var instanceof Blueprint) {
+            $object = $this->instantiate($var);
+            $this->injectDependencies($object, $var);
+            return $object;
+        }
         if (!is_string($var) || strlen($var) === 1) {
             return $var;
         }
