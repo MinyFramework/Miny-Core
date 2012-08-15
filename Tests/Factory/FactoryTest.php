@@ -265,10 +265,17 @@ class FactoryTest extends \PHPUnit_Framework_TestCase
         $this->assertEquals($method_calls, $obj->method);
     }
 
-    public function createMultipleInstances()
+    public function testCreateMultipleInstances()
     {
         $this->object->add('instance', __NAMESPACE__ . '\TestClass', false);
         $this->assertNotSame($this->object->instance, $this->object->instance);
+    }
+
+    public function testShouldInjectObjectConstructedFromBlueprint()
+    {
+        $this->object->add('object', __NAMESPACE__ . '\TestClass')
+                ->addMethodCall('method_name', new Blueprint(__NAMESPACE__ . '\TestClass'));
+        $this->assertInstanceOf(__NAMESPACE__ . '\TestClass', $this->object->object->method['method_name'][0]);
     }
 
 }
