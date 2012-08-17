@@ -38,6 +38,9 @@ class EventDispatcher
                 throw new \UnexpectedValueException('Not callable handler set for event ' . $name);
             }
             call_user_func($handler, $event);
+            if ($event->hasResponse()) {
+                break;
+            }
         }
         $event->setHandled();
     }
