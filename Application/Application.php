@@ -162,8 +162,11 @@ class Application extends Factory
                 ->setArguments('&log')
                 ->addMethodCall('setHandler', 'uncaught_exception', $eh)
                 ->addMethodCall('setHandler', 'uncaught_exception', $eh, 'displayExceptionPage')
-                ->addMethodCall('setHandler', 'handle_request_exception', $eh, 'handleRequestException')
+                //->addMethodCall('setHandler', 'handle_request_exception', $eh, 'handleRequestException')
+                ->addMethodCall('setHandler', 'filter_request', $eh, 'logRequest')
                 ->addMethodCall('setHandler', 'filter_request', $eh, 'filterRoutes')
+                ->addMethodCall('setHandler', 'filter_response', $eh, 'setContentType')
+                ->addMethodCall('setHandler', 'filter_response', $eh, 'logResponse')
                 ->addMethodCall('setHandler', 'invalid_response', $eh, 'filterStringToResponse');
 
         $this->add('view', '\Miny\View\View')
@@ -258,38 +261,25 @@ class Application extends Factory
     public function run()
     {
         date_default_timezone_set($this['default_timezone']);
-        $request = $this->request;
-        $this->log->write(sprintf('Request: [%s] %s Source: %s', $request->method, $request->path, $request->ip));
-
-        $response = $this->dispatch($request);
-
-        $this->log->write('Response: ' . $response->getStatus());
-        $response->send();
+        $this->dispatch($this->request)->send();
     }
 
     public function dispatch(Request $request)
     {
-        $response = new Response;
-        try {
-            $event = new Event('filter_request', array('request' => $request));
-            $this->events->raiseEvent($event);
-        } catch (Exception $e) {
-            $event = new Event('handle_request_exception', array(
-                        'request'   => $request,
-                        'exception' => $e
-                    ));
-            $this->events->raiseEvent($event);
-            if ($event->isHandled()) {
-                //Let's retry with the fallback-request
-                $event = new Event('filter_request', array('request' => $request));
-                $this->events->raiseEvent($event);
-            }
-        }
+        $event = new Event('filter_request', array('request' => $request));
+        $this->events->raiseEvent($event);
+
         if ($event->hasResponse()) {
             $rsp = $event->getResponse();
             if ($rsp instanceof Response) {
                 $response = $rsp;
+            } elseif ($rsp instanceof Request && $rsp !== $request) {
+                $response = $this->dispatch($rsp);
+            } else {
+                $response = new Response;
             }
+        } else {
+            $response = new Response;
         }
         $action = isset($request->get['action']) ? $request->get['action'] : NULL;
         $this->resolver->resolve($request->get['controller'], $action, $request, $response);
