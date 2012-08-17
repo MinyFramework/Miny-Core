@@ -15,8 +15,9 @@ abstract class Module
 {
     protected $application;
 
-    public function __construct()
+    public function __construct(Application $app)
     {
+        $this->application = $app;
         foreach ($this->includes() as $file) {
             if (!is_file($file)) {
                 throw new BadModuleException('Required file not found: ' . $file);

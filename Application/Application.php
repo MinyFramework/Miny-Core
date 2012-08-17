@@ -121,7 +121,7 @@ class Application extends Factory
         if (!is_subclass_of($class, __NAMESPACE__ . '\Module')) {
             throw new BadModuleException('Module descriptor should extend Module class: ' . $class);
         }
-        $module_class = new $class;
+        $module_class = new $class($this);
         $this->modules[$module] = $module_class;
         foreach ($module_class->getDependencies() as $name) {
             $this->module($name);
