@@ -275,14 +275,14 @@ class Application extends Factory
                 $response = $rsp;
             } elseif ($rsp instanceof Request && $rsp !== $request) {
                 $response = $this->dispatch($rsp);
-            } else {
-                $response = new Response;
             }
-        } else {
-            $response = new Response;
         }
-        $action = isset($request->get['action']) ? $request->get['action'] : NULL;
-        $this->resolver->resolve($request->get['controller'], $action, $request, $response);
+
+        if (!isset($response)) {
+            $response = new Response;
+            $action = isset($request->get['action']) ? $request->get['action'] : NULL;
+            $this->resolver->resolve($request->get['controller'], $action, $request, $response);
+        }
 
         $this->events->raiseEvent(new Event('filter_response',
                         array(
