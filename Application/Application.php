@@ -274,7 +274,7 @@ class Application extends Factory
             if ($rsp instanceof Response) {
                 $response = $rsp;
             } elseif ($rsp instanceof Request && $rsp !== $request) {
-                $response = $this->dispatch($rsp);
+                return $this->dispatch($rsp);
             }
         }
 
