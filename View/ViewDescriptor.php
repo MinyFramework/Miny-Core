@@ -15,8 +15,6 @@ class ViewDescriptor
 {
     public $file;
     private $vars = array();
-    //private $filters = array();
-    //private $default_filters = array();
     private $view;
     private $blocks = array();
     private $block_modes = array();
@@ -40,6 +38,11 @@ class ViewDescriptor
             throw new OutOfBoundsException('Key not set: ' . $key);
         }
         return $this->vars[$key];
+    }
+
+    public function addVars(array $vars)
+    {
+        $this->vars = $vars + $this->vars;
     }
 
     public function getVars()
