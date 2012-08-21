@@ -9,11 +9,13 @@
 
 namespace Miny\Application;
 
+use Exception;
 use Miny\Event\Event;
-use Miny\Event\EventHandler;
+use Miny\HTTP\Request;
+use Miny\HTTP\Response;
 use Miny\Routing\Exceptions\PageNotFoundException;
 
-class ApplicationEventHandlers extends EventHandler
+class ApplicationEventHandlers
 {
     private $app;
 
@@ -22,22 +24,18 @@ class ApplicationEventHandlers extends EventHandler
         $this->app = $app;
     }
 
-    public function handle(Event $event)
+    public function logException(Event $event, Exception $e)
     {
-        $e = $event->getParameter('exception');
         $this->app->log->write(sprintf("%s \n Trace: %s", $e->getMessage(), $e->getTraceAsString()), get_class($e));
     }
 
-    public function logRequest(Event $event)
+    public function logRequest(Event $event, Request $request)
     {
-        $request = $event->getParameter('request');
         $this->app->log->write(sprintf('Request: [%s] %s Source: %s', $request->method, $request->path, $request->ip));
     }
 
-    public function logResponse(Event $event)
+    public function logResponse(Event $event, Request $request, Response $response)
     {
-        $response = $event->getParameter('response');
-        $request = $event->getParameter('request');
         $status = $response->getStatus();
         $this->app->log->write(sprintf('Response for request [%s] %s', $request->method, $request->path, $status));
         $this->app->log->write('Response status: ' . $status);
@@ -47,11 +45,11 @@ class ApplicationEventHandlers extends EventHandler
         }
     }
 
-    public function displayExceptionPage(Event $event)
+    public function displayExceptionPage(Event $event, Exception $e)
     {
         $view = $this->app->view->get($this->app['view:exception']);
         $view->app = $this->app;
-        $view->exception = $event->getParameter('exception');
+        $view->exception = $e;
         $event->setResponse($view->render());
     }
 
@@ -89,9 +87,8 @@ class ApplicationEventHandlers extends EventHandler
         }
     }
 
-    public function filterRoutes(Event $event)
+    public function filterRoutes(Event $event, Request $request)
     {
-        $request = $event->getParameter('request');
         $match = $this->app->router->match($request->path, $request->method);
         if (!$match) {
             throw new PageNotFoundException('Page not found: ' . $request->path);
@@ -105,16 +102,16 @@ class ApplicationEventHandlers extends EventHandler
         }
     }
 
-    public function setContentType(Event $event)
+    public function setContentType(Event $event, Request $request, Response $response)
     {
         if (isset($this->app['content_type'])) {
-            $event->getParameter('response')->content_type = $this->app['content_type'];
+            $response->content_type = $this->app['content_type'];
         }
     }
 
-    public function filterStringToResponse(Event $event)
+    public function filterStringToResponse(Event $event, $response)
     {
-        echo $event->getParameter('response');
+        echo $response;
         $event->setResponse($this->app->response);
     }
 

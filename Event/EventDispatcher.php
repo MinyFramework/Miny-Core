@@ -9,18 +9,23 @@
 
 namespace Miny\Event;
 
+use Miny\Event\Exceptions\EventHandlerException;
+
 class EventDispatcher
 {
     private $handlers = array();
 
-    public function setHandler($event, EventHandler $handler, $method = NULL, $place = NULL)
+    public function register($event, $handler, $place = NULL)
     {
+        if (!is_callable($handler)) {
+            throw new EventHandlerException('Handler is not callable for event ' . $event);
+        }
         if (!isset($this->handlers[$event])) {
-            $this->handlers[$event] = array(array($handler, $method));
+            $this->handlers[$event] = array($handler);
         } elseif ($place === NULL) {
-            $this->handlers[$event][] = array($handler, $method);
+            $this->handlers[$event][] = $handler;
         } else {
-            array_splice($this->handlers[$event], $place, 0, array(array($handler, $method)));
+            array_splice($this->handlers[$event], $place, 0, array($handler));
         }
     }
 
@@ -30,14 +35,10 @@ class EventDispatcher
         if (!isset($this->handlers[$name])) {
             return;
         }
+        $parameters = $event->getParameters();
+        array_unshift($parameters, $event);
         foreach ($this->handlers[$name] as $handler) {
-            if (!$handler[1]) {
-                $handler[1] = 'handle';
-            }
-            if (!is_callable($handler)) {
-                throw new \UnexpectedValueException('Not callable handler set for event ' . $name);
-            }
-            call_user_func($handler, $event);
+            call_user_func_array($handler, $parameters);
             if ($event->hasResponse()) {
                 break;
             }

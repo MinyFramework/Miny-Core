@@ -140,7 +140,7 @@ class Application extends Factory
         $app = $this;
 
         set_exception_handler(function(Exception $e) use($app) {
-                    $event = new Event('uncaught_exception', array('exception' => $e));
+                    $event = new Event('uncaught_exception', $e);
                     $app->events->raiseEvent($event);
                     if (!$event->isHandled()) {
                         throw $e;
@@ -160,14 +160,13 @@ class Application extends Factory
 
         $this->add('events', '\Miny\Event\EventDispatcher')
                 ->setArguments('&log')
-                ->addMethodCall('setHandler', 'uncaught_exception', $eh)
-                ->addMethodCall('setHandler', 'uncaught_exception', $eh, 'displayExceptionPage')
-                //->addMethodCall('setHandler', 'handle_request_exception', $eh, 'handleRequestException')
-                ->addMethodCall('setHandler', 'filter_request', $eh, 'logRequest')
-                ->addMethodCall('setHandler', 'filter_request', $eh, 'filterRoutes')
-                ->addMethodCall('setHandler', 'filter_response', $eh, 'setContentType')
-                ->addMethodCall('setHandler', 'filter_response', $eh, 'logResponse')
-                ->addMethodCall('setHandler', 'invalid_response', $eh, 'filterStringToResponse');
+                ->addMethodCall('register', 'uncaught_exception', array($eh, 'logException'))
+                ->addMethodCall('register', 'uncaught_exception', array($eh, 'displayExceptionPage'))
+                ->addMethodCall('register', 'filter_request', array($eh, 'logRequest'))
+                ->addMethodCall('register', 'filter_request', array($eh, 'filterRoutes'))
+                ->addMethodCall('register', 'filter_response', array($eh, 'setContentType'))
+                ->addMethodCall('register', 'filter_response', array($eh, 'logResponse'))
+                ->addMethodCall('register', 'invalid_response', array($eh, 'filterStringToResponse'));
 
         $this->add('view', '\Miny\View\View')
                 ->setArguments('@view:dir', '@view:default_format')
@@ -266,7 +265,7 @@ class Application extends Factory
 
     public function dispatch(Request $request)
     {
-        $event = new Event('filter_request', array('request' => $request));
+        $event = new Event('filter_request', $request);
         $this->events->raiseEvent($event);
 
         if ($event->hasResponse()) {
@@ -284,12 +283,7 @@ class Application extends Factory
             $this->resolver->resolve($request->get['controller'], $action, $request, $response);
         }
 
-        $this->events->raiseEvent(new Event('filter_response',
-                        array(
-                            'response' => $response,
-                            'request'  => $request
-                        )
-        ));
+        $this->events->raiseEvent(new Event('filter_response', $request, $response));
         return $response;
     }
 

@@ -10,10 +10,7 @@ class EventTest extends \PHPUnit_Framework_TestCase
 
     protected function setUp()
     {
-        $this->object = new Event('test_event', array(
-                    'param1_name' => 'param1_value',
-                    'param2_name' => 'param2_value'
-                ));
+        $this->object = new Event('test_event', 'p1', 'p2', 'p3');
     }
 
     public function testHandled()
@@ -33,28 +30,10 @@ class EventTest extends \PHPUnit_Framework_TestCase
         $this->assertEquals('test_event', (string) $this->object);
     }
 
-    public function testHasParameter()
-    {
-        $this->assertTrue($this->object->hasParameter('param1_name'));
-        $this->assertFalse($this->object->hasParameter('nonexistent_param3'));
-    }
-
-    public function testGetParameter()
-    {
-        $this->assertEquals('param1_value', $this->object->getParameter('param1_name'));
-        try {
-            $this->object->getParameter('nonexistent_param');
-            $this->fail('An expected exception has not been raised.');
-        } catch (\OutOfBoundsException $e) {
-
-        }
-    }
-
     public function testGetParameters()
     {
         $parameters = array(
-            'param1_name' => 'param1_value',
-            'param2_name' => 'param2_value'
+            'p1', 'p2', 'p3'
         );
         $this->assertEquals($parameters, $this->object->getParameters());
     }

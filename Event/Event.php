@@ -9,8 +9,6 @@
 
 namespace Miny\Event;
 
-use OutOfBoundsException;
-
 class Event
 {
     private $parameters;
@@ -18,9 +16,13 @@ class Event
     private $response;
     private $is_handled = false;
 
-    public function __construct($name, array $parameters = array())
+    public function __construct($name)
     {
         $this->name = $name;
+
+        $parameters = func_get_args();
+        array_shift($parameters);
+
         $this->parameters = $parameters;
     }
 
@@ -42,19 +44,6 @@ class Event
     public function __toString()
     {
         return $this->name;
-    }
-
-    public function hasParameter($key)
-    {
-        return array_key_exists($key, $this->parameters);
-    }
-
-    public function getParameter($key)
-    {
-        if (!$this->hasParameter($key)) {
-            throw new OutOfBoundsException('Event parameter not set: ' . $key);
-        }
-        return $this->parameters[$key];
     }
 
     public function getParameters()
