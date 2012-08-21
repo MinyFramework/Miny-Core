@@ -42,11 +42,11 @@ class EventDispatcherTest extends \PHPUnit_Framework_TestCase
     public function testShouldPassParametersToHandler()
     {
         $event = new Event('event2', 'p1', 'p2');
-        $this->object->register('event2', function(Event $event){
-            $event->setResponse(func_get_args());
+        $this->object->register('event2', function(){
+            return func_get_args();
         });
         $this->object->raiseEvent($event);
-        $this->assertEquals(array($event, 'p1', 'p2'), $event->getResponse());
+        $this->assertEquals(array('p1', 'p2'), $event->getResponse());
     }
 
     public function testInsertHandlerIntoSequence()
