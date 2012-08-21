@@ -36,10 +36,11 @@ class EventDispatcher
             return;
         }
         $parameters = $event->getParameters();
-        array_unshift($parameters, $event);
+
         foreach ($this->handlers[$name] as $handler) {
-            call_user_func_array($handler, $parameters);
-            if ($event->hasResponse()) {
+            $response = call_user_func_array($handler, $parameters);
+            if ($response) {
+                $event->setResponse($response);
                 break;
             }
         }

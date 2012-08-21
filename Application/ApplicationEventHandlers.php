@@ -24,17 +24,17 @@ class ApplicationEventHandlers
         $this->app = $app;
     }
 
-    public function logException(Event $event, Exception $e)
+    public function logException(Exception $e)
     {
         $this->app->log->write(sprintf("%s \n Trace: %s", $e->getMessage(), $e->getTraceAsString()), get_class($e));
     }
 
-    public function logRequest(Event $event, Request $request)
+    public function logRequest(Request $request)
     {
         $this->app->log->write(sprintf('Request: [%s] %s Source: %s', $request->method, $request->path, $request->ip));
     }
 
-    public function logResponse(Event $event, Request $request, Response $response)
+    public function logResponse(Request $request, Response $response)
     {
         $status = $response->getStatus();
         $this->app->log->write(sprintf('Response for request [%s] %s', $request->method, $request->path, $status));
@@ -45,12 +45,12 @@ class ApplicationEventHandlers
         }
     }
 
-    public function displayExceptionPage(Event $event, Exception $e)
+    public function displayExceptionPage(Exception $e)
     {
         $view = $this->app->view->get($this->app['view:exception']);
         $view->app = $this->app;
         $view->exception = $e;
-        $event->setResponse($view->render());
+        return $view->render();
     }
 
     private function setResponseContentType($format)
@@ -87,7 +87,7 @@ class ApplicationEventHandlers
         }
     }
 
-    public function filterRoutes(Event $event, Request $request)
+    public function filterRoutes(Request $request)
     {
         $match = $this->app->router->match($request->path, $request->method);
         if (!$match) {
@@ -102,17 +102,17 @@ class ApplicationEventHandlers
         }
     }
 
-    public function setContentType(Event $event, Request $request, Response $response)
+    public function setContentType(Request $request, Response $response)
     {
         if (isset($this->app['content_type'])) {
             $response->content_type = $this->app['content_type'];
         }
     }
 
-    public function filterStringToResponse(Event $event, $response)
+    public function filterStringToResponse($response)
     {
         echo $response;
-        $event->setResponse($this->app->response);
+        return $this->app->response;
     }
 
 }
