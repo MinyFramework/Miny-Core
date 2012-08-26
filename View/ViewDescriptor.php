@@ -57,44 +57,47 @@ class ViewDescriptor
         $this->extend = $extend;
     }
 
-    public function renderBlock($name, $default = '')
+    public function renderBlock($name, $content = '', $mode = 'replace')
     {
         if (isset($this->blocks[$name])) {
-            if ($this->block_modes[$name] == 'append') {
-                return $default . $this->blocks[$name];
-            } else {
-                return $this->blocks[$name];
+            list($old_content, $old_mode) = $this->blocks[$name];
+
+            if (is_null($old_mode)) {
+                $old_mode = $mode;
             }
-        } else {
-            return $default;
+
+            switch ($old_mode) {
+                case 'replace':
+                    $content = $old_content;
+                    break;
+                case 'append':
+                    $content .= $old_content;
+                    break;
+                case 'prepend':
+                    $content = $old_content . $content;
+                    break;
+            }
         }
+        return $content;
+    }
+
+    public function block($name, $content, $mode = NULL)
+    {
+        $content = $this->renderBlock($name, $content, NULL);
+        $this->blocks[$name] = array($content, $mode);
+        return $content;
     }
 
     public function beginBlock($name, $mode = NULL)
     {
+        $this->block_stack[] = array($name, $mode);
         ob_start();
-        $this->block_stack[] = $name;
-        if (!$mode) {
-            if (!isset($this->block_modes[$name])) {
-                $this->block_modes[$name] = 'replace';
-            }
-        } else {
-            $this->block_modes[$name] = $mode;
-        }
     }
 
     public function endBlock()
     {
-        $content = ob_get_clean();
-        $name = array_pop($this->block_stack);
-
-        if (isset($this->blocks[$name]) && $this->block_modes[$name] == 'append') {
-            $this->blocks[$name] = $content . $this->blocks[$name];
-        } else {
-            $this->blocks[$name] = $content;
-        }
-
-        return $this->blocks[$name];
+        list($name, $mode) = array_pop($this->block_stack);
+        return $this->block($name, ob_get_clean(), $mode);
     }
 
     public function render($format = NULL)
