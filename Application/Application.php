@@ -209,11 +209,18 @@ class Application extends Factory
         $this->request = Request::getGlobal();
     }
 
-    public function resource($name, $controller = NULL, array $parameters = array(), $singular = false)
+    public function resource($name, $controller = NULL, array $parameters = array())
     {
         $controller = $controller ? : $name;
         $parameters['controller'] = $controller;
-        return $this->router->resource($name, $parameters, $singular);
+        return $this->router->resource($name, $parameters, true);
+    }
+
+    public function resources($name, $controller = NULL, array $parameters = array())
+    {
+        $controller = $controller ? : $name;
+        $parameters['controller'] = $controller;
+        return $this->router->resource($name, $parameters, false);
     }
 
     public function root($controller, array $parameters = array())
