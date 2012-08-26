@@ -87,7 +87,13 @@ class ViewDescriptor
     {
         $content = ob_get_clean();
         $name = array_pop($this->block_stack);
-        $this->blocks[$name] = $this->renderBlock($name, $content);
+
+        if (isset($this->blocks[$name]) && $this->block_modes[$name] == 'append') {
+            $this->blocks[$name] = $content . $this->blocks[$name];
+        } else {
+            $this->blocks[$name] = $content;
+        }
+
         return $this->blocks[$name];
     }
 
