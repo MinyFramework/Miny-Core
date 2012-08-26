@@ -17,7 +17,6 @@ class ViewDescriptor
     private $vars = array();
     private $view;
     private $blocks = array();
-    private $block_modes = array();
     private $block_stack = array();
     private $extend;
 
