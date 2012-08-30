@@ -59,8 +59,8 @@ class View extends Extendable
 
     public function render($file, $format = NULL, array $params = array())
     {
+        extract($params, EXTR_SKIP | EXTR_REFS);
         ob_start();
-        extract($params, EXTR_SKIP);
         include $this->getTemplatePath($file, $format);
         return ob_get_clean();
     }
