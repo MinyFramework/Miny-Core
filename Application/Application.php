@@ -155,11 +155,26 @@ class Application extends Factory
                         $response->send();
                     }
                 });
-        set_error_handler(function($errno, $errstr, $errfile, $errline ) {
-                    throw new ErrorException($errstr, $errno, 0, $errfile, $errline);
+
+        $log = new Log($this['log_path']);
+
+        set_error_handler(function($errno, $errstr, $errfile, $errline ) use($log) {
+                    $loggable = array(
+                        E_NOTICE       => 'Notice (PHP)',
+                        E_USER_NOTICE  => 'Notice',
+                        E_WARNING      => 'Warning (PHP)',
+                        E_USER_WARNING => 'Warning',
+                        E_DEPRECATED   => 'Deprecated notice (PHP)',
+                        E_STRICT       => 'Strict notice (PHP)'
+                    );
+                    if (isset($loggable[$errno])) {
+                        $log->write($errstr, $loggable[$errno]);
+                    } else {
+                        throw new ErrorException($errstr, $errno, 0, $errfile, $errline);
+                    }
                 });
 
-        $this->log = new Log($this['log_path']);
+        $this->log = $log;
         $eh = new ApplicationEventHandlers($this);
 
         $this->add('events', '\Miny\Event\EventDispatcher')
