@@ -181,7 +181,12 @@ class Application extends Factory
                 ->setProperty('config', '&app::getParameters');
 
         $this->add('view_helpers', '\Miny\View\ViewHelpers')
-                ->addMethodCall('addMethod', 'route', '*router::generate');
+                ->addMethodCall('addMethod', 'route', '*router::generate')
+                ->addMethodCall('addMethod', 'routeAnchor',
+                        function($route, $label, array $parameters = array()) use($app) {
+                            $url = $app->router->generate($route, $parameters);
+                            return sprintf('<a href="%s">%s</a>', $url, $label);
+                        });
 
         $this->add('controllers', '\Miny\Controller\ControllerCollection')
                 ->setArguments('&app');
