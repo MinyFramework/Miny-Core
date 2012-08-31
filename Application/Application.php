@@ -49,8 +49,8 @@ class Application extends Factory
             'root'             => $directory,
             'log_path'         => $directory . '/logs',
             'view'             => array(
-                'dir'            => $directory . '/views',
-                'default_format' => 'html',
+                'dir'            => $directory . '/views/',
+                'default_format' => '.html',
                 'exception'      => 'layouts/exception'
             ),
             'router'         => array(
@@ -60,6 +60,10 @@ class Application extends Factory
                     'format'          => '{@view:default_format}'
                 ),
                 'exception_paths' => array()
+            ),
+            'site' => array(
+                'title'    => 'Miny 1.0',
+                'base_url' => 'http://' . $_SERVER['HTTP_HOST'] . '{@router:prefix}'
             )
         ));
         $this->setInstance('app', $this);
@@ -168,28 +172,16 @@ class Application extends Factory
                 ->addMethodCall('register', 'filter_response', array($eh, 'logResponse'))
                 ->addMethodCall('register', 'invalid_response', array($eh, 'filterStringToResponse'));
 
-        $this->add('view', '\Miny\View\View')
-                ->setArguments('@view:dir', '@view:default_format')
-                ->addMethodCall('addMethod', 'route', '*router::generate')
-                ->addMethodCall('addMethod', 'filter_escape', 'htmlspecialchars')
-                ->addMethodCall('addMethod', 'filter_json', 'json_encode')
-                ->addMethodCall('addMethod', 'anchor',
-                        function($url, $label) {
-                            return '<a href="' . $url . '">' . $label . '</a>';
-                        })
-                ->addMethodCall('addMethod', 'routeAnchor',
-                        function($url, $label, array $params = array()) use($app) {
-                            $route = $app->router->generate($url, $params);
-                            return '<a href="' . $route . '">' . $label . '</a>';
-                        })
-                ->addMethodCall('addMethod', 'arguments',
-                        function(array $args) {
-                            $arglist = '';
-                            foreach ($args as $name => $value) {
-                                $arglist .= ' ' . $name . '="' . $value . '"';
-                            }
-                            return $arglist;
-                        });
+        $this->add('view_factory', '\Miny\View\ViewFactory')
+                ->addMethodCall('setPrefix', '@view:dir')
+                ->addMethodCall('setSuffix', '@view:default_format')
+                ->addMethodCall('setHelpers', '&view_helpers')
+                ->addMethodCall('addViewType', 'view', '\Miny\View\View')
+                ->addMethodCall('addViewType', 'list', '\Miny\View\ListView')
+                ->setProperty('config', '&app::getParameters');
+
+        $this->add('view_helpers', '\Miny\View\ViewHelpers')
+                ->addMethodCall('addMethod', 'route', '*router::generate');
 
         $this->add('controllers', '\Miny\Controller\ControllerCollection')
                 ->setArguments('&app');

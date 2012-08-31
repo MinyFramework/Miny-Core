@@ -36,17 +36,19 @@ class ApplicationEventHandlers
     public function logResponse(Request $request, Response $response)
     {
         $status = $response->getStatus();
-        $this->app->log->write(sprintf('Response for request [%s] %s', $request->method, $request->path, $status));
-        $this->app->log->write('Response status: ' . $status);
+        $log = $this->app->log;
+        $log->write(sprintf('Response for request [%s] %s', $request->method, $request->path, $status));
+        $log->write('Response status: ' . $status);
         if ($status == 'OK') {
-            $this->app->log->write('Response content type: ' . $response->content_type);
-            $this->app->log->write('Response body length: ' . strlen($response->getContent()));
+            $log->write('Response content type: ' . $response->content_type);
+            $log->write('Response body length: ' . strlen($response->getContent()));
         }
     }
 
     public function displayExceptionPage(Exception $e)
     {
-        $view = $this->app->view->get($this->app['view:exception']);
+//        $view = $this->app->view->get($this->app['view:exception']);
+        $view = $this->app->view_factory->get('view', $this->app['view:exception']);
         $view->app = $this->app;
         $view->exception = $e;
         return $view->render();
@@ -88,16 +90,18 @@ class ApplicationEventHandlers
 
     public function filterRoutes(Request $request)
     {
-        $match = $this->app->router->match($request->path, $request->method);
+        $app = $this->app;
+        $match = $app->router->match($request->path, $request->method);
         if (!$match) {
             throw new PageNotFoundException('Page not found: ' . $request->path);
         }
-        $this->app->log->write(sprintf('Matched route %s', $match->getRoute()->getPath()));
+        $app->log->write(sprintf('Matched route %s', $match->getRoute()->getPath()));
         parse_str(parse_url($_SERVER['REQUEST_URI'], PHP_URL_QUERY), $_GET);
         $request->get = $match->getParameters() + $_GET;
         if (isset($request->get['format'])) {
             $this->setResponseContentType($request->get['format']);
-            $this->app->view->setFormat($request->get['format']);
+            $app->getBlueprint('view_factory')
+                    ->addMethodCall('setSuffix', $request->get['format']);
         }
     }
 
