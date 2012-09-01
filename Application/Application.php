@@ -49,15 +49,15 @@ class Application extends Factory
             'root'             => $directory,
             'log_path'         => $directory . '/logs',
             'view'             => array(
-                'dir'            => $directory . '/views/',
-                'default_format' => '.html',
+                'dir'            => $directory . '/templates/',
+                'default_format' => '.{@router:defaults:format}',
                 'exception'      => 'layouts/exception'
             ),
             'router'         => array(
                 'prefix'   => '/',
                 'suffix'   => '.:format',
                 'defaults' => array(
-                    'format'          => '{@view:default_format}'
+                    'format'          => 'html'
                 ),
                 'exception_paths' => array()
             ),

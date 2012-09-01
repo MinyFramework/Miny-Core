@@ -100,8 +100,7 @@ class ApplicationEventHandlers
         $request->get = $match->getParameters() + $_GET;
         if (isset($request->get['format'])) {
             $this->setResponseContentType($request->get['format']);
-            $app->getBlueprint('view_factory')
-                    ->addMethodCall('setSuffix', $request->get['format']);
+            $app['view:default_format'] = '.' . $request->get['format'];
         }
     }
 
