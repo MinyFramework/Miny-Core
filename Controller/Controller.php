@@ -70,12 +70,6 @@ abstract class Controller extends Extendable
         if ($response->isRedirect()) {
             return;
         }
-
-        if (is_string($return)) {
-            echo $return;
-        } elseif ($return instanceof iView) {
-            echo $return->render();
-        }
     }
 
 }

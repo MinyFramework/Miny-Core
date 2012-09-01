@@ -13,9 +13,6 @@ use BadMethodCallException;
 use OutOfBoundsException;
 use RuntimeException;
 
-/**
- * TODO: fragmentek így nem jók, a régi blokkos téma jobban tetszett funkcionalitásilag...
- */
 class View implements iView, iTemplatingView
 {
     protected $fragment_stack = array();
