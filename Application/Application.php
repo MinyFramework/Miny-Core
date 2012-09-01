@@ -193,7 +193,7 @@ class Application extends Factory
                 ->addMethodCall('setHelpers', '&view_helpers')
                 ->addMethodCall('addViewType', 'view', '\Miny\View\View')
                 ->addMethodCall('addViewType', 'list', '\Miny\View\ListView')
-                ->setProperty('config', '&app::getParameters');
+                ->setProperty('config', '&app::getResolvedParameters');
 
         $this->add('view_helpers', '\Miny\View\ViewHelpers')
                 ->addMethodCall('addMethod', 'route', '*router::generate')
