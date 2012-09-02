@@ -65,12 +65,21 @@ class View implements iView, iTemplatingView
 
     public function __isset($key)
     {
-        return isset($this->vars[$key]);
+        return isset($this->vars[$key]) || isset($this->fragments[$key]);
     }
 
     public function __unset($key)
     {
         unset($this->vars[$key]);
+    }
+
+    public function get($key, $default = '')
+    {
+        if ($this->__isset($key)) {
+            return $this->__get($key);
+        } else {
+            return $default;
+        }
     }
 
     public function extend($extend)
