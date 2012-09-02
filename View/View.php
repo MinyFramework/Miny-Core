@@ -49,7 +49,9 @@ class View implements iView, iTemplatingView
 
     public function __get($key)
     {
-        if (isset($this->vars[$key])) {
+        if (isset($this->fragments[$key])) {
+            return $this->fragments[$key][0];
+        } elseif (isset($this->vars[$key])) {
             $var = $this->vars[$key];
             if (is_callable($var)) {
                 return call_user_func($var, $this);
@@ -57,8 +59,6 @@ class View implements iView, iTemplatingView
                 return $var->render();
             }
             return $var;
-        } elseif (isset($this->fragments[$key])) {
-            return $this->fragments[$key][0];
         }
         throw new OutOfBoundsException('Key not set: ' . $key);
     }
