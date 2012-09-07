@@ -11,7 +11,6 @@ namespace Miny\View;
 
 use BadMethodCallException;
 use OutOfBoundsException;
-use RuntimeException;
 
 class View implements iView, iTemplatingView
 {
@@ -20,7 +19,6 @@ class View implements iView, iTemplatingView
     protected $vars = array();
     protected $helpers;
     protected $template;
-    protected $template_file;
     protected $extend;
 
     public function __construct($template)
@@ -136,25 +134,17 @@ class View implements iView, iTemplatingView
     public function setTemplate($template)
     {
         $this->template = $template;
-        $this->template_file = NULL;
     }
 
     public function getTemplate()
     {
-        if (is_null($this->template_file)) {
-            $file = $this->template . '.php';
-            if (!is_file($file)) {
-                throw new RuntimeException('Template not found: ' . $this->template);
-            }
-            $this->template_file = $file;
-        }
-        return $this->template_file;
+        return $this->template;
     }
 
     public function renderFile($file)
     {
         ob_start();
-        include $file;
+        include $file . '.php';
         return ob_get_clean();
     }
 
@@ -163,7 +153,7 @@ class View implements iView, iTemplatingView
         $file = $this->template;
         do {
             $this->extend = NULL;
-            $content = $this->renderFile($file . '.php');
+            $content = $this->renderFile($file);
         } while ($file = $this->extend);
         return $content;
     }

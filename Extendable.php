@@ -19,7 +19,7 @@ class Extendable
     public function addMethod($method, $callback)
     {
         if (!is_callable($callback)) {
-            throw new InvalidArgumentException('Callback must be callable');
+            throw new InvalidArgumentException('Callback given for method ' . $method . ' is not callable');
         }
         $this->plugins[$method] = $callback;
     }

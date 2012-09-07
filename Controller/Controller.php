@@ -14,7 +14,6 @@ use Miny\Application\Application;
 use Miny\Extendable;
 use Miny\HTTP\Request;
 use Miny\HTTP\Response;
-use Miny\View\iView;
 
 abstract class Controller extends Extendable
 {
@@ -24,6 +23,12 @@ abstract class Controller extends Extendable
     public function __construct(Application $app)
     {
         $this->app = $app;
+        $this->init();
+    }
+
+    protected function init()
+    {
+
     }
 
     public function request($path, array $get = NULL, array $post = NULL, array $cookie = NULL)
@@ -40,6 +45,21 @@ abstract class Controller extends Extendable
         return $response;
     }
 
+    protected function view($type, $template)
+    {
+        return $this->app->view_factory->get($type, $template);
+    }
+
+    protected function service($name)
+    {
+        return $this->app->$name;
+    }
+
+    protected function route($name, array $parameters = array())
+    {
+        return $this->app->router->generate($name, $parameters);
+    }
+
     public function run($action, Request $request, Response $response)
     {
         $router = $this->app->router;
@@ -50,9 +70,6 @@ abstract class Controller extends Extendable
             'header' => 'setHeader',
             'cookie' => 'setCookie'
         ));
-        $this->addMethod('route', array($router, 'generate'));
-        $this->addMethod('service', array($this->app, '__get'));
-        $this->addMethod('view', array($this->app->view_factory, 'get'));
         $this->addMethod('redirectRoute',
                 function($route, array $params = array()) use($response, $router) {
                     $path = $router->generate($route, $params);
@@ -62,10 +79,10 @@ abstract class Controller extends Extendable
         $action = $action ? : $this->default_action;
         $fn = $action . 'Action';
         if (!method_exists($this, $fn)) {
-            throw new InvalidArgumentException('Action not found: ' . $fn);
+            throw new InvalidArgumentException('Action not found: ' . $action);
         }
 
-        $return = $this->$fn($request);
+        $this->$fn($request);
 
         if ($response->isRedirect()) {
             return;

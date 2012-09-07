@@ -45,7 +45,6 @@ class Application extends Factory
                             '\Modules'     => __DIR__ . '/../../Modules'
                 ));
         $this->setParameters(array(
-            'default_timezone' => date_default_timezone_get(),
             'root'             => $directory,
             'log_path'         => $directory . '/logs',
             'view'             => array(
@@ -278,6 +277,9 @@ class Application extends Factory
 
     public function run()
     {
+        if(!isset($this['default_timezone'])) {
+            $this['default_timezone'] = date_default_timezone_get();
+        }
         date_default_timezone_set($this['default_timezone']);
         $this->dispatch($this->request)->send();
     }
