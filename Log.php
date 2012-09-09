@@ -56,7 +56,11 @@ class Log
         if (!$this->can_log) {
             return;
         }
-        $this->messages[] = sprintf("[%s] %s: %s\n", date('Y-m-d H:i:s'), $level, $message);
+        $key = time();
+        if(!isset($this->messages[$key])) {
+            $this->messages[$key] = array();
+        }
+        $this->messages[$key][] = array($level, $message);
     }
 
     public function __destruct()
@@ -65,7 +69,15 @@ class Log
             return;
         }
         $file = $this->getLogFileName();
-        $data = implode('', $this->messages);
+
+        $data = '';
+
+        foreach($this->messages as $time => $messages) {
+            foreach($messages as $message) {
+                $data .= sprintf("[%s] %s: %s\n", date('Y-m-d H:i:s', $time), $message[0], $message[1]);
+            }
+        }
+
         $data .= "\n";
         if (file_put_contents($file, $data, FILE_APPEND) === false) {
             throw new RuntimeException('Could not write log file: ' . $file);
