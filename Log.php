@@ -73,8 +73,9 @@ class Log
         $data = '';
 
         foreach($this->messages as $time => $messages) {
+            $time = date('Y-m-d H:i:s', $time);
             foreach($messages as $message) {
-                $data .= sprintf("[%s] %s: %s\n", date('Y-m-d H:i:s', $time), $message[0], $message[1]);
+                $data .= sprintf("[%s] %s: %s\n", $time, $message[0], $message[1]);
             }
         }
 
