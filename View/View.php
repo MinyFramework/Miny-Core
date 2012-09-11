@@ -33,7 +33,7 @@ class View implements iView, iTemplatingView
 
     public function __call($method, $arguments)
     {
-        if (is_null($this->helpers)) {
+        if (!$this->helpers) {
             throw new BadMethodCallException('Helper functions are not set.');
         }
         return call_user_func_array(array($this->helpers, $method), $arguments);
@@ -49,16 +49,21 @@ class View implements iView, iTemplatingView
     {
         if (isset($this->fragments[$key])) {
             return $this->fragments[$key][0];
-        } elseif (isset($this->vars[$key])) {
-            $var = $this->vars[$key];
-            if (is_callable($var)) {
-                return call_user_func($var, $this);
-            } elseif ($var instanceof iView) {
-                return $var->render();
-            }
-            return $var;
         }
-        throw new OutOfBoundsException('Key not set: ' . $key);
+
+        if (!isset($this->vars[$key])) {
+            throw new OutOfBoundsException('Key not set: ' . $key);
+        }
+        $var = $this->vars[$key];
+
+        if (is_callable($var)) {
+            $var = call_user_func($var, $this);
+        }
+
+        if ($var instanceof iView) {
+            return $var->render();
+        }
+        return $var;
     }
 
     public function __isset($key)
@@ -73,11 +78,7 @@ class View implements iView, iTemplatingView
 
     public function get($key, $default = '')
     {
-        if ($this->__isset($key)) {
-            return $this->__get($key);
-        } else {
-            return $default;
-        }
+        return ($this->__isset($key)) ? $this->__get($key) : $default;
     }
 
     public function extend($extend)

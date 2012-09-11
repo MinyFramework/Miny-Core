@@ -32,7 +32,7 @@ class Extendable
         foreach ($method_aliasses as $alias => $method) {
             $callable = array($object, $method);
             if (!is_callable($callable)) {
-                throw new InvalidArgumentException('Method not found: ' . $method);
+                throw new InvalidArgumentException('Method ' . $method . ' not found in class ' . get_class($object));
             }
             if (is_numeric($alias)) {
                 $alias = $method;

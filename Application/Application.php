@@ -45,6 +45,7 @@ class Application extends Factory
                             '\Modules'     => __DIR__ . '/../../Modules'
                 ));
         $this->setParameters(array(
+            'default_timezone' => 'UTC',
             'root'             => $directory,
             'log_path'         => $directory . '/logs',
             'view'             => array(
@@ -167,7 +168,7 @@ class Application extends Factory
                         E_STRICT       => 'Strict notice (PHP)'
                     );
                     if (isset($loggable[$errno])) {
-                        $log->write($errstr, $loggable[$errno]);
+                        $log->write(sprintf("%s in %s on line %s", $errstr, $errfile, $errline), $loggable[$errno]);
                     } else {
                         throw new ErrorException($errstr, $errno, 0, $errfile, $errline);
                     }
@@ -277,9 +278,6 @@ class Application extends Factory
 
     public function run()
     {
-        if(!isset($this['default_timezone'])) {
-            $this['default_timezone'] = date_default_timezone_get();
-        }
         date_default_timezone_set($this['default_timezone']);
         $this->dispatch($this->request)->send();
     }

@@ -9,6 +9,9 @@
 
 namespace Miny\View;
 
+use Traversable;
+use UnexpectedValueException;
+
 class ListView extends View
 {
     public $list = array();
@@ -16,6 +19,9 @@ class ListView extends View
     public function render()
     {
         $output = '';
+        if (!is_array($this->list) && !$this->list instanceof Traversable) {
+            throw new UnexpectedValueException('Cannot iterate over the given value.');
+        }
         foreach ($this->list as $item) {
             if (!is_array($item)) {
                 $item = array(
