@@ -175,7 +175,7 @@ class Application extends Factory
                 });
 
         $this->log = $log;
-        $eh = new ApplicationEventHandlers($this);
+        $eh = new ApplicationEventHandlers($this, $log);
 
         $this->add('events', '\Miny\Event\EventDispatcher')
                 ->setArguments('&log')
@@ -223,15 +223,13 @@ class Application extends Factory
 
     public function resource($name, $controller = NULL, array $parameters = array())
     {
-        $controller = $controller ? : $name;
-        $parameters['controller'] = $controller;
+        $parameters['controller'] = $controller ? : $name;
         return $this->router->resource($name, $parameters, true);
     }
 
     public function resources($name, $controller = NULL, array $parameters = array())
     {
-        $controller = $controller ? : $name;
-        $parameters['controller'] = $controller;
+        $parameters['controller'] = $controller ? : $name;
         return $this->router->resource($name, $parameters, false);
     }
 

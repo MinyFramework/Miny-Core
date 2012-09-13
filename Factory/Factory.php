@@ -16,7 +16,7 @@ use ReflectionClass;
 
 /**
  * Factory class
- * Responsible for storing Blueprint and their dependencies, parameters.
+ * Responsible for storing Blueprints and their dependencies, parameters.
  * Factory instantiates stored objects on demand and injects them with specified
  * dependencies.
  *
@@ -24,22 +24,8 @@ use ReflectionClass;
  */
 class Factory implements ArrayAccess
 {
-    /**
-     * A name => object array of stored objects
-     * @var array
-     */
     protected $objects = array();
-
-    /**
-     * A name => object array of stored Blueprints
-     * @var array
-     */
     protected $blueprints = array();
-
-    /**
-     * A name => value array of stored parameters
-     * @var array
-     */
     protected $parameters = array();
     protected $aliasses = array();
 
@@ -67,10 +53,8 @@ class Factory implements ArrayAccess
     }
 
     /**
+     * Creates a Blueprint for $classname and registers it with $alias.
      *
-     * @param string $alias
-     * @param string $classname
-     * @param boolean $singleton
      * @return Blueprint
      */
     public function add($alias, $classname, $singleton = true)
@@ -79,7 +63,7 @@ class Factory implements ArrayAccess
     }
 
     /**
-     * Registers an Blueprint with the given alias.
+     * Registers a Blueprint with the given alias.
      * Unsets any existing instances for the given alias.
      *
      * @param string $alias
@@ -102,6 +86,9 @@ class Factory implements ArrayAccess
      */
     public function setInstance($alias, $object)
     {
+        if (!is_object($object)) {
+            throw new InvalidArgumentException('Factory::setInstance needs an object for alias ' . $alias);
+        }
         $this->objects[$alias] = $object;
     }
 
@@ -130,7 +117,7 @@ class Factory implements ArrayAccess
     }
 
     /**
-     * Retrieves all stored Blueprint.
+     * Retrieves all stored Blueprint objects.
      *
      * @return array
      */
@@ -140,9 +127,8 @@ class Factory implements ArrayAccess
     }
 
     /**
-     * Creates an object using information stored in Blueprint class.
-     * If an object for the given $alias already exists,
-     * returns with the stored object.
+     * Returns with the object stored under $alias.
+     * The method creates the object instance if needed.
      *
      * @param string $alias
      * @return object
@@ -165,12 +151,6 @@ class Factory implements ArrayAccess
         return $obj;
     }
 
-    /**
-     * Injects the object with it's dependencies.
-     *
-     * @param object $object
-     * @param Blueprint $descriptor
-     */
     private function injectDependencies($object, Blueprint $descriptor)
     {
         if ($descriptor->hasParent()) {
@@ -187,14 +167,6 @@ class Factory implements ArrayAccess
         }
     }
 
-    /**
-     * Instantiates the given Blueprint and injects it with the
-     * constructor's parameters.
-     *
-     * @param Blueprint $descriptor
-     * @return object
-     * @throws InvalidArgumentException
-     */
     private function instantiate(Blueprint $descriptor)
     {
         $class = $descriptor->getClassName();
@@ -223,27 +195,8 @@ class Factory implements ArrayAccess
     }
 
     /**
-     * Resolves parameter references.
-     * If the parameter is a string, the first character specifies the value
-     * type:
-     *  - @: A parameter, @see Factory::offsetGet()
-     *  - &: An instance or the return value of a method call.
-     *       Syntax to define a method call:
-     *       object::method[::parameter1::parameter2...]
-     *       At this moment, only string or integer parameters are supported.
-     *  - *: A callback function. This can be a function or a method of an
-     *       object.
-     *       To define a function, give simply the function name.
-     *       To define an object, use the object::method syntax.
-     * If the $var parameter is not a string, or is only a character it is
-     * returned as is.
-     * If you wish to pass a string beginning with one of these characters, you
-     * need to escape the first character. To do that, simply prefix it with a
-     * backslash (\) character. The backslash character must also be escaped the
-     * same way if you want to pass a string starting with a backlash followed
-     * by a parameter specifier. In practice it means, that in order to pass a
-     * string starting with *, &, @, \*, \&, \@ character sequence, you must
-     * prefix those with a backslash.
+     * Resolves parameter references recursively.
+     *
      * @param mixed $var
      * @return mixed
      */
@@ -255,15 +208,19 @@ class Factory implements ArrayAccess
                 $var[$key] = $this->getValue($value);
             }
         }
-        //direct injection for non-string values
+
+        //if the parameter is a Blueprint, instantiate and inject it
         if ($var instanceof Blueprint) {
             $object = $this->instantiate($var);
             $this->injectDependencies($object, $var);
             return $object;
         }
+
+        //direct injection for non-string values
         if (!is_string($var) || strlen($var) <= 1) {
             return $var;
         }
+
         //see if $var is a reference to something
         $str = substr($var, 1);
         switch ($var[0]) {
@@ -271,10 +228,8 @@ class Factory implements ArrayAccess
                 $var = $this->offsetGet($str);
                 break;
             case '&':
-                /*
-                 * object or method call. Basically this is
-                 * $factory->create('object')->method(parameters);
-                 */
+                //object or method call. Basically this is
+                //$factory->create('object')->method(parameters);
                 $var = $this->getObjectParameter($str);
                 break;
             case '*'://callback
@@ -284,10 +239,7 @@ class Factory implements ArrayAccess
                 }
                 break;
             case '\\':
-                /*
-                 * if parameter is string beginning
-                 * with *, &, @ and \, those must be escaped
-                 */
+                //remove backslash from escaped characters
                 $escaped = array('\\', '*', '&', '@');
                 if (in_array($var[1], $escaped)) {
                     $var = $str;
@@ -297,16 +249,11 @@ class Factory implements ArrayAccess
         return $var;
     }
 
-    /**
-     * Processes a parameter string, which specifies an object, a property or a method call.
-     *
-     * @see Factory::getValue()
-     * @param string $str
-     * @return mixed
-     */
     private function getObjectParameter($str)
     {
         if (($pos = strpos($str, '::')) !== false) {
+            //method parameters are separated by ::
+            //TOOD: use different separator for method names and arguments, support for nested method calls
             $arr = explode('::', $str);
             $obj_name = array_shift($arr);
             $method = array_shift($arr);
@@ -335,8 +282,9 @@ class Factory implements ArrayAccess
 
     /**
      * Stores an array of parameters.
+     * Parameters must be defined as name => value
      *
-     * @param array $parameters A name => value array of parameters to store.
+     * @param array $parameters
      */
     public function setParameters(array $parameters)
     {
@@ -365,17 +313,7 @@ class Factory implements ArrayAccess
 
     /**
      * Processes a parameter string, which specifies a stored parameter.
-     * The method is capable of indexing arrays. To get a value from an array,
-     * separate the array name and index with a colon (:)
-     *
-     * @example
-     * Assume, that parameter foo is an array. Foo is defined as
-     * $foo = array(
-     *     'bar' => 'baz'
-     * );
-     *
-     * In order to receive the value contained under bar, use
-     * $factory['foo:bar'];
+     * You can use colons (:) to reference an element of an array within an array ...
      *
      * @param string $key The parameter to get.
      * @return mixed The parameter value

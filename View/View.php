@@ -33,7 +33,7 @@ class View implements iView, iTemplatingView
 
     public function __call($method, $arguments)
     {
-        if (!$this->helpers) {
+        if ($this->helpers === NULL) {
             throw new BadMethodCallException('Helper functions are not set.');
         }
         return call_user_func_array(array($this->helpers, $method), $arguments);
@@ -91,7 +91,7 @@ class View implements iView, iTemplatingView
         if (isset($this->fragments[$name])) {
             list($old_content, $old_mode) = $this->fragments[$name];
 
-            if (is_null($old_mode)) {
+            if ($old_mode === NULL) {
                 $old_mode = $mode;
             }
 

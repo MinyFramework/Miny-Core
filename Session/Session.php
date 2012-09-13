@@ -19,11 +19,6 @@ use OutOfBoundsException;
 
 class Session implements ArrayAccess, IteratorAggregate, Countable
 {
-    /**
-     * Indicates whether the session is started.
-     * @access private
-     * @var boolean
-     */
     private $is_open = false;
 
     public function __construct($register_custom_storage = false)
@@ -144,12 +139,14 @@ class Session implements ArrayAccess, IteratorAggregate, Countable
      */
     public function sessionName($name = NULL)
     {
-        if ($name !== NULL) {
-            if (!$this->is_open) {
-                session_name($name);
-            }
-        } else {
+        if (!$name) {
             return session_name();
+        }
+        if (!is_string($name)) {
+            throw new InvalidArgumentException('Session name must be NULL or a string');
+        }
+        if (!$this->is_open) {
+            session_name($name);
         }
     }
 
@@ -160,14 +157,19 @@ class Session implements ArrayAccess, IteratorAggregate, Countable
      */
     public function savePath($path = NULL)
     {
-        if (is_null($path)) {
+        if (!$path) {
             return session_save_path();
-        } elseif (!$this->is_open) {
-            if (!is_dir($path)) {
-                throw new InvalidArgumentException('Path not found: ' . $path);
-            }
-            session_save_path($path);
         }
+        if ($this->is_open) {
+            return;
+        }
+        if (!is_string($path)) {
+            throw new InvalidArgumentException('Session path must be NULL or a string');
+        }
+        if (!is_dir($path)) {
+            throw new InvalidArgumentException('Path not found: ' . $path);
+        }
+        session_save_path($path);
     }
 
     /**
@@ -221,7 +223,7 @@ class Session implements ArrayAccess, IteratorAggregate, Countable
                 break;
             default:
                 if (!is_numeric($arguments[1])) {
-                    throw new \InvalidArgumentException('Secound argument must be a number.');
+                    throw new InvalidArgumentException('Secound argument must be a number.');
                 }
         }
 
@@ -242,7 +244,7 @@ class Session implements ArrayAccess, IteratorAggregate, Countable
 
     public function offsetSet($key, $value)
     {
-        if (is_null($key)) {
+        if ($key === NULL) {
             $_SESSION['data'][] = $value;
         } else {
             $_SESSION['data'][$key] = $value;

@@ -25,6 +25,7 @@ class EventDispatcher
         } elseif ($place === NULL) {
             $this->handlers[$event][] = $handler;
         } else {
+            //insert handler to the given place
             array_splice($this->handlers[$event], $place, 0, array($handler));
         }
     }

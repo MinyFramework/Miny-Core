@@ -9,6 +9,9 @@
 
 namespace Miny\View;
 
+use InvalidArgumentException;
+use OutOfBoundsException;
+
 class PartialView implements iView
 {
     protected $template_string;
@@ -17,7 +20,7 @@ class PartialView implements iView
     public function __construct($template_string)
     {
         if (!is_string($template_string)) {
-            throw new \InvalidArgumentException('Partial template must be string!');
+            throw new InvalidArgumentException('Partial template must be string!');
         }
         $this->template_string = $template_string;
     }

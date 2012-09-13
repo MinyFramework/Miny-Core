@@ -9,61 +9,26 @@
 
 namespace Miny\Factory;
 
+use BadMethodCallException;
 use InvalidArgumentException;
 
 /**
  * Blueprint class
- * Responsible for statically descripting objects and their dependencies.
+ * Responsible for statically describing objects and their dependencies.
  *
  * @author  Dániel Buga
  */
 class Blueprint
 {
-    /**
-     * @see Blueprint::isSingleton()
-     * @access private
-     * @var boolean
-     */
     private $singleton;
-
-    /**
-     * The classname of the descripted object.
-     * @access private
-     * @var string
-     */
     private $classname;
-
-    /**
-     * The constructor arguments.
-     * @access private
-     * @var array
-     */
     private $args = array();
-
-    /**
-     * Methods to call upon instantiation.
-     * @access private
-     * @var array
-     */
     private $methods = array();
-
-    /**
-     * Properties to set upon instantaiation.
-     * @access private
-     * @var array
-     */
     private $properties = array();
-
-    /**
-     * @access private
-     * @var string
-     */
     private $parent;
 
     /**
-     *
      * @param string $classname The classname of the described object.
-     * @param array $ctor_arguments The parameters for object constructor.
      * @param boolean $singleton Indicates, whether the object is a singleton.
      */
     public function __construct($classname, $singleton = true)
@@ -78,7 +43,6 @@ class Blueprint
     /**
      * Sets constructor arguments.
      *
-     * @param array $arg
      * @return Blueprint
      */
     public function setArguments()
@@ -103,11 +67,13 @@ class Blueprint
      * Sets a method with its parameters to be called upon instantiation.
      *
      * @param string $method
-     * @param array $arguments
      * @return Blueprint
      */
     public function addMethodCall()
     {
+        if (func_num_args() == 0) {
+            throw new BadMethodCallException('Blueprint::addMethodCall needs at least one argument.');
+        }
         $arguments = func_get_args();
         $method = array_shift($arguments);
         $this->methods[] = array($method, $arguments);
@@ -115,7 +81,7 @@ class Blueprint
     }
 
     /**
-     * Sets a value to be set as property $name.
+     * Sets a value for property given in $name.
      *
      * @param string $name
      * @param mixed $value

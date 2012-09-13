@@ -82,7 +82,7 @@ class ViewFactory
         }
         $class = $this->views[$type];
         $view = new $class($this->prefix . $template . $this->suffix);
-        if (!is_null($this->helpers)) {
+        if ($this->helpers !== NULL) {
             $view->setHelpers($this->helpers);
         }
         foreach ($this->assigns as $key => $value) {
