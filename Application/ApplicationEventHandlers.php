@@ -12,6 +12,7 @@ namespace Miny\Application;
 use Exception;
 use Miny\HTTP\Request;
 use Miny\HTTP\Response;
+use Miny\Log;
 use Miny\Routing\Exceptions\PageNotFoundException;
 
 class ApplicationEventHandlers
