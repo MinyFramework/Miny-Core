@@ -11,7 +11,7 @@ namespace Miny\View;
 
 class ViewLoader
 {
-    private static $group_pattern = '/<!-- Template: (.*?) -->(.*?)<!-- End of template: (\\1) -->/musS';
+    private static $group_pattern = '/<!-- Template: (\w+) -->(.*?)<!-- End of template: (\\1) -->/musS';
     private $view_dir;
     private $helpers;
     private $views;
