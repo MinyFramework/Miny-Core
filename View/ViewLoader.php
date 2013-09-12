@@ -9,10 +9,6 @@
 
 namespace Miny\View;
 
-use Miny\View\Exceptions\ViewNotFoundException;
-use Miny\View\Exceptions\ViewDirectoryNotFoundException;
-use Miny\View\Exceptions\ViewFileNotFoundException;
-
 class ViewLoader
 {
     private static $group_pattern = '/<!-- Template: (\w+) -->(.*?)<!-- End of template: (\\1) -->/musS';
@@ -74,11 +70,11 @@ class ViewLoader
         }
 
         $matches = array();
-        preg_match_all(self::$group_pattern, $file_contents, $matches);
+        preg_match_all(self::$group_pattern, $file_contents, &$matches);
 
         foreach ($matches as $match) {
             list(, $template_name, $template_contents) = $match;
-            $this->views[$format][$template_name] = new View($template_contents, $this);
+            $this->views[$template_name] = new View($template_contents, $this);
         }
     }
 
@@ -92,19 +88,16 @@ class ViewLoader
             $ex = sprintf('View file not found with name "%s" and format "%s"', $filename, $format);
             throw new ViewFileNotFoundException($ex);
         }
-        $this->views[$format][$filename] = new View($file_contents, $this);
+        $this->views[$filename] = new View($file_contents, $this);
     }
 
-    public function getView($view, $format = NULL)
+    public function getView($view)
     {
-        if ($format == NULL) {
-            $format = $this->default_format;
+        if (!isset($this->views[$view])) {
+            $ex = sprintf('View not found: %s', $view);
+            throw new ViewFileNotFoundException($ex);
         }
-        if (!isset($this->views[$format][$view])) {
-            $ex = sprintf('View not found with name "%s" and format "%s"', $view, $format);
-            throw new ViewNotFoundException($ex);
-        }
-        return $this->views[$format][$view];
+        return $this->views[$view];
     }
 
 }

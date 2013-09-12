@@ -9,8 +9,6 @@
 
 namespace Miny\View;
 
-use Miny\View\Exceptions\ViewMissingVariablesException;
-
 class View
 {
     //function: {stg:$a,"b"}
@@ -73,10 +71,11 @@ class View
     {
         if (is_array($variable)) {
             $ex = sprintf('Could not render view. Missing variables: %s', implode(', ', $variable));
+            throw new ViewMissingVariablesException($ex, 0, $previous);
         } else {
             $ex = sprintf('Could not render view. Variables "%s" is not set.', $variable);
+            throw new ViewMissingVariablesException($ex, 0, $previous);
         }
-        throw new ViewMissingVariablesException($ex, 0, $previous);
     }
 
     public function render(array $variables = array())
