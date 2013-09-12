@@ -16,7 +16,7 @@ class View
     //function: {stg:$a,"b"}
     //template: {template:valami}
     //list: {list:sablon:$tomb}
-    private static $variable_pattern = '/\{\$(.*?)\}/Sus';
+    private static $variable_pattern = '/\{$(.*?)\}/Sus';
     private static $function_pattern = '/\{([^$]*?)\}/Sus'; //incomplete - this is the most complex
     private static $include_pattern = '/\{template:(.*?)\}/Sus';
     private static $list_pattern = '/\{list:(.*?):$(.*?)\}/Sus';
@@ -43,27 +43,10 @@ class View
 
     protected function collectPlaceholders()
     {
-        $temp = array();
-        preg_match_all(self::$variable_pattern, $this->template, $temp);
-
-        foreach ($temp[0] as $k => $placeholder) {
-            $key = $temp[1][$k];
-            $this->variable_placeholders[$placeholder] = $key;
-        }
-
-        //preg_match_all(self::$function_pattern, $this->template, $temp);
-
-        preg_match_all(self::$include_pattern, $this->template, $temp);
-        foreach ($temp[0] as $k => $placeholder) {
-            $template = $temp[1][$k];
-            $this->include_placeholders[$placeholder] = $template;
-        }
-        preg_match_all(self::$list_pattern, $this->template, $temp);
-        foreach ($temp[0] as $k => $placeholder) {
-            $template = $temp[1][$k];
-            $array = $temp[2][$k];
-            $this->list_placeholders[$placeholder] = array($template, $array);
-        }
+        preg_match_all(self::$variable_pattern, $this->template, $this->variable_placeholders);
+        preg_match_all(self::$function_pattern, $this->template, $this->function_placeholders);
+        preg_match_all(self::$include_pattern, $this->template, $this->include_placeholders);
+        preg_match_all(self::$list_pattern, $this->template, $this->list_placeholders);
     }
 
     private function getArrayItem(array $array, $key)
@@ -98,32 +81,38 @@ class View
 
     public function render(array $variables = array())
     {
-        $array_diff = array_diff(array_values($this->variable_placeholders), array_keys($variables));
+        $array_diff = array_diff_key($this->variable_placeholders, $variables);
         if (!empty($array_diff)) {
             $this->raiseMissingVariableException($array_diff);
         }
 
         $replaces = array();
-        foreach ($this->variable_placeholders as $placeholder => $key) {
-            $replaces[$placeholder] = $this->getArrayItem($variables, $key);
+        foreach ($this->variable_placeholders as $placeholder) {
+            list($key, $name) = $placeholder;
+            $replaces[$key] = $this->getArrayItem($variables, $name);
         }
 
-        foreach ($this->function_placeholders as $placeholder => $array) {
-            $function = array_shift($array);
+        foreach ($this->function_placeholders as $placeholder) {
+            $key = array_shift($placeholder);
+            $function = array_shift($placeholder);
             $arguments = array();
-            foreach ($array as $value) {
+            foreach ($placeholder as $value) {
                 $arguments[] = $this->getTemplateFunctionParameterValue($value, $variables);
             }
-            $replaces[$placeholder] = call_user_func_array(array($this->helpers, $function), $arguments);
+            $replaces[$key] = call_user_func_array(array($this->helpers, $function), $arguments);
         }
-        foreach ($this->include_placeholders as $placeholder => $template) {
-            if ($template == '$') {
+        foreach ($this->include_placeholders as $placeholder) {
+            list($key, $template) = $placeholder;
+
+            if ($template[0] == '$') {
                 $template = $this->getArrayItem($variables, substr($template, 1));
             }
 
-            $replaces[$placeholder] = $this->loader->getView($template)->render($variables);
+            $replaces[$key] = $this->loader->getView($template)->render($variables);
         }
-        foreach ($this->list_placeholders as $placeholder => $array) {
+        foreach ($this->list_placeholders as $placeholder) {
+            list($key, $template, $array) = $placeholder;
+
             $view = $this->loader->getView($template);
             $temp = array_map(array($view, 'render'), $this->getArrayItem($variables, $array));
 
