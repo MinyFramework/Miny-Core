@@ -11,11 +11,12 @@ namespace Miny\View;
 
 class View
 {
+    //variable: {$asd}
     //function: {stg:$a,"b"}
     //template: {template:valami}
     //list: {list:sablon:$tomb}
     private static $variable_pattern = '/\{$(.*?)\}/Sus';
-    private static $function_pattern = '/\{([^$]*?)\}/Sus'; //incomplete - this is the most complex
+    private static $function_pattern = '/\{([^$]*?)\}/Sus';
     private static $include_pattern = '/\{template:(.*?)\}/Sus';
     private static $list_pattern = '/\{list:(.*?):$(.*?)\}/Sus';
     private $variable_placeholders = array();
@@ -47,14 +48,6 @@ class View
         preg_match_all(self::$list_pattern, $this->template, $this->list_placeholders);
     }
 
-    private function getArrayItem(array $array, $key)
-    {
-        if (!isset($array[$key])) {
-            $this->raiseMissingVariableException($key);
-        }
-        return $array[$key];
-    }
-
     private function getTemplateFunctionParameterValue($var, array $variables)
     {
         $len = strlen($var);
@@ -64,32 +57,23 @@ class View
         if ($var[0] == '"' && $var[$len - 1] == '"') {
             return substr($var, 1, $len - 2);
         }
-        return $this->getArrayItem($variables, $var);
-    }
-
-    private function raiseMissingVariableException($variable, $previous = NULL)
-    {
-        if (is_array($variable)) {
-            $ex = sprintf('Could not render view. Missing variables: %s', implode(', ', $variable));
-            throw new ViewMissingVariablesException($ex, 0, $previous);
-        } else {
-            $ex = sprintf('Could not render view. Variables "%s" is not set.', $variable);
-            throw new ViewMissingVariablesException($ex, 0, $previous);
+        if (isset($variables[$var])) {
+            return $variables[$var];
         }
+        $ex = sprintf('Could not render view. Missing variable: %s', $var);
+        throw new ViewMissingVariablesException($ex);
     }
 
     public function render(array $variables = array())
     {
         $array_diff = array_diff_key($this->variable_placeholders, $variables);
         if (!empty($array_diff)) {
-            $this->raiseMissingVariableException($array_diff);
+            $ex = sprintf('Could not render view. Missing variables: %s', implode(', ', $array_diff));
+            throw new ViewMissingVariablesException($ex);
         }
-
-        $replaces = array();
-        foreach ($this->variable_placeholders as $placeholder) {
-            list($key, $name) = $placeholder;
-            $replaces[$key] = $this->getArrayItem($variables, $name);
-        }
+        //TODO: make sure that keys and values are the same order
+        $keys = array_keys($this->variable_placeholders);
+        $values = $variables;
 
         foreach ($this->function_placeholders as $placeholder) {
             $key = array_shift($placeholder);
@@ -98,26 +82,30 @@ class View
             foreach ($placeholder as $value) {
                 $arguments[] = $this->getTemplateFunctionParameterValue($value, $variables);
             }
-            $replaces[$key] = call_user_func_array(array($this->helpers, $function), $arguments);
+
+            $keys[] = $key;
+            $values[] = call_user_func_array(array($this->helpers, $function), $arguments);
         }
         foreach ($this->include_placeholders as $placeholder) {
             list($key, $template) = $placeholder;
-
-            if ($template[0] == '$') {
-                $template = $this->getArrayItem($variables, substr($template, 1));
-            }
-
-            $replaces[$key] = $this->loader->getView($template)->render($variables);
+            $keys[] = $key;
+            $values[] = $this->loader->getView($template)->render($values);
         }
         foreach ($this->list_placeholders as $placeholder) {
             list($key, $template, $array) = $placeholder;
 
-            $view = $this->loader->getView($template);
-            $temp = array_map(array($view, 'render'), $this->getArrayItem($variables, $array));
+            if (!isset($values[$array])) {
+                $ex = sprintf('Could not render view. Missing variable: %s', $array);
+                throw new ViewMissingVariablesException($ex);
+            }
 
-            $replaces[$key] = implode('', $temp);
+            $view = $this->loader->getView($template);
+            $temp = array_map(array($view, 'render'), $values[$array]);
+
+            $keys[] = $key;
+            $values[] = implode('', $temp);
         }
-        return str_replace(array_keys($replaces), $replaces, $this->template);
+        return str_replace($keys, $values, $this->template);
     }
 
     public function renderMultiple(array $variables = array())
