@@ -19,6 +19,12 @@ class Log
     private $messages = array();
     private $can_log = true;
 
+    /**
+     *
+     * @param string $path
+     * @param boolean $force_log
+     * @throws Exception
+     */
     public function __construct($path, $force_log = false)
     {
         $path = realpath($path);
@@ -47,11 +53,20 @@ class Log
         }
     }
 
+    /**
+     *
+     * @return string
+     */
     public function getLogFileName()
     {
         return $this->path . '/log_' . date('Y_m_d') . '.log';
     }
 
+    /**
+     *
+     * @param string $message
+     * @param string $level
+     */
     public function write($message, $level = 'info')
     {
         if (!$this->can_log) {
@@ -64,6 +79,10 @@ class Log
         $this->messages[$key][] = array($level, $message);
     }
 
+    /**
+     *
+     * @throws RuntimeException
+     */
     public function saveLog()
     {
         if (empty($this->messages)) {

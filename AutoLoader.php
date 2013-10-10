@@ -20,12 +20,21 @@ class AutoLoader
 {
     private $map = array();
 
+    /**
+     *
+     * @param array $map
+     */
     public function __construct(array $map = array())
     {
         spl_autoload_register(array($this, 'load'));
         $this->register($map);
     }
 
+    /**
+     *
+     * @param string $namespace
+     * @param string $path
+     */
     public function register($namespace, $path = NULL)
     {
         if (is_array($namespace)) {
@@ -67,6 +76,11 @@ class AutoLoader
         }
     }
 
+    /**
+     *
+     * @param string $class
+     * @throws ClassNotFoundException
+     */
     public function load($class)
     {
         $path = $this->getPathToNamespace($class);
@@ -89,3 +103,4 @@ class ClassNotFoundException extends OutOfBoundsException
     }
 
 }
+
