@@ -11,6 +11,7 @@ namespace Miny\View;
 
 use BadMethodCallException;
 use OutOfBoundsException;
+use UnexpectedValueException;
 
 class View implements iView, iTemplatingView
 {
@@ -83,6 +84,9 @@ class View implements iView, iTemplatingView
 
     public function extend($extend)
     {
+        if (!is_file($extend . '.php')) {
+            throw new UnexpectedValueException(sprintf('View file not found: %s.php', $extend));
+        }
         $this->extend = $extend;
     }
 
