@@ -33,6 +33,7 @@ class Request
     public $cookie;
     private $method;
     private $ip;
+    private $referer;
     private $type;
 
     public function __construct($path, array $get = array(), array $post = array(), array $cookie = array(),
@@ -43,6 +44,10 @@ class Request
         $this->post = $post;
         $this->cookie = $cookie;
         $this->type = $type;
+
+        if (isset($_SERVER['HTTP_REFERER'])) {
+            $this->referer = $_SERVER['HTTP_REFERER'];
+        }
 
         $this->ip = isset($_SERVER['HTTP_X_FORWARDED_FOR']) ? $_SERVER['HTTP_X_FORWARDED_FOR'] : $_SERVER['REMOTE_ADDR'];
 
@@ -67,3 +72,4 @@ class Request
     }
 
 }
+

@@ -34,6 +34,9 @@ class ApplicationEventHandlers
     public function logRequest(Request $request)
     {
         $this->log->write(sprintf('Request: [%s] %s Source: %s', $request->method, $request->path, $request->ip));
+        if (!empty($request->referer)) {
+            $this->log->write(sprintf('Request: [%s] Referer: %s', $request->method, $request->referer));
+        }
     }
 
     public function logResponse(Request $request, Response $response)
@@ -119,3 +122,4 @@ class ApplicationEventHandlers
     }
 
 }
+

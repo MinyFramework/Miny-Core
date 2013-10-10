@@ -39,11 +39,11 @@ class Application extends Factory
     {
         $this->environment = $environment;
         $this->autoloader = new AutoLoader(
-                        array(
-                            '\Application' => $directory,
-                            '\Miny'        => __DIR__ . '/..',
-                            '\Modules'     => __DIR__ . '/../../Modules'
-                ));
+                array(
+            '\Application' => $directory,
+            '\Miny'        => __DIR__ . '/..',
+            '\Modules'     => __DIR__ . '/../../Modules'
+        ));
         $this->setParameters(array(
             'default_timezone' => 'UTC',
             'root'             => $directory,
@@ -53,15 +53,15 @@ class Application extends Factory
                 'default_format' => '.{@router:defaults:format}',
                 'exception'      => 'layouts/exception'
             ),
-            'router'         => array(
-                'prefix'   => '/',
-                'suffix'   => '.:format',
-                'defaults' => array(
-                    'format'          => 'html'
+            'router'           => array(
+                'prefix'          => '/',
+                'suffix'          => '.:format',
+                'defaults'        => array(
+                    'format' => 'html'
                 ),
                 'exception_paths' => array()
             ),
-            'site' => array(
+            'site'             => array(
                 'title'    => 'Miny 1.0',
                 'base_url' => 'http://' . $_SERVER['HTTP_HOST'] . '{@router:prefix}'
             )
@@ -198,7 +198,7 @@ class Application extends Factory
         $this->add('view_helpers', '\Miny\View\ViewHelpers')
                 ->addMethodCall('addMethod', 'route', '*router::generate')
                 ->addMethodCall('addMethod', 'routeAnchor',
-                        function($route, $label, array $parameters = array()) use($app) {
+                                function($route, $label, array $parameters = array()) use($app) {
                             $url = $app->router->generate($route, $parameters);
                             return sprintf('<a href="%s">%s</a>', $url, $label);
                         });
