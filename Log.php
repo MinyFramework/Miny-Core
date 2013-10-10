@@ -32,6 +32,7 @@ class Log
             }
         }
         $this->path = $path;
+        register_shutdown_function(array($this, 'saveLog'));
     }
 
     private function checkPath($path)
@@ -57,13 +58,13 @@ class Log
             return;
         }
         $key = time();
-        if(!isset($this->messages[$key])) {
+        if (!isset($this->messages[$key])) {
             $this->messages[$key] = array();
         }
         $this->messages[$key][] = array($level, $message);
     }
 
-    public function __destruct()
+    public function saveLog()
     {
         if (empty($this->messages)) {
             return;
@@ -72,9 +73,9 @@ class Log
 
         $data = '';
 
-        foreach($this->messages as $time => $messages) {
+        foreach ($this->messages as $time => $messages) {
             $time = date('Y-m-d H:i:s', $time);
-            foreach($messages as $message) {
+            foreach ($messages as $message) {
                 $data .= sprintf("[%s] %s: %s\n", $time, $message[0], $message[1]);
             }
         }
@@ -86,3 +87,4 @@ class Log
     }
 
 }
+
