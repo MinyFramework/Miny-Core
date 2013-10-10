@@ -266,7 +266,8 @@ class Resources extends RouteCollection
             $route->specify('id', $this->id_pattern);
             if ($this->hasParent()) {
                 $route->specify($parent->name . '_id', $parent->id_pattern);
-            }
+            }echo $route->getPath(), ':', $route->getMethod(), ' - ', $action;
+            echo '<br>';
             $this->addRoute($route, $name);
         }
     }

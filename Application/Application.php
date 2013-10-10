@@ -270,7 +270,7 @@ class Application extends Factory
     public function resource($name, $controller = NULL, array $parameters = array())
     {
         $parameters['controller'] = $controller ? : $name;
-        return $this->router->resource($name, $parameters, true);
+        return $this->router->resource($name, $parameters);
     }
 
     /**
@@ -283,7 +283,7 @@ class Application extends Factory
     public function resources($name, $controller = NULL, array $parameters = array())
     {
         $parameters['controller'] = $controller ? : $name;
-        return $this->router->resource($name, $parameters, false);
+        return $this->router->resources($name, $parameters);
     }
 
     /**
