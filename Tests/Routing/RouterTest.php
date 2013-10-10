@@ -11,10 +11,11 @@ class RouterTest extends \PHPUnit_Framework_TestCase
 
     protected function setUp()
     {
-        $this->object = new Router('prefix/', '.suffix', array(
-                    'default_parameter' => 'default_value',
-                    'parameter'         => 'value'
-                ));
+        $this->object = new Router('prefix/', '.suffix',
+                                   array(
+            'default_parameter' => 'default_value',
+            'parameter'         => 'value'
+        ));
     }
 
     public function testRootShouldOnlyHavePrefixByDefault()
@@ -77,7 +78,7 @@ class RouterTest extends \PHPUnit_Framework_TestCase
 
     public function testRouterShouldBuildResourcesBeforeMatch()
     {
-        $this->object->resource('foo_resources', array('parameter' => 'resource_parameter'));
+        $this->object->resources('foo_resources', array('parameter' => 'resource_parameter'));
         $match = $this->object->match('prefix/foo_resources/5.suffix', 'GET');
         $this->assertInstanceOf(__NAMESPACE__ . '\Match', $match);
         $this->assertEquals(array(
@@ -91,7 +92,7 @@ class RouterTest extends \PHPUnit_Framework_TestCase
 
     public function testRouterShouldBuildResourcesBeforeGenerate()
     {
-        $this->object->resource('foo_resources', array('parameter' => 'resource_parameter'));
+        $this->object->resources('foo_resources', array('parameter' => 'resource_parameter'));
         $this->assertEquals('prefix/foo_resources/5.suffix', $this->object->generate('foo_resource', array('id' => 5)));
     }
 
