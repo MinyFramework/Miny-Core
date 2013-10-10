@@ -84,6 +84,11 @@ class Application extends Factory
         $this->registerDefaultServices();
         $env = ($environment == self::ENV_PROD) ? 'production' : 'development';
         $this->log->write(sprintf('Starting Miny in %s environment', $env));
+        if (isset($this['modules']) && is_array($this['modules'])) {
+            foreach ($this['modules'] as $module) {
+                $this->module($module);
+            }
+        }
     }
 
     public function loadConfig($file, $env = self::ENV_COMMON)
@@ -121,6 +126,8 @@ class Application extends Factory
         if (isset($this->modules[$module])) {
             return;
         }
+
+        $this->log->write(sprintf('Loading Miny module: %s', $module));
         $class = '\Modules\\' . $module . '\Module';
         if (!is_subclass_of($class, __NAMESPACE__ . '\Module')) {
             throw new BadModuleException('Module descriptor should extend Module class: ' . $class);
