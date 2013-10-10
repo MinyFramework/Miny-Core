@@ -9,7 +9,6 @@
 
 namespace Miny\Routing;
 
-use ArrayIterator;
 use UnexpectedValueException;
 
 class Resources extends RouteCollection

@@ -39,11 +39,21 @@ class Factory implements ArrayAccess
         $this->setInstance('factory', $this);
     }
 
+    /**
+     *
+     * @param string $alias
+     * @param string $target
+     */
     public function addAlias($alias, $target)
     {
         $this->aliasses[$alias] = $target;
     }
 
+    /**
+     *
+     * @param string $alias
+     * @return string
+     */
     public function getAlias($alias)
     {
         if (isset($this->aliasses[$alias])) {
@@ -55,7 +65,10 @@ class Factory implements ArrayAccess
     /**
      * Creates a Blueprint for $classname and registers it with $alias.
      *
-     * @return Blueprint
+     * @param string $alias
+     * @param string $classname
+     * @param boolean $singleton
+     * @return \Miny\Factory\Blueprint
      */
     public function add($alias, $classname, $singleton = true)
     {
@@ -67,8 +80,8 @@ class Factory implements ArrayAccess
      * Unsets any existing instances for the given alias.
      *
      * @param string $alias
-     * @param Blueprint $object
-     * @return Blueprint
+     * @param \Miny\Factory\Blueprint $object
+     * @return \Miny\Factory\Blueprint
      */
     public function register($alias, Blueprint $object)
     {
@@ -92,6 +105,11 @@ class Factory implements ArrayAccess
         $this->objects[$alias] = $object;
     }
 
+    /**
+     *
+     * @param type $alias
+     * @param object $object
+     */
     public function __set($alias, $object)
     {
         if ($object instanceof Blueprint) {
@@ -105,7 +123,7 @@ class Factory implements ArrayAccess
      * Gets the Blueprint stored for $alias.
      *
      * @param string $alias
-     * @return Blueprint
+     * @return \Miny\Factory\Blueprint
      * @throws OutOfBoundsException
      */
     public function getBlueprint($alias)
@@ -429,3 +447,4 @@ class Factory implements ArrayAccess
     }
 
 }
+

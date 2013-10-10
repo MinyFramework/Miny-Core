@@ -15,6 +15,13 @@ class EventDispatcher
 {
     private $handlers = array();
 
+    /**
+     *
+     * @param string $event
+     * @param callable $handler
+     * @param int $place
+     * @throws EventHandlerException
+     */
     public function register($event, $handler, $place = NULL)
     {
         if (!is_callable($handler)) {
@@ -30,6 +37,10 @@ class EventDispatcher
         }
     }
 
+    /**
+     *
+     * @param \Miny\Event\Event $event
+     */
     public function raiseEvent(Event $event)
     {
         $name = $event->getName();

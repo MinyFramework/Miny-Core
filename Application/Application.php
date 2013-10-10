@@ -22,6 +22,8 @@ use Miny\Factory\Factory;
 use Miny\HTTP\Request;
 use Miny\HTTP\Response;
 use Miny\Log;
+use Miny\Routing\Resource;
+use Miny\Routing\Resources;
 use Miny\Routing\Route;
 use Miny\Session\Session;
 use UnexpectedValueException;
@@ -35,6 +37,12 @@ class Application extends Factory
     private $modules = array();
     private $environment;
 
+    /**
+     *
+     * @param string $directory
+     * @param int $environment
+     * @param boolean $include_configs
+     */
     public function __construct($directory, $environment = self::ENV_PROD, $include_configs = true)
     {
         $this->environment = $environment;
@@ -91,6 +99,13 @@ class Application extends Factory
         }
     }
 
+    /**
+     *
+     * @param string $file
+     * @param int $env
+     * @throws InvalidArgumentException
+     * @throws UnexpectedValueException
+     */
     public function loadConfig($file, $env = self::ENV_COMMON)
     {
         if ($env != $this->environment && $env != self::ENV_COMMON) {
@@ -106,21 +121,38 @@ class Application extends Factory
         $this->setParameters($config);
     }
 
+    /**
+     *
+     * @return int
+     */
     public function getEnvironment()
     {
         return $this->environment;
     }
 
+    /**
+     *
+     * @return boolean
+     */
     public function isDeveloperEnvironment()
     {
         return $this->environment == self::ENV_DEV;
     }
 
+    /**
+     *
+     * @return boolean
+     */
     public function isProductionEnvironment()
     {
         return $this->environment == self::ENV_PROD;
     }
 
+    /**
+     *
+     * @param string $module
+     * @throws BadModuleException
+     */
     public function module($module)
     {
         if (isset($this->modules[$module])) {
@@ -228,18 +260,38 @@ class Application extends Factory
         $this->request = Request::getGlobal();
     }
 
+    /**
+     *
+     * @param string $name
+     * @param mixed $controller
+     * @param array $parameters
+     * @return Resource
+     */
     public function resource($name, $controller = NULL, array $parameters = array())
     {
         $parameters['controller'] = $controller ? : $name;
         return $this->router->resource($name, $parameters, true);
     }
 
+    /**
+     *
+     * @param string $name
+     * @param mixed $controller
+     * @param array $parameters
+     * @return Resources
+     */
     public function resources($name, $controller = NULL, array $parameters = array())
     {
         $parameters['controller'] = $controller ? : $name;
         return $this->router->resource($name, $parameters, false);
     }
 
+    /**
+     *
+     * @param mixed $controller
+     * @param array $parameters
+     * @return Route
+     */
     public function root($controller, array $parameters = array())
     {
         $controller_name = is_string($controller) ? $controller : $this->controllers->getNextName();
@@ -248,6 +300,16 @@ class Application extends Factory
         return $this->router->root($parameters);
     }
 
+    /**
+     *
+     * @param type $path
+     * @param type $controller
+     * @param type $method
+     * @param type $name
+     * @param array $parameters
+     * @return Route
+     * @throws UnexpectedValueException
+     */
     public function route($path, $controller, $method = NULL, $name = NULL, array $parameters = array())
     {
         if (!in_array($method, array(NULL, 'GET', 'POST', 'PUT', 'DELETE'))) {
@@ -261,32 +323,72 @@ class Application extends Factory
         return $this->router->route($route, $name);
     }
 
+    /**
+     *
+     * @param string $path
+     * @param mixed $controller
+     * @param string $name
+     * @param array $parameters
+     * @return \Miny\Routing\Route
+     */
     public function get($path, $controller, $name = NULL, array $parameters = array())
     {
         return $this->route($path, $controller, 'GET', $name, $parameters);
     }
 
+    /**
+     *
+     * @param string $path
+     * @param mixed $controller
+     * @param string $name
+     * @param array $parameters
+     * @return \Miny\Routing\Route
+     */
     public function post($path, $controller, $name = NULL, array $parameters = array())
     {
         return $this->route($path, $controller, 'POST', $name, $parameters);
     }
 
+    /**
+     *
+     * @param string $path
+     * @param mixed $controller
+     * @param string $name
+     * @param array $parameters
+     * @return \Miny\Routing\Route
+     */
     public function put($path, $controller, $name = NULL, array $parameters = array())
     {
         return $this->route($path, $controller, 'PUT', $name, $parameters);
     }
 
+    /**
+     *
+     * @param string $path
+     * @param mixed $controller
+     * @param string $name
+     * @param array $parameters
+     * @return \Miny\Routing\Route
+     */
     public function delete($path, $controller, $name = NULL, array $parameters = array())
     {
         return $this->route($path, $controller, 'DELETE', $name, $parameters);
     }
 
+    /**
+     *
+     */
     public function run()
     {
         date_default_timezone_set($this['default_timezone']);
         $this->dispatch($this->request)->send();
     }
 
+    /**
+     *
+     * @param \Miny\HTTP\Request $request
+     * @return \Miny\HTTP\Response
+     */
     public function dispatch(Request $request)
     {
         $event = new Event('filter_request', $request);

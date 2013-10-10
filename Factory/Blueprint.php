@@ -43,7 +43,7 @@ class Blueprint
     /**
      * Sets constructor arguments.
      *
-     * @return Blueprint
+     * @return \Miny\Factory\Blueprint
      */
     public function setArguments()
     {
@@ -55,7 +55,7 @@ class Blueprint
      * Sets parent object's name.
      *
      * @param string $parent
-     * @return Blueprint
+     * @return \Miny\Factory\Blueprint
      */
     public function setParent($parent)
     {
@@ -67,7 +67,7 @@ class Blueprint
      * Sets a method with its parameters to be called upon instantiation.
      *
      * @param string $method
-     * @return Blueprint
+     * @return \Miny\Factory\Blueprint
      */
     public function addMethodCall()
     {
@@ -85,7 +85,7 @@ class Blueprint
      *
      * @param string $name
      * @param mixed $value
-     * @return Blueprint
+     * @return \Miny\Factory\Blueprint
      */
     public function setProperty($name, $value)
     {
