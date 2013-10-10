@@ -19,6 +19,12 @@ class Router extends RouteCollection
     private $resources = array();
     private $resources_built = false;
 
+    /**
+     *
+     * @param string $prefix
+     * @param string $suffix
+     * @param array $parameters
+     */
     public function __construct($prefix = NULL, $suffix = NULL, array $parameters = array())
     {
         $this->matcher = new RouteMatcher($this);
@@ -28,12 +34,27 @@ class Router extends RouteCollection
         $this->default_parameters = $parameters;
     }
 
+    /**
+     *
+     * @param array $parameters
+     * @param boolean $prefix
+     * @param boolean $suffix
+     * @return \Miny\Routing\Route
+     */
     public function root(array $parameters = array(), $prefix = true, $suffix = false)
     {
         $route = new Route('', 'GET', $parameters);
-        $this->route($route, 'root', $prefix, $suffix);
+        return $this->route($route, 'root', $prefix, $suffix);
     }
 
+    /**
+     *
+     * @param \Miny\Routing\Route $route
+     * @param string $name
+     * @param boolean $prefix
+     * @param boolean $suffix
+     * @return \Miny\Routing\Route
+     */
     public function route(Route $route, $name, $prefix = true, $suffix = true)
     {
         if (!is_null($this->route_prefix) || !is_null($this->route_suffix)) {
@@ -55,14 +76,31 @@ class Router extends RouteCollection
         return $route;
     }
 
-    public function resource($name, array $parameters = array(), $singular = false)
+    /**
+     *
+     * @param type $name
+     * @param array $parameters
+     * @param type $singular
+     * @return \Miny\Routing\Resources
+     */
+    public function resources($name, array $parameters = array())
     {
         $parameters = $parameters + $this->default_parameters;
-        if ($singular) {
-            $resource = new Resource($name, $parameters);
-        } else {
-            $resource = new Resources($name, $parameters);
-        }
+        $resource = new Resources($name, $parameters);
+        $this->resources[] = $resource;
+        return $resource;
+    }
+
+    /**
+     *
+     * @param type $name
+     * @param array $parameters
+     * @return \Miny\Routing\Resource
+     */
+    public function resource($name, array $parameters = array())
+    {
+        $parameters = $parameters + $this->default_parameters;
+        $resource = new Resource($name, $parameters);
         $this->resources[] = $resource;
         return $resource;
     }
@@ -83,12 +121,24 @@ class Router extends RouteCollection
         }
     }
 
+    /**
+     *
+     * @param string $path
+     * @param string $method
+     * @return \Miny\Routing\Match
+     */
     public function match($path, $method = NULL)
     {
         $this->buildResources();
         return $this->matcher->match($path, $method);
     }
 
+    /**
+     *
+     * @param string $route_name
+     * @param array $parameters
+     * @return string
+     */
     public function generate($route_name, array $parameters = array())
     {
         $this->buildResources();

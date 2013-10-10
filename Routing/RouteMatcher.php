@@ -13,11 +13,21 @@ class RouteMatcher
 {
     private $routes;
 
+    /**
+     *
+     * @param \Miny\Routing\RouteCollection $routes
+     */
     public function __construct(RouteCollection $routes)
     {
         $this->routes = $routes;
     }
 
+    /**
+     *
+     * @param string $path
+     * @param string $method
+     * @return \Miny\Routing\Match|boolean
+     */
     public function match($path, $method = NULL)
     {
         foreach ($this->routes as $route) {

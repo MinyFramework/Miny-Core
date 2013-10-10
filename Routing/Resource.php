@@ -23,12 +23,23 @@ class Resource extends Resources
         'create'  => 'POST'
     );
 
+    /**
+     *
+     * @param string $name
+     * @param array $parameters
+     */
     public function __construct($name, array $parameters = array())
     {
         parent::__construct($name, $parameters);
         $this->singular($name);
     }
 
+    /**
+     *
+     * @param string $method
+     * @param string $name
+     * @throws BadMethodCallException
+     */
     public function member($method, $name)
     {
         throw new BadMethodCallException('Single resource can\'t have member action.');

@@ -20,6 +20,12 @@ class Route
     private $regex;
     private $parameter_count;
 
+    /**
+     *
+     * @param string $path
+     * @param string $method
+     * @param array $params
+     */
     public function __construct($path, $method = NULL, array $params = array())
     {
         $this->method = $method;
@@ -27,11 +33,20 @@ class Route
         $this->parameters = $params;
     }
 
+    /**
+     *
+     * @return string
+     */
     public function getPath()
     {
         return $this->path;
     }
 
+    /**
+     *
+     * @param string $path
+     * @throws InvalidArgumentException
+     */
     public function setPath($path)
     {
         if (!is_string($path)) {
@@ -43,26 +58,49 @@ class Route
         $this->regex = NULL;
     }
 
+    /**
+     *
+     * @return string
+     */
     public function getMethod()
     {
         return $this->method;
     }
 
+    /**
+     *
+     * @param array $parameters
+     */
     public function addParameters(array $parameters)
     {
         $this->parameters = $parameters + $this->parameters;
     }
 
+    /**
+     *
+     * @return array
+     */
     public function getParameters()
     {
         return $this->parameters;
     }
 
+    /**
+     *
+     * @param string $parameter
+     * @param string $pattern
+     */
     public function specify($parameter, $pattern)
     {
         $this->patterns[$parameter] = $pattern;
     }
 
+    /**
+     *
+     * @param string $parameter
+     * @param string $default
+     * @return string
+     */
     public function getPattern($parameter, $default = '(\w+)')
     {
         if (isset($this->patterns[$parameter])) {
@@ -71,11 +109,19 @@ class Route
         return $default;
     }
 
+    /**
+     *
+     * @return boolean
+     */
     public function isStatic()
     {
         return $this->getParameterCount() === 0;
     }
 
+    /**
+     *
+     * @return string
+     */
     public function getRegex()
     {
         if ($this->getParameterCount()) {
@@ -83,6 +129,10 @@ class Route
         }
     }
 
+    /**
+     *
+     * @return int
+     */
     public function getParameterCount()
     {
         if (is_null($this->parameter_count)) {
@@ -91,6 +141,10 @@ class Route
         return $this->parameter_count;
     }
 
+    /**
+     *
+     * @return array
+     */
     public function getParameterNames()
     {
         if (is_null($this->parameter_count)) {

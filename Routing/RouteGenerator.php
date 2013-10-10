@@ -16,11 +16,23 @@ class RouteGenerator
 {
     private $routes;
 
+    /**
+     *
+     * @param \Miny\Routing\RouteCollection $routes
+     */
     public function __construct(RouteCollection $routes)
     {
         $this->routes = $routes;
     }
 
+    /**
+     *
+     * @param string $route_name
+     * @param array $parameters
+     * @return string
+     * @throws InvalidArgumentException
+     * @throws OutOfBoundsException
+     */
     public function generate($route_name, array $parameters = array())
     {
         foreach ($this->routes as $name => $route) {
