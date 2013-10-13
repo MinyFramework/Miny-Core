@@ -21,12 +21,12 @@ class Request
     public static function getGlobal()
     {
         if (is_null(self::$request)) {
-            $path = parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH);
-            self::$request = new Request($path, $_GET, $_POST, $_COOKIE);
+            self::$request = new Request($_SERVER['REQUEST_URI'], $_GET, $_POST, $_COOKIE);
         }
         return self::$request;
     }
 
+    public $url;
     public $path;
     public $get;
     public $post;
@@ -36,10 +36,11 @@ class Request
     private $referer;
     private $type;
 
-    public function __construct($path, array $get = array(), array $post = array(), array $cookie = array(),
+    public function __construct($url, array $get = array(), array $post = array(), array $cookie = array(),
                                 $type = self::MASTER_REQUEST)
     {
-        $this->path = $path;
+        $this->url = $url;
+        $this->path = $path = parse_url($url, PHP_URL_PATH);
         $this->get = $get;
         $this->post = $post;
         $this->cookie = $cookie;
