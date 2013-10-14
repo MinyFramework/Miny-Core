@@ -194,7 +194,7 @@ class Session implements ArrayAccess, IteratorAggregate, Countable
         $_SESSION['flash'][$key] = array('data' => $data, 'ttl'  => 1);
     }
 
-    public function __get($key)
+    public function &__get($key)
     {
         if (!isset($_SESSION['flash'][$key])) {
             throw new OutOfBoundsException('Session flash key not set: ' . $key);
@@ -261,7 +261,7 @@ class Session implements ArrayAccess, IteratorAggregate, Countable
         unset($_SESSION['data'][$key]);
     }
 
-    public function offsetGet($key)
+    public function &offsetGet($key)
     {
         if (!isset($_SESSION['data'][$key])) {
             throw new OutOfBoundsException('Session key not set: ' . $key);
