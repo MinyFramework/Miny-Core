@@ -38,6 +38,13 @@ class Log
             }
         }
         $this->path = $path;
+        if (defined('START_TIME')) {
+            $log = $this;
+            register_shutdown_function(function()use($log) {
+                $message = sprintf('Execution time: %lf s', microtime(true) - START_TIME);
+                $log->write($message, 'info');
+            });
+        }
         register_shutdown_function(array($this, 'saveLog'));
     }
 
@@ -54,7 +61,6 @@ class Log
     }
 
     /**
-     *
      * @return string
      */
     public function getLogFileName()
@@ -80,7 +86,6 @@ class Log
     }
 
     /**
-     *
      * @throws RuntimeException
      */
     public function saveLog()
@@ -106,4 +111,3 @@ class Log
     }
 
 }
-
