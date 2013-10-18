@@ -83,10 +83,6 @@ abstract class Controller extends Extendable
         }
 
         $this->$fn($request);
-
-        if ($response->isRedirect()) {
-            return;
-        }
     }
 
 }
