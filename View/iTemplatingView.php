@@ -11,7 +11,7 @@ namespace Miny\View;
 
 interface iTemplatingView
 {
-    public function __construct($template);
+    public function __construct($directory, $template);
     public function setHelpers(ViewHelpers $helpers);
     public function setTemplate($template);
     public function getTemplate();

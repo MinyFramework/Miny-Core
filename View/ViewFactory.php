@@ -14,7 +14,7 @@ use OutOfBoundsException;
 
 class ViewFactory
 {
-    protected $prefix = 'views/';
+    protected $directory = 'views';
     protected $suffix = '';
     protected $helpers;
     protected $assigns = array();
@@ -31,12 +31,12 @@ class ViewFactory
         $this->views[$type] = $class;
     }
 
-    public function setPrefix($prefix)
+    public function setDirectory($dir)
     {
-        if (!is_string($prefix)) {
-            throw new InvalidArgumentException('Format must be a string!');
+        if (!is_string($dir)) {
+            throw new InvalidArgumentException('View directory must be a string!');
         }
-        $this->prefix = $prefix;
+        $this->directory = $dir;
     }
 
     public function setSuffix($suffix)
@@ -81,7 +81,7 @@ class ViewFactory
             throw new InvalidArgumentException('Unknown view type ' . $type);
         }
         $class = $this->views[$type];
-        $view = new $class($this->prefix . $template . $this->suffix);
+        $view = new $class($this->directory, $template . $this->suffix);
         if ($this->helpers !== NULL) {
             $view->setHelpers($this->helpers);
         }

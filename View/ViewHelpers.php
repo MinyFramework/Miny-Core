@@ -29,9 +29,10 @@ class ViewHelpers extends Extendable
         return json_encode($var);
     }
 
-    public function anchor($url, $label)
+    public function anchor($url, $label, array $args = array())
     {
-        return '<a href="' . $url . '">' . $label . '</a>';
+        $args['href'] = $url;
+        return sprintf('<a %s>%s</a>', $this->arguments($args), $label);
     }
 
     public function arguments(array $args)

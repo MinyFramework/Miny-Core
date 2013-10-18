@@ -22,8 +22,9 @@ class View implements iView, iTemplatingView
     protected $template;
     protected $extend;
 
-    public function __construct($template)
+    public function __construct($directory, $template)
     {
+        $this->directory = $directory;
         $this->setTemplate($template);
     }
 
@@ -82,9 +83,14 @@ class View implements iView, iTemplatingView
         return ($this->__isset($key)) ? $this->__get($key) : $default;
     }
 
+    protected function getFileName($file)
+    {
+        return $this->directory . '/' . $file . '.php';
+    }
+
     public function extend($extend)
     {
-        if (!is_file($extend . '.php')) {
+        if (!is_file($this->getFileName($extend))) {
             throw new UnexpectedValueException(sprintf('View file not found: %s.php', $extend));
         }
         $this->extend = $extend;
@@ -149,7 +155,7 @@ class View implements iView, iTemplatingView
     public function renderFile($file)
     {
         ob_start();
-        include $file . '.php';
+        include $this->getFileName($file);
         return ob_get_clean();
     }
 

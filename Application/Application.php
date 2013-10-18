@@ -57,7 +57,7 @@ class Application extends Factory
             'root'             => $directory,
             'log_path'         => $directory . '/logs',
             'view'             => array(
-                'dir'            => $directory . '/templates/',
+                'dir'            => $directory . '/templates',
                 'default_format' => '.{@router:defaults:format}',
                 'exception'      => 'layouts/exception'
             ),
@@ -183,35 +183,35 @@ class Application extends Factory
         $app = $this;
 
         set_exception_handler(function(Exception $e) use($app) {
-                    $event = new Event('uncaught_exception', $e);
-                    $app->events->raiseEvent($event);
-                    if (!$event->isHandled()) {
-                        throw $e;
-                    } else {
-                        $response = new Response;
-                        echo $event->getResponse();
-                        $response->setCode(500);
-                        $response->send();
-                    }
-                });
+            $event = new Event('uncaught_exception', $e);
+            $app->events->raiseEvent($event);
+            if (!$event->isHandled()) {
+                throw $e;
+            } else {
+                $response = new Response;
+                echo $event->getResponse();
+                $response->setCode(500);
+                $response->send();
+            }
+        });
 
         $log = new Log($this['log_path']);
 
         set_error_handler(function($errno, $errstr, $errfile, $errline ) use($log) {
-                    $loggable = array(
-                        E_NOTICE       => 'Notice (PHP)',
-                        E_USER_NOTICE  => 'Notice',
-                        E_WARNING      => 'Warning (PHP)',
-                        E_USER_WARNING => 'Warning',
-                        E_DEPRECATED   => 'Deprecated notice (PHP)',
-                        E_STRICT       => 'Strict notice (PHP)'
-                    );
-                    if (isset($loggable[$errno])) {
-                        $log->write(sprintf("%s in %s on line %s", $errstr, $errfile, $errline), $loggable[$errno]);
-                    } else {
-                        throw new ErrorException($errstr, $errno, 0, $errfile, $errline);
-                    }
-                });
+            $loggable = array(
+                E_NOTICE       => 'Notice (PHP)',
+                E_USER_NOTICE  => 'Notice',
+                E_WARNING      => 'Warning (PHP)',
+                E_USER_WARNING => 'Warning',
+                E_DEPRECATED   => 'Deprecated notice (PHP)',
+                E_STRICT       => 'Strict notice (PHP)'
+            );
+            if (isset($loggable[$errno])) {
+                $log->write(sprintf("%s in %s on line %s", $errstr, $errfile, $errline), $loggable[$errno]);
+            } else {
+                throw new ErrorException($errstr, $errno, 0, $errfile, $errline);
+            }
+        });
 
         $this->log = $log;
         $eh = new ApplicationEventHandlers($this, $log);
@@ -227,7 +227,7 @@ class Application extends Factory
                 ->addMethodCall('register', 'invalid_response', array($eh, 'filterStringToResponse'));
 
         $this->add('view_factory', '\Miny\View\ViewFactory')
-                ->addMethodCall('setPrefix', '@view:dir')
+                ->addMethodCall('setDirectory', '@view:dir')
                 ->addMethodCall('setSuffix', '@view:default_format')
                 ->addMethodCall('setHelpers', '&view_helpers')
                 ->addMethodCall('addViewType', 'view', '\Miny\View\View')
@@ -237,10 +237,10 @@ class Application extends Factory
         $this->add('view_helpers', '\Miny\View\ViewHelpers')
                 ->addMethodCall('addMethod', 'route', '*router::generate')
                 ->addMethodCall('addMethod', 'routeAnchor',
-                                function($route, $label, array $parameters = array()) use($app) {
-                            $url = $app->router->generate($route, $parameters);
-                            return sprintf('<a href="%s">%s</a>', $url, $label);
-                        });
+                        function($route, $label, array $parameters = array(), array $args = array()) use($app) {
+                    $url = $app->router->generate($route, $parameters);
+                    return $app->view_helpers->anchor($url, $label, $args);
+                });
 
         $this->add('controllers', '\Miny\Controller\ControllerCollection')
                 ->setArguments('&app');
