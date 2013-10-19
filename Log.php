@@ -27,22 +27,17 @@ class Log
     private $debug_mode = false;
 
     /**
-     *
      * @param string $path
-     * @param boolean $force_log
      * @throws Exception
      */
-    public function __construct($path, $force_log = false)
+    public function __construct($path)
     {
         $path = realpath($path);
         try {
             $this->checkPath($path);
         } catch (Exception $e) {
-            if ($force_log) {
-                throw $e;
-            } else {
-                $this->can_log = false;
-            }
+            $this->can_log = false;
+            return;
         }
         $this->path = $path;
         if (defined('START_TIME')) {
@@ -80,7 +75,7 @@ class Log
      */
     public function getLogFileName()
     {
-        return $this->path . '/log_' . date('Y_m_d') . '.log';
+        return sprintf('%s/log_%s.log', $this->path, date('Y_m_d'));
     }
 
     /**
@@ -113,7 +108,6 @@ class Log
         $file = $this->getLogFileName();
 
         $data = '';
-
         foreach ($this->messages as $time => $messages) {
             $time = date('Y-m-d H:i:s', $time);
             foreach ($messages as $message) {
