@@ -55,7 +55,10 @@ class Application extends Factory
         $this->setParameters(array(
             'default_timezone' => 'UTC',
             'root'             => $directory,
-            'log_path'         => $directory . '/logs',
+            'log'              => array(
+                'path'  => $directory . '/logs',
+                'debug' => $this->isDeveloperEnvironment()
+            ),
             'view'             => array(
                 'dir'            => $directory . '/templates',
                 'default_format' => '.{@router:defaults:format}',
@@ -90,7 +93,7 @@ class Application extends Factory
             }
         }
         $this->registerDefaultServices();
-        $env = ($environment == self::ENV_PROD) ? 'production' : 'development';
+        $env = $this->isProductionEnvironment() ? 'production' : 'development';
         $this->log->write(sprintf('Starting Miny in %s environment', $env));
         if (isset($this['modules']) && is_array($this['modules'])) {
             foreach ($this['modules'] as $module) {
@@ -159,7 +162,7 @@ class Application extends Factory
             return;
         }
 
-        $this->log->write(sprintf('Loading Miny module: %s', $module));
+        $this->log->write(sprintf('Loading Miny module: %s', $module), Log::DEBUG);
         $class = '\Modules\\' . $module . '\Module';
         if (!is_subclass_of($class, __NAMESPACE__ . '\Module')) {
             throw new BadModuleException('Module descriptor should extend Module class: ' . $class);
@@ -195,9 +198,10 @@ class Application extends Factory
             }
         });
 
-        $log = new Log($this['log_path']);
+        $log = new Log($this['log']['path']);
+        $log->setDebugMode($this['log']['debug']);
 
-        set_error_handler(function($errno, $errstr, $errfile, $errline ) use($log) {
+        set_error_handler(function($errno, $errstr, $errfile, $errline) use($log) {
             $loggable = array(
                 E_NOTICE       => 'Notice (PHP)',
                 E_USER_NOTICE  => 'Notice',

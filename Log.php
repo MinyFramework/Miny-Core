@@ -15,9 +15,16 @@ use RuntimeException;
 
 class Log
 {
+    const DEBUG = 'debug';
+    const INFO = 'info';
+    const WARNING = 'warning';
+    const ERROR = 'error';
+    const EXCEPTION = 'exception';
+
     private $path;
     private $messages = array();
     private $can_log = true;
+    private $debug_mode = false;
 
     /**
      *
@@ -61,6 +68,14 @@ class Log
     }
 
     /**
+     * @param bool $debug
+     */
+    public function setDebugMode($debug = true)
+    {
+        $this->debug_mode = $debug;
+    }
+
+    /**
      * @return string
      */
     public function getLogFileName()
@@ -69,13 +84,15 @@ class Log
     }
 
     /**
-     *
      * @param string $message
      * @param string $level
      */
-    public function write($message, $level = 'info')
+    public function write($message, $level = self::INFO)
     {
         if (!$this->can_log) {
+            return;
+        }
+        if ($level == self::DEBUG && !$this->debug_mode) {
             return;
         }
         $key = time();
