@@ -38,7 +38,6 @@ class Application extends Factory
     private $environment;
 
     /**
-     *
      * @param string $directory
      * @param int $environment
      * @param boolean $include_configs
@@ -103,7 +102,6 @@ class Application extends Factory
     }
 
     /**
-     *
      * @param string $file
      * @param int $env
      * @throws InvalidArgumentException
@@ -125,7 +123,6 @@ class Application extends Factory
     }
 
     /**
-     *
      * @return int
      */
     public function getEnvironment()
@@ -134,7 +131,6 @@ class Application extends Factory
     }
 
     /**
-     *
      * @return boolean
      */
     public function isDeveloperEnvironment()
@@ -143,7 +139,6 @@ class Application extends Factory
     }
 
     /**
-     *
      * @return boolean
      */
     public function isProductionEnvironment()
@@ -152,7 +147,6 @@ class Application extends Factory
     }
 
     /**
-     *
      * @param string $module
      * @throws BadModuleException
      */
@@ -163,8 +157,8 @@ class Application extends Factory
         }
 
         $this->log->write(sprintf('Loading Miny module: %s', $module), Log::DEBUG);
-        $class = '\Modules\\' . $module . '\Module';
-        if (!is_subclass_of($class, __NAMESPACE__ . '\Module')) {
+        $class = sprintf('\Modules\%s\Module', $module);
+        if (!is_subclass_of($class, '\Miny\Application\Module')) {
             throw new BadModuleException('Module descriptor should extend Module class: ' . $class);
         }
         $module_class = new $class($this);
@@ -201,23 +195,6 @@ class Application extends Factory
         $log = new Log($this['log']['path']);
         $log->setDebugMode($this['log']['debug']);
 
-        set_error_handler(function($errno, $errstr, $errfile, $errline) use($log) {
-            $loggable = array(
-                E_NOTICE       => 'Notice (PHP)',
-                E_USER_NOTICE  => 'Notice',
-                E_WARNING      => 'Warning (PHP)',
-                E_USER_WARNING => 'Warning',
-                E_DEPRECATED   => 'Deprecated notice (PHP)',
-                E_STRICT       => 'Strict notice (PHP)'
-            );
-            if (isset($loggable[$errno])) {
-                $log->write(sprintf("%s in %s on line %s", $errstr, $errfile, $errline), $loggable[$errno]);
-            } else {
-                throw new ErrorException($errstr, $errno, 0, $errfile, $errline);
-            }
-        });
-
-        $this->log = $log;
         $eh = new ApplicationEventHandlers($this, $log);
 
         $this->add('events', '\Miny\Event\EventDispatcher')
@@ -260,6 +237,7 @@ class Application extends Factory
             $session['token'] = sha1(mt_rand());
         }
 
+        $this->log = $log;
         $this->session = $session;
         $this->request = Request::getGlobal();
     }
@@ -333,7 +311,7 @@ class Application extends Factory
      * @param mixed $controller
      * @param string $name
      * @param array $parameters
-     * @return \Miny\Routing\Route
+     * @return Route
      */
     public function get($path, $controller, $name = NULL, array $parameters = array())
     {
@@ -346,7 +324,7 @@ class Application extends Factory
      * @param mixed $controller
      * @param string $name
      * @param array $parameters
-     * @return \Miny\Routing\Route
+     * @return Route
      */
     public function post($path, $controller, $name = NULL, array $parameters = array())
     {
@@ -359,7 +337,7 @@ class Application extends Factory
      * @param mixed $controller
      * @param string $name
      * @param array $parameters
-     * @return \Miny\Routing\Route
+     * @return Route
      */
     public function put($path, $controller, $name = NULL, array $parameters = array())
     {
@@ -372,7 +350,7 @@ class Application extends Factory
      * @param mixed $controller
      * @param string $name
      * @param array $parameters
-     * @return \Miny\Routing\Route
+     * @return Route
      */
     public function delete($path, $controller, $name = NULL, array $parameters = array())
     {
@@ -390,8 +368,8 @@ class Application extends Factory
 
     /**
      *
-     * @param \Miny\HTTP\Request $request
-     * @return \Miny\HTTP\Response
+     * @param Request $request
+     * @return Response
      */
     public function dispatch(Request $request)
     {
