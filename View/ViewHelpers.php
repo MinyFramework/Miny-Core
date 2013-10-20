@@ -32,14 +32,14 @@ class ViewHelpers extends Extendable
     public function anchor($url, $label, array $args = array())
     {
         $args['href'] = $url;
-        return sprintf('<a %s>%s</a>', $this->arguments($args), $label);
+        return sprintf('<a%s>%s</a>', $this->arguments($args), $label);
     }
 
     public function arguments(array $args)
     {
         $arglist = '';
         foreach ($args as $name => $value) {
-            $arglist .= ' ' . $name . '="' . $value . '"';
+            $arglist .= sprintf(' %s="%s"', $name, $value);
         }
         return $arglist;
     }
