@@ -48,18 +48,18 @@ class FactoryTest extends \PHPUnit_Framework_TestCase
 {
     protected $object;
     protected $parameters = array(
-        'array_a' => array(
+        'array_a'      => array(
             'param_b' => '{@value_b}',
             'array_b' => array(
                 '{@param_c}'     => 'value_b_value',
                 'deep_parameter' => 'deep_value'
             ),
         ),
-        'param_c'        => '{@array_a:param_b}',
-        'value_b'        => 'value_c',
-        'invalid_link'   => '{@not_exists}',
-        'some_item'      => 'some_value',
-        'array'          => array(
+        'param_c'      => '{@array_a:param_b}',
+        'value_b'      => 'value_c',
+        'invalid_link' => '{@not_exists}',
+        'some_item'    => 'some_value',
+        'array'        => array(
             'array' => array(
                 'array' => 'value'
             )
@@ -157,38 +157,38 @@ class FactoryTest extends \PHPUnit_Framework_TestCase
             )
         );
         $expected_result = array(
-            'array_a' => array(
-                'param_b' => 'some_value',
-                'array_b' => array(
-                    '{@param_c}'       => 'value_b_value',
-                    'deep_parameter'   => 'deep_value'
+            'array_a'      => array(
+                'param_b'          => 'some_value',
+                'array_b'          => array(
+                    '{@param_c}'     => 'value_b_value',
+                    'deep_parameter' => 'deep_value'
                 ),
                 'additional_param' => 'other_value'
             ),
-            'param_c'          => '{@array_a:param_b}',
-            'value_b'          => 'value_c',
-            'invalid_link'     => '{@not_exists}',
-            'some_item'        => 'some_value',
-            'array'            => array(
+            'param_c'      => '{@array_a:param_b}',
+            'value_b'      => 'value_c',
+            'invalid_link' => '{@not_exists}',
+            'some_item'    => 'some_value',
+            'array'        => array(
                 'array' => array(
-                    'array'                   => 'value'
+                    'array' => 'value'
                 )
             )
         );
         $expected_result_resolved = array(
-            'array_a' => array(
-                'param_b' => 'some_value',
-                'array_b' => array(
-                    'some_value'       => 'value_b_value',
-                    'deep_parameter'   => 'deep_value'
+            'array_a'      => array(
+                'param_b'          => 'some_value',
+                'array_b'          => array(
+                    'some_value'     => 'value_b_value',
+                    'deep_parameter' => 'deep_value'
                 ),
                 'additional_param' => 'other_value'
             ),
-            'param_c'          => 'some_value',
-            'value_b'          => 'value_c',
-            'invalid_link'     => '{@not_exists}',
-            'some_item'        => 'some_value',
-            'array'            => array(
+            'param_c'      => 'some_value',
+            'value_b'      => 'value_c',
+            'invalid_link' => '{@not_exists}',
+            'some_item'    => 'some_value',
+            'array'        => array(
                 'array' => array(
                     'array' => 'value'
                 )
@@ -228,13 +228,18 @@ class FactoryTest extends \PHPUnit_Framework_TestCase
     public function testCreateSingleton()
     {
         $helper = new TestHelperClass;
+
         $this->object->helper = $helper;
+        $this->object->setParameters(array(
+            'link' => 'helper'
+        ));
 
         $this->object->add('singleton', __NAMESPACE__ . '\TestClass')
                 ->setArguments('literal', '@param_c', '&helper')
-                ->setProperty('prop_a', 'literal_value')
+                ->setProperty('prop_a', 'literal')
                 ->setProperty('prop_b', '@param_c')
                 ->setProperty('prop_c', '&helper')
+                ->setProperty('prop_d', '&{@link}')
                 ->addMethodCall('method_a', 'literal_value', 'another_literal_value')
                 ->addMethodCall('method_b', '@param_c', '@array:array:array')
                 ->addMethodCall('method_c', '&helper', '&helper->property')
@@ -247,9 +252,10 @@ class FactoryTest extends \PHPUnit_Framework_TestCase
         $constructor_args = array('literal', 'value_c', $helper);
 
         $properties = array(
-            'prop_a' => 'literal_value',
+            'prop_a' => 'literal',
             'prop_b' => 'value_c',
-            'prop_c' => $helper
+            'prop_c' => $helper,
+            'prop_d' => $helper
         );
 
         $method_calls = array(

@@ -266,6 +266,7 @@ class Factory implements ArrayAccess
             case '&':
                 //object or method call. Basically this is
                 //$factory->create('object')->method(parameters);
+                $str = $this->resolveLinks($str);
                 $var = $this->getObjectParameter($str);
                 break;
             case '*'://callback
