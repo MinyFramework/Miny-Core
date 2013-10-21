@@ -180,7 +180,9 @@ class Factory implements ArrayAccess
         }
         foreach ($descriptor->getMethodCalls() as $method) {
             list($name, $args) = $method;
-            $args = array_map(array($this, 'getValue'), $args);
+            foreach ($args as $key => $value) {
+                $args[$key] = $this->getValue($value);
+            }
             call_user_func_array(array($object, $name), $args);
         }
     }
@@ -204,9 +206,25 @@ class Factory implements ArrayAccess
                 $arg = $this->getValue(current($args));
                 $obj = new $class($arg);
                 break;
+            case 2:
+                foreach ($args as $key => $value) {
+                    $args[$key] = $this->getValue($value);
+                }
+                list($arg1, $arg2) = $args;
+                $obj = new $class($arg1, $arg2);
+                break;
+            case 3:
+                foreach ($args as $key => $value) {
+                    $args[$key] = $this->getValue($value);
+                }
+                list($arg1, $arg2, $arg3) = $args;
+                $obj = new $class($arg1, $arg2, $arg3);
+                break;
             default:
                 $ref = new ReflectionClass($class);
-                $args = array_map(array($this, 'getValue'), $args);
+                foreach ($args as $key => $value) {
+                    $args[$key] = $this->getValue($value);
+                }
                 $obj = $ref->newInstanceArgs($args);
         }
         return $obj;
@@ -373,7 +391,11 @@ class Factory implements ArrayAccess
 
     private function resolveLinksCallback($matches)
     {
-        return $this->offsetExists($matches[1]) ? $this->offsetGet($matches[1]) : $matches[0];
+        try {
+            return $this->offsetGet($matches[1]);
+        } catch (OutOfBoundsException $e) {
+            return $matches[0];
+        }
     }
 
     /**
@@ -447,4 +469,3 @@ class Factory implements ArrayAccess
     }
 
 }
-
