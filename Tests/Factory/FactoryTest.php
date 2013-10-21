@@ -152,18 +152,22 @@ class FactoryTest extends \PHPUnit_Framework_TestCase
     {
         $new_parameters = array(
             'array_a' => array(
-                'param_b'          => 'some_value', //overwrite
-                'additional_param' => 'other_value' //new key
+                'param_b'           => 'some_value', //overwrite
+                'additional_param'  => 'other_value', //new key
+                'something'         => 'prefix_{@value_b}',
+                'something_invalid' => 'prefix_{@invalid_link}'
             )
         );
         $expected_result = array(
             'array_a'      => array(
-                'param_b'          => 'some_value',
-                'array_b'          => array(
+                'param_b'           => 'some_value',
+                'array_b'           => array(
                     '{@param_c}'     => 'value_b_value',
                     'deep_parameter' => 'deep_value'
                 ),
-                'additional_param' => 'other_value'
+                'additional_param'  => 'other_value',
+                'something'         => 'prefix_{@value_b}',
+                'something_invalid' => 'prefix_{@invalid_link}'
             ),
             'param_c'      => '{@array_a:param_b}',
             'value_b'      => 'value_c',
@@ -177,12 +181,14 @@ class FactoryTest extends \PHPUnit_Framework_TestCase
         );
         $expected_result_resolved = array(
             'array_a'      => array(
-                'param_b'          => 'some_value',
-                'array_b'          => array(
+                'param_b'           => 'some_value',
+                'array_b'           => array(
                     'some_value'     => 'value_b_value',
                     'deep_parameter' => 'deep_value'
                 ),
-                'additional_param' => 'other_value'
+                'additional_param'  => 'other_value',
+                'something'         => 'prefix_value_c',
+                'something_invalid' => 'prefix_{@not_exists}'
             ),
             'param_c'      => 'some_value',
             'value_b'      => 'value_c',
