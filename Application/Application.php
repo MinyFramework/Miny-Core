@@ -12,7 +12,6 @@ namespace Miny\Application;
 require_once __DIR__ . '/../AutoLoader.php';
 require_once __DIR__ . '/../Factory/Factory.php';
 
-use ErrorException;
 use Exception;
 use InvalidArgumentException;
 use Miny\Application\Exceptions\BadModuleException;

@@ -17,9 +17,19 @@ use Miny\HTTP\Response;
 
 abstract class Controller extends Extendable
 {
+    /**
+     * @var Application
+     */
     protected $app;
+
+    /**
+     * @var string
+     */
     protected $default_action = 'index';
 
+    /**
+     * @param Application $app
+     */
     public function __construct(Application $app)
     {
         $this->app = $app;
@@ -31,6 +41,13 @@ abstract class Controller extends Extendable
 
     }
 
+    /**
+     * @param string $path
+     * @param array $get
+     * @param array $post
+     * @param array $cookie
+     * @return Response
+     */
     public function request($path, array $get = NULL, array $post = NULL, array $cookie = NULL)
     {
         $response = $this->app->dispatch(
@@ -45,21 +62,41 @@ abstract class Controller extends Extendable
         return $response;
     }
 
+    /**
+     * @param string $type
+     * @param string $template
+     * @return View
+     */
     protected function view($type, $template)
     {
         return $this->app->view_factory->get($type, $template);
     }
 
+    /**
+     * @param string $name
+     * @return Object
+     */
     protected function service($name)
     {
         return $this->app->$name;
     }
 
+    /**
+     * @param string $name
+     * @param array $parameters
+     * @return string
+     */
     protected function route($name, array $parameters = array())
     {
         return $this->app->router->generate($name, $parameters);
     }
 
+    /**
+     * @param string $action
+     * @param \Miny\HTTP\Request $request
+     * @param \Miny\HTTP\Response $response
+     * @throws InvalidArgumentException
+     */
     public function run($action, Request $request, Response $response)
     {
         $router = $this->app->router;
@@ -72,9 +109,9 @@ abstract class Controller extends Extendable
         ));
         $this->addMethod('redirectRoute',
                 function($route, array $params = array()) use($response, $router) {
-                    $path = $router->generate($route, $params);
-                    $response->redirect($path);
-                });
+            $path = $router->generate($route, $params);
+            $response->redirect($path);
+        });
 
         $action = $action ? : $this->default_action;
         $fn = $action . 'Action';
