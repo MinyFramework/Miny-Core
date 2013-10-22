@@ -220,7 +220,8 @@ class Application extends Factory
                         function($route, $label, array $parameters = array(), array $args = array()) use($app) {
                     $url = $app->router->generate($route, $parameters);
                     return $app->view_helpers->anchor($url, $label, $args);
-                });
+                })
+                ->addMethodCall('addMethod', 'service', '*app::__get');
 
         $this->add('controllers', '\Miny\Controller\ControllerCollection')
                 ->setArguments('&app');
