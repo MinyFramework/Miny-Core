@@ -310,8 +310,7 @@ class Factory implements ArrayAccess
             return call_user_func_array(array($object, $method), $this->resolveLinks($arr));
         } elseif (($pos = strpos($str, '->')) !== false) {
             list($obj_name, $property) = explode('->', $str, 2);
-            $object = $this->__get($obj_name);
-            return $object->$property;
+            return $this->__get($obj_name)->$property;
         } else {
             return $this->__get($str);
         }

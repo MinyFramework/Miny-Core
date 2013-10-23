@@ -44,28 +44,14 @@ class View implements iView, iTemplatingView
     public function __set($key, $value)
     {
         $this->vars[$key] = $value;
-        $this->output = NULL;
     }
 
     public function __get($key)
     {
-        if (isset($this->fragments[$key])) {
-            return $this->fragments[$key][0];
-        }
-
-        if (!isset($this->vars[$key])) {
+        if (!$this->__isset($key)) {
             throw new OutOfBoundsException('Key not set: ' . $key);
         }
-        $var = $this->vars[$key];
-
-        if (is_callable($var)) {
-            $var = call_user_func($var, $this);
-        }
-
-        if ($var instanceof iView) {
-            return $var->render();
-        }
-        return $var;
+        return $this->get($key, '', true);
     }
 
     public function __isset($key)
@@ -78,9 +64,30 @@ class View implements iView, iTemplatingView
         unset($this->vars[$key]);
     }
 
-    public function get($key, $default = '')
+    public function get($key, $default = '', $escape = true)
     {
-        return ($this->__isset($key)) ? $this->__get($key) : $default;
+        if (isset($this->fragments[$key])) {
+            return $this->fragments[$key][0];
+        }
+
+        if (!isset($this->vars[$key])) {
+            $var = $default;
+        } else {
+            $var = $this->vars[$key];
+        }
+
+        if (is_callable($var)) {
+            $var = call_user_func($var, $this);
+        }
+
+        if (is_string($var) && $escape) {
+            $var = htmlspecialchars($var);
+        }
+
+        if ($var instanceof iView) {
+            return $var->render();
+        }
+        return $var;
     }
 
     protected function getFileName($file)
