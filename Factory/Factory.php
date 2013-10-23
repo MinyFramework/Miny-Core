@@ -24,13 +24,27 @@ use ReflectionClass;
  */
 class Factory implements ArrayAccess
 {
+    /**
+     * @var Object[]
+     */
     protected $objects = array();
+
+    /**
+     * @var Blueprint[]
+     */
     protected $blueprints = array();
+
+    /**
+     * @var array
+     */
     protected $parameters = array();
+
+    /**
+     * @var string[]
+     */
     protected $aliasses = array();
 
     /**
-     *
      * @param array $params Initial list of parameters to be stored.
      */
     public function __construct(array $params = array())
@@ -40,7 +54,6 @@ class Factory implements ArrayAccess
     }
 
     /**
-     *
      * @param string $alias
      * @param string $target
      */
@@ -50,7 +63,6 @@ class Factory implements ArrayAccess
     }
 
     /**
-     *
      * @param string $alias
      * @return string
      */
@@ -68,7 +80,7 @@ class Factory implements ArrayAccess
      * @param string $alias
      * @param string $classname
      * @param boolean $singleton
-     * @return \Miny\Factory\Blueprint
+     * @return Blueprint
      */
     public function add($alias, $classname, $singleton = true)
     {
@@ -80,8 +92,8 @@ class Factory implements ArrayAccess
      * Unsets any existing instances for the given alias.
      *
      * @param string $alias
-     * @param \Miny\Factory\Blueprint $object
-     * @return \Miny\Factory\Blueprint
+     * @param Blueprint $object
+     * @return Blueprint
      */
     public function register($alias, Blueprint $object)
     {
@@ -106,7 +118,6 @@ class Factory implements ArrayAccess
     }
 
     /**
-     *
      * @param type $alias
      * @param object $object
      */
@@ -123,7 +134,7 @@ class Factory implements ArrayAccess
      * Gets the Blueprint stored for $alias.
      *
      * @param string $alias
-     * @return \Miny\Factory\Blueprint
+     * @return Blueprint
      * @throws OutOfBoundsException
      */
     public function getBlueprint($alias)
@@ -137,7 +148,7 @@ class Factory implements ArrayAccess
     /**
      * Retrieves all stored Blueprint objects.
      *
-     * @return array
+     * @return Blueprint[]
      */
     public function getBlueprints()
     {
@@ -169,6 +180,10 @@ class Factory implements ArrayAccess
         return $obj;
     }
 
+    /**
+     * @param object $object
+     * @param Blueprint $descriptor
+     */
     private function injectDependencies($object, Blueprint $descriptor)
     {
         if ($descriptor->hasParent()) {
@@ -187,6 +202,11 @@ class Factory implements ArrayAccess
         }
     }
 
+    /**
+     * @param Blueprint $descriptor
+     * @return object
+     * @throws InvalidArgumentException
+     */
     private function instantiate(Blueprint $descriptor)
     {
         $class = $descriptor->getClassName();
@@ -198,36 +218,24 @@ class Factory implements ArrayAccess
             throw new InvalidArgumentException('Class not found: ' . $class);
         }
         $args = $descriptor->getArguments();
+        foreach ($args as $key => $value) {
+            $args[$key] = $this->getValue($value);
+        }
         switch (count($args)) {
             case 0:
-                $obj = new $class;
-                break;
+                return new $class;
             case 1:
-                $arg = $this->getValue(current($args));
-                $obj = new $class($arg);
-                break;
+                return new $class(current($args));
             case 2:
-                foreach ($args as $key => $value) {
-                    $args[$key] = $this->getValue($value);
-                }
                 list($arg1, $arg2) = $args;
-                $obj = new $class($arg1, $arg2);
-                break;
+                return new $class($arg1, $arg2);
             case 3:
-                foreach ($args as $key => $value) {
-                    $args[$key] = $this->getValue($value);
-                }
                 list($arg1, $arg2, $arg3) = $args;
-                $obj = new $class($arg1, $arg2, $arg3);
-                break;
+                return new $class($arg1, $arg2, $arg3);
             default:
                 $ref = new ReflectionClass($class);
-                foreach ($args as $key => $value) {
-                    $args[$key] = $this->getValue($value);
-                }
-                $obj = $ref->newInstanceArgs($args);
+                return $ref->newInstanceArgs($args);
         }
-        return $obj;
     }
 
     /**
@@ -286,6 +294,10 @@ class Factory implements ArrayAccess
         return $var;
     }
 
+    /**
+     * @param string $str
+     * @return mixed
+     */
     private function getObjectParameter($str)
     {
         if (($pos = strpos($str, '::')) !== false) {
@@ -305,7 +317,12 @@ class Factory implements ArrayAccess
         }
     }
 
-    private function merge($array1, $array2)
+    /**
+     * @param array $array1
+     * @param array $array2
+     * @return array
+     */
+    private function merge(array $array1, array $array2)
     {
         foreach ($array2 as $key => $value) {
             if (isset($array1[$key]) && is_array($array1[$key]) && is_array($value)) {
@@ -319,7 +336,7 @@ class Factory implements ArrayAccess
 
     /**
      * Stores an array of parameters.
-     * Parameters must be defined as name => value
+     * Parameters are defined as a key-value pair (name => value)
      *
      * @param array $parameters
      */
@@ -374,6 +391,10 @@ class Factory implements ArrayAccess
         return $this->resolveLinks($return);
     }
 
+    /**
+     * @param string $value
+     * @return string
+     */
     private function resolveLinks($value)
     {
         if (is_array($value)) {

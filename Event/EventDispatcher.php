@@ -13,10 +13,12 @@ use Miny\Event\Exceptions\EventHandlerException;
 
 class EventDispatcher
 {
+    /**
+     * @var callback[]
+     */
     private $handlers = array();
 
     /**
-     *
      * @param string $event
      * @param callable $handler
      * @param int $place
@@ -38,8 +40,7 @@ class EventDispatcher
     }
 
     /**
-     *
-     * @param \Miny\Event\Event $event
+     * @param Event $event
      */
     public function raiseEvent(Event $event)
     {

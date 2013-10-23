@@ -33,7 +33,14 @@ class Application extends Factory
     const ENV_DEV = 1;
     const ENV_COMMON = 2;
 
+    /**
+     * @var Module[]
+     */
     private $modules = array();
+
+    /**
+     * @var int
+     */
     private $environment;
 
     /**

@@ -27,7 +27,14 @@ class ApplicationEventHandlers
         E_STRICT       => 'Strict notice (PHP)'
     );
 
+    /**
+     * @var Application
+     */
     protected $app;
+
+    /**
+     * @var Log
+     */
     protected $log;
 
     public function __construct(Application $app, Log $log)

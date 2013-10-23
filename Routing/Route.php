@@ -13,28 +13,52 @@ use InvalidArgumentException;
 
 class Route
 {
+    /**
+     * @var string
+     */
     private $path;
+
+    /**
+     * @var array
+     */
     private $parameters;
+
+    /**
+     * @var string[]
+     */
     private $parameter_names = array();
+
+    /**
+     * @var string[]
+     */
     private $patterns = array();
+
+    /**
+     * @var string
+     */
     private $regex;
+
+    /**
+     * @var int
+     */
     private $parameter_count;
 
     /**
-     *
      * @param string $path
      * @param string $method
      * @param array $params
      */
     public function __construct($path, $method = NULL, array $params = array())
     {
+        if (!is_string($path)) {
+            throw new InvalidArgumentException('Path must be a string');
+        }
         $this->method = $method;
         $this->path = $path;
         $this->parameters = $params;
     }
 
     /**
-     *
      * @return string
      */
     public function getPath()
@@ -43,7 +67,6 @@ class Route
     }
 
     /**
-     *
      * @param string $path
      * @throws InvalidArgumentException
      */
@@ -59,7 +82,6 @@ class Route
     }
 
     /**
-     *
      * @return string
      */
     public function getMethod()
@@ -68,7 +90,6 @@ class Route
     }
 
     /**
-     *
      * @param array $parameters
      */
     public function addParameters(array $parameters)
@@ -77,7 +98,6 @@ class Route
     }
 
     /**
-     *
      * @return array
      */
     public function getParameters()
@@ -86,7 +106,6 @@ class Route
     }
 
     /**
-     *
      * @param string $parameter
      * @param string $pattern
      */
@@ -96,7 +115,6 @@ class Route
     }
 
     /**
-     *
      * @param string $parameter
      * @param string $default
      * @return string
@@ -110,7 +128,6 @@ class Route
     }
 
     /**
-     *
      * @return boolean
      */
     public function isStatic()
@@ -119,7 +136,6 @@ class Route
     }
 
     /**
-     *
      * @return string
      */
     public function getRegex()
@@ -130,7 +146,6 @@ class Route
     }
 
     /**
-     *
      * @return int
      */
     public function getParameterCount()
@@ -142,7 +157,6 @@ class Route
     }
 
     /**
-     *
      * @return array
      */
     public function getParameterNames()

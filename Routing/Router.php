@@ -11,12 +11,39 @@ namespace Miny\Routing;
 
 class Router extends RouteCollection
 {
+    /**
+     * @var RouteMatcher
+     */
     private $matcher;
+
+    /**
+     * @var RouteGenerator
+     */
     private $generator;
+
+    /**
+     * @var string
+     */
     private $route_prefix;
+
+    /**
+     * @var string
+     */
     private $route_suffix;
+
+    /**
+     * @var array
+     */
     private $default_parameters;
+
+    /**
+     * @var Resources[]
+     */
     private $resources = array();
+
+    /**
+     * @var bool
+     */
     private $resources_built = false;
 
     /**
@@ -39,7 +66,7 @@ class Router extends RouteCollection
      * @param array $parameters
      * @param boolean $prefix
      * @param boolean $suffix
-     * @return \Miny\Routing\Route
+     * @return Route
      */
     public function root(array $parameters = array(), $prefix = true, $suffix = false)
     {
@@ -48,12 +75,11 @@ class Router extends RouteCollection
     }
 
     /**
-     *
-     * @param \Miny\Routing\Route $route
+     * @param Route $route
      * @param string $name
      * @param boolean $prefix
      * @param boolean $suffix
-     * @return \Miny\Routing\Route
+     * @return Route
      */
     public function route(Route $route, $name, $prefix = true, $suffix = true)
     {
@@ -77,11 +103,10 @@ class Router extends RouteCollection
     }
 
     /**
-     *
      * @param type $name
      * @param array $parameters
      * @param type $singular
-     * @return \Miny\Routing\Resources
+     * @return Resources
      */
     public function resources($name, array $parameters = array())
     {
@@ -92,10 +117,9 @@ class Router extends RouteCollection
     }
 
     /**
-     *
      * @param type $name
      * @param array $parameters
-     * @return \Miny\Routing\Resource
+     * @return Resource
      */
     public function resource($name, array $parameters = array())
     {
@@ -122,10 +146,9 @@ class Router extends RouteCollection
     }
 
     /**
-     *
      * @param string $path
      * @param string $method
-     * @return \Miny\Routing\Match
+     * @return Match
      */
     public function match($path, $method = NULL)
     {
@@ -134,7 +157,6 @@ class Router extends RouteCollection
     }
 
     /**
-     *
      * @param string $route_name
      * @param array $parameters
      * @return string

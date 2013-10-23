@@ -9,33 +9,77 @@
 
 namespace Miny\Routing;
 
+use ArrayIterator;
+use InvalidArgumentException;
 use UnexpectedValueException;
 
 class Resources extends RouteCollection
 {
+    /**
+     * @var string[]
+     */
     protected static $memberActions = array(
         'show'    => 'GET',
         'destroy' => 'DELETE',
         'edit'    => 'GET',
         'update'  => 'PUT'
     );
+
+    /**
+     * @var string[]
+     */
     protected static $collectionActions = array(
         'index'  => 'GET',
         'new'    => 'GET',
         'create' => 'POST'
     );
+
+    /**
+     * @var string[]
+     */
     protected $member_actions;
+
+    /**
+     * @var string[]
+     */
     protected $collection_actions;
+
+    /**
+     * @var string
+     */
     protected $name;
+
+    /**
+     * @var string
+     */
     private $singular_name;
+
+    /**
+     * @var array
+     */
     private $parameters;
+
+    /**
+     * @var bool
+     */
     private $built = false;
+
+    /**
+     * @var string
+     */
     private $id_pattern;
+
+    /**
+     * @var Resources
+     */
     private $parent;
+
+    /**
+     * @var Resources[]
+     */
     private $resources = array();
 
     /**
-     *
      * @param string $name
      * @return string
      */
@@ -48,7 +92,6 @@ class Resources extends RouteCollection
     }
 
     /**
-     *
      * @param string $name
      * @param array $parameters
      * @throws UnexpectedValueException
@@ -69,33 +112,43 @@ class Resources extends RouteCollection
     }
 
     /**
-     *
-     * @param type $pattern
-     * @return \Miny\Routing\Resources
+     * @param string $pattern
+     * @return Resources
      */
     public function specify($pattern)
     {
+        if (!is_string($pattern)) {
+            throw new InvalidArgumentException('Pattern must be a string');
+        }
         $this->id_pattern = $pattern;
         return $this;
     }
 
+    /**
+     * @param Resources $resource
+     */
     private function setParent(Resources $resource)
     {
         $this->parent = $resource;
     }
 
+    /**
+     * @return Resources
+     */
     private function getParent()
     {
         return $this->parent;
     }
 
+    /**
+     * @return bool
+     */
     private function hasParent()
     {
         return !is_null($this->parent);
     }
 
     /**
-     *
      * @param array $parameters
      */
     public function addParameters(array $parameters)
@@ -104,7 +157,6 @@ class Resources extends RouteCollection
     }
 
     /**
-     *
      * @param string $key
      * @param mixed $value
      */
@@ -117,9 +169,8 @@ class Resources extends RouteCollection
     }
 
     /**
-     *
      * @param string $name
-     * @return \Miny\Routing\Resources
+     * @return Resources
      * @throws UnexpectedValueException
      */
     public function singular($name)
@@ -132,7 +183,6 @@ class Resources extends RouteCollection
     }
 
     /**
-     *
      * @return string
      */
     public function getName()
@@ -144,7 +194,6 @@ class Resources extends RouteCollection
     }
 
     /**
-     *
      * @return string
      */
     public function getSingularName()
@@ -156,8 +205,7 @@ class Resources extends RouteCollection
     }
 
     /**
-     *
-     * @return \Miny\Routing\Resources
+     * @return Resources
      */
     public function only()
     {
@@ -168,8 +216,7 @@ class Resources extends RouteCollection
     }
 
     /**
-     *
-     * @return \Miny\Routing\Resources
+     * @return Resources
      */
     public function except()
     {
@@ -180,10 +227,9 @@ class Resources extends RouteCollection
     }
 
     /**
-     *
      * @param string $method
      * @param string $name
-     * @return \Miny\Routing\Resources
+     * @return Resources
      */
     public function member($method, $name)
     {
@@ -192,10 +238,9 @@ class Resources extends RouteCollection
     }
 
     /**
-     *
      * @param string $method
      * @param string $name
-     * @return \Miny\Routing\Resources
+     * @return Resources
      */
     public function collection($method, $name)
     {
@@ -204,9 +249,8 @@ class Resources extends RouteCollection
     }
 
     /**
-     *
-     * @param \Miny\Routing\Resources $resource
-     * @return \Miny\Routing\Resources
+     * @param Resources $resource
+     * @return Resources
      */
     public function resource(Resources $resource)
     {
@@ -232,7 +276,6 @@ class Resources extends RouteCollection
     }
 
     /**
-     *
      * @return string
      */
     public function getPathBase()
@@ -248,14 +291,20 @@ class Resources extends RouteCollection
         return $path . $this->name;
     }
 
-    protected function generateActions($actions, array $unnamed, $unnamed_route_name, $path)
+    /**
+     * @param array $actions
+     * @param array $unnamed_actions
+     * @param null $unnamed_route_name
+     * @param string $path
+     */
+    protected function generateActions(array $actions, array $unnamed_actions, $unnamed_route_name, $path)
     {
         $parameters = $this->parameters;
         $singular_name = $this->getSingularName();
         $parent = $this->getParent();
         foreach ($actions as $action => $method) {
             $parameters['action'] = $action;
-            if (in_array($action, $unnamed)) {
+            if (in_array($action, $unnamed_actions)) {
                 $name = $unnamed_route_name;
                 $unnamed_route_name = NULL;
                 $route = new Route($path, $method, $parameters);
@@ -284,9 +333,8 @@ class Resources extends RouteCollection
     }
 
     /**
-     *
      * @param string $name
-     * @return \Miny\Routing\Route
+     * @return Route
      */
     public function getRoute($name)
     {
@@ -295,8 +343,7 @@ class Resources extends RouteCollection
     }
 
     /**
-     *
-     * @return \ArrayIterator
+     * @return ArrayIterator
      */
     public function getIterator()
     {
@@ -305,4 +352,3 @@ class Resources extends RouteCollection
     }
 
 }
-

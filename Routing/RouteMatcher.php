@@ -11,11 +11,13 @@ namespace Miny\Routing;
 
 class RouteMatcher
 {
+    /**
+     * @var RouteCollection
+     */
     private $routes;
 
     /**
-     *
-     * @param \Miny\Routing\RouteCollection $routes
+     * @param RouteCollection $routes
      */
     public function __construct(RouteCollection $routes)
     {
@@ -23,10 +25,9 @@ class RouteMatcher
     }
 
     /**
-     *
      * @param string $path
      * @param string $method
-     * @return \Miny\Routing\Match|boolean
+     * @return Match|boolean
      */
     public function match($path, $method = NULL)
     {

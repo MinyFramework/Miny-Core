@@ -19,8 +19,14 @@ use OutOfBoundsException;
 
 class Session implements ArrayAccess, IteratorAggregate, Countable
 {
+    /**
+     * @var bool
+     */
     private $is_open = false;
 
+    /**
+     * @param bool $register_custom_storage
+     */
     public function __construct($register_custom_storage = false)
     {
         if ($register_custom_storage) {
@@ -82,7 +88,7 @@ class Session implements ArrayAccess, IteratorAggregate, Countable
     private function updateFlash()
     {
         foreach (array_keys($_SESSION['flash']) as $key) {
-            if ($_SESSION['flash'][$key]['ttl']-- == 0) {
+            if ($_SESSION['flash'][$key]['ttl'] -- == 0) {
                 unset($_SESSION['flash'][$key]);
             }
         }
@@ -191,7 +197,7 @@ class Session implements ArrayAccess, IteratorAggregate, Countable
 
     public function __set($key, $data)
     {
-        $_SESSION['flash'][$key] = array('data' => $data, 'ttl'  => 1);
+        $_SESSION['flash'][$key] = array('data' => $data, 'ttl' => 1);
     }
 
     public function &__get($key)
@@ -227,7 +233,7 @@ class Session implements ArrayAccess, IteratorAggregate, Countable
                 }
         }
 
-        $_SESSION['flash'][$key] = array('data' => $arguments[0], 'ttl'  => $arguments[1]);
+        $_SESSION['flash'][$key] = array('data' => $arguments[0], 'ttl' => $arguments[1]);
     }
 
     //Interfaces

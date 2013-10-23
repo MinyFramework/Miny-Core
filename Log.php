@@ -21,9 +21,24 @@ class Log
     const ERROR = 'error';
     const EXCEPTION = 'exception';
 
+    /**
+     * @var string
+     */
     private $path;
+
+    /**
+     * @var array
+     */
     private $messages = array();
+
+    /**
+     * @var bool
+     */
     private $can_log = true;
+
+    /**
+     * @var bool
+     */
     private $debug_mode = false;
 
     /**
@@ -50,6 +65,10 @@ class Log
         register_shutdown_function(array($this, 'saveLog'));
     }
 
+    /**
+     * @param string $path
+     * @throws InvalidArgumentException
+     */
     private function checkPath($path)
     {
         if (!is_dir($path)) {

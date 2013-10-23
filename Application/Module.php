@@ -15,6 +15,10 @@ abstract class Module
 {
     protected $application;
 
+    /**
+     * @param Application $app
+     * @throws BadModuleException
+     */
     public function __construct(Application $app)
     {
         $this->application = $app;

@@ -11,12 +11,19 @@ namespace Miny\Routing;
 
 class Match
 {
+    /**
+     * @var Route
+     */
     private $route;
+
+    /**
+     * @var array
+     */
     private $parameters;
 
     /**
      *
-     * @param \Miny\Routing\Route $route
+     * @param Route $route
      * @param array $parameters
      */
     public function __construct(Route $route, array $parameters = array())
@@ -26,7 +33,6 @@ class Match
     }
 
     /**
-     *
      * @return array
      */
     public function getParameters()
@@ -35,8 +41,7 @@ class Match
     }
 
     /**
-     *
-     * @return \Miny\Routing\Route
+     * @return Route
      */
     public function getRoute()
     {

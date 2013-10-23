@@ -14,6 +14,9 @@ use InvalidArgumentException;
 
 class Extendable
 {
+    /**
+     * @var callable[]
+     */
     private $plugins = array();
 
     /**
@@ -34,7 +37,6 @@ class Extendable
     }
 
     /**
-     *
      * @param object $object
      * @param array $method_aliasses
      * @throws InvalidArgumentException
@@ -58,10 +60,9 @@ class Extendable
     }
 
     /**
-     *
      * @param string $method
      * @param array $args
-     * @return type
+     * @return mixed
      * @throws BadMethodCallException
      */
     public function __call($method, $args)

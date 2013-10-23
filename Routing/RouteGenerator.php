@@ -14,11 +14,13 @@ use OutOfBoundsException;
 
 class RouteGenerator
 {
+    /**
+     * @var RouteCollection
+     */
     private $routes;
 
     /**
-     *
-     * @param \Miny\Routing\RouteCollection $routes
+     * @param RouteCollection $routes
      */
     public function __construct(RouteCollection $routes)
     {
@@ -26,7 +28,6 @@ class RouteGenerator
     }
 
     /**
-     *
      * @param string $route_name
      * @param array $parameters
      * @return string

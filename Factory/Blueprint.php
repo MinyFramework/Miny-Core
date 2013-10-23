@@ -16,15 +16,38 @@ use InvalidArgumentException;
  * Blueprint class
  * Responsible for statically describing objects and their dependencies.
  *
- * @author  Dániel Buga
+ * @author Dániel Buga
  */
 class Blueprint
 {
+    /**
+     * @var boolean
+     */
     private $singleton;
+
+    /**
+     * @var string
+     */
     private $classname;
+
+    /**
+     * @var array
+     */
     private $args = array();
+
+    /**
+     * @var array
+     */
     private $methods = array();
+
+    /**
+     * @var array
+     */
     private $properties = array();
+
+    /**
+     * @var string
+     */
     private $parent;
 
     /**
@@ -43,7 +66,7 @@ class Blueprint
     /**
      * Sets constructor arguments.
      *
-     * @return \Miny\Factory\Blueprint
+     * @return Blueprint
      */
     public function setArguments()
     {
@@ -55,7 +78,7 @@ class Blueprint
      * Sets parent object's name.
      *
      * @param string $parent
-     * @return \Miny\Factory\Blueprint
+     * @return Blueprint
      */
     public function setParent($parent)
     {
@@ -67,7 +90,7 @@ class Blueprint
      * Sets a method with its parameters to be called upon instantiation.
      *
      * @param string $method
-     * @return \Miny\Factory\Blueprint
+     * @return Blueprint
      */
     public function addMethodCall()
     {
@@ -85,7 +108,7 @@ class Blueprint
      *
      * @param string $name
      * @param mixed $value
-     * @return \Miny\Factory\Blueprint
+     * @return Blueprint
      */
     public function setProperty($name, $value)
     {

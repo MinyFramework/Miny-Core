@@ -18,10 +18,12 @@ use OutOfBoundsException;
  */
 class AutoLoader
 {
+    /**
+     * @var string[]
+     */
     private $map = array();
 
     /**
-     *
      * @param array $map
      */
     public function __construct(array $map = array())
@@ -31,7 +33,6 @@ class AutoLoader
     }
 
     /**
-     *
      * @param string $namespace
      * @param string $path
      */
@@ -54,6 +55,10 @@ class AutoLoader
         }
     }
 
+    /**
+     * @param string $class
+     * @return string
+     */
     private function getPathToNamespace($class)
     {
         $temp = '\\' . $class;
@@ -77,7 +82,6 @@ class AutoLoader
     }
 
     /**
-     *
      * @param string $class
      * @throws ClassNotFoundException
      */
@@ -103,4 +107,3 @@ class ClassNotFoundException extends OutOfBoundsException
     }
 
 }
-

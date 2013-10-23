@@ -13,7 +13,14 @@ use BadMethodCallException;
 
 class Resource extends Resources
 {
+    /**
+     * @var string[]
+     */
     protected static $memberActions = array();
+
+    /**
+     * @var string[]
+     */
     protected static $collectionActions = array(
         'show'    => 'GET',
         'destroy' => 'DELETE',
@@ -24,7 +31,6 @@ class Resource extends Resources
     );
 
     /**
-     *
      * @param string $name
      * @param array $parameters
      */
@@ -35,7 +41,6 @@ class Resource extends Resources
     }
 
     /**
-     *
      * @param string $method
      * @param string $name
      * @throws BadMethodCallException

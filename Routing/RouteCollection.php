@@ -12,14 +12,17 @@ namespace Miny\Routing;
 use ArrayIterator;
 use IteratorAggregate;
 use OutOfBoundsException;
+use UnexpectedValueException;
 
 class RouteCollection implements IteratorAggregate
 {
+    /**
+     * @var Route[]
+     */
     private $routes = array();
 
     /**
-     *
-     * @param \Miny\Routing\RouteCollection $collection
+     * @param RouteCollection $collection
      */
     public function merge(RouteCollection $collection)
     {
@@ -27,8 +30,7 @@ class RouteCollection implements IteratorAggregate
     }
 
     /**
-     *
-     * @param \Miny\Routing\Route $route
+     * @param Route $route
      * @param string $name
      * @throws UnexpectedValueException
      */
@@ -45,9 +47,8 @@ class RouteCollection implements IteratorAggregate
     }
 
     /**
-     *
      * @param string $name
-     * @return \Miny\Routing\Route
+     * @return Route
      * @throws OutOfBoundsException
      */
     public function getRoute($name)
@@ -62,8 +63,7 @@ class RouteCollection implements IteratorAggregate
     }
 
     /**
-     *
-     * @return \ArrayIterator
+     * @return ArrayIterator
      */
     public function getIterator()
     {

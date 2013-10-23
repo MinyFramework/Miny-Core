@@ -16,6 +16,9 @@ use Miny\HTTP\Response;
 
 class ControllerResolver
 {
+    /**
+     * @var ControllerCollection
+     */
     private $collection;
 
     public function __construct(ControllerCollection $collection)
@@ -23,6 +26,13 @@ class ControllerResolver
         $this->collection = $collection;
     }
 
+    /**
+     * @param string $class
+     * @param string $action
+     * @param Request $request
+     * @param Response $response
+     * @throws InvalidArgumentException
+     */
     public function resolve($class, $action, Request $request, Response $response)
     {
         $controller = $this->collection->getController($class);

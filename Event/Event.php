@@ -11,13 +11,27 @@ namespace Miny\Event;
 
 class Event
 {
+    /**
+     * @var array
+     */
     private $parameters;
+
+    /**
+     * @var string
+     */
     private $name;
+
+    /**
+     * @var mixed
+     */
     private $response;
+
+    /**
+     * @var bool
+     */
     private $is_handled = false;
 
     /**
-     *
      * @param string $name
      */
     public function __construct($name)
@@ -31,7 +45,6 @@ class Event
     }
 
     /**
-     *
      * @return boolean
      */
     public function isHandled()
@@ -39,16 +52,12 @@ class Event
         return $this->is_handled;
     }
 
-    /**
-     *
-     */
     public function setHandled()
     {
         $this->is_handled = true;
     }
 
     /**
-     *
      * @return string
      */
     public function getName()
@@ -57,7 +66,6 @@ class Event
     }
 
     /**
-     *
      * @return string
      */
     public function __toString()
@@ -66,7 +74,6 @@ class Event
     }
 
     /**
-     *
      * @return array
      */
     public function getParameters()
@@ -75,7 +82,6 @@ class Event
     }
 
     /**
-     *
      * @param mixed $response
      */
     public function setResponse($response)
@@ -84,7 +90,6 @@ class Event
     }
 
     /**
-     *
      * @return boolean
      */
     public function hasResponse()
@@ -93,7 +98,6 @@ class Event
     }
 
     /**
-     *
      * @return mixed
      */
     public function getResponse()
@@ -102,4 +106,3 @@ class Event
     }
 
 }
-
