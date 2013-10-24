@@ -232,6 +232,9 @@ class Factory implements ArrayAccess
             case 3:
                 list($arg1, $arg2, $arg3) = $args;
                 return new $class($arg1, $arg2, $arg3);
+            case 4:
+                list($arg1, $arg2, $arg3, $arg4) = $args;
+                return new $class($arg1, $arg2, $arg3, $arg4);
             default:
                 $ref = new ReflectionClass($class);
                 return $ref->newInstanceArgs($args);
