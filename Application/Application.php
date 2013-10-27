@@ -218,17 +218,10 @@ class Application extends Factory
                 ->addMethodCall('setSuffix', '@view:default_format')
                 ->addMethodCall('setHelpers', '&view_helpers')
                 ->addMethodCall('addViewType', 'view', '\Miny\View\View')
-                ->addMethodCall('addViewType', 'list', '\Miny\View\ListView')
                 ->setProperty('config', '&app::getResolvedParameters');
 
         $this->add('view_helpers', '\Miny\View\ViewHelpers')
-                ->addMethodCall('addMethod', 'route', '*router::generate')
-                ->addMethodCall('addMethod', 'routeAnchor',
-                        function($route, $label, array $parameters = array(), array $args = array()) use($app) {
-                    $url = $app->router->generate($route, $parameters);
-                    return $app->view_helpers->anchor($url, $label, $args);
-                })
-                ->addMethodCall('addMethod', 'service', '*app::__get');
+                ->setArguments('&app');
 
         $this->add('controllers', '\Miny\Controller\ControllerCollection')
                 ->setArguments('&app');

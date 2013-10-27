@@ -9,10 +9,10 @@
 
 namespace Miny\View;
 
+use BadMethodCallException;
 use InvalidArgumentException;
-use OutOfBoundsException;
 
-class ViewFactory
+class ViewFactory extends ViewBase
 {
     /**
      * @var string
@@ -30,11 +30,6 @@ class ViewFactory
     protected $helpers;
 
     /**
-     * @var array
-     */
-    protected $assigns = array();
-
-    /**
      * @var string[]
      */
     protected $views = array();
@@ -49,7 +44,7 @@ class ViewFactory
         if (!class_exists($class)) {
             throw new InvalidArgumentException('Nonexistent class set for view type ' . $type);
         }
-        if (!is_subclass_of($class, __NAMESPACE__ . '\iTemplatingView')) {
+        if (!is_subclass_of($class, __NAMESPACE__ . '\iView')) {
             throw new InvalidArgumentException('Invalid class set for view type ' . $type);
         }
         $this->views[$type] = $class;
@@ -88,52 +83,21 @@ class ViewFactory
     }
 
     /**
-     * @param string $key
-     * @param mixed $value
-     */
-    public function __set($key, $value)
-    {
-        $this->assigns[$key] = $value;
-    }
-
-    /**
-     * @param string $key
-     * @return mixed
-     * @throws OutOfBoundsException
-     */
-    public function __get($key)
-    {
-        if (!isset($this->assigns[$key])) {
-            throw new OutOfBoundsException('Key not set: ' . $key);
-        }
-        return $this->assigns[$key];
-    }
-
-    /**
-     * @param string $key
-     * @return bool
-     */
-    public function __isset($key)
-    {
-        return isset($this->assigns[$key]);
-    }
-
-    /**
-     * @param string $key
-     */
-    public function __unset($key)
-    {
-        unset($this->assigns[$key]);
-    }
-
-    /**
      * @param string $type
-     * @param string $template
+     * @param array $args
      * @return iView
+     * @throws BadMethodCallException
      * @throws InvalidArgumentException
      */
-    public function get($type, $template)
+    public function __call($type, $args)
     {
+        if (count($args) == 0) {
+            throw new BadMethodCallException('This method requires a template argument.');
+        }
+        $template = $args[0];
+        if (!is_string($template)) {
+            throw new BadMethodCallException('The template argument must be a string.');
+        }
         if (!isset($this->views[$type])) {
             throw new InvalidArgumentException('Unknown view type ' . $type);
         }
@@ -142,9 +106,7 @@ class ViewFactory
         if ($this->helpers !== NULL) {
             $view->setHelpers($this->helpers);
         }
-        foreach ($this->assigns as $key => $value) {
-            $view->$key = $value;
-        }
+        $view->setVariables($this->variables);
         return $view;
     }
 

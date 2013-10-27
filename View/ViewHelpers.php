@@ -9,10 +9,36 @@
 
 namespace Miny\View;
 
+use Miny\Application\Application;
 use Miny\Extendable;
 
 class ViewHelpers extends Extendable
 {
+    private $application;
+    private $router;
+
+    public function __construct(Application $application)
+    {
+        $this->application = $application;
+        $this->router = $application->router;
+    }
+
+    public function service($service)
+    {
+        return $this->application->__get($service);
+    }
+
+    public function route($route, array $parameters = array())
+    {
+        return $this->router->generate($route, $parameters);
+    }
+
+    public function routeAnchor($route, $label, array $parameters = array(), array $args = array())
+    {
+        $url = $this->router->generate($route, $parameters);
+        return $this->anchor($url, $label, $args);
+    }
+
     public function filter($data, $filter)
     {
         $method = 'filter_' . $filter;

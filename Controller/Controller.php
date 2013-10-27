@@ -69,7 +69,7 @@ abstract class Controller extends Extendable
      */
     protected function view($type, $template)
     {
-        return $this->app->view_factory->get($type, $template);
+        return $this->app->view_factory->$type($template);
     }
 
     /**

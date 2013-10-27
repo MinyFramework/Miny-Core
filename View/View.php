@@ -13,14 +13,15 @@ use BadMethodCallException;
 use OutOfBoundsException;
 use UnexpectedValueException;
 
-class View implements iView, iTemplatingView
+class View extends ViewBase implements iView
 {
     protected $fragment_stack = array();
     protected $fragments = array();
-    protected $vars = array();
+    protected $directory;
     protected $helpers;
     protected $template;
     protected $extend;
+    protected $variable_stack = array();
 
     public function __construct($directory, $template)
     {
@@ -33,17 +34,33 @@ class View implements iView, iTemplatingView
         $this->helpers = $helpers;
     }
 
-    public function __call($method, $arguments)
+    public function setVariables(array $variables)
     {
-        if ($this->helpers === NULL) {
-            throw new BadMethodCallException('Helper functions are not set.');
-        }
-        return call_user_func_array(array($this->helpers, $method), $arguments);
+        $this->variables = $variables;
     }
 
-    public function __set($key, $value)
+    public function saveVariables()
     {
-        $this->vars[$key] = $value;
+        $this->variable_stack[] = $this->variables;
+    }
+
+    public function pushVariables(array $variables)
+    {
+        $this->saveVariables();
+        $this->setVariables($variables);
+    }
+
+    public function restoreVariables()
+    {
+        if (empty($this->variables)) {
+            throw new BadMethodCallException('Unable to restore: There are no saved variables.');
+        }
+        $this->variables = array_pop($this->variable_stack);
+    }
+
+    public function __isset($key)
+    {
+        return parent::__isset($key) || isset($this->fragments[$key]);
     }
 
     public function __get($key)
@@ -54,14 +71,12 @@ class View implements iView, iTemplatingView
         return $this->get($key, '', true);
     }
 
-    public function __isset($key)
+    public function __call($method, $arguments)
     {
-        return isset($this->vars[$key]) || isset($this->fragments[$key]);
-    }
-
-    public function __unset($key)
-    {
-        unset($this->vars[$key]);
+        if ($this->helpers === NULL) {
+            throw new BadMethodCallException('Helper functions are not set.');
+        }
+        return call_user_func_array(array($this->helpers, $method), $arguments);
     }
 
     public function get($key, $default = '', $escape = true)
@@ -70,11 +85,7 @@ class View implements iView, iTemplatingView
             return $this->fragments[$key][0];
         }
 
-        if (!isset($this->vars[$key])) {
-            $var = $default;
-        } else {
-            $var = $this->vars[$key];
-        }
+        $var = parent::__isset($key) ? parent::__get($key) : $default;
 
         if (is_callable($var)) {
             $var = call_user_func($var, $this);
