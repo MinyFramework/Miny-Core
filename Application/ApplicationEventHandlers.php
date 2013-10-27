@@ -81,7 +81,7 @@ class ApplicationEventHandlers
 
     public function displayExceptionPage(Exception $e)
     {
-        $view = $this->app->view_factory->get('view', $this->app['view:exception']);
+        $view = $this->app->view_factory->view($this->app['view:exception']);
         $view->app = $this->app;
         $view->exception = $e;
         return $view->render();

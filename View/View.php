@@ -177,13 +177,20 @@ class View extends ViewBase implements iView
         return ob_get_clean();
     }
 
-    public function render()
+    public function render(array $variables = NULL)
     {
+        if (isset($variables)) {
+            $this->pushVariables($variables);
+        }
         $file = $this->template;
         do {
             $this->extend = NULL;
             $content = $this->renderFile($file);
         } while ($file = $this->extend);
+
+        if (isset($variables)) {
+            $this->restoreVariables();
+        }
         return $content;
     }
 
