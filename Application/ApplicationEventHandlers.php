@@ -18,15 +18,6 @@ use Miny\Routing\Exceptions\PageNotFoundException;
 
 class ApplicationEventHandlers
 {
-    private static $loggable = array(
-        E_NOTICE       => 'Notice (PHP)',
-        E_USER_NOTICE  => 'Notice',
-        E_WARNING      => 'Warning (PHP)',
-        E_USER_WARNING => 'Warning',
-        E_DEPRECATED   => 'Deprecated notice (PHP)',
-        E_STRICT       => 'Strict notice (PHP)'
-    );
-
     /**
      * @var Application
      */
@@ -41,22 +32,6 @@ class ApplicationEventHandlers
     {
         $this->app = $app;
         $this->log = $log;
-        set_error_handler(array($this, 'logError'));
-    }
-
-    public function logError($errno, $errstr, $errfile, $errline)
-    {
-        if (isset(self::$loggable[$errno])) {
-            $message = sprintf('%s in %s on line %s', $errstr, $errfile, $errline);
-            $this->log->write($message, self::$loggable[$errno]);
-        } else {
-            throw new ErrorException($errstr, $errno, 0, $errfile, $errline);
-        }
-    }
-
-    public function logException(Exception $e)
-    {
-        $this->log->write(sprintf("%s \n Trace: %s", $e->getMessage(), $e->getTraceAsString()), get_class($e));
     }
 
     public function logRequest(Request $request)

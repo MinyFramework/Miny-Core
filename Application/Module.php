@@ -13,13 +13,16 @@ use Miny\Application\Exceptions\BadModuleException;
 
 abstract class Module
 {
+    /**
+     * @var BaseApplication
+     */
     protected $application;
 
     /**
-     * @param Application $app
+     * @param BaseApplication $app
      * @throws BadModuleException
      */
-    public function __construct(Application $app)
+    public function __construct(BaseApplication $app)
     {
         $this->application = $app;
         foreach ($this->includes() as $file) {
@@ -40,5 +43,5 @@ abstract class Module
         return array();
     }
 
-    public abstract function init(Application $app);
+    public abstract function init(BaseApplication $app);
 }

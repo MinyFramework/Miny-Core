@@ -9,67 +9,23 @@
 
 namespace Miny\Application;
 
-require_once __DIR__ . '/../AutoLoader.php';
-require_once __DIR__ . '/../Factory/Factory.php';
-
-use Exception;
-use InvalidArgumentException;
-use Miny\Application\Exceptions\BadModuleException;
-use Miny\AutoLoader;
 use Miny\Event\Event;
-use Miny\Factory\Factory;
 use Miny\HTTP\Request;
 use Miny\HTTP\Response;
-use Miny\Log;
 use Miny\Routing\Resource;
 use Miny\Routing\Resources;
 use Miny\Routing\Route;
 use Miny\Session\Session;
 use UnexpectedValueException;
 
-class Application extends Factory
+require_once __DIR__ . '/BaseApplication.php';
+
+class Application extends BaseApplication
 {
-    const ENV_PROD = 0;
-    const ENV_DEV = 1;
-    const ENV_COMMON = 2;
-
-    /**
-     * @var Module[]
-     */
-    private $modules = array();
-
-    /**
-     * @var int
-     */
-    private $environment;
-
-    /**
-     * @param string $directory
-     * @param int $environment
-     * @param boolean $include_configs
-     */
-    public function __construct($directory, $environment = self::ENV_PROD, $include_configs = true)
+    protected function setDefaultParameters()
     {
-        $this->environment = $environment;
-        $this->autoloader = new AutoLoader(
-                array(
-            '\Application' => $directory,
-            '\Miny'        => __DIR__ . '/..',
-            '\Modules'     => __DIR__ . '/../../Modules'
-        ));
         $this->setParameters(array(
-            'default_timezone' => 'UTC',
-            'root'             => $directory,
-            'log'              => array(
-                'path'  => $directory . '/logs',
-                'debug' => $this->isDeveloperEnvironment()
-            ),
-            'view'             => array(
-                'dir'            => $directory . '/templates',
-                'default_format' => '.{@router:defaults:format}',
-                'exception'      => 'layouts/exception'
-            ),
-            'router'           => array(
+            'router' => array(
                 'prefix'          => '/',
                 'suffix'          => '.:format',
                 'defaults'        => array(
@@ -77,141 +33,33 @@ class Application extends Factory
                 ),
                 'exception_paths' => array()
             ),
-            'site'             => array(
+            'view'   => array(
+                'dir'            => '{@root}/templates',
+                'default_format' => '.{@router:defaults:format}',
+                'exception'      => 'layouts/exception'
+            ),
+            'site'   => array(
                 'title'    => 'Miny 1.0',
                 'base_url' => 'http://' . $_SERVER['HTTP_HOST'] . '{@router:prefix}'
-            )
-        ));
-        $this->setInstance('app', $this);
-        if ($include_configs) {
-            $config_files = array(
-                $directory . '/config/config.common.php' => self::ENV_COMMON,
-                $directory . '/config/config.dev.php'    => self::ENV_DEV,
-                $directory . '/config/config.php'        => self::ENV_PROD
-            );
-            foreach ($config_files as $file => $env) {
-                try {
-                    $this->loadConfig($file, $env);
-                } catch (InvalidArgumentException $e) {
-
-                }
-            }
-        }
-        $this->registerDefaultServices();
-        $env = $this->isProductionEnvironment() ? 'production' : 'development';
-        $this->log->write(sprintf('Starting Miny in %s environment', $env));
-        if (isset($this['modules']) && is_array($this['modules'])) {
-            foreach ($this['modules'] as $module) {
-                $this->module($module);
-            }
-        }
+        )));
     }
 
-    /**
-     * @param string $file
-     * @param int $env
-     * @throws InvalidArgumentException
-     * @throws UnexpectedValueException
-     */
-    public function loadConfig($file, $env = self::ENV_COMMON)
+    private function registerEventHandlers()
     {
-        if ($env != $this->environment && $env != self::ENV_COMMON) {
-            return;
-        }
-        if (!is_file($file)) {
-            throw new InvalidArgumentException('Configuration file not found: ' . $file);
-        }
-        $config = include $file;
-        if (!is_array($config)) {
-            throw new UnexpectedValueException('Invalid configuration file: ' . $file);
-        }
-        $this->setParameters($config);
-    }
-
-    /**
-     * @return int
-     */
-    public function getEnvironment()
-    {
-        return $this->environment;
-    }
-
-    /**
-     * @return boolean
-     */
-    public function isDeveloperEnvironment()
-    {
-        return $this->environment == self::ENV_DEV;
-    }
-
-    /**
-     * @return boolean
-     */
-    public function isProductionEnvironment()
-    {
-        return $this->environment == self::ENV_PROD;
-    }
-
-    /**
-     * @param string $module
-     * @throws BadModuleException
-     */
-    public function module($module)
-    {
-        if (isset($this->modules[$module])) {
-            return;
-        }
-
-        $this->log->write(sprintf('Loading Miny module: %s', $module), Log::DEBUG);
-        $class = sprintf('\Modules\%s\Module', $module);
-        if (!is_subclass_of($class, '\Miny\Application\Module')) {
-            throw new BadModuleException('Module descriptor should extend Module class: ' . $class);
-        }
-        $module_class = new $class($this);
-        $this->modules[$module] = $module_class;
-        foreach ($module_class->getDependencies() as $name) {
-            $this->module($name);
-        }
-        if (func_num_args() == 1) {
-            $module_class->init($this);
-        } else {
-            $args = func_get_args();
-            $args[0] = $this;
-            call_user_func_array(array($module_class, 'init'), $args);
-        }
-    }
-
-    private function registerDefaultServices()
-    {
-        $app = $this;
-
-        set_exception_handler(function(Exception $e) use($app) {
-            $event = new Event('uncaught_exception', $e);
-            $app->events->raiseEvent($event);
-            if (!$event->isHandled()) {
-                throw $e;
-            } else {
-                $response = new Response;
-                echo $event->getResponse();
-                $response->setCode(500);
-                $response->send();
-            }
-        });
-
-        $log = new Log($this['log']['path']);
-        $log->setDebugMode($this['log']['debug']);
-
-        $eh = new ApplicationEventHandlers($this, $log);
-
-        $this->add('events', '\Miny\Event\EventDispatcher')
-                ->setArguments('&log')
-                ->addMethodCall('register', 'uncaught_exception', array($eh, 'logException'))
-                ->addMethodCall('register', 'uncaught_exception', array($eh, 'displayExceptionPage'))
+        $eh = new ApplicationEventHandlers($this, $this->log);
+        $this->getBlueprint('events')
                 ->addMethodCall('register', 'filter_request', array($eh, 'logRequest'))
                 ->addMethodCall('register', 'filter_request', array($eh, 'filterRoutes'))
                 ->addMethodCall('register', 'filter_response', array($eh, 'setContentType'))
                 ->addMethodCall('register', 'filter_response', array($eh, 'logResponse'))
-                ->addMethodCall('register', 'invalid_response', array($eh, 'filterStringToResponse'));
+                ->addMethodCall('register', 'invalid_response', array($eh, 'filterStringToResponse'))
+                ->addMethodCall('register', 'uncaught_exception', array($eh, 'displayExceptionPage'));
+    }
+
+    protected function registerDefaultServices()
+    {
+        parent::registerDefaultServices();
+        $this->registerEventHandlers();
 
         $this->add('view_factory', '\Miny\View\ViewFactory')
                 ->addMethodCall('setDirectory', '@view:dir')
@@ -237,7 +85,6 @@ class Application extends Factory
             $session['token'] = sha1(mt_rand());
         }
 
-        $this->log = $log;
         $this->session = $session;
         $this->request = Request::getGlobal();
     }
