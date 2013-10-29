@@ -55,14 +55,15 @@ class Log
             return;
         }
         $this->path = $path;
-        if (defined('START_TIME')) {
-            $log = $this;
-            register_shutdown_function(function()use($log) {
+        $log = $this;
+        register_shutdown_function(function()use($log) {
+            if (defined('START_TIME')) {
                 $message = sprintf('Execution time: %lf s', microtime(true) - START_TIME);
                 $log->write($message, 'info');
-            });
-        }
-        register_shutdown_function(array($this, 'saveLog'));
+            }
+            $log->write("End of execution.\n", 'info');
+            $log->saveLog();
+        });
     }
 
     /**
@@ -116,6 +117,25 @@ class Log
         $this->messages[$key][] = array($level, $message);
     }
 
+    private function writeFile($file, $data)
+    {
+        if (file_put_contents($file, $data, FILE_APPEND) === false) {
+            throw new RuntimeException('Could not write log file: ' . $file);
+        }
+    }
+
+    private function assembleLogMessage()
+    {
+        $data = '';
+        foreach ($this->messages as $time => $messages) {
+            $time = date('Y-m-d H:i:s', $time);
+            foreach ($messages as $message) {
+                $data .= sprintf("[%s] %s: %s\n", $time, $message[0], $message[1]);
+            }
+        }
+        return $data;
+    }
+
     /**
      * @throws RuntimeException
      */
@@ -125,19 +145,10 @@ class Log
             return;
         }
         $file = $this->getLogFileName();
+        $data = $this->assembleLogMessage();
 
-        $data = '';
-        foreach ($this->messages as $time => $messages) {
-            $time = date('Y-m-d H:i:s', $time);
-            foreach ($messages as $message) {
-                $data .= sprintf("[%s] %s: %s\n", $time, $message[0], $message[1]);
-            }
-        }
-
-        $data .= "\n";
-        if (file_put_contents($file, $data, FILE_APPEND) === false) {
-            throw new RuntimeException('Could not write log file: ' . $file);
-        }
+        $this->writeFile($file, $data);
+        $this->messages = array();
     }
 
 }

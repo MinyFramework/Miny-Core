@@ -69,6 +69,7 @@ class CLIApplication extends BaseApplication
                     $this->removeJob($key);
                 }
             }
+            $this->log->saveLog();
         }
     }
 
