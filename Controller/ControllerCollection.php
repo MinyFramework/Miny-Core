@@ -12,13 +12,12 @@ namespace Miny\Controller;
 use Closure;
 use InvalidArgumentException;
 use Miny\Application\Application;
-use Miny\Controller\Controller;
 use UnexpectedValueException;
 
 class ControllerCollection
 {
     /**
-     * @var (Controller|Closure|string)[]
+     * @var (BaseController|Closure|string)[]
      */
     private $controllers = array();
 
@@ -34,7 +33,7 @@ class ControllerCollection
 
     /**
      * @param string $name
-     * @param (Controller|Closure|string) $controller
+     * @param (BaseController|Closure|string) $controller
      * @throws InvalidArgumentException
      */
     public function register($name, $controller)
@@ -42,7 +41,7 @@ class ControllerCollection
         if (!is_string($name)) {
             throw new InvalidArgumentException('Controller name must be a string');
         }
-        if (!$controller instanceof Closure && !$controller instanceof Controller && !is_string($controller)) {
+        if (!$controller instanceof Closure && !$controller instanceof BaseController && !is_string($controller)) {
             throw new InvalidArgumentException(sprintf('Invalid controller: %s (%s)', $name, gettype($controller)));
         }
         $this->controllers[$name] = $controller;
@@ -58,7 +57,7 @@ class ControllerCollection
 
     /**
      * @param string $class
-     * @return Controller|Closure
+     * @return BaseController|Closure
      * @throws UnexpectedValueException
      */
     public function getController($class)
@@ -79,8 +78,8 @@ class ControllerCollection
                 throw new UnexpectedValueException('Class not exists: ' . $class);
             }
         }
-        if (!is_subclass_of($class, __NAMESPACE__ . '\Controller')) {
-            throw new UnexpectedValueException('Class does not extend Controller: ' . $class);
+        if (!is_subclass_of($class, __NAMESPACE__ . '\BaseController')) {
+            throw new UnexpectedValueException('Class does not extend BaseController: ' . $class);
         }
         return new $class($this->application);
     }

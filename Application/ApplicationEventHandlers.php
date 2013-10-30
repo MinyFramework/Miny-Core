@@ -9,8 +9,7 @@
 
 namespace Miny\Application;
 
-use ErrorException;
-use Exception;
+use Miny\Application\Application;
 use Miny\HTTP\Request;
 use Miny\HTTP\Response;
 use Miny\Log;

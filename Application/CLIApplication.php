@@ -11,7 +11,9 @@ namespace Miny\Application;
 
 use Closure;
 use InvalidArgumentException;
+use Miny\Controller\CLIController;
 use RuntimeException;
+use UnexpectedValueException;
 
 require_once __DIR__ . '/BaseApplication.php';
 
@@ -42,9 +44,18 @@ class CLIApplication extends BaseApplication
         if (!is_string($name)) {
             throw new InvalidArgumentException('Job name must be a string.');
         }
-        if (!is_callable($job) && !$job instanceof Closure) {
-            throw new InvalidArgumentException('Job must be a callable object.');
+        if (is_string($job)) {
+            if (!class_exists($job)) {
+                $class = '\Application\Controllers\\' . ucfirst($job) . 'Controller';
+                if (!class_exists($class)) {
+                    throw new UnexpectedValueException('Class not exists: ' . $class);
+                }
+                $job = new $class($this);
+            }
+        } else if (!is_callable($job) && !$job instanceof Closure) {
+            throw new InvalidArgumentException('Job must be a callable object or a CLIController name.');
         }
+
         $this->jobs[$name] = array($job, $one_time);
     }
 
@@ -64,7 +75,13 @@ class CLIApplication extends BaseApplication
         while (!$this->exit_requested && !empty($this->jobs)) {
             foreach ($this->jobs as $key => $obj) {
                 list($job, $one_time) = $obj;
-                call_user_func($job, $this, $this->argc, $this->argv);
+
+                if ($job instanceof CLIController) {
+                    $job->run($this->argc, $this->argv);
+                } else {
+                    call_user_func($job, $this, $this->argc, $this->argv);
+                }
+
                 if ($one_time) {
                     $this->removeJob($key);
                 }

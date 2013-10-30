@@ -10,36 +10,16 @@
 namespace Miny\Controller;
 
 use InvalidArgumentException;
-use Miny\Application\Application;
-use Miny\Extendable;
 use Miny\HTTP\Request;
 use Miny\HTTP\Response;
+use Miny\View\View;
 
-abstract class Controller extends Extendable
+abstract class Controller extends BaseController
 {
-    /**
-     * @var Application
-     */
-    protected $app;
-
     /**
      * @var string
      */
     protected $default_action = 'index';
-
-    /**
-     * @param Application $app
-     */
-    public function __construct(Application $app)
-    {
-        $this->app = $app;
-        $this->init();
-    }
-
-    protected function init()
-    {
-
-    }
 
     /**
      * @param string $path
@@ -74,15 +54,6 @@ abstract class Controller extends Extendable
 
     /**
      * @param string $name
-     * @return Object
-     */
-    protected function service($name)
-    {
-        return $this->app->$name;
-    }
-
-    /**
-     * @param string $name
      * @param array $parameters
      * @return string
      */
@@ -93,8 +64,8 @@ abstract class Controller extends Extendable
 
     /**
      * @param string $action
-     * @param \Miny\HTTP\Request $request
-     * @param \Miny\HTTP\Response $response
+     * @param Request $request
+     * @param Response $response
      * @throws InvalidArgumentException
      */
     public function run($action, Request $request, Response $response)
