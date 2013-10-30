@@ -61,7 +61,7 @@ class CLIApplication extends BaseApplication
     public function run()
     {
         date_default_timezone_set($this['default_timezone']);
-        while (!$this->exit_requested || empty($this->jobs)) {
+        while (!$this->exit_requested && !empty($this->jobs)) {
             foreach ($this->jobs as $key => $obj) {
                 list($job, $one_time) = $obj;
                 call_user_func($job, $this, $this->argc, $this->argv);
