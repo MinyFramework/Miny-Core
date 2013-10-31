@@ -47,7 +47,6 @@ class Log
      */
     public function __construct($path)
     {
-        $path = realpath($path);
         try {
             $this->checkPath($path);
         } catch (Exception $e) {
@@ -74,7 +73,7 @@ class Log
     {
         if (!is_dir($path)) {
             if (!mkdir($path, 0777, true)) {
-                throw new InvalidArgumentException('Path not exists: ' . $path);
+                throw new InvalidArgumentException('Could not create directory: ' . $path);
             }
         }
         if (!is_writable($path)) {
