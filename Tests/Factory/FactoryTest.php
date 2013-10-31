@@ -237,7 +237,8 @@ class FactoryTest extends \PHPUnit_Framework_TestCase
 
         $this->object->helper = $helper;
         $this->object->setParameters(array(
-            'link' => 'helper'
+            'link' => 'helper',
+            'link_to_instance_reference' => '&helper'
         ));
 
         $this->object->add('singleton', __NAMESPACE__ . '\TestClass')
@@ -246,6 +247,8 @@ class FactoryTest extends \PHPUnit_Framework_TestCase
                 ->setProperty('prop_b', '@param_c')
                 ->setProperty('prop_c', '&helper')
                 ->setProperty('prop_d', '&{@link}')
+                ->setProperty('prop_e', '@link_to_instance_reference')
+                ->setProperty('prop_f', '{@link_to_instance_reference}')
                 ->addMethodCall('method_a', 'literal_value', 'another_literal_value')
                 ->addMethodCall('method_b', '@param_c', '@array:array:array')
                 ->addMethodCall('method_c', '&helper', '&helper->property')
@@ -261,7 +264,9 @@ class FactoryTest extends \PHPUnit_Framework_TestCase
             'prop_a' => 'literal',
             'prop_b' => 'value_c',
             'prop_c' => $helper,
-            'prop_d' => $helper
+            'prop_d' => $helper,
+            'prop_e' => $helper,
+            'prop_f' => $helper
         );
 
         $method_calls = array(

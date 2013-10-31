@@ -268,22 +268,27 @@ class Factory implements ArrayAccess
             return $var;
         }
 
+        //Resolve any links in $var
+        $var = $this->resolveLinks($var);
+
         //see if $var is a reference to something
         $str = substr($var, 1);
         switch ($var[0]) {
             case '@'://param
                 $var = $this->offsetGet($str);
+                $var = $this->getValue($var);
                 break;
             case '&':
                 //object or method call. Basically this is
                 //$factory->create('object')->method(parameters);
-                $str = $this->resolveLinks($str);
                 $var = $this->getObjectParameter($str);
+                $var = $this->getValue($var);
                 break;
             case '*'://callback
                 if (strpos($var, '::') !== false) {
                     list($obj_name, $method) = explode('::', $str);
                     $var = array($this->__get($obj_name), $method);
+                    $var = $this->getValue($var);
                 }
                 break;
             case '\\':
