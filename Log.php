@@ -116,6 +116,16 @@ class Log
         $this->messages[$key][] = array($level, $message);
     }
 
+    /**
+     * @param string $name
+     * @param array $args
+     */
+    public function __call($name, $args){
+        $message = array_shift($args);
+
+        $this->write(vsprintf($message, $args), $name);
+    }
+
     private function writeFile($file, $data)
     {
         if (file_put_contents($file, $data, FILE_APPEND) === false) {
