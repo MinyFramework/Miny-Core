@@ -46,6 +46,21 @@ class Application extends BaseApplication
 
     private function registerEventHandlers()
     {
+        $app = $this;
+
+        set_exception_handler(function(Exception $e) use($app) {
+            $event = new Event('uncaught_exception', $e);
+            $app->events->raiseEvent($event);
+            if (!$event->isHandled()) {
+                throw $e;
+            } else {
+                $response = new Response;
+                echo $event->getResponse();
+                $response->setCode(500);
+                $response->send();
+            }
+        });
+
         $eh = new ApplicationEventHandlers($this, $this->log);
         $this->getBlueprint('events')
                 ->addMethodCall('register', 'filter_request', array($eh, 'logRequest'))
