@@ -52,10 +52,11 @@ class CLIApplication extends BaseApplication
                 }
                 $job = new $class($this);
             }
-        } else if (!is_callable($job) && !$job instanceof Closure) {
-            throw new InvalidArgumentException('Job must be a callable object or a CLIController name.');
+        } else if (!is_callable($job) && !$job instanceof Closure && !$job instanceof CLIController) {
+            throw new InvalidArgumentException('Job must be a callable object, a CLIController instance or a CLIController name.');
         }
-
+        
+        $this->log->info('Registering new %s "%s"', ($one_time ? 'one time job' : 'job'), $name);
         $this->jobs[$name] = array($job, $one_time);
     }
 
@@ -73,18 +74,18 @@ class CLIApplication extends BaseApplication
     {
         date_default_timezone_set($this['default_timezone']);
         while (!$this->exit_requested && !empty($this->jobs)) {
-            foreach ($this->jobs as $key => $obj) {
-                list($job, $one_time) = $obj;
 
-                if ($job instanceof CLIController) {
-                    $job->run($this->argc, $this->argv);
-                } else {
-                    call_user_func($job, $this, $this->argc, $this->argv);
-                }
+            $name = key($this->jobs);
+            list($job, $one_time) = array_shift($this->jobs);
 
-                if ($one_time) {
-                    $this->removeJob($key);
-                }
+            if ($job instanceof CLIController) {
+                $job->run($this->argc, $this->argv);
+            } else {
+                call_user_func($job, $this, $this->argc, $this->argv);
+            }
+
+            if (!$one_time) {
+                $this->addJob($name, $job, false);
             }
             $this->log->saveLog();
         }

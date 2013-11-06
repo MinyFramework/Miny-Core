@@ -47,7 +47,8 @@ class ErrorHandlers
 
     public function logException(Exception $e)
     {
-        $this->log->write(sprintf("%s \n Trace: %s", $e->getMessage(), $e->getTraceAsString()), get_class($e));
+        $class = get_class($e);
+        $this->log->$class("%s \n Trace: %s", $e->getMessage(), $e->getTraceAsString());
     }
 
 }
