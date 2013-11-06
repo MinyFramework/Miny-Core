@@ -9,7 +9,9 @@
 
 namespace Miny\Controller;
 
-abstract class CLIController extends BaseController
+use Miny\Application\Job;
+
+abstract class WorkerController extends BaseController
 {
-    abstract public function run($argc, array $argv);
+    abstract public function run(Job $job);
 }

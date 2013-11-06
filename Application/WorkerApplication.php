@@ -10,47 +10,37 @@
 namespace Miny\Application;
 
 use InvalidArgumentException;
-use RuntimeException;
 
 require_once __DIR__ . '/BaseApplication.php';
 
-class CLIApplication extends BaseApplication
+class WorkerApplication extends BaseApplication
 {
     private $jobs = array();
-    private $argc;
-    private $argv;
     private $exit_requested = false;
 
     public function __construct($directory, $environment = self::ENV_PROD, $include_configs = true)
     {
-        global $argc, $argv;
-
-        if (!isset($argc, $argv)) {
-            throw new RuntimeException('CLIApplication can only run in CLI environment.');
-        }
         ignore_user_abort(true);
         set_time_limit(0);
         parent::__construct($directory, $environment, $include_configs);
-        $this->argc = $argc;
-        $this->argv = $argv;
-        unset($argc, $argv);
     }
 
     /**
      * @param string $name
      * @param mixed $runnable
+     * @param mixed $workload
      * @param mixed $condition
      * @param bool $one_time
      * @return Job
      * @throws InvalidArgumentException
      */
-    public function addJob($name, $runnable, $condition = null, $one_time = false)
+    public function addJob($name, $runnable, $workload = null, $condition = null, $one_time = false)
     {
         if (!is_string($name)) {
             throw new InvalidArgumentException('Job name must be a string.');
         }
         if (!$runnable instanceof Job) {
-            $runnable = new Job($runnable, $one_time, $condition);
+            $runnable = new Job($runnable, $workload, $one_time, $condition);
         }
 
         $this->log->info('Registering new %s "%s"', ($one_time ? 'one-time job' : 'job'), $name);
@@ -75,7 +65,7 @@ class CLIApplication extends BaseApplication
 
             foreach ($this->jobs as $name => $job) {
                 if ($job->canRun()) {
-                    $job->run($this, $this->argc, $this->argv);
+                    $job->run($this);
                     if ($job->isOneTimeJob()) {
                         $this->log->info('Removing one-time job %s', $name);
                         $this->removeJob($name);
