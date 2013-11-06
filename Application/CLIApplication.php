@@ -9,11 +9,8 @@
 
 namespace Miny\Application;
 
-use Closure;
 use InvalidArgumentException;
-use Miny\Controller\CLIController;
 use RuntimeException;
-use UnexpectedValueException;
 
 require_once __DIR__ . '/BaseApplication.php';
 
@@ -39,25 +36,26 @@ class CLIApplication extends BaseApplication
         unset($argc, $argv);
     }
 
-    public function addJob($name, $job, $one_time = false)
+    /**
+     * @param string $name
+     * @param mixed $runnable
+     * @param mixed $condition
+     * @param bool $one_time
+     * @return Job
+     * @throws InvalidArgumentException
+     */
+    public function addJob($name, $runnable, $condition = null, $one_time = false)
     {
         if (!is_string($name)) {
             throw new InvalidArgumentException('Job name must be a string.');
         }
-        if (is_string($job)) {
-            if (!class_exists($job)) {
-                $class = '\Application\Controllers\\' . ucfirst($job) . 'Controller';
-                if (!class_exists($class)) {
-                    throw new UnexpectedValueException('Class not exists: ' . $class);
-                }
-                $job = new $class($this);
-            }
-        } else if (!is_callable($job) && !$job instanceof Closure && !$job instanceof CLIController) {
-            throw new InvalidArgumentException('Job must be a callable object, a CLIController instance or a CLIController name.');
+        if (!$runnable instanceof Job) {
+            $runnable = new Job($runnable, $one_time, $condition);
         }
-        
-        $this->log->info('Registering new %s "%s"', ($one_time ? 'one time job' : 'job'), $name);
-        $this->jobs[$name] = array($job, $one_time);
+
+        $this->log->info('Registering new %s "%s"', ($one_time ? 'one-time job' : 'job'), $name);
+        $this->jobs[$name] = $runnable;
+        return $runnable;
     }
 
     public function removeJob($name)
@@ -75,19 +73,18 @@ class CLIApplication extends BaseApplication
         date_default_timezone_set($this['default_timezone']);
         while (!$this->exit_requested && !empty($this->jobs)) {
 
-            $name = key($this->jobs);
-            list($job, $one_time) = array_shift($this->jobs);
-
-            if ($job instanceof CLIController) {
-                $job->run($this->argc, $this->argv);
-            } else {
-                call_user_func($job, $this, $this->argc, $this->argv);
+            foreach ($this->jobs as $name => $job) {
+                if ($job->canRun()) {
+                    $job->run($this, $this->argc, $this->argv);
+                    if ($job->isOneTimeJob()) {
+                        $this->log->info('Removing one-time job %s', $name);
+                        $this->removeJob($name);
+                    }
+                    $this->log->saveLog();
+                } else {
+                    $this->log->info('Skipping job %s', $name);
+                }
             }
-
-            if (!$one_time) {
-                $this->addJob($name, $job, false);
-            }
-            $this->log->saveLog();
         }
     }
 
