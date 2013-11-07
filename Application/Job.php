@@ -16,21 +16,33 @@ class Job
 
     public function __construct($runnable, $workload = null, $run_condition = null, $one_time = false)
     {
-        if (is_string($runnable)) {
-            if (!class_exists($runnable)) {
-                $class = '\Application\Controllers\\' . ucfirst($runnable) . 'Controller';
-                if (!class_exists($class)) {
-                    throw new UnexpectedValueException('Class not exists: ' . $class);
-                }
-                $runnable = $class;
+        if (!is_callable($runnable) && !$runnable instanceof Closure) {
+            if (is_string($runnable)) {
+                $class = $runnable;
+                $method = 'run';
+            } else if (is_array($runnable) && count($runnable) == 2) {
+                list($class, $method) = $runnable;
+            } else {
+                throw new InvalidArgumentException('Invalid runnable set.');
             }
-        } else if (!is_callable($runnable) && !$runnable instanceof Closure && !$runnable instanceof WorkerController) {
-            throw new InvalidArgumentException('Job must be a callable object, a CLIController instance or a CLIController name.');
+            $runnable = array($this->getClassName($class), $method);
         }
         $this->runnable = $runnable;
         $this->one_time = $one_time;
         $this->run_condition = $run_condition;
         $this->workload = $workload;
+    }
+
+    private function getClassName($name)
+    {
+        if (class_exists($name)) {
+            return $name;
+        }
+        $class = '\Application\Controllers\\' . ucfirst($name) . 'Controller';
+        if (class_exists($class)) {
+            return $class;
+        }
+        throw new UnexpectedValueException('Class not exists: ' . $class);
     }
 
     public function isOneTimeJob()
@@ -58,15 +70,24 @@ class Job
 
     public function run(WorkerApplication $app)
     {
-        if (is_string($this->runnable)) {
-            //Lazily instantiate WorkerController
-            $this->runnable = new $this->runnable($app);
+        if (is_array($this->runnable)) {
+            list($class, $method) = $this->runnable;
+
+            if (is_string($class)) {
+                //Lazily instantiate WorkerController
+                //Keep it in the same variable for later use
+                $class = new $class($app);
+
+                //Cache our runnable to avoid reinstantiation
+                $this->runnable = array($class, $method);
+            }
+
+            if ($class instanceof WorkerController) {
+                $class->$method($this);
+                return;
+            }
         }
-        if ($this->runnable instanceof WorkerController) {
-            $this->runnable->run($this);
-        } else {
-            call_user_func($this->runnable, $app, $this);
-        }
+        call_user_func($this->runnable, $app, $this);
     }
 
 }
