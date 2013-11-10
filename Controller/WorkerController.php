@@ -9,9 +9,6 @@
 
 namespace Miny\Controller;
 
-use Miny\Application\Job;
-
 abstract class WorkerController extends BaseController
 {
-    abstract public function run(Job $job);
 }
