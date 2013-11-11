@@ -26,6 +26,8 @@ class LogTest extends \PHPUnit_Framework_TestCase
         date_default_timezone_set('UTC');
         $this->log_file = $tmp . '/log_' . date('Y_m_d') . '.log';
         $this->object = new Log($tmp, true);
+
+        unlink($this->log_file);
     }
 
     /**
@@ -45,13 +47,18 @@ class LogTest extends \PHPUnit_Framework_TestCase
     public function testLog()
     {
         $this->assertEquals($this->log_file, $this->object->getLogFileName());
+
         $date = date('Y-m-d H:i:s');
         $message = 'TestMessage';
         $this->object->write($message);
-        $this->object->write($message, 'somelevel');
-        unset($this->object);
-        $expected = sprintf("[%s] %s: %s\n[%s] %s: %s\n\n", $date, 'info', $message, $date, 'somelevel', $message);
-        $this->assertEquals(file_get_contents($this->log_file), $expected);
+        $this->object->write($message, 'someLevel');
+
+        $this->object->saveLog();
+
+        $expected = sprintf("[%s] %s: %s\n", $date, 'info', $message);
+        $expected .= sprintf("[%s] %s: %s\n", $date, 'someLevel', $message);
+
+        $this->assertEquals($expected, file_get_contents($this->log_file));
     }
 
 }
