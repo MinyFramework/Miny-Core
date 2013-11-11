@@ -315,6 +315,7 @@ class Factory implements ArrayAccess
     /**
      * @param string $str
      * @return mixed
+     * @throw InvalidArgumentException
      */
     private function getObjectParameter($str)
     {
@@ -325,7 +326,13 @@ class Factory implements ArrayAccess
             $obj_name = array_shift($arr);
             $method = array_shift($arr);
             $object = $this->__get($obj_name);
-            return call_user_func_array(array($object, $method), $this->parameters->resolveLinks($arr));
+
+            $callback = array($object, $method);
+            if(!is_callable($callback)) {
+                $method = sprintf('Class "%s" does not have a method "%s"', $obj_name, $method);
+                throw new InvalidArgumentException($method);
+            }
+            return call_user_func_array($callback, $this->parameters->resolveLinks($arr));
         } elseif (($pos = strpos($str, '->')) !== false) {
             list($obj_name, $property) = explode('->', $str, 2);
             return $this->__get($obj_name)->$property;
