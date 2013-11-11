@@ -49,7 +49,7 @@ abstract class BaseApplication extends Factory
             '\Miny'        => __DIR__ . '/..',
             '\Modules'     => __DIR__ . '/../../Modules'
         ));
-        $this->setParameters(array(
+        parent::__construct(array(
             'default_timezone' => 'UTC',
             'root'             => $directory,
             'log'              => array(
@@ -64,7 +64,8 @@ abstract class BaseApplication extends Factory
         }
         $this->registerDefaultServices();
         $env = $this->isProductionEnvironment() ? 'production' : 'development';
-        $this->log->write(sprintf('Starting Miny in %s environment', $env));
+        $this->log->info('Starting Miny in %s environment', $env);
+
         if (isset($this['modules']) && is_array($this['modules'])) {
             foreach ($this['modules'] as $module) {
                 $this->module($module);
@@ -114,7 +115,7 @@ abstract class BaseApplication extends Factory
         if (!is_array($config)) {
             throw new UnexpectedValueException('Invalid configuration file: ' . $file);
         }
-        $this->setParameters($config);
+        $this->getParameters()->addParameters($config);
     }
 
     /**
@@ -151,7 +152,7 @@ abstract class BaseApplication extends Factory
             return;
         }
 
-        $this->log->write(sprintf('Loading Miny module: %s', $module), Log::DEBUG);
+        $this->log->debug('Loading Miny module: %s', $module);
         $class = sprintf('\Modules\%s\Module', $module);
         if (!is_subclass_of($class, '\Miny\Application\Module')) {
             throw new BadModuleException('Module descriptor should extend Module class: ' . $class);

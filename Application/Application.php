@@ -25,7 +25,7 @@ class Application extends BaseApplication
 {
     protected function setDefaultParameters()
     {
-        $this->setParameters(array(
+        $this->getParameters()->addParameters(array(
             'router' => array(
                 'prefix'          => '/',
                 'suffix'          => '.:format',
@@ -82,7 +82,7 @@ class Application extends BaseApplication
                 ->addMethodCall('setSuffix', '@view:default_format')
                 ->addMethodCall('setHelpers', '&view_helpers')
                 ->addMethodCall('addViewType', 'view', '\Miny\View\View')
-                ->setProperty('config', '&app::getResolvedParameters');
+                ->setProperty('config', '&app::getParameters');
 
         $this->add('view_helpers', '\Miny\View\ViewHelpers')
                 ->setArguments('&app');
