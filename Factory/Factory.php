@@ -35,9 +35,9 @@ class Factory implements ArrayAccess
     protected $blueprints = array();
 
     /**
-     * @var array
+     * @var ParameterContainer
      */
-    protected $parameters = array();
+    protected $parameters;
 
     /**
      * @var string[]
@@ -49,8 +49,18 @@ class Factory implements ArrayAccess
      */
     public function __construct(array $params = array())
     {
-        $this->setParameters($params);
+        $this->parameters = new ParameterContainer($params);
         $this->setInstance('factory', $this);
+    }
+
+    /**
+     * Retrieves parameter container.
+     *
+     * @return ParameterContainer
+     */
+    public function getParameters()
+    {
+        return $this->parameters;
     }
 
     /**
@@ -269,13 +279,13 @@ class Factory implements ArrayAccess
         }
 
         //Resolve any links in $var
-        $var = $this->resolveLinks($var);
+        $var = $this->parameters->resolveLinks($var);
 
         //see if $var is a reference to something
         $str = substr($var, 1);
         switch ($var[0]) {
             case '@'://param
-                $var = $this->offsetGet($str);
+                $var = $this->parameters[$str];
                 $var = $this->getValue($var);
                 break;
             case '&':
@@ -315,7 +325,7 @@ class Factory implements ArrayAccess
             $obj_name = array_shift($arr);
             $method = array_shift($arr);
             $object = $this->__get($obj_name);
-            return call_user_func_array(array($object, $method), $this->resolveLinks($arr));
+            return call_user_func_array(array($object, $method), $this->parameters->resolveLinks($arr));
         } elseif (($pos = strpos($str, '->')) !== false) {
             list($obj_name, $property) = explode('->', $str, 2);
             return $this->__get($obj_name)->$property;
@@ -324,177 +334,24 @@ class Factory implements ArrayAccess
         }
     }
 
-    /**
-     * @param array $array1
-     * @param array $array2
-     * @return array
-     */
-    private function merge(array $array1, array $array2)
+    public function offsetExists($offset)
     {
-        foreach ($array2 as $key => $value) {
-            if (isset($array1[$key]) && is_array($array1[$key]) && is_array($value)) {
-                $array1[$key] = $this->merge($array1[$key], $value);
-            } else {
-                $array1[$key] = $value;
-            }
-        }
-        return $array1;
+        return $this->parameters->offsetExists($offset);
     }
 
-    /**
-     * Stores an array of parameters.
-     * Parameters are defined as a key-value pair (name => value)
-     *
-     * @param array $parameters
-     */
-    public function setParameters(array $parameters)
+    public function offsetGet($offset)
     {
-        $this->parameters = $this->merge($this->parameters, $parameters);
+        return $this->parameters->offsetGet($offset);
     }
 
-    /**
-     * Retrieves all stored parameters.
-     *
-     * @return array
-     */
-    public function getParameters()
+    public function offsetSet($offset, $value)
     {
-        return $this->parameters;
+        $this->parameters->offsetSet($offset, $value);
     }
 
-    /**
-     * Retrieves all stored parameters with their links resolved.
-     *
-     * @return array
-     */
-    public function getResolvedParameters()
+    public function offsetUnset($offset)
     {
-        return $this->resolveLinks($this->parameters);
-    }
-
-    /**
-     * Processes a parameter string, which specifies a stored parameter.
-     * You can use colons (:) to reference an element of an array within an array ...
-     *
-     * @param string $key The parameter to get.
-     * @return mixed The parameter value
-     * @throws OutOfBoundsException
-     */
-    public function offsetGet($key)
-    {
-        if (strpos($key, ':') !== false) {
-            $return = $this->parameters;
-            foreach (explode(':', $key) as $k) {
-                if (!array_key_exists($k, $return)) {
-                    throw new OutOfBoundsException('Parameter not set: ' . $key);
-                }
-                $return = $return[$k];
-            }
-        } elseif (isset($this->parameters[$key])) {
-            $return = $this->parameters[$key];
-        } else {
-            throw new OutOfBoundsException('Parameter not set: ' . $key);
-        }
-        return $this->resolveLinks($return);
-    }
-
-    /**
-     * @param string $value
-     * @return string
-     */
-    private function resolveLinks($value)
-    {
-        if (is_array($value)) {
-            $return = array();
-            foreach ($value as $k => $v) {
-                $k = $this->resolveLinks($k);
-                $return[$k] = $this->resolveLinks($v);
-            }
-            return $return;
-        }
-        if (is_string($value)) {
-            return preg_replace_callback('/(?<!\\\){@(.*?)}/', array($this, 'resolveLinksCallback'), $value);
-        }
-        return $value;
-    }
-
-    private function resolveLinksCallback($matches)
-    {
-        try {
-            return $this->offsetGet($matches[1]);
-        } catch (OutOfBoundsException $e) {
-            return $matches[0];
-        }
-    }
-
-    /**
-     * Stores a parameter for $key serving as key.
-     *
-     * @param string $key
-     * @param mixed $value
-     */
-    public function offsetSet($key, $value)
-    {
-        if (strpos($key, ':') !== false) {
-            $arr = & $this->parameters;
-            foreach (explode(':', $key) as $k) {
-                if (!array_key_exists($k, $arr)) {
-                    $arr[$k] = array();
-                }
-                $arr = & $arr[$k];
-            }
-            $arr = $value;
-        } else {
-            $this->parameters[$key] = $value;
-        }
-    }
-
-    /**
-     * Removes the parameter specified with $key.
-     *
-     * @param string $key
-     */
-    public function offsetUnset($key)
-    {
-        if (strpos($key, ':') !== false) {
-            $parts = explode(':', $key);
-            $last = count($parts) - 1;
-            $arr = & $this->parameters;
-            foreach ($parts as $i => $k) {
-                if (!array_key_exists($k, $arr)) {
-                    return;
-                }
-                if ($i !== $last) {
-                    $arr = & $arr[$k];
-                } else {
-                    unset($arr[$k]);
-                }
-            }
-        } else {
-            unset($this->parameters[$key]);
-        }
-    }
-
-    /**
-     * Indicates whether the parameter specified with $key is set.
-     *
-     * @param string $key
-     * @return boolean
-     */
-    public function offsetExists($key)
-    {
-        if (strpos($key, ':') !== false) {
-            $arr = $this->parameters;
-            foreach (explode(':', $key) as $k) {
-                if (!array_key_exists($k, $arr)) {
-                    return false;
-                }
-                $arr = $arr[$k];
-            }
-            return true;
-        } else {
-            return isset($this->parameters[$key]);
-        }
+        $this->parameters->offsetUnset($offset);
     }
 
 }
