@@ -122,7 +122,9 @@ class Log
      */
     public function __call($name, $args){
         $message = array_shift($args);
-
+        if(is_array(current($args))) {
+            $args = current($args);
+        }
         $this->write(vsprintf($message, $args), $name);
     }
 
