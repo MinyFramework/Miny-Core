@@ -23,7 +23,7 @@ class ViewHelpers extends Extendable
         $this->router = $application->router;
     }
 
-    public function file($file, array $params)
+    public function file($file, array $params = array())
     {
         $view = $this->service('view_factory')->view($file);
         $view->setVariables($params);

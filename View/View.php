@@ -194,4 +194,9 @@ class View extends ViewBase implements iView
         return $content;
     }
 
+    public function __toString()
+    {
+        return $this->render();
+    }
+
 }

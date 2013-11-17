@@ -17,4 +17,5 @@ interface iView
     public function setTemplate($template);
     public function getTemplate();
     public function render();
+    public function __toString();
 }

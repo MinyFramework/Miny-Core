@@ -82,6 +82,7 @@ class Application extends BaseApplication
                 ->addMethodCall('setSuffix', '@view:default_format')
                 ->addMethodCall('setHelpers', '&view_helpers')
                 ->addMethodCall('addViewType', 'view', '\Miny\View\View')
+                ->addMethodCall('addViewType', 'list', '\Miny\View\ListView')
                 ->setProperty('config', '&app::getParameters');
 
         $this->add('view_helpers', '\Miny\View\ViewHelpers')
