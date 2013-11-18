@@ -47,7 +47,7 @@ abstract class Controller extends BaseController
      * @param string $template
      * @return View
      */
-    protected function view($type, $template)
+    public function view($type, $template)
     {
         return $this->app->view_factory->$type($template);
     }
@@ -57,7 +57,7 @@ abstract class Controller extends BaseController
      * @param array $parameters
      * @return string
      */
-    protected function route($name, array $parameters = array())
+    public function route($name, array $parameters = array())
     {
         return $this->app->router->generate($name, $parameters);
     }

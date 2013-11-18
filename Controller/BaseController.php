@@ -38,7 +38,7 @@ abstract class BaseController extends Extendable
      * @param string $name
      * @return Object
      */
-    protected function service($name)
+    public function service($name)
     {
         return $this->app->$name;
     }
