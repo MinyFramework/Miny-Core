@@ -22,6 +22,9 @@ class WorkerApplication extends BaseApplication
     {
         ignore_user_abort(true);
         set_time_limit(0);
+        pcntl_signal(SIGTERM, function() {
+            exit;
+        });
         parent::__construct($directory, $environment, $include_configs);
     }
 
@@ -58,7 +61,7 @@ class WorkerApplication extends BaseApplication
         $this->exit_requested = true;
     }
 
-    public function run()
+    public function onRun()
     {
         date_default_timezone_set($this['default_timezone']);
         while (!$this->exit_requested && !empty($this->jobs)) {
