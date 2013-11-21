@@ -9,6 +9,7 @@
 
 namespace Miny\Event;
 
+use InvalidArgumentException;
 use Miny\Event\Exceptions\EventHandlerException;
 
 class EventDispatcher
@@ -20,7 +21,7 @@ class EventDispatcher
 
     /**
      * @param string $event
-     * @param callable $handler
+     * @param callback $handler
      * @param int $place
      * @throws EventHandlerException
      */
@@ -39,25 +40,31 @@ class EventDispatcher
         }
     }
 
-    /**
-     * @param Event $event
-     */
-    public function raiseEvent(Event $event)
+    public function raiseEvent()
     {
-        $name = $event->getName();
-        if (!isset($this->handlers[$name])) {
-            return;
-        }
-        $parameters = $event->getParameters();
+        $args = func_get_args();
+        $event = array_shift($args);
 
-        foreach ($this->handlers[$name] as $handler) {
-            $response = call_user_func_array($handler, $parameters);
-            if ($response) {
-                $event->setResponse($response);
-                break;
-            }
+        if (is_string($event)) {
+            $event = new Event($event, $args);
         }
-        $event->setHandled();
+        if (!$event instanceof Event) {
+            throw new InvalidArgumentException('The first parameter must be an Event object or a string.');
+        }
+        $name = $event->getName();
+        if (isset($this->handlers[$name])) {
+            $parameters = $event->getParameters();
+
+            foreach ($this->handlers[$name] as $handler) {
+                $response = call_user_func_array($handler, $parameters);
+                if ($response) {
+                    $event->setResponse($response);
+                    break;
+                }
+            }
+            $event->setHandled();
+        }
+        return $event;
     }
 
 }

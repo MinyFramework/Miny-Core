@@ -34,13 +34,16 @@ class Event
     /**
      * @param string $name
      */
-    public function __construct($name)
+    public function __construct()
     {
-        $this->name = $name;
-
         $parameters = func_get_args();
-        array_shift($parameters);
+        $name = array_shift($parameters);
 
+        if (isset($parameters[0]) && is_array($parameters[0]) && count($parameters) == 1) {
+            $parameters = $parameters[0];
+        }
+
+        $this->name = $name;
         $this->parameters = $parameters;
     }
 

@@ -6,28 +6,19 @@ require_once dirname(__FILE__) . '/../../Event/Event.php';
 
 class EventTest extends \PHPUnit_Framework_TestCase
 {
-    protected $object;
-
-    protected function setUp()
-    {
-        $this->object = new Event('test_event', 'p1', 'p2', 'p3');
-    }
-
     public function testHandled()
     {
-        $this->assertFalse($this->object->isHandled());
-        $this->object->setHandled();
-        $this->assertTrue($this->object->isHandled());
+        $event = new Event('test_event');
+        $this->assertFalse($event->isHandled());
+        $event->setHandled();
+        $this->assertTrue($event->isHandled());
     }
 
     public function testGetName()
     {
-        $this->assertEquals('test_event', $this->object->getName());
-    }
-
-    public function test__toString()
-    {
-        $this->assertEquals('test_event', (string) $this->object);
+        $event = new Event('test_event');
+        $this->assertEquals('test_event', $event->getName());
+        $this->assertEquals('test_event', (string) $event);
     }
 
     public function testGetParameters()
@@ -35,19 +26,24 @@ class EventTest extends \PHPUnit_Framework_TestCase
         $parameters = array(
             'p1', 'p2', 'p3'
         );
-        $this->assertEquals($parameters, $this->object->getParameters());
+        $event1 = new Event('name', 'p1', 'p2', 'p3');
+        $event2 = new Event('name', $parameters);
+
+        $this->assertEquals($parameters, $event1->getParameters());
+        $this->assertEquals($parameters, $event2->getParameters());
     }
 
     public function testResponse()
     {
+        $event = new Event('test_event');
         //no response set
-        $this->assertFalse($this->object->hasResponse());
-        $this->assertNull($this->object->getResponse());
+        $this->assertFalse($event->hasResponse());
+        $this->assertNull($event->getResponse());
         //response set
         $response = 'foo';
-        $this->object->setResponse($response);
-        $this->assertTrue($this->object->hasResponse());
-        $this->assertEquals($response, $this->object->getResponse());
+        $event->setResponse($response);
+        $this->assertTrue($event->hasResponse());
+        $this->assertEquals($response, $event->getResponse());
     }
 
 }

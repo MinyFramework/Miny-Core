@@ -20,6 +20,22 @@ class EventDispatcherTest extends \PHPUnit_Framework_TestCase
                 };
     }
 
+    public function testRetValOfRaiseEvent()
+    {
+        $event = new Event('event');
+        $retval = $this->object->raiseEvent($event);
+        $this->assertSame($event, $retval);
+    }
+
+    public function testStringEvent()
+    {
+        $retval1 = $this->object->raiseEvent('event');
+        $retval2 = $this->object->raiseEvent('event', 'p1', 'p2');
+
+        $this->assertEquals('event', $retval1->getName());
+        $this->assertEquals(array('p1', 'p2'), $retval2->getParameters());
+    }
+
     public function testHandleEventWithHandler()
     {
         $handler_factory = $this->handler_factory;
