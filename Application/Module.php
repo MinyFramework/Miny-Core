@@ -9,6 +9,8 @@
 
 namespace Miny\Application;
 
+use Closure;
+use InvalidArgumentException;
 use Miny\Application\Exceptions\BadModuleException;
 
 abstract class Module
@@ -17,6 +19,11 @@ abstract class Module
      * @var BaseApplication
      */
     protected $application;
+
+    /**
+     * @var callback[]
+     */
+    private $conditional_runnables = array();
 
     /**
      * @param BaseApplication $app
@@ -41,6 +48,19 @@ abstract class Module
     public function includes()
     {
         return array();
+    }
+
+    public function getConditionalRunnables()
+    {
+        return $this->conditional_runnables;
+    }
+
+    public function ifModule($module, $runnable)
+    {
+        if (!is_callable($runnable) || !$runnable instanceof Closure) {
+            throw new InvalidArgumentException('Runnable must be a callable variable.');
+        }
+        $this->conditional_runnables[$module] = $runnable;
     }
 
     public abstract function init(BaseApplication $app);

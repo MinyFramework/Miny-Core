@@ -13,8 +13,8 @@ require_once __DIR__ . '/../AutoLoader.php';
 require_once __DIR__ . '/../Factory/Factory.php';
 
 use InvalidArgumentException;
-use Miny\Application\Exceptions\BadModuleException;
 use Miny\AutoLoader;
+use Miny\Event\Event;
 use Miny\Factory\Factory;
 use Miny\Log;
 use UnexpectedValueException;
@@ -24,11 +24,6 @@ abstract class BaseApplication extends Factory
     const ENV_PROD = 0;
     const ENV_DEV = 1;
     const ENV_COMMON = 2;
-
-    /**
-     * @var Module[]
-     */
-    private $modules = array();
 
     /**
      * @var int
@@ -66,9 +61,10 @@ abstract class BaseApplication extends Factory
         $env = $this->isProductionEnvironment() ? 'production' : 'development';
         $this->log->info('Starting Miny in %s environment', $env);
 
+        $module_handler = $this->module_handler;
         if (isset($this['modules']) && is_array($this['modules'])) {
             foreach ($this['modules'] as $module) {
-                $this->module($module);
+                $module_handler->module($module);
             }
         }
     }
@@ -142,49 +138,29 @@ abstract class BaseApplication extends Factory
         return $this->environment == self::ENV_PROD;
     }
 
-    /**
-     * @param string $module
-     * @throws BadModuleException
-     */
-    public function module($module)
-    {
-        if (isset($this->modules[$module])) {
-            return;
-        }
-
-        $this->log->debug('Loading Miny module: %s', $module);
-        $class = sprintf('\Modules\%s\Module', $module);
-        if (!is_subclass_of($class, '\Miny\Application\Module')) {
-            throw new BadModuleException('Module descriptor should extend Module class: ' . $class);
-        }
-        $module_class = new $class($this);
-        $this->modules[$module] = $module_class;
-        foreach ($module_class->getDependencies() as $name) {
-            $this->module($name);
-        }
-        if (func_num_args() == 1) {
-            $module_class->init($this);
-        } else {
-            $args = func_get_args();
-            $args[0] = $this;
-            call_user_func_array(array($module_class, 'init'), $args);
-        }
-    }
-
     protected function registerDefaultServices()
     {
         $log = new Log($this['log']['path']);
         $log->setDebugMode($this['log']['debug']);
+        $this->log = $log;
 
         $errh = new ErrorHandlers($log);
         $this->add('events', '\Miny\Event\EventDispatcher')
                 ->addMethodCall('register', 'uncaught_exception', array($errh, 'logException'));
-
-        $this->log = $log;
+        $this->add('module_handler', '\Miny\Application\ModuleHandler')
+                ->setArguments('&app', '&log');
     }
 
-    /**
-     *
-     */
-    abstract public function run();
+    public function run()
+    {
+        $event = $this->events;
+
+        $event->raiseEvent('before_run');
+        register_shutdown_function(function()use($event) {
+            $event->raiseEvent('shutdown');
+        });
+        $this->onRun();
+    }
+
+    abstract public function onRun();
 }

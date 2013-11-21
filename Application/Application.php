@@ -224,7 +224,7 @@ class Application extends BaseApplication
     /**
      *
      */
-    public function run()
+    public function onRun()
     {
         date_default_timezone_set($this['default_timezone']);
         $this->dispatch($this->request)->send();
