@@ -14,7 +14,6 @@ require_once __DIR__ . '/../Factory/Factory.php';
 
 use InvalidArgumentException;
 use Miny\AutoLoader;
-use Miny\Event\Event;
 use Miny\Factory\Factory;
 use Miny\Log;
 use UnexpectedValueException;

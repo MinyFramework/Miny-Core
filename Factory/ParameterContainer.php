@@ -87,10 +87,10 @@ class ParameterContainer implements ArrayAccess
             return $return;
         }
         if (is_string($value)) {
-            $pc = $this;
-            $callback = function($matches) use($pc) {
+            $container = $this;
+            $callback = function($matches) use($container) {
                 try {
-                    return $pc->offsetGet($matches[1]);
+                    return $container->offsetGet($matches[1]);
                 } catch (OutOfBoundsException $e) {
                     return $matches[0];
                 }
