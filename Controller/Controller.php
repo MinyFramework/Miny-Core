@@ -12,7 +12,6 @@ namespace Miny\Controller;
 use InvalidArgumentException;
 use Miny\HTTP\Request;
 use Miny\HTTP\Response;
-use Miny\View\View;
 
 abstract class Controller extends BaseController
 {
@@ -40,16 +39,6 @@ abstract class Controller extends BaseController
             $this->cookie($name, $value);
         }
         return $response;
-    }
-
-    /**
-     * @param string $type
-     * @param string $template
-     * @return View
-     */
-    public function view($type, $template)
-    {
-        return $this->app->view_factory->$type($template);
     }
 
     /**

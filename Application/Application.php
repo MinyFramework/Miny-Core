@@ -9,8 +9,7 @@
 
 namespace Miny\Application;
 
-use \Exception;
-use Miny\Event\Event;
+use Exception;
 use Miny\HTTP\Request;
 use Miny\HTTP\Response;
 use Miny\Routing\Resource;
@@ -23,6 +22,7 @@ require_once __DIR__ . '/BaseApplication.php';
 
 class Application extends BaseApplication
 {
+
     protected function setDefaultParameters()
     {
         $this->getParameters()->addParameters(array(
@@ -50,8 +50,7 @@ class Application extends BaseApplication
         $app = $this;
 
         set_exception_handler(function(Exception $e) use($app) {
-            $event = new Event('uncaught_exception', $e);
-            $app->events->raiseEvent($event);
+            $event = $app->events->raiseEvent('uncaught_exception', $e);
             if (!$event->isHandled()) {
                 throw $e;
             } else {
@@ -67,26 +66,13 @@ class Application extends BaseApplication
                 ->addMethodCall('register', 'filter_request', array($eh, 'logRequest'))
                 ->addMethodCall('register', 'filter_request', array($eh, 'filterRoutes'))
                 ->addMethodCall('register', 'filter_response', array($eh, 'setContentType'))
-                ->addMethodCall('register', 'filter_response', array($eh, 'logResponse'))
-                ->addMethodCall('register', 'invalid_response', array($eh, 'filterStringToResponse'))
-                ->addMethodCall('register', 'uncaught_exception', array($eh, 'displayExceptionPage'));
+                ->addMethodCall('register', 'filter_response', array($eh, 'logResponse'));
     }
 
     protected function registerDefaultServices()
     {
         parent::registerDefaultServices();
         $this->registerEventHandlers();
-
-        $this->add('view_factory', '\Miny\View\ViewFactory')
-                ->addMethodCall('setDirectory', '@view:dir')
-                ->addMethodCall('setSuffix', '@view:default_format')
-                ->addMethodCall('setHelpers', '&view_helpers')
-                ->addMethodCall('addViewType', 'view', '\Miny\View\View')
-                ->addMethodCall('addViewType', 'list', '\Miny\View\ListView')
-                ->setProperty('config', '&app::getParameters');
-
-        $this->add('view_helpers', '\Miny\View\ViewHelpers')
-                ->setArguments('&app');
 
         $this->add('controllers', '\Miny\Controller\ControllerCollection')
                 ->setArguments('&app');
@@ -140,7 +126,7 @@ class Application extends BaseApplication
      */
     public function root($controller, array $parameters = array())
     {
-        $controller_name = is_string($controller) ? $controller : $this->controllers->getNextName();
+        $controller_name          = is_string($controller) ? $controller : $this->controllers->getNextName();
         $parameters['controller'] = $controller_name;
         $this->controllers->register($controller_name, $controller);
         return $this->router->root($parameters);
@@ -161,7 +147,7 @@ class Application extends BaseApplication
         if (!in_array($method, array(NULL, 'GET', 'POST', 'PUT', 'DELETE'))) {
             throw new UnexpectedValueException('Unexpected route method:' . $method);
         }
-        $controller_name = is_string($controller) ? $controller : $this->controllers->getNextName();
+        $controller_name          = is_string($controller) ? $controller : $this->controllers->getNextName();
         $parameters['controller'] = $controller_name;
         $this->controllers->register($controller_name, $controller);
 
@@ -237,8 +223,7 @@ class Application extends BaseApplication
      */
     public function dispatch(Request $request)
     {
-        $event = new Event('filter_request', $request);
-        $this->events->raiseEvent($event);
+        $event = $this->events->raiseEvent('filter_request', $request);
 
         if ($event->hasResponse()) {
             $rsp = $event->getResponse();
@@ -251,12 +236,11 @@ class Application extends BaseApplication
 
         if (!isset($response)) {
             $response = new Response;
-            $action = isset($request->get['action']) ? $request->get['action'] : NULL;
+            $action   = isset($request->get['action']) ? $request->get['action'] : NULL;
             $this->resolver->resolve($request->get['controller'], $action, $request, $response);
         }
 
-        $this->events->raiseEvent(new Event('filter_response', $request, $response));
+        $this->events->raiseEvent('filter_response', $request, $response);
         return $response;
     }
-
 }

@@ -141,6 +141,16 @@ class Response
         return $clean ? ob_get_clean() : ob_get_contents();
     }
 
+    public function isCode($code)
+    {
+        return $this->status_code === $code;
+    }
+
+    public function getCode()
+    {
+        return $this->status_code;
+    }
+
     public function getStatus()
     {
         return self::$status_codes[$this->status_code];
