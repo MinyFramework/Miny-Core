@@ -36,28 +36,28 @@ class ApplicationEventHandlers
 
     public function logRequest(Request $request)
     {
-        $this->log->write(sprintf('Request: [%s] %s Source: %s', $request->method, $request->path, $request->ip));
+        $this->log->info('Request: [%s] %s Source: %s', $request->method, $request->url, $request->ip);
         if (!empty($request->referer)) {
-            $this->log->write(sprintf('Request: [%s] Referer: %s', $request->method, $request->referer));
+            $this->log->info('Request: [%s] Referer: %s', $request->method, $request->referer);
         }
     }
 
     public function logResponse(Request $request, Response $response)
     {
         $status = $response->getStatus();
-        $log = $this->log;
-        $log->write(sprintf('Response for request [%s] %s', $request->method, $request->path, $status));
-        $log->write('Response status: ' . $status);
+        $log    = $this->log;
+        $log->info('Response for request [%s] %s', $request->method, $request->path, $status);
+        $log->info('Response status: %s', $status);
         if ($status == 'OK') {
-            $log->write('Response content type: ' . $response->content_type);
-            $log->write('Response body length: ' . strlen($response->getContent()));
+            $log->info('Response content type: %s', $response->content_type);
+            $log->info('Response body length: %s', strlen($response->getContent()));
         }
     }
 
     public function displayExceptionPage(Exception $e)
     {
-        $view = $this->app->view_factory->view($this->app['view:exception']);
-        $view->app = $this->app;
+        $view            = $this->app->view_factory->view($this->app['view:exception']);
+        $view->app       = $this->app;
         $view->exception = $e;
         return $view->render();
     }
@@ -91,7 +91,7 @@ class ApplicationEventHandlers
             'html'  => 'text/html',
         );
         if (isset($content_types[$format])) {
-            $this->log->write(sprintf('Content type %s set for format %s', $content_types[$format], $format));
+            $this->log->info('Content type %s set for format %s', $content_types[$format], $format);
             $this->app['content_type'] = $content_types[$format];
         }
     }
@@ -102,7 +102,7 @@ class ApplicationEventHandlers
         if (!$match) {
             throw new PageNotFoundException('Page not found: ' . $request->path);
         }
-        $this->log->write(sprintf('Matched route %s', $match->getRoute()->getPath()));
+        $this->log->info('Matched route %s', $match->getRoute()->getPath());
         parse_str(parse_url($_SERVER['REQUEST_URI'], PHP_URL_QUERY), $_GET);
         $request->get = $match->getParameters() + $_GET;
         if (isset($request->get['format'])) {
@@ -123,5 +123,4 @@ class ApplicationEventHandlers
         echo $response;
         return $this->app->response;
     }
-
 }
