@@ -46,20 +46,12 @@ class ApplicationEventHandlers
     {
         $status = $response->getStatus();
         $log    = $this->log;
-        $log->info('Response for request [%s] %s', $request->method, $request->path, $status);
-        $log->info('Response status: %s', $status);
+        $log->info('Response for request [%s] %s', $request->method, $request->path);
+        $log->info('Response status: %s %s', $response->getCode(), $status);
         if ($status == 'OK') {
             $log->info('Response content type: %s', $response->content_type);
             $log->info('Response body length: %s', strlen($response->getContent()));
         }
-    }
-
-    public function displayExceptionPage(Exception $e)
-    {
-        $view            = $this->app->view_factory->view($this->app['view:exception']);
-        $view->app       = $this->app;
-        $view->exception = $e;
-        return $view->render();
     }
 
     private function setResponseContentType($format)
@@ -100,7 +92,10 @@ class ApplicationEventHandlers
     {
         $match = $this->app->router->match($request->path, $request->method);
         if (!$match) {
-            throw new PageNotFoundException('Page not found: ' . $request->path);
+            $this->log->info('Route was not found for path [%s] %s', $request->method, $request->path);
+            $response = new Response();
+            $response->setCode(404);
+            return $response;
         }
         $this->log->info('Matched route %s', $match->getRoute()->getPath());
         parse_str(parse_url($_SERVER['REQUEST_URI'], PHP_URL_QUERY), $_GET);
@@ -116,11 +111,5 @@ class ApplicationEventHandlers
         if (isset($this->app['content_type'])) {
             $response->content_type = $this->app['content_type'];
         }
-    }
-
-    public function filterStringToResponse($response)
-    {
-        echo $response;
-        return $this->app->response;
     }
 }
