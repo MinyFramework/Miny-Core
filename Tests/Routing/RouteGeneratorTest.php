@@ -12,7 +12,7 @@ class RouteGeneratorTest extends \PHPUnit_Framework_TestCase
 
     protected function setUp()
     {
-        $collection = new RouteCollection;
+        $collection   = new RouteCollection;
         $collection->addRoute(new Route('path/:parameter/:other_parameter'), 'route');
         $collection->addRoute(new Route('?path/:parameter'), 'other_route');
         $this->object = new RouteGenerator($collection);
@@ -38,12 +38,11 @@ class RouteGeneratorTest extends \PHPUnit_Framework_TestCase
         $this->assertEquals('path/with/parameter', $this->object->generate('route', $parameters));
         //extra parameters
         $this->assertEquals('?path/with&other_parameter=parameter', $this->object->generate('other_route', $parameters));
-        $parameters['foo'] = 'bar';
+        $parameters['foo']             = 'bar';
         $this->assertEquals('path/with/parameter?foo=bar', $this->object->generate('route', $parameters));
-        $parameters['bar'] = 'baz';
+        $parameters['bar']             = 'baz';
         $this->assertEquals('path/with/parameter?foo=bar&bar=baz', $this->object->generate('route', $parameters));
     }
-
 }
 
 ?>

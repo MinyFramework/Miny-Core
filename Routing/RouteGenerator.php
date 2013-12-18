@@ -42,7 +42,7 @@ class RouteGenerator
             }
 
             $required_params = $route->getParameterNames();
-            $missing = array_diff($required_params, array_keys($parameters));
+            $missing         = array_diff($required_params, array_keys($parameters));
 
             if (!empty($missing)) {
                 $route_params = $route->getParameters();
@@ -71,5 +71,4 @@ class RouteGenerator
         }
         throw new OutOfBoundsException('Route not found: ' . $route_name);
     }
-
 }

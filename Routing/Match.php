@@ -28,7 +28,7 @@ class Match
      */
     public function __construct(Route $route, array $parameters = array())
     {
-        $this->route = $route;
+        $this->route      = $route;
         $this->parameters = array_merge($parameters, $route->getParameters());
     }
 
@@ -47,5 +47,4 @@ class Match
     {
         return $this->route;
     }
-
 }

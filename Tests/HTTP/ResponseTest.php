@@ -95,7 +95,6 @@ class ResponseTest extends \PHPUnit_Framework_TestCase
         $this->response->setCode($code);
         $this->assertEquals($message, $this->response->getStatus());
     }
-
 }
 
 ?>

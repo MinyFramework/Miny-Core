@@ -12,7 +12,7 @@ class RouterTest extends \PHPUnit_Framework_TestCase
     protected function setUp()
     {
         $this->object = new Router('prefix/', '.suffix',
-                                   array(
+                array(
             'default_parameter' => 'default_value',
             'parameter'         => 'value'
         ));
@@ -95,7 +95,6 @@ class RouterTest extends \PHPUnit_Framework_TestCase
         $this->object->resources('foo_resources', array('parameter' => 'resource_parameter'));
         $this->assertEquals('prefix/foo_resources/5.suffix', $this->object->generate('foo_resource', array('id' => 5)));
     }
-
 }
 
 ?>

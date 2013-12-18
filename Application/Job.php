@@ -18,7 +18,7 @@ class Job
     {
         if (!is_callable($runnable) && !$runnable instanceof Closure) {
             if (is_string($runnable)) {
-                $class = $runnable;
+                $class  = $runnable;
                 $method = 'run';
             } else if (is_array($runnable) && count($runnable) == 2) {
                 list($class, $method) = $runnable;
@@ -27,10 +27,10 @@ class Job
             }
             $runnable = array($this->getClassName($class), $method);
         }
-        $this->runnable = $runnable;
-        $this->one_time = $one_time;
+        $this->runnable      = $runnable;
+        $this->one_time      = $one_time;
         $this->run_condition = $run_condition;
-        $this->workload = $workload;
+        $this->workload      = $workload;
     }
 
     private function getClassName($name)
@@ -89,5 +89,4 @@ class Job
         }
         call_user_func($this->runnable, $app, $this);
     }
-
 }

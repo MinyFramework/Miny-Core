@@ -42,7 +42,7 @@ class EventDispatcher
 
     public function raiseEvent()
     {
-        $args = func_get_args();
+        $args  = func_get_args();
         $event = array_shift($args);
 
         if (is_string($event)) {
@@ -66,5 +66,4 @@ class EventDispatcher
         }
         return $event;
     }
-
 }

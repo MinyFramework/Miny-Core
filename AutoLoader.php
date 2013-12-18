@@ -96,14 +96,13 @@ class AutoLoader
             throw new ClassNotFoundException($path, $class);
         }
     }
-
 }
 
 class ClassNotFoundException extends OutOfBoundsException
 {
+
     public function __construct($path, $class)
     {
         parent::__construct(sprintf('File %s does not contain class %s.', $path, $class));
     }
-
 }

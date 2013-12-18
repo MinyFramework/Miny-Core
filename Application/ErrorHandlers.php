@@ -50,5 +50,4 @@ class ErrorHandlers
         $class = get_class($e);
         $this->log->$class("%s \n Trace: %s", $e->getMessage(), $e->getTraceAsString());
     }
-
 }

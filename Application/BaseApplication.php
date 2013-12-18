@@ -20,8 +20,8 @@ use UnexpectedValueException;
 
 abstract class BaseApplication extends Factory
 {
-    const ENV_PROD = 0;
-    const ENV_DEV = 1;
+    const ENV_PROD   = 0;
+    const ENV_DEV    = 1;
     const ENV_COMMON = 2;
 
     /**
@@ -37,7 +37,7 @@ abstract class BaseApplication extends Factory
     public function __construct($directory, $environment = self::ENV_PROD, $include_configs = true)
     {
         $this->environment = $environment;
-        $this->autoloader = new AutoLoader(
+        $this->autoloader  = new AutoLoader(
                 array(
             '\Application' => $directory,
             '\Miny'        => __DIR__ . '/..',
@@ -139,7 +139,7 @@ abstract class BaseApplication extends Factory
 
     protected function registerDefaultServices()
     {
-        $log = new Log($this['log']['path']);
+        $log       = new Log($this['log']['path']);
         $log->setDebugMode($this['log']['debug']);
         $this->log = $log;
 

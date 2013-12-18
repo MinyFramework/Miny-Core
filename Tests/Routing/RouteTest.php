@@ -10,14 +10,16 @@ class RouteTest extends \PHPUnit_Framework_TestCase
 
     protected function setUp()
     {
-        $this->static_object = new Route('path', 'static_method', array(
-                    'param_foo'           => 'val_foo',
-                    'param_bar'           => 'val_bar',
-                ));
-        $this->dynamic_object = new Route('path/:field', 'some_method', array(
-                    'param_foo' => 'val_foo',
-                    'param_bar' => 'val_bar',
-                ));
+        $this->static_object  = new Route('path', 'static_method',
+                array(
+            'param_foo' => 'val_foo',
+            'param_bar' => 'val_bar',
+        ));
+        $this->dynamic_object = new Route('path/:field', 'some_method',
+                array(
+            'param_foo' => 'val_foo',
+            'param_bar' => 'val_bar',
+        ));
     }
 
     public function testPaths()
@@ -84,7 +86,6 @@ class RouteTest extends \PHPUnit_Framework_TestCase
             'param_foobar' => 'val_foobar',
                 ), $route->getParameters());
     }
-
 }
 
 ?>

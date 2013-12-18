@@ -60,5 +60,4 @@ class Resource extends Resources
         $unnamed = array('create', 'show', 'destroy', 'update');
         $this->generateActions($this->collection_actions, $unnamed, $this->getName(), $this->getPathBase());
     }
-
 }

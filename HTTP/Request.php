@@ -14,7 +14,7 @@ use InvalidArgumentException;
 class Request
 {
     const MASTER_REQUEST = 0;
-    const SUB_REQUEST = 1;
+    const SUB_REQUEST    = 1;
 
     private static $request;
 
@@ -25,7 +25,6 @@ class Request
         }
         return self::$request;
     }
-
     public $url;
     public $path;
     public $get;
@@ -39,12 +38,12 @@ class Request
     public function __construct($url, array $get = array(), array $post = array(), array $cookie = array(),
                                 $type = self::MASTER_REQUEST)
     {
-        $this->url = $url;
-        $this->path = $path = parse_url($url, PHP_URL_PATH);
-        $this->get = $get;
-        $this->post = $post;
+        $this->url    = $url;
+        $this->path   = $path         = parse_url($url, PHP_URL_PATH);
+        $this->get    = $get;
+        $this->post   = $post;
         $this->cookie = $cookie;
-        $this->type = $type;
+        $this->type   = $type;
 
         if (isset($_SERVER['HTTP_REFERER'])) {
             $this->referer = $_SERVER['HTTP_REFERER'];
@@ -71,6 +70,4 @@ class Request
     {
         return $this->type == self::SUB_REQUEST;
     }
-
 }
-

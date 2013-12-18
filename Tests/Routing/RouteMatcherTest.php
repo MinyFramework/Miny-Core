@@ -18,9 +18,9 @@ class RouteMatcherTest extends \PHPUnit_Framework_TestCase
     {
         $collection = new RouteCollection;
 
-        $this->static_route = new Route('static_path');
+        $this->static_route      = new Route('static_path');
         $this->static_route_post = new Route('other_static_path', 'POST');
-        $this->route = new Route('path/:parameter', 'POST');
+        $this->route             = new Route('path/:parameter', 'POST');
         $this->route->specify('parameter', '(\d+)');
 
         $collection->addRoute($this->route);
@@ -68,7 +68,6 @@ class RouteMatcherTest extends \PHPUnit_Framework_TestCase
         $this->assertInstanceOf(__NAMESPACE__ . '\Match', $this->object->match('other_static_path'));
         $this->assertInstanceOf(__NAMESPACE__ . '\Match', $this->object->match('other_static_path', 'POST'));
     }
-
 }
 
 ?>

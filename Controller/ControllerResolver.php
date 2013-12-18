@@ -44,5 +44,4 @@ class ControllerResolver
             throw new InvalidArgumentException('Invalid controller: ' . $class);
         }
     }
-
 }

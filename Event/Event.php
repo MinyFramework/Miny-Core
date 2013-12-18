@@ -37,13 +37,13 @@ class Event
     public function __construct()
     {
         $parameters = func_get_args();
-        $name = array_shift($parameters);
+        $name       = array_shift($parameters);
 
         if (isset($parameters[0]) && is_array($parameters[0]) && count($parameters) == 1) {
             $parameters = $parameters[0];
         }
 
-        $this->name = $name;
+        $this->name       = $name;
         $this->parameters = $parameters;
     }
 
@@ -107,5 +107,4 @@ class Event
     {
         return $this->response;
     }
-
 }

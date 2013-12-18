@@ -6,6 +6,7 @@ require_once dirname(__FILE__) . '/../Extendable.php';
 
 class FooPlugin
 {
+
     public function bar()
     {
         return 'bar';
@@ -20,7 +21,6 @@ class FooPlugin
     {
         return 'foobar';
     }
-
 }
 
 /**
@@ -42,8 +42,8 @@ class ExtendableTest extends \PHPUnit_Framework_TestCase
     {
         $object = new Extendable;
         $object->addMethod('foo', function() {
-                    return 'foo';
-                });
+            return 'foo';
+        });
 
         $object->addMethods(new FooPlugin, array(
             'bar', 'baz'
@@ -73,7 +73,6 @@ class ExtendableTest extends \PHPUnit_Framework_TestCase
 
         }
     }
-
 }
 
 ?>

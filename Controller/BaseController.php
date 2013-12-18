@@ -1,6 +1,5 @@
 <?php
 
-
 /**
  * This file is part of the Miny framework.
  * (c) Dániel Buga <daniel@bugadani.hu>
@@ -42,5 +41,4 @@ abstract class BaseController extends Extendable
     {
         return $this->app->$name;
     }
-
 }

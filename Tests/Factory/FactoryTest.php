@@ -8,7 +8,7 @@ require_once dirname(__FILE__) . '/../../Factory/Factory.php';
 class TestClass
 {
     private $constructor;
-    private $method = array();
+    private $method   = array();
     private $property = array();
 
     public function __construct()
@@ -30,7 +30,6 @@ class TestClass
     {
         return $this->$key;
     }
-
 }
 
 class TestHelperClass
@@ -41,7 +40,6 @@ class TestHelperClass
     {
         return $return;
     }
-
 }
 
 class FactoryTest extends \PHPUnit_Framework_TestCase
@@ -73,7 +71,7 @@ class FactoryTest extends \PHPUnit_Framework_TestCase
 
     public function testSetter()
     {
-        $std = new \stdClass;
+        $std       = new \stdClass;
         $blueprint = new Blueprint('\stdClass');
 
         //testing setInstance
@@ -103,7 +101,7 @@ class FactoryTest extends \PHPUnit_Framework_TestCase
 
         $this->object->helper = $helper;
         $this->object->getParameters()->addParameters(array(
-            'link' => 'helper',
+            'link'                       => 'helper',
             'link_to_instance_reference' => '&helper'
         ));
 
@@ -160,7 +158,6 @@ class FactoryTest extends \PHPUnit_Framework_TestCase
                 ->addMethodCall('method_name', new Blueprint(__NAMESPACE__ . '\TestClass'));
         $this->assertInstanceOf(__NAMESPACE__ . '\TestClass', $this->object->object->method['method_name'][0]);
     }
-
 }
 
 ?>

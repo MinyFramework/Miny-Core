@@ -14,11 +14,11 @@ class MatchTest extends \PHPUnit_Framework_TestCase
     protected function setUp()
     {
         $this->parameters = array(
-            'foo'         => 'bar',
-            'baz'         => 'foobar'
+            'foo' => 'bar',
+            'baz' => 'foobar'
         );
-        $this->route = new Route('test/path', NULL, $this->parameters);
-        $this->object = new Match($this->route, array('foo' => 'bar_baz'));
+        $this->route      = new Route('test/path', NULL, $this->parameters);
+        $this->object     = new Match($this->route, array('foo' => 'bar_baz'));
     }
 
     public function testGetParameters()
@@ -30,7 +30,6 @@ class MatchTest extends \PHPUnit_Framework_TestCase
     {
         $this->assertSame($this->route, $this->object->getRoute());
     }
-
 }
 
 ?>

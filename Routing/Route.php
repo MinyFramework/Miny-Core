@@ -53,8 +53,8 @@ class Route
         if (!is_string($path)) {
             throw new InvalidArgumentException('Path must be a string');
         }
-        $this->method = $method;
-        $this->path = $path;
+        $this->method     = $method;
+        $this->path       = $path;
         $this->parameters = $params;
     }
 
@@ -75,10 +75,10 @@ class Route
         if (!is_string($path)) {
             throw new InvalidArgumentException('Path must be a string.');
         }
-        $this->path = $path;
+        $this->path            = $path;
         $this->parameter_count = NULL;
         $this->parameter_names = array();
-        $this->regex = NULL;
+        $this->regex           = NULL;
     }
 
     /**
@@ -169,18 +169,17 @@ class Route
 
     private function build()
     {
-        $arr = array();
+        $arr                   = array();
         $this->parameter_count = preg_match_all('/:(\w+)/', $this->path, $arr);
         if ($this->parameter_count === 0) {
             return;
         }
         $this->parameter_names = $arr[1];
-        $tokens = array();
+        $tokens                = array();
         foreach ($arr[1] as $k => $name) {
             $tokens[$arr[0][$k]] = $this->getPattern($name);
         }
         $this->regex = str_replace(array('#', '?'), array('\#', '\?'), $this->path);
         $this->regex = str_replace(array_keys($tokens), $tokens, $this->regex);
     }
-
 }

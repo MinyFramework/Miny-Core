@@ -6,16 +6,17 @@ require_once dirname(__FILE__) . '/../../HTTP/Request.php';
 
 class RequestTest extends \PHPUnit_Framework_TestCase
 {
+
     public function setUp()
     {
-        $_GET = array(
+        $_GET                      = array(
             'get_array'
         );
-        $_COOKIE = array(
+        $_COOKIE                   = array(
             'cookie_array'
         );
-        $_SERVER['REQUEST_URI'] = '/some_path/to?this=foo';
-        $_SERVER['REMOTE_ADDR'] = 'my_ip';
+        $_SERVER['REQUEST_URI']    = '/some_path/to?this=foo';
+        $_SERVER['REMOTE_ADDR']    = 'my_ip';
         $_SERVER['REQUEST_METHOD'] = 'GET';
     }
 
@@ -52,7 +53,6 @@ class RequestTest extends \PHPUnit_Framework_TestCase
         $request = new Request('', array(), array('_method' => 'PUT'), array(), true);
         $this->assertEquals('PUT', $request->method);
     }
-
 }
 
 ?>

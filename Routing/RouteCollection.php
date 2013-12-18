@@ -69,5 +69,4 @@ class RouteCollection implements IteratorAggregate
     {
         return new ArrayIterator($this->routes);
     }
-
 }

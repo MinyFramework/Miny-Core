@@ -11,4 +11,5 @@ namespace Miny\Controller;
 
 abstract class WorkerController extends BaseController
 {
+
 }

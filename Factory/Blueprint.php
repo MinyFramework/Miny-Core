@@ -97,8 +97,8 @@ class Blueprint
         if (func_num_args() == 0) {
             throw new BadMethodCallException('Blueprint::addMethodCall needs at least one argument.');
         }
-        $arguments = func_get_args();
-        $method = array_shift($arguments);
+        $arguments       = func_get_args();
+        $method          = array_shift($arguments);
         $this->methods[] = array($method, $arguments);
         return $this;
     }
@@ -185,5 +185,4 @@ class Blueprint
     {
         return $this->parent;
     }
-
 }

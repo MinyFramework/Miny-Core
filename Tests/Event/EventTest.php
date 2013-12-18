@@ -6,6 +6,7 @@ require_once dirname(__FILE__) . '/../../Event/Event.php';
 
 class EventTest extends \PHPUnit_Framework_TestCase
 {
+
     public function testHandled()
     {
         $event = new Event('test_event');
@@ -26,8 +27,8 @@ class EventTest extends \PHPUnit_Framework_TestCase
         $parameters = array(
             'p1', 'p2', 'p3'
         );
-        $event1 = new Event('name', 'p1', 'p2', 'p3');
-        $event2 = new Event('name', $parameters);
+        $event1     = new Event('name', 'p1', 'p2', 'p3');
+        $event2     = new Event('name', $parameters);
 
         $this->assertEquals($parameters, $event1->getParameters());
         $this->assertEquals($parameters, $event2->getParameters());
@@ -35,7 +36,7 @@ class EventTest extends \PHPUnit_Framework_TestCase
 
     public function testResponse()
     {
-        $event = new Event('test_event');
+        $event    = new Event('test_event');
         //no response set
         $this->assertFalse($event->hasResponse());
         $this->assertNull($event->getResponse());
@@ -45,7 +46,6 @@ class EventTest extends \PHPUnit_Framework_TestCase
         $this->assertTrue($event->hasResponse());
         $this->assertEquals($response, $event->getResponse());
     }
-
 }
 
 ?>

@@ -180,7 +180,7 @@ class Factory implements ArrayAccess
         }
 
         $descriptor = $this->getBlueprint($alias);
-        $obj = $this->instantiate($descriptor);
+        $obj        = $this->instantiate($descriptor);
 
         if ($descriptor->isSingleton()) {
             $this->setInstance($alias, $obj);
@@ -322,13 +322,13 @@ class Factory implements ArrayAccess
         if (($pos = strpos($str, '::')) !== false) {
             //method parameters are separated by ::
             //TOOD: use different separator for method names and arguments, support for nested method calls
-            $arr = explode('::', $str);
+            $arr      = explode('::', $str);
             $obj_name = array_shift($arr);
-            $method = array_shift($arr);
-            $object = $this->__get($obj_name);
+            $method   = array_shift($arr);
+            $object   = $this->__get($obj_name);
 
             $callback = array($object, $method);
-            if(!is_callable($callback)) {
+            if (!is_callable($callback)) {
                 $method = sprintf('Class "%s" does not have a method "%s"', $obj_name, $method);
                 throw new InvalidArgumentException($method);
             }
@@ -360,5 +360,4 @@ class Factory implements ArrayAccess
     {
         $this->parameters->offsetUnset($offset);
     }
-
 }

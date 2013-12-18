@@ -22,10 +22,10 @@ class LogTest extends \PHPUnit_Framework_TestCase
      */
     protected function setUp()
     {
-        $tmp = sys_get_temp_dir();
+        $tmp            = sys_get_temp_dir();
         date_default_timezone_set('UTC');
         $this->log_file = $tmp . '/log_' . date('Y_m_d') . '.log';
-        $this->object = new Log($tmp, true);
+        $this->object   = new Log($tmp, true);
 
         unlink($this->log_file);
     }
@@ -48,7 +48,7 @@ class LogTest extends \PHPUnit_Framework_TestCase
     {
         $this->assertEquals($this->log_file, $this->object->getLogFileName());
 
-        $date = date('Y-m-d H:i:s');
+        $date    = date('Y-m-d H:i:s');
         $message = 'TestMessage';
         $this->object->write($message);
         $this->object->write($message, 'someLevel');
@@ -60,7 +60,6 @@ class LogTest extends \PHPUnit_Framework_TestCase
 
         $this->assertEquals($expected, file_get_contents($this->log_file));
     }
-
 }
 
 ?>

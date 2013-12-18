@@ -74,12 +74,11 @@ abstract class Controller extends BaseController
         });
 
         $action = $action ? : $this->default_action;
-        $fn = $action . 'Action';
+        $fn     = $action . 'Action';
         if (!method_exists($this, $fn)) {
             throw new InvalidArgumentException('Action not found: ' . $action);
         }
 
         $this->$fn($request);
     }
-
 }

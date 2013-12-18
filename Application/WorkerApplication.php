@@ -15,7 +15,7 @@ require_once __DIR__ . '/BaseApplication.php';
 
 class WorkerApplication extends BaseApplication
 {
-    private $jobs = array();
+    private $jobs           = array();
     private $exit_requested = false;
 
     public function __construct($directory, $environment = self::ENV_PROD, $include_configs = true)
@@ -80,5 +80,4 @@ class WorkerApplication extends BaseApplication
             }
         }
     }
-
 }

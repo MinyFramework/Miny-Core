@@ -15,10 +15,10 @@ use RuntimeException;
 
 class Log
 {
-    const DEBUG = 'debug';
-    const INFO = 'info';
-    const WARNING = 'warning';
-    const ERROR = 'error';
+    const DEBUG     = 'debug';
+    const INFO      = 'info';
+    const WARNING   = 'warning';
+    const ERROR     = 'error';
     const EXCEPTION = 'exception';
 
     /**
@@ -54,7 +54,7 @@ class Log
             return;
         }
         $this->path = $path;
-        $log = $this;
+        $log        = $this;
         register_shutdown_function(function()use($log) {
             if (defined('START_TIME')) {
                 $message = sprintf('Execution time: %lf s', microtime(true) - START_TIME);
@@ -120,9 +120,10 @@ class Log
      * @param string $name
      * @param array $args
      */
-    public function __call($name, $args){
+    public function __call($name, $args)
+    {
         $message = array_shift($args);
-        if(is_array(current($args))) {
+        if (is_array(current($args))) {
             $args = current($args);
         }
         $this->write(vsprintf($message, $args), $name);
@@ -161,5 +162,4 @@ class Log
         $this->writeFile($file, $data);
         $this->messages = array();
     }
-
 }

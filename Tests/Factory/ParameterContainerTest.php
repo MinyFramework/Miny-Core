@@ -111,7 +111,7 @@ class ParameterContainerTest extends \PHPUnit_Framework_TestCase
 
     public function testParameterMerge()
     {
-        $new_parameters = array(
+        $new_parameters           = array(
             'array_a' => array(
                 'param_b'           => 'some_value', //overwrite
                 'additional_param'  => 'other_value', //new key
@@ -119,7 +119,7 @@ class ParameterContainerTest extends \PHPUnit_Framework_TestCase
                 'something_invalid' => 'prefix_{@invalid_link}'
             )
         );
-        $expected_result = array(
+        $expected_result          = array(
             'array_a'      => array(
                 'param_b'           => 'some_value',
                 'array_b'           => array(
@@ -165,7 +165,6 @@ class ParameterContainerTest extends \PHPUnit_Framework_TestCase
         $this->assertEquals($expected_result, $this->object->toArray());
         $this->assertEquals($expected_result_resolved, $this->object->getResolvedParameters());
     }
-
 }
 
 ?>

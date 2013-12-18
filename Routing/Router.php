@@ -54,10 +54,10 @@ class Router extends RouteCollection
      */
     public function __construct($prefix = NULL, $suffix = NULL, array $parameters = array())
     {
-        $this->matcher = new RouteMatcher($this);
-        $this->generator = new RouteGenerator($this);
-        $this->route_prefix = $prefix;
-        $this->route_suffix = $suffix;
+        $this->matcher            = new RouteMatcher($this);
+        $this->generator          = new RouteGenerator($this);
+        $this->route_prefix       = $prefix;
+        $this->route_suffix       = $suffix;
         $this->default_parameters = $parameters;
     }
 
@@ -110,8 +110,8 @@ class Router extends RouteCollection
      */
     public function resources($name, array $parameters = array())
     {
-        $parameters = $parameters + $this->default_parameters;
-        $resource = new Resources($name, $parameters);
+        $parameters        = $parameters + $this->default_parameters;
+        $resource          = new Resources($name, $parameters);
         $this->resources[] = $resource;
         return $resource;
     }
@@ -123,8 +123,8 @@ class Router extends RouteCollection
      */
     public function resource($name, array $parameters = array())
     {
-        $parameters = $parameters + $this->default_parameters;
-        $resource = new Resource($name, $parameters);
+        $parameters        = $parameters + $this->default_parameters;
+        $resource          = new Resource($name, $parameters);
         $this->resources[] = $resource;
         return $resource;
     }
@@ -166,5 +166,4 @@ class Router extends RouteCollection
         $this->buildResources();
         return $this->generator->generate($route_name, $parameters);
     }
-
 }

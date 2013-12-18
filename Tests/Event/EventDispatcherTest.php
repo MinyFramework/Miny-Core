@@ -12,17 +12,17 @@ class EventDispatcherTest extends \PHPUnit_Framework_TestCase
 
     protected function setUp()
     {
-        $this->object = new EventDispatcher;
+        $this->object          = new EventDispatcher;
         $this->handler_factory = function($num) {
-                    return function()use($num) {
-                                echo $num;
-                            };
-                };
+            return function()use($num) {
+                echo $num;
+            };
+        };
     }
 
     public function testRetValOfRaiseEvent()
     {
-        $event = new Event('event');
+        $event  = new Event('event');
         $retval = $this->object->raiseEvent($event);
         $this->assertSame($event, $retval);
     }
@@ -58,7 +58,7 @@ class EventDispatcherTest extends \PHPUnit_Framework_TestCase
     public function testShouldPassParametersToHandler()
     {
         $event = new Event('event2', 'p1', 'p2');
-        $this->object->register('event2', function(){
+        $this->object->register('event2', function() {
             return func_get_args();
         });
         $this->object->raiseEvent($event);
@@ -76,7 +76,6 @@ class EventDispatcherTest extends \PHPUnit_Framework_TestCase
 
         $this->object->raiseEvent(new Event('event'));
     }
-
 }
 
 ?>

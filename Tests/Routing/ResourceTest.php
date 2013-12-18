@@ -44,7 +44,7 @@ class ResourceTest extends \PHPUnit_Framework_TestCase
 
     private function checkGeneratedRoutes(Resources $resources, $expected_count, array $expected_paths_and_methods)
     {
-        $routes_iterator = $resources->getIterator();
+        $routes_iterator          = $resources->getIterator();
         $this->assertEquals($expected_count, $routes_iterator->count());
         $actual_paths_and_methods = array();
         foreach ($routes_iterator as $route) {
@@ -52,7 +52,6 @@ class ResourceTest extends \PHPUnit_Framework_TestCase
         }
         $this->assertEquals($expected_paths_and_methods, $actual_paths_and_methods);
     }
-
 }
 
 ?>

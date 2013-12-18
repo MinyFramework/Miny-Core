@@ -83,5 +83,4 @@ class ControllerCollection
         }
         return new $class($this->application);
     }
-
 }

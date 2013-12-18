@@ -81,14 +81,14 @@ class ParameterContainer implements ArrayAccess
         if (is_array($value)) {
             $return = array();
             foreach ($value as $k => $v) {
-                $k = $this->resolveLinks($k);
+                $k          = $this->resolveLinks($k);
                 $return[$k] = $this->resolveLinks($v);
             }
             return $return;
         }
         if (is_string($value)) {
             $container = $this;
-            $callback = function($matches) use($container) {
+            $callback  = function($matches) use($container) {
                 try {
                     return $container->offsetGet($matches[1]);
                 } catch (OutOfBoundsException $e) {
@@ -157,8 +157,8 @@ class ParameterContainer implements ArrayAccess
     {
         if (strpos($key, ':') !== false) {
             $parts = explode(':', $key);
-            $last = count($parts) - 1;
-            $arr = & $this->parameters;
+            $last  = count($parts) - 1;
+            $arr   = & $this->parameters;
             foreach ($parts as $i => $k) {
                 if (!array_key_exists($k, $arr)) {
                     return;
@@ -195,5 +195,4 @@ class ParameterContainer implements ArrayAccess
             return isset($this->parameters[$key]);
         }
     }
-
 }

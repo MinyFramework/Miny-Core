@@ -107,7 +107,6 @@ class BlueprintTest extends \PHPUnit_Framework_TestCase
         $object = new Blueprint('SomeClass', false);
         $this->assertFalse($object->isSingleton());
     }
-
 }
 
 ?>

@@ -75,5 +75,4 @@ class Extendable
         }
         return call_user_func_array($this->plugins[$method], $args);
     }
-
 }

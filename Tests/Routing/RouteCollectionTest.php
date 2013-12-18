@@ -48,7 +48,6 @@ class RouteCollectionTest extends \PHPUnit_Framework_TestCase
 
         }
     }
-
 }
 
 ?>

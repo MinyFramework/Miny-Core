@@ -274,5 +274,4 @@ class Session implements ArrayAccess, IteratorAggregate, Countable
         }
         return $_SESSION['data'][$key];
     }
-
 }
