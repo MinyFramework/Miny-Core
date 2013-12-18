@@ -79,6 +79,6 @@ abstract class Controller extends BaseController
             throw new InvalidArgumentException('Action not found: ' . $action);
         }
 
-        $this->$fn($request);
+        return $this->$fn($request);
     }
 }
