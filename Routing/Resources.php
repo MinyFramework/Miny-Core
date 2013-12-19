@@ -306,7 +306,7 @@ class Resources extends RouteCollection
             $parameters['action'] = $action;
             if (in_array($action, $unnamed_actions)) {
                 $name               = $unnamed_route_name;
-                $unnamed_route_name = NULL;
+                $unnamed_route_name = null;
                 $route              = new Route($path, $method, $parameters);
             } else {
                 $name  = $action . '_' . $singular_name;
@@ -323,7 +323,8 @@ class Resources extends RouteCollection
     protected function generateMemberActions()
     {
         $unnamed = array('show', 'update', 'destroy');
-        $this->generateActions($this->member_actions, $unnamed, $this->getSingularName(), $this->getPathBase() . '/:id');
+        $path    = $this->getPathBase() . '/:id';
+        $this->generateActions($this->member_actions, $unnamed, $this->getSingularName(), $path);
     }
 
     protected function generateCollectionActions()

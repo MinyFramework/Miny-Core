@@ -22,7 +22,7 @@ class WorkerApplication extends BaseApplication
     {
         ignore_user_abort(true);
         set_time_limit(0);
-        pcntl_signal(SIGTERM, function() {
+        pcntl_signal(SIGTERM, function () {
             exit;
         });
         parent::__construct($directory, $environment, $include_configs);

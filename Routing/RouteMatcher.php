@@ -29,11 +29,11 @@ class RouteMatcher
      * @param string $method
      * @return Match|boolean
      */
-    public function match($path, $method = NULL)
+    public function match($path, $method = null)
     {
         foreach ($this->routes as $route) {
             $route_method = $route->getMethod();
-            if ($method !== NULL && $route_method !== NULL && $method !== $route_method) {
+            if ($method !== null && $route_method !== null && $method !== $route_method) {
                 continue;
             }
 

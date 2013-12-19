@@ -45,7 +45,7 @@ class Log
      * @param string $path
      * @throws Exception
      */
-    public function __construct($path)
+    public function __construct($path, $debug = true)
     {
         try {
             $this->checkPath($path);
@@ -55,7 +55,7 @@ class Log
         }
         $this->path = $path;
         $log        = $this;
-        register_shutdown_function(function()use($log) {
+        register_shutdown_function(function () use ($log) {
             if (defined('START_TIME')) {
                 $message = sprintf('Execution time: %lf s', microtime(true) - START_TIME);
                 $log->write($message, 'info');
@@ -63,6 +63,7 @@ class Log
             $log->write("End of execution.\n", 'info');
             $log->saveLog();
         });
+        $this->setDebugMode($debug);
     }
 
     /**

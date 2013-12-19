@@ -52,7 +52,7 @@ class Router extends RouteCollection
      * @param string $suffix
      * @param array $parameters
      */
-    public function __construct($prefix = NULL, $suffix = NULL, array $parameters = array())
+    public function __construct($prefix = null, $suffix = null, array $parameters = array())
     {
         $this->matcher            = new RouteMatcher($this);
         $this->generator          = new RouteGenerator($this);
@@ -138,7 +138,7 @@ class Router extends RouteCollection
         foreach ($this->resources as $resource) {
             foreach ($resource as $name => $route) {
                 if (is_numeric($name)) {
-                    $name = NULL;
+                    $name = null;
                 }
                 $this->route($route, $name);
             }
@@ -150,7 +150,7 @@ class Router extends RouteCollection
      * @param string $method
      * @return Match
      */
-    public function match($path, $method = NULL)
+    public function match($path, $method = null)
     {
         $this->buildResources();
         return $this->matcher->match($path, $method);

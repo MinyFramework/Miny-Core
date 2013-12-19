@@ -97,7 +97,7 @@ class Event
      */
     public function hasResponse()
     {
-        return $this->response !== NULL;
+        return $this->response !== null;
     }
 
     /**

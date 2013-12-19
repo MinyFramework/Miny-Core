@@ -108,7 +108,7 @@ class Response
         }
     }
 
-    public function removeHeader($name, $value = NULL)
+    public function removeHeader($name, $value = null)
     {
         if (is_null($value)) {
             unset($this->headers[$name]);

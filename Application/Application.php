@@ -44,7 +44,7 @@ class Application extends BaseApplication
     {
         $app = $this;
 
-        set_exception_handler(function(Exception $e) use($app) {
+        set_exception_handler(function (Exception $e) use ($app) {
             $event = $app->events->raiseEvent('uncaught_exception', $e);
             if (!$event->isHandled()) {
                 throw $e;
@@ -94,7 +94,7 @@ class Application extends BaseApplication
      * @param array $parameters
      * @return Resource
      */
-    public function resource($name, $controller = NULL, array $parameters = array())
+    public function resource($name, $controller = null, array $parameters = array())
     {
         $parameters['controller'] = $controller ? : $name;
         return $this->router->resource($name, $parameters);
@@ -107,7 +107,7 @@ class Application extends BaseApplication
      * @param array $parameters
      * @return Resources
      */
-    public function resources($name, $controller = NULL, array $parameters = array())
+    public function resources($name, $controller = null, array $parameters = array())
     {
         $parameters['controller'] = $controller ? : $name;
         return $this->router->resources($name, $parameters);
@@ -137,9 +137,9 @@ class Application extends BaseApplication
      * @return Route
      * @throws UnexpectedValueException
      */
-    public function route($path, $controller, $method = NULL, $name = NULL, array $parameters = array())
+    public function route($path, $controller, $method = null, $name = null, array $parameters = array())
     {
-        if (!in_array($method, array(NULL, 'GET', 'POST', 'PUT', 'DELETE'))) {
+        if (!in_array($method, array(null, 'GET', 'POST', 'PUT', 'DELETE'))) {
             throw new UnexpectedValueException('Unexpected route method:' . $method);
         }
         $controller_name          = is_string($controller) ? $controller : $this->controllers->getNextName();
@@ -158,7 +158,7 @@ class Application extends BaseApplication
      * @param array $parameters
      * @return Route
      */
-    public function get($path, $controller, $name = NULL, array $parameters = array())
+    public function get($path, $controller, $name = null, array $parameters = array())
     {
         return $this->route($path, $controller, 'GET', $name, $parameters);
     }
@@ -171,7 +171,7 @@ class Application extends BaseApplication
      * @param array $parameters
      * @return Route
      */
-    public function post($path, $controller, $name = NULL, array $parameters = array())
+    public function post($path, $controller, $name = null, array $parameters = array())
     {
         return $this->route($path, $controller, 'POST', $name, $parameters);
     }
@@ -184,7 +184,7 @@ class Application extends BaseApplication
      * @param array $parameters
      * @return Route
      */
-    public function put($path, $controller, $name = NULL, array $parameters = array())
+    public function put($path, $controller, $name = null, array $parameters = array())
     {
         return $this->route($path, $controller, 'PUT', $name, $parameters);
     }
@@ -197,7 +197,7 @@ class Application extends BaseApplication
      * @param array $parameters
      * @return Route
      */
-    public function delete($path, $controller, $name = NULL, array $parameters = array())
+    public function delete($path, $controller, $name = null, array $parameters = array())
     {
         return $this->route($path, $controller, 'DELETE', $name, $parameters);
     }
@@ -231,7 +231,7 @@ class Application extends BaseApplication
 
         if (!isset($response)) {
             $response = new Response;
-            $action   = isset($request->get['action']) ? $request->get['action'] : NULL;
+            $action   = isset($request->get['action']) ? $request->get['action'] : null;
             $this->resolver->resolve($request->get['controller'], $action, $request, $response);
         }
 

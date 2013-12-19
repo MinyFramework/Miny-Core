@@ -25,11 +25,11 @@ class Session implements ArrayAccess, IteratorAggregate, Countable
     private $is_open = false;
 
     /**
-     * @param bool $register_custom_storage
+     * @param bool $custom_storage
      */
-    public function __construct($register_custom_storage = false)
+    public function __construct($custom_storage = false)
     {
-        if ($register_custom_storage) {
+        if ($custom_storage) {
             session_set_save_handler(
                     array($this, 'openSession'), array($this, 'closeSession'), array($this, 'readSession'),
                     array($this, 'writeSession'), array($this, 'destroySession'), array($this, 'gcSession')
@@ -143,13 +143,13 @@ class Session implements ArrayAccess, IteratorAggregate, Countable
      *
      * @return string the current session name
      */
-    public function sessionName($name = NULL)
+    public function sessionName($name = null)
     {
         if (!$name) {
             return session_name();
         }
         if (!is_string($name)) {
-            throw new InvalidArgumentException('Session name must be NULL or a string');
+            throw new InvalidArgumentException('Session name must be null or a string');
         }
         if (!$this->is_open) {
             session_name($name);
@@ -161,7 +161,7 @@ class Session implements ArrayAccess, IteratorAggregate, Countable
      *
      * @return string the current session save path.
      */
-    public function savePath($path = NULL)
+    public function savePath($path = null)
     {
         if (!$path) {
             return session_save_path();
@@ -170,7 +170,7 @@ class Session implements ArrayAccess, IteratorAggregate, Countable
             return;
         }
         if (!is_string($path)) {
-            throw new InvalidArgumentException('Session path must be NULL or a string');
+            throw new InvalidArgumentException('Session path must be null or a string');
         }
         if (!is_dir($path)) {
             throw new InvalidArgumentException('Path not found: ' . $path);
@@ -181,7 +181,7 @@ class Session implements ArrayAccess, IteratorAggregate, Countable
     /**
      * @see http://us2.php.net/manual/en/function.session-get-cookie-params.php
      */
-    public function cookieParams(array $new_params = NULL)
+    public function cookieParams(array $new_params = null)
     {
         $params = session_get_cookie_params();
         if (!is_null($new_params) && !$this->is_open) {
@@ -250,7 +250,7 @@ class Session implements ArrayAccess, IteratorAggregate, Countable
 
     public function offsetSet($key, $value)
     {
-        if ($key === NULL) {
+        if ($key === null) {
             $_SESSION['data'][] = $value;
         } else {
             $_SESSION['data'][$key] = $value;

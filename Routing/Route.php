@@ -48,7 +48,7 @@ class Route
      * @param string $method
      * @param array $params
      */
-    public function __construct($path, $method = NULL, array $params = array())
+    public function __construct($path, $method = null, array $params = array())
     {
         if (!is_string($path)) {
             throw new InvalidArgumentException('Path must be a string');
@@ -76,9 +76,9 @@ class Route
             throw new InvalidArgumentException('Path must be a string.');
         }
         $this->path            = $path;
-        $this->parameter_count = NULL;
+        $this->parameter_count = null;
         $this->parameter_names = array();
-        $this->regex           = NULL;
+        $this->regex           = null;
     }
 
     /**

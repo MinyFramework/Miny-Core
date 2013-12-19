@@ -36,7 +36,7 @@ class AutoLoader
      * @param string $namespace
      * @param string $path
      */
-    public function register($namespace, $path = NULL)
+    public function register($namespace, $path = null)
     {
         if (is_array($namespace)) {
             foreach ($namespace as $ns => $path) {

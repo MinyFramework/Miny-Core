@@ -34,7 +34,7 @@ class RouteCollection implements IteratorAggregate
      * @param string $name
      * @throws UnexpectedValueException
      */
-    public function addRoute(Route $route, $name = NULL)
+    public function addRoute(Route $route, $name = null)
     {
         if (is_null($name)) {
             $this->routes[] = $route;

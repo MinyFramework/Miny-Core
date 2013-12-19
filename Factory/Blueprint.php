@@ -173,7 +173,7 @@ class Blueprint
      */
     public function hasParent()
     {
-        return $this->parent !== NULL;
+        return $this->parent !== null;
     }
 
     /**

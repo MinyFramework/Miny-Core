@@ -63,5 +63,5 @@ abstract class Module
         $this->conditional_runnables[$module] = $runnable;
     }
 
-    public abstract function init(BaseApplication $app);
+    abstract public function init(BaseApplication $app);
 }

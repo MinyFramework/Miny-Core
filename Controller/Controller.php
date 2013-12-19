@@ -27,10 +27,9 @@ abstract class Controller extends BaseController
      * @param array $cookie
      * @return Response
      */
-    public function request($path, array $get = NULL, array $post = NULL, array $cookie = NULL)
+    public function request($path, array $get = null, array $post = null, array $cookie = null)
     {
-        $response = $this->app->dispatch(
-                new Request($path, $get, $post, $cookie, Request::SUB_REQUEST));
+        $response = $this->app->dispatch(new Request($path, $get, $post, $cookie, Request::SUB_REQUEST));
 
         foreach ($response->getHeaders() as $name => $value) {
             $this->header($name, $value);
@@ -61,24 +60,22 @@ abstract class Controller extends BaseController
     {
         $router = $this->app->router;
 
-        $this->addMethods($response,
-                array(
+        $this->addMethods($response, array(
             'setCode', 'redirect',
             'header' => 'setHeader',
             'cookie' => 'setCookie'
         ));
-        $this->addMethod('redirectRoute',
-                function($route, array $params = array()) use($response, $router) {
+        $this->addMethod('redirectRoute', function ($route, array $params = array()) use ($response, $router) {
             $path = $router->generate($route, $params);
             $response->redirect($path);
         });
 
         $action = $action ? : $this->default_action;
-        $fn     = $action . 'Action';
-        if (!method_exists($this, $fn)) {
+        $method = $action . 'Action';
+        if (!method_exists($this, $method)) {
             throw new InvalidArgumentException('Action not found: ' . $action);
         }
 
-        return $this->$fn($request);
+        return $this->$method($request);
     }
 }

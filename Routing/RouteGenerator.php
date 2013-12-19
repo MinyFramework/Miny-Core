@@ -57,18 +57,23 @@ class RouteGenerator
                 }
             }
 
-            $path = $route->getPath();
-            $glue = (strpos($path, '?') === false) ? '?' : '&';
-            foreach ($parameters as $name => $value) {
-                if (strpos($path, ':' . $name) !== false) {
-                    $path = str_replace(':' . $name, $value, $path);
-                } else {
-                    $path .= $glue . $name . '=' . $value;
-                    $glue = '&';
-                }
-            }
-            return $path;
+            return $this->buildPath($route, $parameters);
         }
         throw new OutOfBoundsException('Route not found: ' . $route_name);
+    }
+
+    private function buildPath(Route $route, array $parameters)
+    {
+        $path = $route->getPath();
+        $glue = (strpos($path, '?') === false) ? '?' : '&';
+        foreach ($parameters as $name => $value) {
+            if (strpos($path, ':' . $name) !== false) {
+                $path = str_replace(':' . $name, $value, $path);
+            } else {
+                $path .= $glue . $name . '=' . $value;
+                $glue = '&';
+            }
+        }
+        return $path;
     }
 }

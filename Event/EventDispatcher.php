@@ -25,14 +25,14 @@ class EventDispatcher
      * @param int $place
      * @throws EventHandlerException
      */
-    public function register($event, $handler, $place = NULL)
+    public function register($event, $handler, $place = null)
     {
         if (!is_callable($handler)) {
             throw new EventHandlerException('Handler is not callable for event ' . $event);
         }
         if (!isset($this->handlers[$event])) {
             $this->handlers[$event] = array($handler);
-        } elseif ($place === NULL) {
+        } elseif ($place === null) {
             $this->handlers[$event][] = $handler;
         } else {
             //insert handler to the given place

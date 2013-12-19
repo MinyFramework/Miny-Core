@@ -20,7 +20,7 @@ class Job
             if (is_string($runnable)) {
                 $class  = $runnable;
                 $method = 'run';
-            } else if (is_array($runnable) && count($runnable) == 2) {
+            } elseif (is_array($runnable) && count($runnable) == 2) {
                 list($class, $method) = $runnable;
             } else {
                 throw new InvalidArgumentException('Invalid runnable set.');
