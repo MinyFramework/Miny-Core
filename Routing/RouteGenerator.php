@@ -65,16 +65,14 @@ class RouteGenerator
     private function buildPath(Route $route, array $parameters)
     {
         $path = $route->getPath();
-        $glue = (strpos($path, '?') === false) ? '?' : '&';
         krsort($parameters);
         foreach ($parameters as $name => $value) {
             if (strpos($path, ':' . $name) !== false) {
                 $path = str_replace(':' . $name, $value, $path);
-            } else {
-                $path .= $glue . $name . '=' . $value;
-                $glue = '&';
+                unset($parameters[$name]);
             }
         }
+        $path .= http_build_query($parameters, null, (strpos($path, '?') === false) ? '?' : '&');
         return $path;
     }
 }
