@@ -92,6 +92,14 @@ abstract class BaseApplication implements ArrayAccess
         }
     }
 
+    /**
+     * @return Factory
+     */
+    public function getFactory()
+    {
+        return $this->factory;
+    }
+
     protected function setDefaultParameters()
     {
 
