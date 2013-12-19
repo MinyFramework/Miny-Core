@@ -133,7 +133,9 @@ class Factory implements ArrayAccess
      */
     public function __set($alias, $object)
     {
-        if ($object instanceof Blueprint) {
+        if (is_string($object)) {
+            $this->add($alias, $object);
+        } elseif ($object instanceof Blueprint) {
             $this->register($alias, $object);
         } else {
             $this->setInstance($alias, $object);
