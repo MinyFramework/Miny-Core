@@ -169,17 +169,17 @@ class Route
 
     private function build()
     {
-        $arr                   = array();
-        $this->parameter_count = preg_match_all('/:(\w+)/', $this->path, $arr);
+        $parameter_names                   = array();
+        $this->parameter_count = preg_match_all('/:(\w+)/', $this->path, $parameter_names);
         if ($this->parameter_count === 0) {
             return;
         }
-        $this->parameter_names = $arr[1];
+        $this->parameter_names = $parameter_names[1];
         $tokens                = array();
-        foreach ($arr[1] as $k => $name) {
-            $tokens[$arr[0][$k]] = $this->getPattern($name);
+        foreach ($parameter_names[1] as $k => $name) {
+            $tokens[$parameter_names[0][$k]] = $this->getPattern($name);
         }
-        $this->regex = str_replace(array('#', '?'), array('\#', '\?'), $this->path);
+        $this->regex = strtr($this->path, array('#' => '\#', '?' => '\?'));
         $this->regex = str_replace(array_keys($tokens), $tokens, $this->regex);
     }
 }

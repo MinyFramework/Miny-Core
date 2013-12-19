@@ -183,14 +183,25 @@ class Resources extends RouteCollection
     }
 
     /**
+     * Prefixes the given name with the parent name if needed.
+     *
+     * @param type $name
+     * @return type
+     */
+    private function prefixName($name)
+    {
+        if ($this->hasParent()) {
+            return $this->getParent()->getName() . '_' . $name;
+        }
+        return $name;
+    }
+
+    /**
      * @return string
      */
     public function getName()
     {
-        if ($this->hasParent()) {
-            return $this->getParent()->getName() . '_' . $this->name;
-        }
-        return $this->name;
+        return $this->prefixName($this->name);
     }
 
     /**
@@ -198,10 +209,7 @@ class Resources extends RouteCollection
      */
     public function getSingularName()
     {
-        if ($this->hasParent()) {
-            return $this->getParent()->getName() . '_' . $this->singular_name;
-        }
-        return $this->singular_name;
+        return $this->prefixName($this->singular_name);
     }
 
     /**
@@ -313,7 +321,7 @@ class Resources extends RouteCollection
                 $route = new Route($path . '/' . $action, $method, $parameters);
             }
             $route->specify('id', $this->id_pattern);
-            if ($this->hasParent()) {
+            if ($parent !== null) {
                 $route->specify($parent->name . '_id', $parent->id_pattern);
             }
             $this->addRoute($route, $name);

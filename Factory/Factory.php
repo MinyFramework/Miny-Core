@@ -188,8 +188,7 @@ class Factory implements ArrayAccess
             $this->setInstance($alias, $obj);
         }
 
-        $this->injectDependencies($obj, $descriptor);
-        return $obj;
+        return $this->injectDependencies($obj, $descriptor);
     }
 
     /**
@@ -207,11 +206,10 @@ class Factory implements ArrayAccess
         }
         foreach ($descriptor->getMethodCalls() as $method) {
             list($name, $args) = $method;
-            foreach ($args as $key => $value) {
-                $args[$key] = $this->resolveReferences($value);
-            }
-            call_user_func_array(array($object, $name), $args);
+            $arguments = $this->resolveReferences($args);
+            call_user_func_array(array($object, $name), $arguments);
         }
+        return $object;
     }
 
     /**
@@ -229,27 +227,31 @@ class Factory implements ArrayAccess
         if (!class_exists($class)) {
             throw new InvalidArgumentException('Class not found: ' . $class);
         }
-        $args = $descriptor->getArguments();
-        foreach ($args as $key => $value) {
-            $args[$key] = $this->resolveReferences($value);
-        }
+        $args      = $descriptor->getArguments();
+        $arguments = $this->resolveReferences($args);
+        
         switch (count($args)) {
             case 0:
                 return new $class;
+
             case 1:
-                return new $class(current($args));
+                return new $class(current($arguments));
+
             case 2:
-                list($arg1, $arg2) = $args;
+                list($arg1, $arg2) = $arguments;
                 return new $class($arg1, $arg2);
+
             case 3:
-                list($arg1, $arg2, $arg3) = $args;
+                list($arg1, $arg2, $arg3) = $arguments;
                 return new $class($arg1, $arg2, $arg3);
+
             case 4:
-                list($arg1, $arg2, $arg3, $arg4) = $args;
+                list($arg1, $arg2, $arg3, $arg4) = $arguments;
                 return new $class($arg1, $arg2, $arg3, $arg4);
+
             default:
                 $ref = new ReflectionClass($class);
-                return $ref->newInstanceArgs($args);
+                return $ref->newInstanceArgs($arguments);
         }
     }
 
@@ -272,8 +274,7 @@ class Factory implements ArrayAccess
         //if the parameter is a Blueprint, instantiate and inject it
         if ($var instanceof Blueprint) {
             $object = $this->instantiate($var);
-            $this->injectDependencies($object, $var);
-            return $object;
+            return $this->injectDependencies($object, $var);
         }
 
         //direct injection for non-string values

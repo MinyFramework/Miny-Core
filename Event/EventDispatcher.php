@@ -57,7 +57,7 @@ class EventDispatcher
 
             foreach ($this->handlers[$name] as $handler) {
                 $response = call_user_func_array($handler, $parameters);
-                if ($response) {
+                if ($response !== null) {
                     $event->setResponse($response);
                     break;
                 }
