@@ -72,7 +72,10 @@ class RouteGenerator
                 unset($parameters[$name]);
             }
         }
-        $path .= http_build_query($parameters, null, (strpos($path, '?') === false) ? '?' : '&');
+        if (!empty($parameters)) {
+            $path .= (strpos($path, '?') === false) ? '?' : '&';
+            $path .= http_build_query($parameters, null, '&');
+        }
         return $path;
     }
 }
