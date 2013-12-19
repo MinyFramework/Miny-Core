@@ -102,7 +102,6 @@ class ApplicationEventHandlers
         $request->get = $match->getParameters() + $_GET;
         if (isset($request->get['format'])) {
             $this->setResponseContentType($request->get['format']);
-            $this->app['view:default_format'] = '.' . $request->get['format'];
         }
     }
 

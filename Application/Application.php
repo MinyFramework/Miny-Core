@@ -34,11 +34,6 @@ class Application extends BaseApplication
                 ),
                 'exception_paths' => array()
             ),
-            'view'   => array(
-                'dir'            => '{@root}/templates',
-                'default_format' => '.{@router:defaults:format}',
-                'exception'      => 'layouts/exception'
-            ),
             'site'   => array(
                 'title'    => 'Miny 1.0',
                 'base_url' => 'http://' . $_SERVER['HTTP_HOST'] . '{@router:prefix}'
