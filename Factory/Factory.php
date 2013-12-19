@@ -285,23 +285,27 @@ class Factory implements ArrayAccess
         //see if $var is a reference to something
         $str = substr($var, 1);
         switch ($var[0]) {
-            case '@'://param
-                $var = $this->parameters[$str];
-                $var = $this->resolveReferences($var);
+            case '@':
+                //parameter
+                $key = $this->parameters[$str];
+                $var = $this->resolveReferences($key);
                 break;
+
             case '&':
                 //object or method call. Basically this is
                 //$factory->create('object')->method(parameters);
-                $var = $this->getObjectParameter($str);
-                $var = $this->resolveReferences($var);
+                $key = $this->getObjectParameter($str);
+                $var = $this->resolveReferences($key);
                 break;
-            case '*'://callback
+
+            case '*':
+                //callback
                 if (strpos($var, '::') !== false) {
-                    list($obj_name, $method) = explode('::', $str);
+                    list($obj_name, $method) = explode('::', $str, 2);
                     $var = array($this->__get($obj_name), $method);
-                    $var = $this->resolveReferences($var);
                 }
                 break;
+
             case '\\':
                 //remove backslash from escaped characters
                 $escaped = array('\\', '*', '&', '@');
