@@ -66,6 +66,7 @@ class RouteGenerator
     {
         $path = $route->getPath();
         $glue = (strpos($path, '?') === false) ? '?' : '&';
+        krsort($parameters);
         foreach ($parameters as $name => $value) {
             if (strpos($path, ':' . $name) !== false) {
                 $path = str_replace(':' . $name, $value, $path);
