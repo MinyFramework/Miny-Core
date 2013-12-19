@@ -10,15 +10,15 @@
 namespace Miny\Application;
 
 require_once __DIR__ . '/../AutoLoader.php';
-require_once __DIR__ . '/../Factory/Factory.php';
 
+use ArrayAccess;
 use InvalidArgumentException;
 use Miny\AutoLoader;
 use Miny\Factory\Factory;
 use Miny\Log;
 use UnexpectedValueException;
 
-abstract class BaseApplication extends Factory
+abstract class BaseApplication implements ArrayAccess
 {
     const ENV_PROD   = 0;
     const ENV_DEV    = 1;
@@ -30,20 +30,24 @@ abstract class BaseApplication extends Factory
     private $environment;
 
     /**
+     * @var Factory
+     */
+    private $factory;
+
+    /**
      * @param string $directory
      * @param int $environment
      * @param boolean $include_configs
      */
     public function __construct($directory, $environment = self::ENV_PROD, $include_configs = true)
     {
-        $this->environment = $environment;
-        $this->autoloader  = new AutoLoader(
+        $autoloader        = new AutoLoader(
                 array(
             '\Application' => $directory,
             '\Miny'        => __DIR__ . '/..',
             '\Modules'     => __DIR__ . '/../../Modules'
         ));
-        parent::__construct(array(
+        $this->factory     = new Factory(array(
             'default_timezone' => 'UTC',
             'root'             => $directory,
             'log'              => array(
@@ -51,8 +55,10 @@ abstract class BaseApplication extends Factory
                 'debug' => $this->isDeveloperEnvironment()
             ),
         ));
+        $this->environment = $environment;
+        $this->autoloader  = $autoloader;
         $this->setDefaultParameters();
-        $this->setInstance('app', $this);
+        $this->factory->setInstance('app', $this);
         if ($include_configs) {
             $this->loadConfigFiles($directory);
         }
@@ -141,18 +147,18 @@ abstract class BaseApplication extends Factory
     {
         $log       = new Log($this['log']['path']);
         $log->setDebugMode($this['log']['debug']);
-        $this->log = $log;
+        $this->factory->log = $log;
 
         $errh = new ErrorHandlers($log);
-        $this->add('events', '\Miny\Event\EventDispatcher')
+        $this->factory->add('events', '\Miny\Event\EventDispatcher')
                 ->addMethodCall('register', 'uncaught_exception', array($errh, 'logException'));
-        $this->add('module_handler', '\Miny\Application\ModuleHandler')
+        $this->factory->add('module_handler', '\Miny\Application\ModuleHandler')
                 ->setArguments('&app', '&log');
     }
 
     public function run()
     {
-        $event = $this->events;
+        $event = $this->factory->events;
 
         $event->raiseEvent('before_run');
         register_shutdown_function(function()use($event) {
@@ -162,4 +168,42 @@ abstract class BaseApplication extends Factory
     }
 
     abstract public function onRun();
+
+    /* Magic methods are dispatched to Factory */
+
+    public function __set($key, $value)
+    {
+        $this->factory->__set($key, $value);
+    }
+
+    public function __get($key)
+    {
+        return $this->factory->__get($key);
+    }
+
+    public function __call($method, $args)
+    {
+        return call_user_func_array(array($this->factory, $method), $args);
+    }
+    /* ArrayAccess interface */
+
+    public function offsetExists($offset)
+    {
+        return $this->factory->offsetExists($offset);
+    }
+
+    public function offsetGet($offset)
+    {
+        return $this->factory->offsetGet($offset);
+    }
+
+    public function offsetSet($offset, $value)
+    {
+        $this->factory->offsetSet($offset, $value);
+    }
+
+    public function offsetUnset($offset)
+    {
+        $this->factory->offsetUnset($offset);
+    }
 }
