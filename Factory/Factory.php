@@ -201,12 +201,12 @@ class Factory implements ArrayAccess
             $this->injectDependencies($object, $parent);
         }
         foreach ($descriptor->getProperties() as $name => $value) {
-            $object->$name = $this->getValue($value);
+            $object->$name = $this->resolveReferences($value);
         }
         foreach ($descriptor->getMethodCalls() as $method) {
             list($name, $args) = $method;
             foreach ($args as $key => $value) {
-                $args[$key] = $this->getValue($value);
+                $args[$key] = $this->resolveReferences($value);
             }
             call_user_func_array(array($object, $name), $args);
         }
@@ -229,7 +229,7 @@ class Factory implements ArrayAccess
         }
         $args = $descriptor->getArguments();
         foreach ($args as $key => $value) {
-            $args[$key] = $this->getValue($value);
+            $args[$key] = $this->resolveReferences($value);
         }
         switch (count($args)) {
             case 0:
@@ -257,13 +257,14 @@ class Factory implements ArrayAccess
      * @param mixed $var
      * @return mixed
      */
-    public function getValue($var)
+    private function resolveReferences($var)
     {
         //substitute values in arrays, too
         if (is_array($var)) {
             foreach ($var as $key => $value) {
-                $var[$key] = $this->getValue($value);
+                $var[$key] = $this->resolveReferences($value);
             }
+            return $var;
         }
 
         //if the parameter is a Blueprint, instantiate and inject it
@@ -286,19 +287,19 @@ class Factory implements ArrayAccess
         switch ($var[0]) {
             case '@'://param
                 $var = $this->parameters[$str];
-                $var = $this->getValue($var);
+                $var = $this->resolveReferences($var);
                 break;
             case '&':
                 //object or method call. Basically this is
                 //$factory->create('object')->method(parameters);
                 $var = $this->getObjectParameter($str);
-                $var = $this->getValue($var);
+                $var = $this->resolveReferences($var);
                 break;
             case '*'://callback
                 if (strpos($var, '::') !== false) {
                     list($obj_name, $method) = explode('::', $str);
                     $var = array($this->__get($obj_name), $method);
-                    $var = $this->getValue($var);
+                    $var = $this->resolveReferences($var);
                 }
                 break;
             case '\\':
@@ -348,7 +349,7 @@ class Factory implements ArrayAccess
 
     public function offsetGet($offset)
     {
-        return $this->parameters->offsetGet($offset);
+        return $this->resolveReferences($this->parameters->offsetGet($offset));
     }
 
     public function offsetSet($offset, $value)
