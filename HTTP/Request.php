@@ -39,7 +39,7 @@ class Request
                                 $type = self::MASTER_REQUEST)
     {
         $this->url    = $url;
-        $this->path   = $path         = parse_url($url, PHP_URL_PATH);
+        $this->path   = parse_url($url, PHP_URL_PATH);
         $this->get    = $get;
         $this->post   = $post;
         $this->cookie = $cookie;
