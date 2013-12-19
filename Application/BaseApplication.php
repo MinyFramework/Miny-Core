@@ -41,8 +41,8 @@ abstract class BaseApplication implements ArrayAccess
      */
     public function __construct($directory, $environment = self::ENV_PROD, $include_configs = true)
     {
-        $autoloader        = new AutoLoader(
-                array(
+        $this->environment = $environment;
+        $autoloader        = new AutoLoader(array(
             '\Application' => $directory,
             '\Miny'        => __DIR__ . '/..',
             '\Modules'     => __DIR__ . '/../../Modules'
@@ -55,7 +55,6 @@ abstract class BaseApplication implements ArrayAccess
                 'debug' => $this->isDeveloperEnvironment()
             ),
         ));
-        $this->environment = $environment;
         $this->autoloader  = $autoloader;
         $this->setDefaultParameters();
         $this->factory->setInstance('app', $this);
@@ -145,7 +144,7 @@ abstract class BaseApplication implements ArrayAccess
 
     protected function registerDefaultServices()
     {
-        $log       = new Log($this['log']['path']);
+        $log                = new Log($this['log']['path']);
         $log->setDebugMode($this['log']['debug']);
         $this->factory->log = $log;
 
