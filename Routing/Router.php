@@ -20,30 +20,15 @@ class Router extends RouteCollection
      * @var RouteGenerator
      */
     private $generator;
-
-    /**
-     * @var string
-     */
     private $route_prefix;
-
-    /**
-     * @var string
-     */
     private $route_suffix;
-
-    /**
-     * @var array
-     */
     private $default_parameters;
+    private $short_urls;
 
     /**
      * @var Resources[]
      */
-    private $resources = array();
-
-    /**
-     * @var bool
-     */
+    private $resources       = array();
     private $resources_built = false;
 
     /**
@@ -52,13 +37,19 @@ class Router extends RouteCollection
      * @param string $suffix
      * @param array $parameters
      */
-    public function __construct($prefix = null, $suffix = null, array $parameters = array())
+    public function __construct($prefix = null, $suffix = null, array $parameters = array(), $short_urls = true)
     {
         $this->matcher            = new RouteMatcher($this);
-        $this->generator          = new RouteGenerator($this);
+        $this->generator          = new RouteGenerator($this, $short_urls);
         $this->route_prefix       = $prefix;
         $this->route_suffix       = $suffix;
         $this->default_parameters = $parameters;
+        $this->short_urls         = $short_urls;
+    }
+
+    public function shortUrls()
+    {
+        return $this->short_urls;
     }
 
     /**

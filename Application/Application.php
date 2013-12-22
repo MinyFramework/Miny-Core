@@ -32,7 +32,8 @@ class Application extends BaseApplication
                 'defaults'        => array(
                     'format' => 'html'
                 ),
-                'exception_paths' => array()
+                'exception_paths' => array(),
+                'short_urls'      => false
             ),
             'site'   => array(
                 'title'    => 'Miny 1.0',
@@ -74,7 +75,7 @@ class Application extends BaseApplication
         $this->add('resolver', '\Miny\Controller\ControllerResolver')
                 ->setArguments('&controllers');
         $this->add('router', '\Miny\Routing\Router')
-                ->setArguments('@router:prefix', '@router:suffix', '@router:defaults');
+                ->setArguments('@router:prefix', '@router:suffix', '@router:defaults', '@router:short_urls');
 
         $session = new Session;
         $session->open();
