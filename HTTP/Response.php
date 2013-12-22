@@ -10,8 +10,9 @@
 namespace Miny\HTTP;
 
 use InvalidArgumentException;
+use Serializable;
 
-class Response
+class Response implements Serializable
 {
     public static $status_codes = array(
         100 => 'Continue',
@@ -188,5 +189,27 @@ class Response
         if (!$this->is_redirect) {
             ob_flush();
         }
+    }
+
+    public function serialize()
+    {
+        return serialize(array(
+            $this->content_type,
+            $this->cookies,
+            $this->headers,
+            $this->is_redirect,
+            $this->status_code
+        ));
+    }
+
+    public function unserialize($serialized)
+    {
+        $data = unserialize($serialized);
+        $this->content_type = array_shift($data);
+        $this->cookies = array_shift($data);
+        $this->headers = array_shift($data);
+        $this->is_redirect = array_shift($data);
+        $this->status_code = array_shift($data);
+        ob_start();
     }
 }
