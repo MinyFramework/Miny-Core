@@ -18,13 +18,15 @@ class RouteGenerator
      * @var RouteCollection
      */
     private $routes;
+    private $short_urls;
 
     /**
      * @param RouteCollection $routes
      */
-    public function __construct(RouteCollection $routes)
+    public function __construct(RouteCollection $routes, $short_urls = true)
     {
-        $this->routes = $routes;
+        $this->routes     = $routes;
+        $this->short_urls = $short_urls;
     }
 
     /**
@@ -72,10 +74,15 @@ class RouteGenerator
                 unset($parameters[$name]);
             }
         }
-        if (!empty($parameters)) {
-            $path .= (strpos($path, '?') === false) ? '?' : '&';
-            $path .= http_build_query($parameters, null, '&');
+        if ($this->short_urls) {
+            if (!empty($parameters)) {
+                $path .= (strpos($path, '?') === false) ? '?' : '&';
+                $path .= http_build_query($parameters, null, '&');
+            }
+            return $path;
+        } else {
+            $parameters['path'] = $path;
+            return '?' . http_build_query($parameters, null, '&');
         }
-        return $path;
     }
 }

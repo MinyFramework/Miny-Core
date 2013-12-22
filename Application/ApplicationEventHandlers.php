@@ -9,12 +9,10 @@
 
 namespace Miny\Application;
 
-use Exception;
 use Miny\Application\Application;
 use Miny\HTTP\Request;
 use Miny\HTTP\Response;
 use Miny\Log;
-use Miny\Routing\Exceptions\PageNotFoundException;
 
 class ApplicationEventHandlers
 {
@@ -90,7 +88,12 @@ class ApplicationEventHandlers
 
     public function filterRoutes(Request $request)
     {
-        $match = $this->app->router->match($request->path, $request->method);
+        if ($this->app->router->shortUrls()) {
+            $path = $request->path;
+        } else {
+            $path = isset($request->get['path']) ? $request->get['path'] : '';
+        }
+        $match = $this->app->router->match($path, $request->method);
         if (!$match) {
             $this->log->info('Route was not found for path [%s] %s', $request->method, $request->path);
             $response = new Response();
