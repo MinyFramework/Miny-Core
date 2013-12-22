@@ -14,7 +14,7 @@ use Miny\Log;
 
 class ModuleHandler
 {
-    private static $base_module_class   = 'Miny\Application\Module';
+    private static $base_module_class   = '\Miny\Application\Module';
     private static $module_class_format = '\Modules\%s\Module';
 
     /**
@@ -86,7 +86,7 @@ class ModuleHandler
         foreach ($this->modules as $module) {
             foreach ($module->getConditionalRunnables() as $module_name => $runnable) {
                 if (isset($this->modules[$module_name])) {
-                    call_user_func($runnable, $this->application);
+                    $runnable($this->application);
                 }
             }
         }

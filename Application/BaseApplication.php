@@ -152,13 +152,12 @@ abstract class BaseApplication implements ArrayAccess
 
     protected function registerDefaultServices()
     {
-        $log = new Log($this['log']['path'], $this['log']['debug']);
-
-        $this->factory->log = $log;
-        $error_handler      = new ErrorHandlers($log);
-
+        $this->factory->add('log', '\Miny\Log')
+                ->setArguments('@log:path', '@log:debug');
+        $this->factory->add('error_handlers', '\Miny\Application\ErrorHandlers')
+                ->setArguments('&log');
         $this->factory->add('events', '\Miny\Event\EventDispatcher')
-                ->addMethodCall('register', 'uncaught_exception', array($error_handler      , 'logException'));
+                ->addMethodCall('register', 'uncaught_exception', '*error_handlers::logException');
         $this->factory->add('module_handler', '\Miny\Application\ModuleHandler')
                 ->setArguments('&app', '&log');
     }

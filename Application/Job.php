@@ -58,7 +58,8 @@ class Job
     public function canRun()
     {
         if (is_callable($this->run_condition)) {
-            return call_user_func($this->run_condition);
+            $function = $this->run_condition;
+            return $function();
         }
         return true;
     }
@@ -87,6 +88,7 @@ class Job
                 return;
             }
         }
-        call_user_func($this->runnable, $app, $this);
+        $runnable = $this->runnable;
+        $runnable($app, $this);
     }
 }
