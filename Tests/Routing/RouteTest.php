@@ -3,6 +3,7 @@
 namespace Miny\Routing;
 
 require_once dirname(__FILE__) . '/../../Routing/Route.php';
+require_once dirname(__FILE__) . '/../../Routing/Exceptions/BadMethodException.php';
 
 class RouteTest extends \PHPUnit_Framework_TestCase
 {
@@ -10,12 +11,12 @@ class RouteTest extends \PHPUnit_Framework_TestCase
 
     protected function setUp()
     {
-        $this->static_object  = new Route('path', 'static_method',
+        $this->static_object  = new Route('path', 'get',
                 array(
             'param_foo' => 'val_foo',
             'param_bar' => 'val_bar',
         ));
-        $this->dynamic_object = new Route('path/:field', 'some_method',
+        $this->dynamic_object = new Route('path/:field', 'get',
                 array(
             'param_foo' => 'val_foo',
             'param_bar' => 'val_bar',
@@ -34,7 +35,7 @@ class RouteTest extends \PHPUnit_Framework_TestCase
 
     public function testGetMethod()
     {
-        $this->assertEquals('static_method', $this->static_object->getMethod());
+        $this->assertEquals('get', $this->static_object->getMethod());
     }
 
     public function testRegex()
