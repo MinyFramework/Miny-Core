@@ -15,7 +15,6 @@ use ArrayAccess;
 use InvalidArgumentException;
 use Miny\AutoLoader;
 use Miny\Factory\Factory;
-use Miny\Log;
 use UnexpectedValueException;
 
 abstract class BaseApplication implements ArrayAccess
