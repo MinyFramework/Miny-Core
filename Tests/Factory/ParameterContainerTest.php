@@ -165,6 +165,37 @@ class ParameterContainerTest extends \PHPUnit_Framework_TestCase
         $this->assertEquals($expected_result, $this->object->toArray());
         $this->assertEquals($expected_result_resolved, $this->object->getResolvedParameters());
     }
+
+    public function testParameterMergeWithoutOverwrite()
+    {
+        $new_parameters  = array(
+            'array_a' => array(
+                'param_b'          => 'some_value', //overwrite
+                'additional_param' => 'other_value', //new key
+            )
+        );
+        $expected_result = array(
+            'array_a'      => array(
+                'param_b'          => '{@value_b}',
+                'array_b'          => array(
+                    '{@param_c}'     => 'value_b_value',
+                    'deep_parameter' => 'deep_value'
+                ),
+                'additional_param' => 'other_value'
+            ),
+            'param_c'      => '{@array_a:param_b}',
+            'value_b'      => 'value_c',
+            'invalid_link' => '{@not_exists}',
+            'some_item'    => 'some_value',
+            'array'        => array(
+                'array' => array(
+                    'array' => 'value'
+                )
+            )
+        );
+        $this->object->addParameters($new_parameters, false);
+        $this->assertEquals($expected_result, $this->object->toArray());
+    }
 }
 
 ?>

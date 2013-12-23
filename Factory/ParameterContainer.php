@@ -29,11 +29,15 @@ class ParameterContainer implements ArrayAccess
      * @param array $array2
      * @return array
      */
-    private function merge(array $array1, array $array2)
+    private function merge(array $array1, array $array2, $overwrite = true)
     {
         foreach ($array2 as $key => $value) {
-            if (isset($array1[$key]) && is_array($array1[$key]) && is_array($value)) {
-                $array1[$key] = $this->merge($array1[$key], $value);
+            if (isset($array1[$key])) {
+                if (is_array($array1[$key]) && is_array($value)) {
+                    $array1[$key] = $this->merge($array1[$key], $value, $overwrite);
+                } elseif ($overwrite) {
+                    $array1[$key] = $value;
+                }
             } else {
                 $array1[$key] = $value;
             }
@@ -47,9 +51,9 @@ class ParameterContainer implements ArrayAccess
      *
      * @param array $parameters
      */
-    public function addParameters(array $parameters)
+    public function addParameters(array $parameters, $overwrite = true)
     {
-        $this->parameters = $this->merge($this->parameters, $parameters);
+        $this->parameters = $this->merge($this->parameters, $parameters, $overwrite);
     }
 
     /**
