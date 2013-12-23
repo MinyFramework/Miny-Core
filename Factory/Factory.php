@@ -229,7 +229,7 @@ class Factory implements ArrayAccess
         }
         $args      = $descriptor->getArguments();
         $arguments = $this->resolveReferences($args);
-        
+
         switch (count($args)) {
             case 0:
                 return new $class;

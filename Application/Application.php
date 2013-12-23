@@ -153,6 +153,7 @@ class Application extends BaseApplication
             case 'post':
             case 'put':
             case 'delete':
+                array_splice($args, 2, 0, $method);
                 call_user_func_array(array($this, 'route'), $args);
                 break;
             default:
