@@ -113,7 +113,7 @@ abstract class BaseApplication implements ArrayAccess
      */
     public function loadConfig($file, $env = self::ENV_COMMON)
     {
-        if (($env & $this->environment) === 0) {
+        if (!$this->isEnvironment($env)) {
             return;
         }
         if (!is_file($file)) {
@@ -135,11 +135,21 @@ abstract class BaseApplication implements ArrayAccess
     }
 
     /**
+     * Checks whether the given $env matches the current environment.
+     *
+     * @return boolean
+     */
+    public function isEnvironment($env)
+    {
+        return ($this->environment & $env) !== 0;
+    }
+
+    /**
      * @return boolean
      */
     public function isDeveloperEnvironment()
     {
-        return $this->environment == self::ENV_DEV;
+        return $this->isEnvironment(self::ENV_DEV);
     }
 
     /**
@@ -147,7 +157,15 @@ abstract class BaseApplication implements ArrayAccess
      */
     public function isProductionEnvironment()
     {
-        return $this->environment == self::ENV_PROD;
+        return $this->isEnvironment(self::ENV_PROD);
+    }
+
+    /**
+     * @return boolean
+     */
+    public function isTestEnvironment()
+    {
+        return $this->isEnvironment(self::ENV_TEST);
     }
 
     protected function registerDefaultServices()
