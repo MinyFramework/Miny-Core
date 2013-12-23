@@ -130,19 +130,17 @@ class Application extends BaseApplication
 
     /**
      *
-     * @param type $path
-     * @param type $controller
-     * @param type $method
-     * @param type $name
+     * @param string $path
+     * @param mixed $controller
+     * @param string|null $method
+     * @param string|null $name
      * @param array $parameters
      * @return Route
      * @throws UnexpectedValueException
      */
     public function route($path, $controller, $method = null, $name = null, array $parameters = array())
     {
-        if (!in_array($method, array(null, 'GET', 'POST', 'PUT', 'DELETE'))) {
-            throw new UnexpectedValueException('Unexpected route method:' . $method);
-        }
+        $method                   = strtoupper($method);
         $controller_name          = is_string($controller) ? $controller : $this->controllers->getNextName();
         $parameters['controller'] = $controller_name;
         $this->controllers->register($controller_name, $controller);
@@ -151,56 +149,18 @@ class Application extends BaseApplication
         return $this->router->route($route, $name);
     }
 
-    /**
-     *
-     * @param string $path
-     * @param mixed $controller
-     * @param string $name
-     * @param array $parameters
-     * @return Route
-     */
-    public function get($path, $controller, $name = null, array $parameters = array())
+    public function __call($method, $args)
     {
-        return $this->route($path, $controller, 'GET', $name, $parameters);
-    }
-
-    /**
-     *
-     * @param string $path
-     * @param mixed $controller
-     * @param string $name
-     * @param array $parameters
-     * @return Route
-     */
-    public function post($path, $controller, $name = null, array $parameters = array())
-    {
-        return $this->route($path, $controller, 'POST', $name, $parameters);
-    }
-
-    /**
-     *
-     * @param string $path
-     * @param mixed $controller
-     * @param string $name
-     * @param array $parameters
-     * @return Route
-     */
-    public function put($path, $controller, $name = null, array $parameters = array())
-    {
-        return $this->route($path, $controller, 'PUT', $name, $parameters);
-    }
-
-    /**
-     *
-     * @param string $path
-     * @param mixed $controller
-     * @param string $name
-     * @param array $parameters
-     * @return Route
-     */
-    public function delete($path, $controller, $name = null, array $parameters = array())
-    {
-        return $this->route($path, $controller, 'DELETE', $name, $parameters);
+        switch ($method) {
+            case 'get':
+            case 'post':
+            case 'put':
+            case 'delete':
+                call_user_func_array(array($this, 'route'), $args);
+                break;
+            default:
+                return parent::__call($method, $args);
+        }
     }
 
     /**
