@@ -38,6 +38,8 @@ abstract class Module
             }
             include_once $file;
         }
+        $parameters = $app->getFactory()->getParameters();
+        $parameters->addParameters($this->defaultConfiguration(), false);
     }
 
     public function getDependencies()
@@ -46,6 +48,11 @@ abstract class Module
     }
 
     public function includes()
+    {
+        return array();
+    }
+
+    public function defaultConfiguration()
     {
         return array();
     }
