@@ -19,9 +19,10 @@ use UnexpectedValueException;
 
 abstract class BaseApplication implements ArrayAccess
 {
-    const ENV_PROD   = 0;
-    const ENV_DEV    = 1;
-    const ENV_COMMON = 2;
+    const ENV_PROD   = 1;
+    const ENV_DEV    = 2;
+    const ENV_TEST   = 4;
+    const ENV_COMMON = 7;
 
     /**
      * @var int
@@ -56,7 +57,6 @@ abstract class BaseApplication implements ArrayAccess
         ));
         $this->autoloader  = $autoloader;
         $this->setDefaultParameters();
-        $this->factory->setInstance('app', $this);
         if ($include_configs) {
             $this->loadConfigFiles($directory);
         }
@@ -78,13 +78,14 @@ abstract class BaseApplication implements ArrayAccess
     private function loadConfigFiles($directory)
     {
         $config_files = array(
-            $directory . '/config/config.common.php' => self::ENV_COMMON,
-            $directory . '/config/config.dev.php'    => self::ENV_DEV,
-            $directory . '/config/config.php'        => self::ENV_PROD
+            '/config/config.common.php' => self::ENV_COMMON,
+            '/config/config.dev.php'    => self::ENV_DEV,
+            '/config/config.test.php'   => self::ENV_TEST,
+            '/config/config.php'        => self::ENV_PROD
         );
         foreach ($config_files as $file => $env) {
             try {
-                $this->loadConfig($file, $env);
+                $this->loadConfig($directory . $file, $env);
             } catch (InvalidArgumentException $e) {
 
             }
@@ -112,7 +113,7 @@ abstract class BaseApplication implements ArrayAccess
      */
     public function loadConfig($file, $env = self::ENV_COMMON)
     {
-        if ($env != $this->environment && $env != self::ENV_COMMON) {
+        if (($env & $this->environment) === 0) {
             return;
         }
         if (!is_file($file)) {
@@ -151,6 +152,7 @@ abstract class BaseApplication implements ArrayAccess
 
     protected function registerDefaultServices()
     {
+        $this->factory->setInstance('app', $this);
         $this->factory->add('log', '\Miny\Log')
                 ->setArguments('@log:path', '@log:debug');
         $this->factory->add('error_handlers', '\Miny\Application\ErrorHandlers')
