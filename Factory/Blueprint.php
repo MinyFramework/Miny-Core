@@ -169,7 +169,7 @@ class Blueprint
     }
 
     /**
-     * @return boolean Wether the object has a parent or not.
+     * @return boolean Whether the object has a parent or not.
      */
     public function hasParent()
     {
