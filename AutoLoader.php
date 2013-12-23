@@ -9,8 +9,6 @@
 
 namespace Miny;
 
-use OutOfBoundsException;
-
 /**
  * AutoLoader is a simple autoloader class to be used with the Miny framework.
  *
@@ -42,24 +40,24 @@ class AutoLoader
             foreach ($namespace as $ns => $path) {
                 $this->register($ns, $path);
             }
-        } elseif (is_array($path)) {
-            if (isset($this->map[$namespace])) {
-                $path = array_merge($this->map[$namespace], $path);
-            }
-            $this->map[$namespace] = $path;
         } else {
             if (!isset($this->map[$namespace])) {
                 $this->map[$namespace] = array();
             }
-            $this->map[$namespace][] = $path;
+            if (is_array($path)) {
+                foreach ($path as $new_path) {
+                    $this->map[$namespace][] = realpath($new_path);
+                }
+            } else {
+                $this->map[$namespace][] = realpath($path);
+            }
         }
     }
 
     /**
      * @param string $class
-     * @return string
      */
-    private function getPathToNamespace($class)
+    public function load($class)
     {
         $temp = '\\' . $class;
         /*
@@ -72,37 +70,13 @@ class AutoLoader
             }
             $temp = substr($temp, 0, $pos);
         }
+        $subpath = substr($class, $pos - 1) . '.php';
         foreach ($this->map[$temp] as $path) {
-            $path .= substr($class, $pos - 1) . '.php';
-            $path = str_replace('\\', DIRECTORY_SEPARATOR, $path);
+            $path = strtr($path . $subpath, '\\', DIRECTORY_SEPARATOR);
             if (is_file($path)) {
-                return $path;
+                include_once $path;
+                return;
             }
         }
-    }
-
-    /**
-     * @param string $class
-     * @throws ClassNotFoundException
-     */
-    public function load($class)
-    {
-        $path = $this->getPathToNamespace($class);
-        if (!$path) {
-            return;
-        }
-        include_once $path;
-        if (!class_exists($class) && !interface_exists($class)) {
-            throw new ClassNotFoundException($path, $class);
-        }
-    }
-}
-
-class ClassNotFoundException extends OutOfBoundsException
-{
-
-    public function __construct($path, $class)
-    {
-        parent::__construct(sprintf('File %s does not contain class %s.', $path, $class));
     }
 }
