@@ -35,10 +35,7 @@ class Application extends BaseApplication
                 'exception_paths' => array(),
                 'short_urls'      => false
             ),
-            'site'   => array(
-                'title'    => 'Miny 1.0',
-                'base_url' => 'http://' . $_SERVER['HTTP_HOST'] . '{@router:prefix}'
-        )));
+        ));
     }
 
     private function registerEventHandlers()
