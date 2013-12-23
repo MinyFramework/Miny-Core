@@ -10,13 +10,21 @@
 namespace Miny\Routing;
 
 use InvalidArgumentException;
+use Miny\Routing\Exceptions\BadMethodException;
 
 class Route
 {
+    private static $methods = array('GET', 'POST', 'PUT', 'DELETE');
+
     /**
      * @var string
      */
     private $path;
+
+    /**
+     * @var string
+     */
+    private $method;
 
     /**
      * @var array
@@ -52,6 +60,10 @@ class Route
     {
         if (!is_string($path)) {
             throw new InvalidArgumentException('Path must be a string');
+        }
+
+        if ($method !== null && !in_array($method, self::$methods)) {
+            throw new BadMethodException('Unexpected route method:' . $method);
         }
         $this->method     = $method;
         $this->path       = $path;
@@ -169,7 +181,7 @@ class Route
 
     private function build()
     {
-        $parameter_names                   = array();
+        $parameter_names       = array();
         $this->parameter_count = preg_match_all('/:(\w+)/', $this->path, $parameter_names);
         if ($this->parameter_count === 0) {
             return;
