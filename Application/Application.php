@@ -15,7 +15,6 @@ use Miny\HTTP\Response;
 use Miny\Routing\Resource;
 use Miny\Routing\Resources;
 use Miny\Routing\Route;
-use Miny\Session\Session;
 use UnexpectedValueException;
 
 require_once __DIR__ . '/BaseApplication.php';
@@ -73,15 +72,9 @@ class Application extends BaseApplication
                 ->setArguments('&controllers');
         $this->add('router', '\Miny\Routing\Router')
                 ->setArguments('@router:prefix', '@router:suffix', '@router:defaults', '@router:short_urls');
+        $this->add('session', '\Miny\Session\Session')
+                ->addMethodCall('open');
 
-        $session = new Session;
-        $session->open();
-
-        if (!isset($session['token'])) {
-            $session['token'] = sha1(mt_rand());
-        }
-
-        $this->session = $session;
         $this->request = Request::getGlobal();
     }
 
