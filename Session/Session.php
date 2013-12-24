@@ -27,13 +27,17 @@ class Session implements ArrayAccess, IteratorAggregate, Countable
     /**
      * @param bool $custom_storage
      */
-    public function __construct($custom_storage = false)
+    public function __construct(iSessionHandler $handler = null)
     {
-        if ($custom_storage) {
-            session_set_save_handler(
-                    array($this, 'openSession'), array($this, 'closeSession'), array($this, 'readSession'),
-                    array($this, 'writeSession'), array($this, 'destroySession'), array($this, 'gcSession')
-            );
+        if ($handler) {
+            if (PHP_MINOR_VERSION >= 4) {
+                session_set_save_handler($handler, true);
+            } else {
+                session_set_save_handler(
+                        array($handler, 'open'), array($handler, 'close'), array($handler, 'read'),
+                        array($handler, 'write'), array($handler, 'destroy'), array($handler, 'gc')
+                );
+            }
         }
     }
 
@@ -92,38 +96,6 @@ class Session implements ArrayAccess, IteratorAggregate, Countable
                 unset($_SESSION['flash'][$key]);
             }
         }
-    }
-
-    //Session handling methods
-
-    public function openSession()
-    {
-        return true;
-    }
-
-    public function closeSession()
-    {
-        return true;
-    }
-
-    public function readSession($key)
-    {
-        return '';
-    }
-
-    public function writeSession($key, $value)
-    {
-        return true;
-    }
-
-    public function destroySession($key)
-    {
-        return true;
-    }
-
-    public function gcSession($lifetime)
-    {
-        return true;
     }
 
     //Session option methods
