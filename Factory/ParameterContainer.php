@@ -93,7 +93,7 @@ class ParameterContainer implements ArrayAccess
      *
      * @return array
      */
-    public function &toArray()
+    public function toArray()
     {
         return $this->parameters;
     }
