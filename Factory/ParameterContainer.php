@@ -20,12 +20,17 @@ class ParameterContainer implements ArrayAccess
     protected $parameters = array();
 
     /**
+     * @var array
+     */
+    protected $resolved_parameters;
+
+    /**
      * Walks through the given $array and returns a reference to the value represented by $path.
      *
      * @param array $array
      * @param array $parts
      * @param bool $create
-     * 
+     *
      * @return mixed
      *
      * @throws OutOfBoundsException
@@ -80,6 +85,7 @@ class ParameterContainer implements ArrayAccess
     public function addParameters(array $parameters, $overwrite = true)
     {
         $this->parameters = $this->merge($this->parameters, $parameters, $overwrite);
+        unset($this->resolved_parameters);
     }
 
     /**
@@ -87,7 +93,7 @@ class ParameterContainer implements ArrayAccess
      *
      * @return array
      */
-    public function toArray()
+    public function &toArray()
     {
         return $this->parameters;
     }
@@ -99,7 +105,10 @@ class ParameterContainer implements ArrayAccess
      */
     public function getResolvedParameters()
     {
-        return $this->resolveLinks($this->parameters);
+        if (!isset($this->resolved_parameters)) {
+            $this->resolved_parameters = $this->resolveLinks($this->parameters);
+        }
+        return $this->resolved_parameters;
     }
 
     /**
@@ -120,7 +129,8 @@ class ParameterContainer implements ArrayAccess
             $container = $this;
             $callback  = function ($matches) use ($container) {
                 try {
-                    return $container->offsetGet($matches[1]);
+                    $return = self::find($container->toArray(), explode(':', $matches[1]));
+                    return $container->resolveLinks($return);
                 } catch (OutOfBoundsException $e) {
                     return $matches[0];
                 }
@@ -138,10 +148,10 @@ class ParameterContainer implements ArrayAccess
      * @return mixed The parameter value
      * @throws OutOfBoundsException
      */
-    public function offsetGet($key)
+    public function &offsetGet($key)
     {
-        $return = self::find($this->parameters, explode(':', $key));
-        return $this->resolveLinks($return);
+        $resolved = $this->getResolvedParameters();
+        return self::find($resolved, explode(':', $key));
     }
 
     /**
@@ -160,6 +170,7 @@ class ParameterContainer implements ArrayAccess
         } else {
             $this->parameters[$key] = $value;
         }
+        unset($this->resolved_parameters);
     }
 
     /**
@@ -181,6 +192,7 @@ class ParameterContainer implements ArrayAccess
         } else {
             unset($this->parameters[$key]);
         }
+        unset($this->resolved_parameters);
     }
 
     /**
