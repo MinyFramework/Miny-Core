@@ -144,8 +144,13 @@ class ParameterContainer implements ArrayAccess
      * Processes a parameter string, which specifies a stored parameter.
      * You can use colons (:) to reference an element of an array within an array ...
      *
+     * Note: This method returns a reference to the resolved value. Modifying the result will not modify the
+     * unresolved parameters and will disappear when offsetSet, offsetUnset or addParameters is called.
+     *
      * @param string $key The parameter to get.
+     * 
      * @return mixed The parameter value
+     *
      * @throws OutOfBoundsException
      */
     public function &offsetGet($key)
