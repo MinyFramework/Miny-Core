@@ -19,6 +19,32 @@ class ParameterContainer implements ArrayAccess
      */
     protected $parameters = array();
 
+    /**
+     * Walks through the given $array and returns a reference to the value represented by $path.
+     *
+     * @param array $array
+     * @param array $parts
+     * @param bool $create
+     * 
+     * @return mixed
+     *
+     * @throws OutOfBoundsException
+     */
+    public static function &find(array &$array, array $parts, $create = false)
+    {
+        foreach ($parts as $k) {
+            if (!array_key_exists($k, $array)) {
+                if ($create) {
+                    $array[$k] = array();
+                } else {
+                    throw new OutOfBoundsException('Array key not found: ' . implode(':', $parts));
+                }
+            }
+            $array = & $array[$k];
+        }
+        return $array;
+    }
+
     public function __construct(array $params = array())
     {
         $this->addParameters($params);
@@ -114,19 +140,7 @@ class ParameterContainer implements ArrayAccess
      */
     public function offsetGet($key)
     {
-        if (strpos($key, ':') !== false) {
-            $return = $this->parameters;
-            foreach (explode(':', $key) as $k) {
-                if (!array_key_exists($k, $return)) {
-                    throw new OutOfBoundsException('Parameter not set: ' . $key);
-                }
-                $return = $return[$k];
-            }
-        } elseif (isset($this->parameters[$key])) {
-            $return = $this->parameters[$key];
-        } else {
-            throw new OutOfBoundsException('Parameter not set: ' . $key);
-        }
+        $return = self::find($this->parameters, explode(':', $key));
         return $this->resolveLinks($return);
     }
 
@@ -139,14 +153,10 @@ class ParameterContainer implements ArrayAccess
     public function offsetSet($key, $value)
     {
         if (strpos($key, ':') !== false) {
-            $arr = & $this->parameters;
-            foreach (explode(':', $key) as $k) {
-                if (!array_key_exists($k, $arr)) {
-                    $arr[$k] = array();
-                }
-                $arr = & $arr[$k];
-            }
-            $arr = $value;
+            $parts          = explode(':', $key);
+            $last_key       = array_pop($parts);
+            $arr            = & self::find($this->parameters, $parts);
+            $arr[$last_key] = $value;
         } else {
             $this->parameters[$key] = $value;
         }
@@ -160,18 +170,13 @@ class ParameterContainer implements ArrayAccess
     public function offsetUnset($key)
     {
         if (strpos($key, ':') !== false) {
-            $parts = explode(':', $key);
-            $last  = count($parts) - 1;
-            $arr   = & $this->parameters;
-            foreach ($parts as $i => $k) {
-                if (!array_key_exists($k, $arr)) {
-                    return;
-                }
-                if ($i !== $last) {
-                    $arr = & $arr[$k];
-                } else {
-                    unset($arr[$k]);
-                }
+            $parts    = explode(':', $key);
+            $last_key = array_pop($parts);
+            try {
+                $arr = & self::find($this->parameters, $parts);
+                unset($arr[$last_key]);
+            } catch (OutOfBoundsException $e) {
+
             }
         } else {
             unset($this->parameters[$key]);
@@ -187,14 +192,13 @@ class ParameterContainer implements ArrayAccess
     public function offsetExists($key)
     {
         if (strpos($key, ':') !== false) {
-            $arr = $this->parameters;
-            foreach (explode(':', $key) as $k) {
-                if (!array_key_exists($k, $arr)) {
-                    return false;
-                }
-                $arr = $arr[$k];
+            $parts = explode(':', $key);
+            try {
+                self::find($this->parameters, $parts);
+                return true;
+            } catch (OutOfBoundsException $e) {
+                return false;
             }
-            return true;
         } else {
             return isset($this->parameters[$key]);
         }
