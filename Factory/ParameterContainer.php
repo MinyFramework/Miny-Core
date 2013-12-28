@@ -56,8 +56,12 @@ class ParameterContainer implements ArrayAccess
     }
 
     /**
+     * Merge two arrays recursively.
+     *
      * @param array $array1
      * @param array $array2
+     * @param bool $overwrite Overwrite value if it exists in $array1.
+     *
      * @return array
      */
     private function merge(array $array1, array $array2, $overwrite = true)
@@ -96,7 +100,7 @@ class ParameterContainer implements ArrayAccess
      *
      * @return array
      */
-    public function toArray()
+    public function &toArray()
     {
         return $this->parameters;
     }
@@ -125,6 +129,7 @@ class ParameterContainer implements ArrayAccess
 
     /**
      * @param string $value
+     * 
      * @return string
      */
     public function resolveLinks($value)
@@ -216,6 +221,7 @@ class ParameterContainer implements ArrayAccess
      * Indicates whether the parameter specified with $key is set.
      *
      * @param string $key
+     *
      * @return boolean
      */
     public function offsetExists($key)
