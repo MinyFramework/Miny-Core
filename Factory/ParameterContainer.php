@@ -165,7 +165,7 @@ class ParameterContainer implements ArrayAccess
         if (strpos($key, ':') !== false) {
             $parts          = explode(':', $key);
             $last_key       = array_pop($parts);
-            $arr            = & self::find($this->parameters, $parts);
+            $arr            = & self::find($this->parameters, $parts, true);
             $arr[$last_key] = $value;
         } else {
             $this->parameters[$key] = $value;

@@ -80,6 +80,11 @@ class ParameterContainerTest extends \PHPUnit_Framework_TestCase
         $this->object['param_d'] = 'value_d';
         $this->assertTrue(isset($this->object['param_d']));
         $this->assertEquals('value_d', $this->object['param_d']);
+
+        $this->object['some_array_param:subindex:another'] = 'value';
+        $this->assertTrue(isset($this->object['some_array_param'], $this->object['some_array_param']['subindex']));
+        $this->assertTrue(isset($this->object['some_array_param']['subindex']['another']));
+        $this->assertEquals('value', $this->object['some_array_param']['subindex']['another']);
     }
 
     public function testUnsetParameters()
