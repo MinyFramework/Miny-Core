@@ -181,10 +181,14 @@ abstract class BaseApplication implements ArrayAccess
                 ->setArguments('&app', '&log');
     }
 
+    /**
+     * Runs the application.
+     */
     public function run()
     {
         $event = $this->factory->events;
 
+        date_default_timezone_set($this['default_timezone']);
         $event->raiseEvent('before_run');
         register_shutdown_function(function () use ($event) {
             $event->raiseEvent('shutdown');
@@ -192,7 +196,7 @@ abstract class BaseApplication implements ArrayAccess
         $this->onRun();
     }
 
-    abstract public function onRun();
+    abstract protected function onRun();
 
     /* Magic methods are dispatched to Factory */
 

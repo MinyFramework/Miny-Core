@@ -154,12 +154,8 @@ class Application extends BaseApplication
         }
     }
 
-    /**
-     *
-     */
-    public function onRun()
+    protected function onRun()
     {
-        date_default_timezone_set($this['default_timezone']);
         $this->dispatch($this->request)->send();
     }
 

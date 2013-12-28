@@ -61,9 +61,8 @@ class WorkerApplication extends BaseApplication
         $this->exit_requested = true;
     }
 
-    public function onRun()
+    protected function onRun()
     {
-        date_default_timezone_set($this['default_timezone']);
         while (!$this->exit_requested && !empty($this->jobs)) {
 
             foreach ($this->jobs as $name => $job) {
