@@ -24,7 +24,7 @@ class Application extends BaseApplication
 
     protected function setDefaultParameters()
     {
-        $this->getParameters()->addParameters(array(
+        $this->getFactory()->getParameters()->addParameters(array(
             'router' => array(
                 'prefix'          => '/',
                 'suffix'          => '.:format',
