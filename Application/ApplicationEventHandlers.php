@@ -42,14 +42,13 @@ class ApplicationEventHandlers
 
     public function logResponse(Request $request, Response $response)
     {
-        $status = $response->getStatus();
         $log    = $this->log;
         $log->info('Response for request [%s] %s', $request->method, $request->path);
-        $log->info('Response status: %s %s', $response->getCode(), $status);
-        if ($status == 'OK') {
+        $log->info('Response status: %s %s', $response->getCode(), $response->getStatus());
+        if (isset($response->content_type)) {
             $log->info('Response content type: %s', $response->content_type);
-            $log->info('Response body length: %s', strlen($response->getContent()));
         }
+        $log->info('Response body length: %s', strlen($response->getContent()));
     }
 
     private function setResponseContentType($format)
@@ -65,7 +64,7 @@ class ApplicationEventHandlers
             'tar'   => 'application/x-tar',
             'pdf'   => 'application/pdf',
             'ogg'   => 'application/ogg',
-            //images
+            //image
             'gif'   => 'image/gif',
             'jpg'   => 'image/jpeg',
             'jpeg'  => 'image/jpeg',
