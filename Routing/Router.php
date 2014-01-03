@@ -74,7 +74,7 @@ class Router extends RouteCollection
      */
     public function route(Route $route, $name, $prefix = true, $suffix = true)
     {
-        if (!is_null($this->route_prefix) || !is_null($this->route_suffix)) {
+        if ($this->route_prefix !== null || $this->route_suffix !== null) {
             $path = $route->getPath();
             if ($prefix) {
                 $path = $this->route_prefix . $path;

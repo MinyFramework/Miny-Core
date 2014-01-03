@@ -145,7 +145,7 @@ class Resources extends RouteCollection
      */
     private function hasParent()
     {
-        return !is_null($this->parent);
+        return isset($this->parent);
     }
 
     /**

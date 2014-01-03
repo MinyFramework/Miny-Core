@@ -111,7 +111,7 @@ class Response implements Serializable
 
     public function removeHeader($name, $value = null)
     {
-        if (is_null($value)) {
+        if ($value === null) {
             unset($this->headers[$name]);
         } else {
             if (!isset($this->headers[$name])) {

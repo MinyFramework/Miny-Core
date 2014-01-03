@@ -62,7 +62,7 @@ class Route
             throw new InvalidArgumentException('Path must be a string');
         }
         if ($method !== null && !in_array(strtoupper($method), self::$methods)) {
-            throw new BadMethodException('Unexpected route method:' . $method);
+            throw new BadMethodException('Unexpected route method: ' . $method);
         }
         $this->method     = $method;
         $this->path       = $path;
@@ -161,7 +161,7 @@ class Route
      */
     public function getParameterCount()
     {
-        if (is_null($this->parameter_count)) {
+        if (!isset($this->parameter_count)) {
             $this->build();
         }
         return $this->parameter_count;
@@ -172,7 +172,7 @@ class Route
      */
     public function getParameterNames()
     {
-        if (is_null($this->parameter_count)) {
+        if (!isset($this->parameter_count)) {
             $this->build();
         }
         return $this->parameter_names;
@@ -186,11 +186,9 @@ class Route
             return;
         }
         $this->parameter_names = $parameter_names[1];
-        $tokens                = array();
+        $this->regex           = strtr($this->path, array('#' => '\#', '?' => '\?'));
         foreach ($parameter_names[1] as $k => $name) {
-            $tokens[$parameter_names[0][$k]] = $this->getPattern($name);
+            $this->regex = str_replace($parameter_names[0][$k], $this->getPattern($name), $this->regex);
         }
-        $this->regex = strtr($this->path, array('#' => '\#', '?' => '\?'));
-        $this->regex = str_replace(array_keys($tokens), $tokens, $this->regex);
     }
 }

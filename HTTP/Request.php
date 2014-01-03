@@ -20,7 +20,7 @@ class Request
 
     public static function getGlobal()
     {
-        if (is_null(self::$request)) {
+        if (!isset(self::$request)) {
             self::$request = new Request($_SERVER['REQUEST_URI'], $_GET, $_POST, $_COOKIE);
         }
         return self::$request;

@@ -156,7 +156,7 @@ class Session implements ArrayAccess, IteratorAggregate, Countable
     public function cookieParams(array $new_params = null)
     {
         $params = session_get_cookie_params();
-        if (!is_null($new_params) && !$this->is_open) {
+        if ($new_params !== null && !$this->is_open) {
             $params = $new_params + $params;
             session_set_cookie_params(
                     $params['lifetime'], $params['path'], $params['domain'], $params['secure'], $params['http_only']
