@@ -10,6 +10,7 @@
 namespace Miny\Factory;
 
 use ArrayAccess;
+use Miny\Utils\Utils;
 use OutOfBoundsException;
 
 class ParameterContainer implements ArrayAccess
@@ -24,60 +25,9 @@ class ParameterContainer implements ArrayAccess
      */
     protected $resolved_parameters;
 
-    /**
-     * Walks through the given $array and returns a reference to the value represented by $path.
-     *
-     * @param array $array
-     * @param array $parts
-     * @param bool $create
-     *
-     * @return mixed
-     *
-     * @throws OutOfBoundsException
-     */
-    public static function &find(array &$array, array $parts, $create = false)
-    {
-        foreach ($parts as $k) {
-            if (!array_key_exists($k, $array)) {
-                if ($create) {
-                    $array[$k] = array();
-                } else {
-                    throw new OutOfBoundsException('Array key not found: ' . implode(':', $parts));
-                }
-            }
-            $array = & $array[$k];
-        }
-        return $array;
-    }
-
     public function __construct(array $params = array())
     {
         $this->addParameters($params);
-    }
-
-    /**
-     * Merge two arrays recursively.
-     *
-     * @param array $array1
-     * @param array $array2
-     * @param bool $overwrite Overwrite value if it exists in $array1.
-     *
-     * @return array
-     */
-    private function merge(array $array1, array $array2, $overwrite = true)
-    {
-        foreach ($array2 as $key => $value) {
-            if (isset($array1[$key])) {
-                if (is_array($array1[$key]) && is_array($value)) {
-                    $array1[$key] = $this->merge($array1[$key], $value, $overwrite);
-                } elseif ($overwrite) {
-                    $array1[$key] = $value;
-                }
-            } else {
-                $array1[$key] = $value;
-            }
-        }
-        return $array1;
     }
 
     /**
@@ -88,7 +38,7 @@ class ParameterContainer implements ArrayAccess
      */
     public function addParameters(array $parameters, $overwrite = true)
     {
-        $this->parameters = $this->merge($this->parameters, $parameters, $overwrite);
+        $this->parameters = Utils::merge($this->parameters, $parameters, $overwrite);
         unset($this->resolved_parameters);
     }
 
@@ -129,7 +79,7 @@ class ParameterContainer implements ArrayAccess
 
     /**
      * @param string $value
-     * 
+     *
      * @return string
      */
     public function resolveLinks($value)
@@ -146,7 +96,7 @@ class ParameterContainer implements ArrayAccess
             $container = $this;
             $callback  = function ($matches) use ($container) {
                 try {
-                    $return = self::find($container->toArray(), explode(':', $matches[1]));
+                    $return = Utils::findByPath($container->toArray(), explode(':', $matches[1]));
                     return $container->resolveLinks($return);
                 } catch (OutOfBoundsException $e) {
                     return $matches[0];
@@ -173,7 +123,7 @@ class ParameterContainer implements ArrayAccess
     public function &offsetGet($key)
     {
         $resolved = $this->getResolvedParameters();
-        return self::find($resolved, explode(':', $key));
+        return Utils::findByPath($resolved, explode(':', $key));
     }
 
     /**
@@ -187,7 +137,7 @@ class ParameterContainer implements ArrayAccess
         if (strpos($key, ':') !== false) {
             $parts          = explode(':', $key);
             $last_key       = array_pop($parts);
-            $arr            = & self::find($this->parameters, $parts, true);
+            $arr            = & Utils::findByPath($this->parameters, $parts, true);
             $arr[$last_key] = $value;
         } else {
             $this->parameters[$key] = $value;
@@ -206,7 +156,7 @@ class ParameterContainer implements ArrayAccess
             $parts    = explode(':', $key);
             $last_key = array_pop($parts);
             try {
-                $arr = & self::find($this->parameters, $parts);
+                $arr = & Utils::findByPath($this->parameters, $parts);
                 unset($arr[$last_key]);
             } catch (OutOfBoundsException $e) {
 
@@ -229,7 +179,7 @@ class ParameterContainer implements ArrayAccess
         if (strpos($key, ':') !== false) {
             $parts = explode(':', $key);
             try {
-                self::find($this->parameters, $parts);
+                Utils::findByPath($this->parameters, $parts);
                 return true;
             } catch (OutOfBoundsException $e) {
                 return false;

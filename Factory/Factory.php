@@ -11,8 +11,8 @@ namespace Miny\Factory;
 
 use ArrayAccess;
 use InvalidArgumentException;
+use Miny\Utils\Utils;
 use OutOfBoundsException;
-use ReflectionClass;
 
 /**
  * Factory class
@@ -25,7 +25,7 @@ use ReflectionClass;
 class Factory implements ArrayAccess
 {
     /**
-     * @var Object[]
+     * @var object[]
      */
     protected $objects = array();
 
@@ -128,7 +128,7 @@ class Factory implements ArrayAccess
     }
 
     /**
-     * @param type $alias
+     * @param string $alias
      * @param object $object
      */
     public function __set($alias, $object)
@@ -230,29 +230,7 @@ class Factory implements ArrayAccess
         $args      = $descriptor->getArguments();
         $arguments = $this->resolveReferences($args);
 
-        switch (count($args)) {
-            case 0:
-                return new $class;
-
-            case 1:
-                return new $class(current($arguments));
-
-            case 2:
-                list($arg1, $arg2) = $arguments;
-                return new $class($arg1, $arg2);
-
-            case 3:
-                list($arg1, $arg2, $arg3) = $arguments;
-                return new $class($arg1, $arg2, $arg3);
-
-            case 4:
-                list($arg1, $arg2, $arg3, $arg4) = $arguments;
-                return new $class($arg1, $arg2, $arg3, $arg4);
-
-            default:
-                $ref = new ReflectionClass($class);
-                return $ref->newInstanceArgs($arguments);
-        }
+        return Utils::instantiate($class, $arguments);
     }
 
     /**
