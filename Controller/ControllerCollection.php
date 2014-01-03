@@ -12,12 +12,14 @@ namespace Miny\Controller;
 use Closure;
 use InvalidArgumentException;
 use Miny\Application\Application;
+use Miny\HTTP\Request;
+use Miny\HTTP\Response;
 use UnexpectedValueException;
 
 class ControllerCollection
 {
     /**
-     * @var (BaseController|Closure|string)[]
+     * @var BaseController|Closure|string []
      */
     private $controllers = array();
 
@@ -33,7 +35,7 @@ class ControllerCollection
 
     /**
      * @param string $name
-     * @param (BaseController|Closure|string) $controller
+     * @param BaseController|Closure|string $controller
      * @throws InvalidArgumentException
      */
     public function register($name, $controller)
@@ -82,5 +84,24 @@ class ControllerCollection
             throw new UnexpectedValueException('Class does not extend BaseController: ' . $class);
         }
         return new $class($this->application);
+    }
+
+    /**
+     * @param string $class
+     * @param string $action
+     * @param Request $request
+     * @param Response $response
+     * @throws InvalidArgumentException
+     */
+    public function resolve($class, $action, Request $request, Response $response)
+    {
+        $controller = $this->getController($class);
+        if ($controller instanceof Controller) {
+            $controller->run($action, $request, $response);
+        } elseif ($controller instanceof Closure) {
+            $controller($request, $action, $response);
+        } else {
+            throw new InvalidArgumentException('Invalid controller: ' . $class);
+        }
     }
 }

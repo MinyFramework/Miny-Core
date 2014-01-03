@@ -68,8 +68,6 @@ class Application extends BaseApplication
 
         $this->add('controllers', '\Miny\Controller\ControllerCollection')
                 ->setArguments('&app');
-        $this->add('resolver', '\Miny\Controller\ControllerResolver')
-                ->setArguments('&controllers');
         $this->add('router', '\Miny\Routing\Router')
                 ->setArguments('@router:prefix', '@router:suffix', '@router:defaults', '@router:short_urls');
         $this->add('session', '\Miny\Session\Session')
@@ -104,6 +102,13 @@ class Application extends BaseApplication
         return $this->router->resources($name, $parameters);
     }
 
+    private function registerController($controller)
+    {
+        $controller_name = is_string($controller) ? $controller : $this->controllers->getNextName();
+        $this->controllers->register($controller_name, $controller);
+        return $controller_name;
+    }
+
     /**
      *
      * @param mixed $controller
@@ -112,9 +117,7 @@ class Application extends BaseApplication
      */
     public function root($controller, array $parameters = array())
     {
-        $controller_name          = is_string($controller) ? $controller : $this->controllers->getNextName();
-        $parameters['controller'] = $controller_name;
-        $this->controllers->register($controller_name, $controller);
+        $parameters['controller'] = $this->registerController($controller);
         return $this->router->root($parameters);
     }
 
@@ -130,12 +133,10 @@ class Application extends BaseApplication
      */
     public function route($path, $controller, $method = null, $name = null, array $parameters = array())
     {
-        $method                   = strtoupper($method);
-        $controller_name          = is_string($controller) ? $controller : $this->controllers->getNextName();
-        $parameters['controller'] = $controller_name;
-        $this->controllers->register($controller_name, $controller);
+        $parameters['controller'] = $this->registerController($controller);
 
-        $route = new Route($path, $method, $parameters);
+        $method = strtoupper($method);
+        $route  = new Route($path, $method, $parameters);
         return $this->router->route($route, $name);
     }
 
@@ -180,7 +181,7 @@ class Application extends BaseApplication
         if (!isset($response)) {
             $response = new Response;
             $action   = isset($request->get['action']) ? $request->get['action'] : null;
-            $this->resolver->resolve($request->get['controller'], $action, $request, $response);
+            $this->controllers->resolve($request->get['controller'], $action, $request, $response);
         }
 
         $this->events->raiseEvent('filter_response', $request, $response);
