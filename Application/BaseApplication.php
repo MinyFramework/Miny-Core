@@ -64,10 +64,14 @@ abstract class BaseApplication implements ArrayAccess
         $env = $this->isProductionEnvironment() ? 'production' : 'development';
         $this->log->info('Starting Miny in %s environment', $env);
 
-        $module_handler = $this->module_handler;
         if (isset($this['modules']) && is_array($this['modules'])) {
-            foreach ($this['modules'] as $module) {
-                $module_handler->module($module);
+            $module_handler = $this->module_handler;
+            foreach ($this['modules'] as $module => $parameters) {
+                if (is_numeric($module) && !is_array($parameters)) {
+                    $module     = $parameters;
+                    $parameters = array();
+                }
+                $module_handler->module($module, $parameters);
             }
         }
     }

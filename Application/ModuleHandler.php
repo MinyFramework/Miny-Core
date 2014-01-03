@@ -72,13 +72,7 @@ class ModuleHandler
         foreach ($module_class->getDependencies() as $name) {
             $this->module($name);
         }
-        if (func_num_args() == 1) {
-            $module_class->init($this->application);
-        } else {
-            $args    = func_get_args();
-            $args[0] = $this->application;
-            call_user_func_array(array($module_class, 'init'), $args);
-        }
+        $module_class->init($this->application);
     }
 
     public function processConditionalRunnables()
