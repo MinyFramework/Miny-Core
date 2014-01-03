@@ -91,7 +91,7 @@ class ApplicationEventHandlers
         if ($this->app->router->shortUrls()) {
             $path = $request->path;
         } else {
-            $path = isset($request->get['path']) ? $request->get['path'] : '/';
+            $path = $request->get('path', '/');
         }
         $match = $this->app->router->match($path, $request->method);
         if (!$match) {

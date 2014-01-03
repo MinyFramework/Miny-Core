@@ -66,6 +66,22 @@ class Request
         return $this->$field;
     }
 
+    public function __call($container, $args)
+    {
+        $key       = array_shift($args);
+        $container = $this->__get($container);
+        if (!is_string($key)) {
+            throw new InvalidArgumentException('You need to supply a string key.');
+        }
+        if (isset($container[$key])) {
+            return $container[$key];
+        }
+        if (count($args) > 0) {
+            return current($args);
+        }
+        return null;
+    }
+
     public function isSubRequest()
     {
         return $this->type == self::SUB_REQUEST;

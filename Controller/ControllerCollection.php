@@ -93,9 +93,11 @@ class ControllerCollection
      * @param Response $response
      * @throws InvalidArgumentException
      */
-    public function resolve($class, $action, Request $request, Response $response)
+    public function resolve($class, Request $request, Response $response)
     {
         $controller = $this->getController($class);
+        $action     = $request->get('action');
+
         if ($controller instanceof Controller) {
             $controller->run($action, $request, $response);
         } elseif ($controller instanceof Closure) {

@@ -26,13 +26,11 @@ class Application extends BaseApplication
     {
         $this->getFactory()->getParameters()->addParameters(array(
             'router' => array(
-                'prefix'          => '/',
-                'suffix'          => '.:format',
-                'defaults'        => array(
-                    'format' => 'html'
-                ),
-                'exception_paths' => array(),
-                'short_urls'      => false
+                'prefix'             => '/',
+                'suffix'             => '',
+                'default_parameters' => array(),
+                'exception_paths'    => array(),
+                'short_urls'         => false
             ),
         ));
     }
@@ -69,7 +67,7 @@ class Application extends BaseApplication
         $this->add('controllers', '\Miny\Controller\ControllerCollection')
                 ->setArguments('&app');
         $this->add('router', '\Miny\Routing\Router')
-                ->setArguments('@router:prefix', '@router:suffix', '@router:defaults', '@router:short_urls');
+                ->setArguments('@router:prefix', '@router:suffix', '@router:default_parameters', '@router:short_urls');
         $this->add('session', '\Miny\Session\Session')
                 ->addMethodCall('open');
 
@@ -180,8 +178,7 @@ class Application extends BaseApplication
 
         if (!isset($response)) {
             $response = new Response;
-            $action   = isset($request->get['action']) ? $request->get['action'] : null;
-            $this->controllers->resolve($request->get['controller'], $action, $request, $response);
+            $this->controllers->resolve($request->get['controller'], $request, $response);
         }
 
         $this->events->raiseEvent('filter_response', $request, $response);
