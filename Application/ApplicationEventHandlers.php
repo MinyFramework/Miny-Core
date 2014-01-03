@@ -91,11 +91,11 @@ class ApplicationEventHandlers
         if ($this->app->router->shortUrls()) {
             $path = $request->path;
         } else {
-            $path = isset($request->get['path']) ? $request->get['path'] : '';
+            $path = isset($request->get['path']) ? $request->get['path'] : '/';
         }
         $match = $this->app->router->match($path, $request->method);
         if (!$match) {
-            $this->log->info('Route was not found for path [%s] %s', $request->method, $request->path);
+            $this->log->info('Route was not found for path [%s] %s', $request->method, $path);
             $response = new Response();
             $response->setCode(404);
             return $response;
