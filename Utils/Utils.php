@@ -11,6 +11,7 @@ namespace Miny\Utils;
 
 use InvalidArgumentException;
 use Miny\Utils\Exceptions\AssertationException;
+use OutOfBoundsException;
 use ReflectionClass;
 
 /**
