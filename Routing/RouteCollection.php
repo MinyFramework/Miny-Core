@@ -36,7 +36,7 @@ class RouteCollection implements IteratorAggregate
      */
     public function addRoute(Route $route, $name = null)
     {
-        if ($name !== null) {
+        if ($name === null) {
             $this->routes[] = $route;
         } else {
             if (!is_string($name)) {
