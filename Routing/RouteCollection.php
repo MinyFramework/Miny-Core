@@ -48,7 +48,10 @@ class RouteCollection implements IteratorAggregate
 
     /**
      * @param string $name
+     *
      * @return Route
+     *
+     * @throws UnexpectedValueException
      * @throws OutOfBoundsException
      */
     public function getRoute($name)
@@ -60,6 +63,16 @@ class RouteCollection implements IteratorAggregate
             throw new OutOfBoundsException('Route not set: ' . $name);
         }
         return $this->routes[$name];
+    }
+
+    /**
+     * @param string $name
+     *
+     * @return bool
+     */
+    public function hasRoute($name)
+    {
+        return isset($this->routes[$name]);
     }
 
     /**

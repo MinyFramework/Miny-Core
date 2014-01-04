@@ -155,6 +155,9 @@ class Application extends BaseApplication
 
     protected function onRun()
     {
+        if (!$this->router->hasRoute('root')) {
+            $this->root('index');
+        }
         $this->dispatch($this->request)->send();
     }
 
