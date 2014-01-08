@@ -97,16 +97,6 @@ class Request
         return $this->type == self::SUB_REQUEST;
     }
 
-    public function getPreferredLanguage()
-    {
-
-    }
-
-    public function isMethod($method)
-    {
-
-    }
-
     public function isAjax()
     {
         if (!$this->headers->has('x-requested-with')) {
