@@ -10,7 +10,7 @@
 namespace Miny\Factory;
 
 use ArrayAccess;
-use Miny\Utils\Utils;
+use Miny\Utils\ArrayUtils;
 use OutOfBoundsException;
 
 class ParameterContainer implements ArrayAccess
@@ -38,7 +38,7 @@ class ParameterContainer implements ArrayAccess
      */
     public function addParameters(array $parameters, $overwrite = true)
     {
-        $this->parameters = Utils::merge($this->parameters, $parameters, $overwrite);
+        $this->parameters = ArrayUtils::merge($this->parameters, $parameters, $overwrite);
         unset($this->resolved_parameters);
     }
 
@@ -96,7 +96,7 @@ class ParameterContainer implements ArrayAccess
             $container = $this;
             $callback  = function ($matches) use ($container) {
                 try {
-                    $return = Utils::findByPath($container->toArray(), explode(':', $matches[1]));
+                    $return = ArrayUtils::findByPath($container->toArray(), explode(':', $matches[1]));
                     return $container->resolveLinks($return);
                 } catch (OutOfBoundsException $e) {
                     return $matches[0];
@@ -123,7 +123,7 @@ class ParameterContainer implements ArrayAccess
     public function &offsetGet($key)
     {
         $resolved = $this->getResolvedParameters();
-        return Utils::findByPath($resolved, explode(':', $key));
+        return ArrayUtils::findByPath($resolved, explode(':', $key));
     }
 
     /**
@@ -135,10 +135,7 @@ class ParameterContainer implements ArrayAccess
     public function offsetSet($key, $value)
     {
         if (strpos($key, ':') !== false) {
-            $parts          = explode(':', $key);
-            $last_key       = array_pop($parts);
-            $arr            = & Utils::findByPath($this->parameters, $parts, true);
-            $arr[$last_key] = $value;
+            ArrayUtils::setByPath($this->parameters, explode(':', $key), $value);
         } else {
             $this->parameters[$key] = $value;
         }
@@ -153,14 +150,7 @@ class ParameterContainer implements ArrayAccess
     public function offsetUnset($key)
     {
         if (strpos($key, ':') !== false) {
-            $parts    = explode(':', $key);
-            $last_key = array_pop($parts);
-            try {
-                $arr = & Utils::findByPath($this->parameters, $parts);
-                unset($arr[$last_key]);
-            } catch (OutOfBoundsException $e) {
-
-            }
+            ArrayUtils::unsetByPath($this->parameters, explode(':', $key));
         } else {
             unset($this->parameters[$key]);
         }
@@ -177,13 +167,7 @@ class ParameterContainer implements ArrayAccess
     public function offsetExists($key)
     {
         if (strpos($key, ':') !== false) {
-            $parts = explode(':', $key);
-            try {
-                Utils::findByPath($this->parameters, $parts);
-                return true;
-            } catch (OutOfBoundsException $e) {
-                return false;
-            }
+            return ArrayUtils::existsByPath($this->parameters, explode(':', $key));
         } else {
             return isset($this->parameters[$key]);
         }

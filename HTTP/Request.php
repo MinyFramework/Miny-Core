@@ -109,7 +109,10 @@ class Request
 
     public function isAjax()
     {
-
+        if (!$this->headers->has('x-requested-with')) {
+            return false;
+        }
+        return strtolower($this->headers->get('x-requested-with')) === 'xmlhttprequest';
     }
 
     public function getHeaders()

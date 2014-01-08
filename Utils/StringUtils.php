@@ -14,7 +14,7 @@ namespace Miny\Utils;
  *
  * @author Dániel Buga
  */
-class String
+class StringUtils
 {
 
     /**

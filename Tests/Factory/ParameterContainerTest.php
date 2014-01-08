@@ -2,6 +2,7 @@
 
 namespace Miny\Factory;
 
+require_once dirname(__FILE__) . '/../../Utils/ArrayUtils.php';
 require_once dirname(__FILE__) . '/../../Factory/Blueprint.php';
 require_once dirname(__FILE__) . '/../../Factory/ParameterContainer.php';
 
