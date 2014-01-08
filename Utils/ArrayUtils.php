@@ -9,6 +9,7 @@
 
 namespace Miny\Utils;
 
+use InvalidArgumentException;
 use OutOfBoundsException;
 
 /**
@@ -19,16 +20,32 @@ use OutOfBoundsException;
 class ArrayUtils
 {
 
+    private static function createPath($path)
+    {
+        if (is_array($path)) {
+            return $path;
+        }
+        if (is_string($path)) {
+            if (strpos($path, ':') === false) {
+                return array($path);
+            } else {
+                return explode(':', $path);
+            }
+        }
+        throw new InvalidArgumentException('Path must be an array or a string.');
+    }
+
     /**
      * Determines whether the value represented by $path exists in $array.
      *
      * @param array $array
-     * @param array $parts
+     * @param array|string $parts An array containing the keys or a string delimited by :
      *
      * @return bool
      */
-    public static function existsByPath(array $array, array $parts)
+    public static function existsByPath(array $array, $parts)
     {
+        $parts = self::createPath($parts);
         foreach ($parts as $k) {
             if (!array_key_exists($k, $array)) {
                 return false;
@@ -39,18 +56,41 @@ class ArrayUtils
     }
 
     /**
+     * Walks through the given $array and returns the value represented by $path. Returns $default if the requested
+     * element does not exist.
+     *
+     * @param array $array
+     * @param array|string $parts An array containing the keys or a string delimited by :
+     * @param mixed $default
+     *
+     * @return mixed
+     */
+    public static function getByPath(array $array, $parts, $default = null)
+    {
+        $parts = self::createPath($parts);
+        foreach ($parts as $k) {
+            if (!array_key_exists($k, $array)) {
+                return $default;
+            }
+            $array = $array[$k];
+        }
+        return $array;
+    }
+
+    /**
      * Walks through the given $array and returns a reference to the value represented by $path.
      *
      * @param array $array
-     * @param array $parts
+     * @param array|string $parts An array containing the keys or a string delimited by :
      * @param bool $create
      *
      * @return mixed
      *
      * @throws OutOfBoundsException
      */
-    public static function &findByPath(array &$array, array $parts, $create = false)
+    public static function &findByPath(array &$array, $parts, $create = false)
     {
+        $parts = self::createPath($parts);
         foreach ($parts as $k) {
             if (!array_key_exists($k, $array)) {
                 if ($create) {
@@ -68,11 +108,12 @@ class ArrayUtils
      * Inserts $item into $array. The place of $item is determined by $parts.
      *
      * @param array $array
-     * @param array $parts
+     * @param array|string $parts An array containing the keys or a string delimited by :
      * @param mixed $item
      */
-    public static function setByPath(array &$array, array $parts, $item)
+    public static function setByPath(array &$array, $parts, $item)
     {
+        $parts = self::createPath($parts);
         foreach ($parts as $k) {
             if (!array_key_exists($k, $array)) {
                 $array[$k] = array();
@@ -86,10 +127,11 @@ class ArrayUtils
      * Removed the item from $array that is represented by $parts.
      *
      * @param array $array
-     * @param array $parts
+     * @param array|string $parts An array containing the keys or a string delimited by :
      */
-    public static function unsetByPath(array &$array, array $parts)
+    public static function unsetByPath(array &$array, $parts)
     {
+        $parts    = self::createPath($parts);
         $last_key = array_pop($parts);
         foreach ($parts as $k) {
             if (!array_key_exists($k, $array)) {

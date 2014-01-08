@@ -96,7 +96,7 @@ class ParameterContainer implements ArrayAccess
             $container = $this;
             $callback  = function ($matches) use ($container) {
                 try {
-                    $return = ArrayUtils::findByPath($container->toArray(), explode(':', $matches[1]));
+                    $return = ArrayUtils::findByPath($container->toArray(), $matches[1]);
                     return $container->resolveLinks($return);
                 } catch (OutOfBoundsException $e) {
                     return $matches[0];
@@ -123,7 +123,7 @@ class ParameterContainer implements ArrayAccess
     public function &offsetGet($key)
     {
         $resolved = $this->getResolvedParameters();
-        return ArrayUtils::findByPath($resolved, explode(':', $key));
+        return ArrayUtils::findByPath($resolved, $key);
     }
 
     /**
@@ -134,11 +134,7 @@ class ParameterContainer implements ArrayAccess
      */
     public function offsetSet($key, $value)
     {
-        if (strpos($key, ':') !== false) {
-            ArrayUtils::setByPath($this->parameters, explode(':', $key), $value);
-        } else {
-            $this->parameters[$key] = $value;
-        }
+        ArrayUtils::setByPath($this->parameters, $key, $value);
         unset($this->resolved_parameters);
     }
 
@@ -149,11 +145,7 @@ class ParameterContainer implements ArrayAccess
      */
     public function offsetUnset($key)
     {
-        if (strpos($key, ':') !== false) {
-            ArrayUtils::unsetByPath($this->parameters, explode(':', $key));
-        } else {
-            unset($this->parameters[$key]);
-        }
+        ArrayUtils::unsetByPath($this->parameters, $key);
         unset($this->resolved_parameters);
     }
 
@@ -166,10 +158,6 @@ class ParameterContainer implements ArrayAccess
      */
     public function offsetExists($key)
     {
-        if (strpos($key, ':') !== false) {
-            return ArrayUtils::existsByPath($this->parameters, explode(':', $key));
-        } else {
-            return isset($this->parameters[$key]);
-        }
+        return ArrayUtils::existsByPath($this->parameters, $key);
     }
 }
