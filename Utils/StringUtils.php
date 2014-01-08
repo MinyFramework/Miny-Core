@@ -36,4 +36,28 @@ class StringUtils
         }
         return $result == 0;
     }
+
+    /**
+     * Determines whether $string starts with $start.
+     *
+     * @param string $string
+     * @param string $start
+     * @return bool
+     */
+    public static function startsWith($string, $start)
+    {
+        return substr($string, 0, strlen($start)) === $start;
+    }
+
+    /**
+     * Determines whether $string ends with $start.
+     *
+     * @param string $string
+     * @param string $end
+     * @return bool
+     */
+    public static function endsWith($string, $end)
+    {
+        return substr($string, -strlen($end)) === $end;
+    }
 }

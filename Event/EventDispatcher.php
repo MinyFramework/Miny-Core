@@ -40,10 +40,9 @@ class EventDispatcher
         }
     }
 
-    public function raiseEvent()
+    public function raiseEvent($event)
     {
-        $args  = func_get_args();
-        $event = array_shift($args);
+        $args = array_slice(func_get_args(), 1);
 
         if (is_string($event)) {
             $event = new Event($event, $args);

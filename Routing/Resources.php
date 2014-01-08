@@ -11,6 +11,7 @@ namespace Miny\Routing;
 
 use ArrayIterator;
 use InvalidArgumentException;
+use Miny\Utils\StringUtils;
 use UnexpectedValueException;
 
 class Resources extends RouteCollection
@@ -85,7 +86,7 @@ class Resources extends RouteCollection
      */
     public static function singularize($name)
     {
-        if (substr($name, -1, 1) == 's') {
+        if (StringUtils::endsWith($name, 's')) {
             return substr($name, 0, -1);
         }
         return $name;
@@ -185,8 +186,8 @@ class Resources extends RouteCollection
     /**
      * Prefixes the given name with the parent name if needed.
      *
-     * @param type $name
-     * @return type
+     * @param string $name
+     * @return string
      */
     private function prefixName($name)
     {

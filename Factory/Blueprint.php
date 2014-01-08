@@ -92,13 +92,12 @@ class Blueprint
      * @param string $method
      * @return Blueprint
      */
-    public function addMethodCall()
+    public function addMethodCall($method)
     {
         if (func_num_args() == 0) {
             throw new BadMethodCallException('Blueprint::addMethodCall needs at least one argument.');
         }
-        $arguments       = func_get_args();
-        $method          = array_shift($arguments);
+        $arguments       = array_slice(func_get_args(), 1);
         $this->methods[] = array($method, $arguments);
         return $this;
     }
