@@ -61,9 +61,13 @@ abstract class Controller extends BaseController
         $router = $this->app->router;
 
         $this->addMethods($response, array(
-            'setCode', 'redirect',
-            'header' => 'setHeader',
+            'setCode', 'redirect', 'getHeaders',
             'cookie' => 'setCookie'
+        ));
+        $this->addMethods($response->getHeaders(), array(
+            'header'       => 'set',
+            'hasHeader'    => 'has',
+            'removeHeader' => 'remove'
         ));
         $this->addMethod('redirectRoute', function ($route, array $params = array()) use ($response, $router) {
             $path = $router->generate($route, $params);

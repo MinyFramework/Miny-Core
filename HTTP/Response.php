@@ -57,13 +57,14 @@ class Response implements Serializable
         505 => 'HTTP Version Not Supported'
     );
     private $cookies            = array();
-    private $headers            = array();
+    private $headers;
     private $status_code        = 200;
     private $is_redirect        = false;
     public $content_type;
 
     public function __construct()
     {
+        $this->headers = new Headers();
         ob_start();
     }
 
@@ -94,37 +95,12 @@ class Response implements Serializable
 
     public function hasHeader($name)
     {
-        return isset($this->headers[$name]);
+        $this->headers->has($name);
     }
 
-    public function setHeader($name, $value, $replace = true)
+    public function setHeader($name, $value)
     {
-        if ($replace) {
-            $this->headers[$name] = $value;
-        } else {
-            if (!isset($this->headers[$name])) {
-                $this->headers[$name] = array();
-            }
-            $this->headers[$name][] = $value;
-        }
-    }
-
-    public function removeHeader($name, $value = null)
-    {
-        if ($value === null) {
-            unset($this->headers[$name]);
-        } else {
-            if (!isset($this->headers[$name])) {
-                return;
-            }
-            if (!is_array($this->headers[$name])) {
-                return;
-            }
-            if (!is_array($value)) {
-                $value = array($value);
-            }
-            $this->headers[$name] = array_diff($this->headers[$name], $value);
-        }
+        $this->headers->set($name, $value);
     }
 
     public function getHeaders()
@@ -157,27 +133,17 @@ class Response implements Serializable
         return self::$status_codes[$this->status_code];
     }
 
-    private function sendHTTPStatus()
-    {
-        $header = sprintf('HTTP/1.1 %d: %s', $this->status_code, $this->getStatus());
-        header($header, true, $this->status_code);
-    }
-
     protected function sendHeaders()
     {
-        $this->sendHTTPStatus();
-        foreach ($this->headers as $name => $header) {
-            if (is_string($header)) {
-                header($name . ': ' . $header);
-            } elseif (is_array($header)) {
-                foreach ($header as $h) {
-                    header($name . ': ' . $h, false);
-                }
-            }
-        }
+        $headers = $this->headers;
         if ($this->content_type) {
-            header('Content-Type: ' . $this->content_type);
+            $headers->set('content-type', $this->content_type);
         }
+        $headers->setRaw(sprintf('HTTP/1.1 %d: %s', $this->status_code, $this->getStatus()));
+        if (!$this->is_redirect) {
+            $headers->set('content-length', strlen(ob_get_contents()));
+        }
+        $headers->send();
         foreach ($this->cookies as $name => $value) {
             setcookie($name, $value);
         }
@@ -204,12 +170,12 @@ class Response implements Serializable
 
     public function unserialize($serialized)
     {
-        $data = unserialize($serialized);
+        $data               = unserialize($serialized);
         $this->content_type = array_shift($data);
-        $this->cookies = array_shift($data);
-        $this->headers = array_shift($data);
-        $this->is_redirect = array_shift($data);
-        $this->status_code = array_shift($data);
+        $this->cookies      = array_shift($data);
+        $this->headers      = array_shift($data);
+        $this->is_redirect  = array_shift($data);
+        $this->status_code  = array_shift($data);
         ob_start();
     }
 }
