@@ -22,7 +22,31 @@ class Request
     public static function getGlobal()
     {
         if (!isset(self::$request)) {
-            self::$request = new Request($_SERVER['REQUEST_URI'], $_GET, $_POST, $_COOKIE);
+            if (!empty($_POST)) {
+                $method = isset($_POST['_method']) ? $_POST['_method'] : 'POST';
+            } else {
+                $method = $_SERVER['REQUEST_METHOD'];
+            }
+
+            $request         = new Request($method, $_SERVER['REQUEST_URI']);
+            $request->type   = self::MASTER_REQUEST;
+            $request->get    = $_GET;
+            $request->post   = $_POST;
+            $request->cookie = $_COOKIE;
+
+            foreach ($_SERVER as $key => $value) {
+                if (StringUtils::startsWith($key, 'HTTP_')) {
+                    $request->headers->set(substr($key, 5), $value);
+                }
+            }
+
+            if ($request->headers->has('x-forwarded-for')) {
+                $request->ip = $request->headers->get('x-forwarded-for');
+            } else {
+                $request->ip = $_SERVER['REMOTE_ADDR'];
+            }
+
+            self::$request = $request;
         }
         return self::$request;
     }
@@ -36,32 +60,12 @@ class Request
     private $ip;
     private $type;
 
-    public function __construct($url, array $get = array(), array $post = array(), array $cookie = array(),
-                                $type = self::MASTER_REQUEST)
+    public function __construct($method, $url)
     {
         $this->url     = $url;
+        $this->method  = $method;
         $this->path    = parse_url($url, PHP_URL_PATH);
-        $this->get     = $get;
-        $this->post    = $post;
-        $this->cookie  = $cookie;
-        $this->type    = $type;
         $this->headers = new Headers();
-
-        if (!empty($post)) {
-            $this->method = isset($post['_method']) ? $post['_method'] : 'POST';
-        } else {
-            $this->method = $_SERVER['REQUEST_METHOD'];
-        }
-        foreach ($_SERVER as $key => $value) {
-            if (StringUtils::startsWith($key, 'HTTP_')) {
-                $this->headers->set(substr($key, 5), $value);
-            }
-        }
-        if ($this->headers->has('x-forwarded-for')) {
-            $this->ip = $this->headers->get('x-forwarded-for');
-        } else {
-            $this->ip = $_SERVER['REMOTE_ADDR'];
-        }
     }
 
     public function __get($field)
@@ -91,6 +95,17 @@ class Request
     public function isSubRequest()
     {
         return $this->type == self::SUB_REQUEST;
+    }
+
+    public function getSubRequest($method, $url, array $post = array())
+    {
+        $request = clone $this;
+
+        $request->__construct($method, $url);
+        $request->type = self::SUB_REQUEST;
+        $request->post = $post;
+
+        return $request;
     }
 
     public function isAjax()

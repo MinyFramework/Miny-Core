@@ -58,14 +58,14 @@ class Response implements Serializable
     );
     private $cookies;
     private $headers;
-    private $status_code        = 200;
-    private $output_stack;
+    private $status_code;
 
     public function __construct()
     {
         $this->headers      = new Headers();
         $this->cookies      = array();
         $this->output_stack = array();
+        $this->status_code  = 200;
         ob_start();
     }
 
@@ -118,12 +118,6 @@ class Response implements Serializable
         return self::$status_codes[$this->status_code];
     }
 
-    public function addResponse(Response $response)
-    {
-        $this->output_stack[] = $this->getContent(true);
-        $this->output_stack[] = $response;
-    }
-
     public function send()
     {
         $this->headers->setRaw(sprintf('HTTP/1.1 %d: %s', $this->status_code, $this->getStatus()));
@@ -132,9 +126,6 @@ class Response implements Serializable
         }
         $this->headers->send();
         if (!$this->headers->has('location')) {
-            foreach ($this->output_stack as $output) {
-                echo $output;
-            }
             ob_end_flush();
         }
     }

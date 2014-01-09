@@ -100,7 +100,7 @@ class ApplicationEventHandlers
             return $response;
         }
         $this->log->info('Matched route %s', $match->getRoute()->getPath());
-        parse_str(parse_url($_SERVER['REQUEST_URI'], PHP_URL_QUERY), $_GET);
+        parse_str(parse_url($request->url, PHP_URL_QUERY), $_GET);
         $request->get = $match->getParameters() + $_GET;
         if (isset($request->get['format'])) {
             $this->setResponseContentType($request->get['format']);

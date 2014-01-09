@@ -75,8 +75,6 @@ class Application extends BaseApplication
                 ->addMethodCall('open');
         $this->add('controller', '\Miny\Controller\Controller')
                 ->setArguments('&app');
-
-        $this->request = Request::getGlobal();
     }
 
     /**
@@ -163,7 +161,7 @@ class Application extends BaseApplication
         if (!$this->router->hasRoute('root')) {
             $this->root('index');
         }
-        $this->dispatch($this->request)->send();
+        $this->dispatch(Request::getGlobal())->send();
     }
 
     /**
@@ -173,7 +171,8 @@ class Application extends BaseApplication
      */
     public function dispatch(Request $request)
     {
-        $event = $this->events->raiseEvent('filter_request', $request);
+        $this->request = $request;
+        $event         = $this->events->raiseEvent('filter_request', $request);
 
         if ($event->hasResponse()) {
             $rsp = $event->getResponse();
@@ -185,8 +184,14 @@ class Application extends BaseApplication
         }
 
         if (!isset($response)) {
-            $response = new Response;
+            if (isset($this->response)) {
+                $old_response = $this->response;
+            }
+            $response       = $this->response = new Response;
             $this->controllers->resolve($request->get['controller'], $request, $response);
+            if (isset($old_response)) {
+                $this->response = $old_response;
+            }
         }
 
         $this->events->raiseEvent('filter_response', $request, $response);
