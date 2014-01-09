@@ -70,6 +70,8 @@ class Application extends BaseApplication
                 ->setArguments('@router:prefix', '@router:suffix', '@router:default_parameters', '@router:short_urls');
         $this->add('session', '\Miny\Session\Session')
                 ->addMethodCall('open');
+        $this->add('controller', '\Miny\Controller\Controller')
+                ->setArguments('&app');
 
         $this->request = Request::getGlobal();
     }
