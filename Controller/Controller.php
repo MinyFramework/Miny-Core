@@ -39,16 +39,6 @@ abstract class Controller extends BaseController
     }
 
     /**
-     * @param string $name
-     * @param array $parameters
-     * @return string
-     */
-    public function route($name, array $parameters = array())
-    {
-        return $this->app->router->generate($name, $parameters);
-    }
-
-    /**
      * @param string $action
      * @param Request $request
      * @param Response $response
