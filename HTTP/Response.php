@@ -60,7 +60,6 @@ class Response implements Serializable
     private $headers;
     private $status_code        = 200;
     private $is_redirect        = false;
-    public $content_type;
 
     public function __construct()
     {
@@ -133,27 +132,15 @@ class Response implements Serializable
         return self::$status_codes[$this->status_code];
     }
 
-    protected function sendHeaders()
+    public function send()
     {
-        $headers = $this->headers;
-        if ($this->content_type) {
-            $headers->set('content-type', $this->content_type);
-        }
-        $headers->setRaw(sprintf('HTTP/1.1 %d: %s', $this->status_code, $this->getStatus()));
-        if (!$this->is_redirect) {
-            $headers->set('content-length', strlen(ob_get_contents()));
-        }
-        $headers->send();
+        $this->headers->setRaw(sprintf('HTTP/1.1 %d: %s', $this->status_code, $this->getStatus()));
+        $this->headers->send();
         foreach ($this->cookies as $name => $value) {
             setcookie($name, $value);
         }
-    }
-
-    public function send()
-    {
-        $this->sendHeaders();
         if (!$this->is_redirect) {
-            ob_flush();
+            ob_end_flush();
         }
     }
 
