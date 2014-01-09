@@ -20,7 +20,8 @@ use Serializable;
  */
 class Headers implements Iterator, Serializable
 {
-    private static $multiple_values_allowed = array('Accept',
+    private static $multiple_values_allowed = array(
+        'Accept',
         'Accept-Charset',
         'Accept-Encoding',
         'Accept-Language',
