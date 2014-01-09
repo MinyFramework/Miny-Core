@@ -35,6 +35,7 @@ class ParameterContainer implements ArrayAccess
      * Parameters are defined as a key-value pair (name => value)
      *
      * @param array $parameters
+     * @param bool $overwrite
      */
     public function addParameters(array $parameters, $overwrite = true)
     {

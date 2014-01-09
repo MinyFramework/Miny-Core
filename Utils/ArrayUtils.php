@@ -20,6 +20,12 @@ use OutOfBoundsException;
 class ArrayUtils
 {
 
+    /**
+     * @param string|array $path
+     * @return array
+     * 
+     * @throws InvalidArgumentException
+     */
     private static function createPath($path)
     {
         if (is_array($path)) {
@@ -127,7 +133,7 @@ class ArrayUtils
      * Removed the item from $array that is represented by $parts.
      *
      * @param array $array
-     * @param array|string $parts An array containing the keys or a string delimited by :
+     * @param array|string $parts An array containing the keys or a string delimited by ":"
      */
     public static function unsetByPath(array &$array, $parts)
     {
@@ -149,7 +155,7 @@ class ArrayUtils
      * @param array $array2
      * @param bool $overwrite Overwrite value if it exists in $array1.
      *
-     * @return array
+     * @return array The merged array
      */
     public static function merge(array $array1, array $array2, $overwrite = true)
     {
