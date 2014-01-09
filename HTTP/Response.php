@@ -59,8 +59,6 @@ class Response implements Serializable
     private $cookies            = array();
     private $headers;
     private $status_code        = 200;
-    private $is_redirect        = false;
-    public $content_type;
 
     public function __construct()
     {
@@ -70,14 +68,8 @@ class Response implements Serializable
 
     public function redirect($url, $code = 301)
     {
-        $this->is_redirect = true;
-        $this->setHeader('Location', $url);
+        $this->headers->set('Location', $url);
         $this->setCode($code);
-    }
-
-    public function isRedirect()
-    {
-        return $this->is_redirect;
     }
 
     public function setCookie($name, $value)
@@ -91,16 +83,6 @@ class Response implements Serializable
             throw new InvalidArgumentException('Invalid status code: ' . $code);
         }
         $this->status_code = $code;
-    }
-
-    public function hasHeader($name)
-    {
-        $this->headers->has($name);
-    }
-
-    public function setHeader($name, $value)
-    {
-        $this->headers->set($name, $value);
     }
 
     public function getHeaders()
@@ -133,27 +115,15 @@ class Response implements Serializable
         return self::$status_codes[$this->status_code];
     }
 
-    protected function sendHeaders()
+    public function send()
     {
-        $headers = $this->headers;
-        if ($this->content_type) {
-            $headers->set('content-type', $this->content_type);
-        }
-        $headers->setRaw(sprintf('HTTP/1.1 %d: %s', $this->status_code, $this->getStatus()));
-        if (!$this->is_redirect) {
-            $headers->set('content-length', strlen(ob_get_contents()));
-        }
-        $headers->send();
+        $this->headers->setRaw(sprintf('HTTP/1.1 %d: %s', $this->status_code, $this->getStatus()));
         foreach ($this->cookies as $name => $value) {
             setcookie($name, $value);
         }
-    }
-
-    public function send()
-    {
-        $this->sendHeaders();
-        if (!$this->is_redirect) {
-            ob_flush();
+        $this->headers->send();
+        if (!$this->headers->has('location')) {
+            ob_end_flush();
         }
     }
 
@@ -163,7 +133,6 @@ class Response implements Serializable
             $this->content_type,
             $this->cookies,
             $this->headers,
-            $this->is_redirect,
             $this->status_code
         ));
     }
@@ -174,7 +143,6 @@ class Response implements Serializable
         $this->content_type = array_shift($data);
         $this->cookies      = array_shift($data);
         $this->headers      = array_shift($data);
-        $this->is_redirect  = array_shift($data);
         $this->status_code  = array_shift($data);
         ob_start();
     }

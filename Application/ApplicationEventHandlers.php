@@ -35,20 +35,20 @@ class ApplicationEventHandlers
     public function logRequest(Request $request)
     {
         $this->log->info('Request: [%s] %s Source: %s', $request->method, $request->url, $request->ip);
-        if (!empty($request->referer)) {
-            $this->log->info('Request: [%s] Referer: %s', $request->method, $request->referer);
+        $headers = $request->getHeaders();
+        if ($headers->has('referer')) {
+            $this->log->info('Request: Referer: %s', $headers->get('referer'));
         }
     }
 
     public function logResponse(Request $request, Response $response)
     {
-        $log    = $this->log;
+        $log = $this->log;
         $log->info('Response for request [%s] %s', $request->method, $request->path);
         $log->info('Response status: %s %s', $response->getCode(), $response->getStatus());
-        if (isset($response->content_type)) {
-            $log->info('Response content type: %s', $response->content_type);
+        foreach ($response->getHeaders() as $header => $value) {
+            $log->info($header . ': ' . $value);
         }
-        $log->info('Response body length: %s', strlen($response->getContent()));
     }
 
     private function setResponseContentType($format)
@@ -110,7 +110,7 @@ class ApplicationEventHandlers
     public function setContentType(Request $request, Response $response)
     {
         if (isset($this->app['content_type'])) {
-            $response->content_type = $this->app['content_type'];
+            $response->getHeaders()->set('content-type', $this->app['content_type']);
         }
     }
 }
