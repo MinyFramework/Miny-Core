@@ -74,6 +74,10 @@ class ControllerCollection
                 return $class;
             }
         }
+        $factory = $this->application->getFactory();
+        if (isset($factory->{$class . '_controller'})) {
+            return $factory->{$class . '_controller'};
+        }
         if (!class_exists($class)) {
             $class = '\Application\Controllers\\' . ucfirst($class) . 'Controller';
             if (!class_exists($class)) {

@@ -143,6 +143,18 @@ class Factory implements ArrayAccess
     }
 
     /**
+     * Checks whether $alias is registered.
+     *
+     * @param string $alias
+     * @return bool
+     */
+    public function __isset($alias)
+    {
+        $alias = $this->getAlias($alias);
+        return isset($this->blueprints[$alias]) || isset($this->objects[$alias]);
+    }
+
+    /**
      * Gets the Blueprint stored for $alias.
      *
      * @param string $alias

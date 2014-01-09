@@ -34,7 +34,9 @@ abstract class BaseController extends Extendable
     }
 
     /**
+     * @deprecated Services should be injected using Factory.
      * @param string $name
+     *
      * @return Object
      */
     public function service($name)
