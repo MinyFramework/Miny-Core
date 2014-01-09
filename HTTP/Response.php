@@ -59,6 +59,7 @@ class Response implements Serializable
     private $cookies            = array();
     private $headers;
     private $status_code        = 200;
+    private $is_redirect        = false;
 
     public function __construct()
     {
@@ -118,11 +119,11 @@ class Response implements Serializable
     public function send()
     {
         $this->headers->setRaw(sprintf('HTTP/1.1 %d: %s', $this->status_code, $this->getStatus()));
+        $this->headers->send();
         foreach ($this->cookies as $name => $value) {
             setcookie($name, $value);
         }
-        $this->headers->send();
-        if (!$this->headers->has('location')) {
+        if (!$this->is_redirect) {
             ob_end_flush();
         }
     }
