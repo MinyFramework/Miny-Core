@@ -47,7 +47,7 @@ class ArrayUtils
     {
         $parts = self::createPath($parts);
         foreach ($parts as $k) {
-            if (!array_key_exists($k, $array)) {
+            if (!is_array($array) || !array_key_exists($k, $array)) {
                 return false;
             }
             $array = $array[$k];
