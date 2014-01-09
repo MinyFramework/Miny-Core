@@ -30,10 +30,8 @@ abstract class Controller extends BaseController
     public function request($path, array $get = null, array $post = null, array $cookie = null)
     {
         $response = $this->app->dispatch(new Request($path, $get, $post, $cookie, Request::SUB_REQUEST));
+        $this->getHeaders()->addHeaders($response->getHeaders());
 
-        foreach ($response->getHeaders() as $name => $value) {
-            $this->header($name, $value);
-        }
         foreach ($response->getCookies() as $name => $value) {
             $this->cookie($name, $value);
         }
@@ -58,8 +56,6 @@ abstract class Controller extends BaseController
      */
     public function run($action, Request $request, Response $response)
     {
-        $router = $this->app->router;
-
         $this->addMethods($response, array(
             'setCode', 'redirect', 'getHeaders',
             'cookie' => 'setCookie'
@@ -69,17 +65,14 @@ abstract class Controller extends BaseController
             'hasHeader'    => 'has',
             'removeHeader' => 'remove'
         ));
+
+        $router = $this->app->router;
         $this->addMethod('redirectRoute', function ($route, array $params = array()) use ($response, $router) {
             $path = $router->generate($route, $params);
             $response->redirect($path);
         });
 
         $action = $action ? : $this->default_action;
-        $method = $action . 'Action';
-        if (!method_exists($this, $method)) {
-            throw new InvalidArgumentException('Action not found: ' . $action);
-        }
-
-        return $this->$method($request);
+        return $this->{$action . 'Action'}($request);
     }
 }
