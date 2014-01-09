@@ -63,6 +63,6 @@ abstract class Controller extends BaseController
         });
 
         $action = $action ? : $this->default_action;
-        return $this->{$action . 'Action'}($request);
+        return $this->{$action . 'Action'}($request, $response);
     }
 }
