@@ -22,15 +22,17 @@ class ControllerCollection
      * @var BaseController|Closure|string []
      */
     private $controllers = array();
+    private $controller_namespace;
 
     /**
      * @var Application
      */
     private $application;
 
-    public function __construct(Application $application)
+    public function __construct(Application $application, $ns)
     {
-        $this->application = $application;
+        $this->application          = $application;
+        $this->controller_namespace = $ns;
     }
 
     /**
@@ -79,7 +81,7 @@ class ControllerCollection
             return $factory->{$class . '_controller'};
         }
         if (!class_exists($class)) {
-            $class = '\Application\Controllers\\' . ucfirst($class) . 'Controller';
+            $class = $this->controller_namespace . ucfirst($class) . 'Controller';
             if (!class_exists($class)) {
                 throw new UnexpectedValueException('Class not exists: ' . $class);
             }

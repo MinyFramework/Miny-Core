@@ -56,13 +56,16 @@ class Response implements Serializable
         504 => 'Gateway Timeout',
         505 => 'HTTP Version Not Supported'
     );
-    private $cookies            = array();
+    private $cookies;
     private $headers;
     private $status_code        = 200;
+    private $output_stack;
 
     public function __construct()
     {
-        $this->headers = new Headers();
+        $this->headers      = new Headers();
+        $this->cookies      = array();
+        $this->output_stack = array();
         ob_start();
     }
 
@@ -115,6 +118,12 @@ class Response implements Serializable
         return self::$status_codes[$this->status_code];
     }
 
+    public function addResponse(Response $response)
+    {
+        $this->output_stack[] = $this->getContent(true);
+        $this->output_stack[] = $response;
+    }
+
     public function send()
     {
         $this->headers->setRaw(sprintf('HTTP/1.1 %d: %s', $this->status_code, $this->getStatus()));
@@ -123,6 +132,9 @@ class Response implements Serializable
         }
         $this->headers->send();
         if (!$this->headers->has('location')) {
+            foreach ($this->output_stack as $output) {
+                echo $output;
+            }
             ob_end_flush();
         }
     }

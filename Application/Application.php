@@ -25,13 +25,16 @@ class Application extends BaseApplication
     protected function setDefaultParameters()
     {
         $this->getFactory()->getParameters()->addParameters(array(
-            'router' => array(
+            'router'      => array(
                 'prefix'             => '/',
                 'suffix'             => '',
                 'default_parameters' => array(),
                 'exception_paths'    => array(),
                 'short_urls'         => false
             ),
+            'controllers' => array(
+                'namespace' => '\Application\Controllers\\'
+            )
         ));
     }
 
@@ -65,7 +68,7 @@ class Application extends BaseApplication
         $this->registerEventHandlers();
 
         $this->add('controllers', '\Miny\Controller\ControllerCollection')
-                ->setArguments('&app');
+                ->setArguments('&app', '{@controllers:namespace}');
         $this->add('router', '\Miny\Routing\Router')
                 ->setArguments('@router:prefix', '@router:suffix', '@router:default_parameters', '@router:short_urls');
         $this->add('session', '\Miny\Session\Session')
