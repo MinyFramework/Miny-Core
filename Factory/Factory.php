@@ -224,6 +224,16 @@ class Factory implements ArrayAccess
         return $object;
     }
 
+    protected function getConstructorArguments(Blueprint $descriptor)
+    {
+        $arguments = $descriptor->getArguments();
+        if (empty($arguments) && $descriptor->hasParent()) {
+            $parent = $this->getBlueprint($descriptor->getParent());
+            $arguments = $this->getConstructorArguments($parent);
+        }
+        return $arguments;
+    }
+
     /**
      * @param Blueprint $descriptor
      * @return object
@@ -239,7 +249,7 @@ class Factory implements ArrayAccess
         if (!class_exists($class)) {
             throw new InvalidArgumentException('Class not found: ' . $class);
         }
-        $args      = $descriptor->getArguments();
+        $args      = $this->getConstructorArguments($descriptor);
         $arguments = $this->resolveReferences($args);
 
         return Utils::instantiate($class, $arguments);
