@@ -13,6 +13,7 @@ use ArrayAccess;
 use InvalidArgumentException;
 use Miny\Utils\Utils;
 use OutOfBoundsException;
+use UnexpectedValueException;
 
 /**
  * Factory class
@@ -180,6 +181,36 @@ class Factory implements ArrayAccess
     }
 
     /**
+     * Replaces an instance with another if instantiated.
+     *
+     * @param string $alias
+     * @param object|null $object
+     *
+     * @return null|object The old object instance.
+     *
+     * @throws UnexpectedValueException
+     */
+    public function replace($alias, $object = null)
+    {
+        $alias = $this->getAlias($alias);
+        if (isset($this->objects[$alias])) {
+            $old = $this->objects[$alias];
+        } else {
+            $old = null;
+        }
+
+        if ($object === null) {
+            $this->__get($alias);
+        } elseif (is_object($object)) {
+            $this->__set($alias, $object);
+        } else {
+            throw new UnexpectedValueException('Can only insert objects.');
+        }
+
+        return $old;
+    }
+
+    /**
      * Returns with the object stored under $alias.
      * The method creates the object instance if needed.
      *
@@ -228,7 +259,7 @@ class Factory implements ArrayAccess
     {
         $arguments = $descriptor->getArguments();
         if (empty($arguments) && $descriptor->hasParent()) {
-            $parent = $this->getBlueprint($descriptor->getParent());
+            $parent    = $this->getBlueprint($descriptor->getParent());
             $arguments = $this->getConstructorArguments($parent);
         }
         return $arguments;

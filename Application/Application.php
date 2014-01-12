@@ -75,6 +75,7 @@ class Application extends BaseApplication
                 ->addMethodCall('open');
         $this->add('controller', '\Miny\Controller\Controller')
                 ->setArguments('&app');
+        $this->add('response', '\Miny\HTTP\Response');
     }
 
     /**
@@ -184,14 +185,9 @@ class Application extends BaseApplication
         }
 
         if (!isset($response)) {
-            if (isset($this->response)) {
-                $old_response = $this->response;
-            }
-            $response       = $this->response = new Response;
-            $this->controllers->resolve($request->get['controller'], $request, $response);
-            if (isset($old_response)) {
-                $this->response = $old_response;
-            }
+            $old_response = $this->getFactory()->replace('response');
+            $this->controllers->resolve($request->get['controller'], $request, $this->response);
+            $response = $this->getFactory()->replace('response', $old_response);
         }
 
         $this->events->raiseEvent('filter_response', $request, $response);
