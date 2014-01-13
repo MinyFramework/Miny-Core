@@ -177,7 +177,7 @@ abstract class BaseApplication implements ArrayAccess
         $this->factory->setInstance('app', $this);
         $this->factory->add('log', '\Miny\Log')
                 ->setArguments('@log:path', '@log:debug');
-        $this->factory->add('error_handlers', '\Miny\Application\ErrorHandlers')
+        $this->factory->add('error_handlers', '\Miny\Application\Handlers\ErrorHandlers')
                 ->setArguments('&log');
         $this->factory->add('events', '\Miny\Event\EventDispatcher')
                 ->addMethodCall('register', 'uncaught_exception', '*error_handlers::logException');

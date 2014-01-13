@@ -7,7 +7,7 @@
  * For licensing information see the LICENSE file.
  */
 
-namespace Miny\Application;
+namespace Miny\Application\Handlers;
 
 use ErrorException;
 use Exception;

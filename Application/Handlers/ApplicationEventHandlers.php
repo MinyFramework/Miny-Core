@@ -7,7 +7,7 @@
  * For licensing information see the LICENSE file.
  */
 
-namespace Miny\Application;
+namespace Miny\Application\Handlers;
 
 use Miny\Application\Application;
 use Miny\HTTP\Request;

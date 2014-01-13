@@ -10,6 +10,7 @@
 namespace Miny\Application;
 
 use Exception;
+use Miny\Application\Handlers\ApplicationEventHandlers;
 use Miny\HTTP\Request;
 use Miny\HTTP\Response;
 use Miny\Routing\Resource;
