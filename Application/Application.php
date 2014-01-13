@@ -172,34 +172,35 @@ class Application extends BaseApplication
      */
     public function dispatch(Request $request)
     {
-        $old_request = $this->getFactory()->replace('request', $request);
+        $factory     = $this->getFactory();
+        $old_request = $factory->replace('request', $request);
         $event       = $this->events->raiseEvent('filter_request', $request);
 
+        $filter = true;
         if ($event->hasResponse()) {
             $rsp = $event->getResponse();
             if ($rsp instanceof Response) {
                 $response = $rsp;
             } elseif ($rsp instanceof Request && $rsp !== $request) {
-                $tmp = $this->dispatch($rsp);
-                if ($old_request) {
-                    $this->getFactory()->replace('request', $old_request);
-                }
-                return $tmp;
+                $response = $this->dispatch($rsp);
+                $filter   = false;
             }
         }
 
+        ob_start();
         if (!isset($response)) {
-            $factory      = $this->getFactory();
             $old_response = $factory->replace('response');
-            ob_start();
             $this->controllers->resolve($request->get['controller'], $request, $this->response);
-            $this->response->addContent(ob_get_clean());
             $response     = $old_response ? $factory->replace('response', $old_response) : $factory->response;
         }
 
-        $this->events->raiseEvent('filter_response', $request, $response);
+        if ($filter) {
+            $this->events->raiseEvent('filter_response', $request, $response);
+        }
+        $response->addContent(ob_get_clean());
+
         if ($old_request) {
-            $this->getFactory()->replace('request', $old_request);
+            $factory->replace('request', $old_request);
         }
         return $response;
     }
