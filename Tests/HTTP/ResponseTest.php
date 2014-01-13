@@ -13,26 +13,10 @@ class ResponseTest extends \PHPUnit_Framework_TestCase
         $this->response = new Response;
     }
 
-    public function testResponseShouldUseOutputBuffering()
+    public function testSetGetContent()
     {
-        echo 'output';
-        $this->assertEquals('output', $this->response->getContent(true));
-    }
-
-    public function testGettingTheContentFromResponseShouldNotClearOutputBuffersByDefault()
-    {
-        echo 'output';
-        $this->assertEquals('output', $this->response->getContent());
-        echo 'other';
-        $this->assertEquals('outputother', $this->response->getContent(true));
-    }
-
-    public function testGettingTheContentFromResponseShouldBeAbleToClearOutputBuffers()
-    {
-        echo 'output';
-        $this->assertEquals('output', $this->response->getContent(true));
-        $this->expectOutputString('other');
-        echo 'other';
+        $this->response->addContent('content');
+        $this->assertEquals('content', $this->response->getContent());
     }
 
     public function testResponseShouldNotAcceptInvalidStatusCodes()

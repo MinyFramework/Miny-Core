@@ -45,14 +45,8 @@ class RequestTest extends \PHPUnit_Framework_TestCase
     public function testIsSubRequest()
     {
         $this->assertFalse(Request::getGlobal()->isSubRequest());
-        $sub = new Request('', array(), array(), array(), true);
+        $sub = Request::getGlobal()->getSubRequest('', '');
         $this->assertTrue($sub->isSubRequest());
-    }
-
-    public function testSimulateMethods()
-    {
-        $request = new Request('', array(), array('_method' => 'PUT'), array(), true);
-        $this->assertEquals('PUT', $request->method);
     }
 }
 
