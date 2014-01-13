@@ -95,7 +95,7 @@ class ApplicationEventHandlers
         $match = $this->app->router->match($path, $request->method);
         if (!$match) {
             $this->log->info('Route was not found for path [%s] %s', $request->method, $path);
-            $response = new Response();
+            $response = $this->app->response;
             $response->setCode(404);
             return $response;
         }

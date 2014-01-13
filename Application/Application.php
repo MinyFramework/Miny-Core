@@ -47,7 +47,7 @@ class Application extends BaseApplication
             if (!$event->isHandled()) {
                 throw $e;
             } else {
-                $response = new Response;
+                $response = $app->response;
                 echo $event->getResponse();
                 $response->setCode(500);
                 $response->send();
@@ -185,9 +185,12 @@ class Application extends BaseApplication
         }
 
         if (!isset($response)) {
-            $old_response = $this->getFactory()->replace('response');
+            $factory      = $this->getFactory();
+            $old_response = $factory->replace('response');
+            ob_start();
             $this->controllers->resolve($request->get['controller'], $request, $this->response);
-            $response = $this->getFactory()->replace('response', $old_response);
+            $this->response->addContent(ob_get_clean());
+            $response     = $old_response ? $factory->replace('response', $old_response) : $factory->response;
         }
 
         $this->events->raiseEvent('filter_response', $request, $response);

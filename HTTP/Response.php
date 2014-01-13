@@ -59,14 +59,14 @@ class Response implements Serializable
     private $cookies;
     private $headers;
     private $status_code;
+    private $content;
 
     public function __construct()
     {
-        $this->headers      = new Headers();
-        $this->cookies      = array();
-        $this->output_stack = array();
-        $this->status_code  = 200;
-        ob_start();
+        $this->headers     = new Headers();
+        $this->cookies     = array();
+        $this->content     = '';
+        $this->status_code = 200;
     }
 
     public function redirect($url, $code = 301)
@@ -88,6 +88,10 @@ class Response implements Serializable
         $this->status_code = $code;
     }
 
+    /**
+     *
+     * @return Headers
+     */
     public function getHeaders()
     {
         return $this->headers;
@@ -98,9 +102,24 @@ class Response implements Serializable
         return $this->cookies;
     }
 
-    public function getContent($clean = false)
+    public function clearContent()
     {
-        return $clean ? ob_get_clean() : ob_get_contents();
+        $this->content = '';
+    }
+
+    public function getContent()
+    {
+        return $this->content;
+    }
+
+    public function addResponse(Response $response)
+    {
+        $this->addContent($response->getContent());
+    }
+
+    public function addContent($content)
+    {
+        $this->content .= $content;
     }
 
     public function isCode($code)
@@ -118,6 +137,11 @@ class Response implements Serializable
         return self::$status_codes[$this->status_code];
     }
 
+    public function __toString()
+    {
+        return $this->content;
+    }
+
     public function send()
     {
         $this->headers->setRaw(sprintf('HTTP/1.1 %d: %s', $this->status_code, $this->getStatus()));
@@ -126,7 +150,7 @@ class Response implements Serializable
         }
         $this->headers->send();
         if (!$this->headers->has('location')) {
-            ob_end_flush();
+            echo $this;
         }
     }
 
@@ -136,6 +160,7 @@ class Response implements Serializable
             $this->content_type,
             $this->cookies,
             $this->headers,
+            $this->content,
             $this->status_code
         ));
     }
@@ -146,6 +171,7 @@ class Response implements Serializable
         $this->content_type = array_shift($data);
         $this->cookies      = array_shift($data);
         $this->headers      = array_shift($data);
+        $this->content      = array_shift($data);
         $this->status_code  = array_shift($data);
         ob_start();
     }

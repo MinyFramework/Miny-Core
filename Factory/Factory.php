@@ -195,6 +195,7 @@ class Factory implements ArrayAccess
         $alias = $this->getAlias($alias);
         if (isset($this->objects[$alias])) {
             $old = $this->objects[$alias];
+            unset($this->objects[$alias]);
         } else {
             $old = null;
         }
