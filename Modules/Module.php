@@ -7,11 +7,12 @@
  * For licensing information see the LICENSE file.
  */
 
-namespace Miny\Application;
+namespace Miny\Modules;
 
 use Closure;
 use InvalidArgumentException;
-use Miny\Application\Exceptions\BadModuleException;
+use Miny\Application\BaseApplication;
+use Miny\Modules\Exceptions\BadModuleException;
 
 abstract class Module
 {

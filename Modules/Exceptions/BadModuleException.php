@@ -7,7 +7,7 @@
  * For licensing information see the LICENSE file.
  */
 
-namespace Miny\Application\Exceptions;
+namespace Miny\Modules\Exceptions;
 
 use Exception;
 

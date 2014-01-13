@@ -7,14 +7,16 @@
  * For licensing information see the LICENSE file.
  */
 
-namespace Miny\Application;
+namespace Miny\Modules;
 
-use Miny\Application\Exceptions\BadModuleException;
+use Miny\Application\BaseApplication;
+use Miny\Application\Module;
 use Miny\Log;
+use Miny\Modules\Exceptions\BadModuleException;
 
 class ModuleHandler
 {
-    private static $base_module_class   = '\Miny\Application\Module';
+    private static $base_module_class   = '\Miny\Modules\Module';
     private static $module_class_format = '\Modules\%s\Module';
 
     /**
