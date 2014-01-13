@@ -180,7 +180,11 @@ class Application extends BaseApplication
             if ($rsp instanceof Response) {
                 $response = $rsp;
             } elseif ($rsp instanceof Request && $rsp !== $request) {
-                return $this->dispatch($rsp);
+                $tmp = $this->dispatch($rsp);
+                if ($old_request) {
+                    $this->getFactory()->replace('request', $old_request);
+                }
+                return $tmp;
             }
         }
 
