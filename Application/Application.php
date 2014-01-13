@@ -172,8 +172,8 @@ class Application extends BaseApplication
      */
     public function dispatch(Request $request)
     {
-        $this->request = $request;
-        $event         = $this->events->raiseEvent('filter_request', $request);
+        $old_request = $this->getFactory()->replace('request', $request);
+        $event       = $this->events->raiseEvent('filter_request', $request);
 
         if ($event->hasResponse()) {
             $rsp = $event->getResponse();
@@ -194,6 +194,9 @@ class Application extends BaseApplication
         }
 
         $this->events->raiseEvent('filter_response', $request, $response);
+        if ($old_request) {
+            $this->getFactory()->replace('request', $old_request);
+        }
         return $response;
     }
 }
