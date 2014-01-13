@@ -62,8 +62,8 @@ class Request
 
     public function __construct($method, $url)
     {
-        $this->url     = strtoupper($url);
-        $this->method  = $method;
+        $this->url     = $url;
+        $this->method  = strtoupper($method);
         $this->path    = parse_url($url, PHP_URL_PATH);
         $this->headers = new Headers();
     }
