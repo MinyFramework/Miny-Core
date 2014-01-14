@@ -35,7 +35,7 @@ class RouteTest extends \PHPUnit_Framework_TestCase
 
     public function testGetMethod()
     {
-        $this->assertEquals('get', $this->static_object->getMethod());
+        $this->assertEquals('GET', $this->static_object->getMethod());
     }
 
     public function testRegex()
