@@ -27,7 +27,9 @@ class LogTest extends \PHPUnit_Framework_TestCase
         $this->log_file = $tmp . '/log_' . date('Y_m_d') . '.log';
         $this->object   = new Log($tmp, true);
 
-        unlink($this->log_file);
+        if (is_file($this->log_file)) {
+            unlink($this->log_file);
+        }
     }
 
     /**
