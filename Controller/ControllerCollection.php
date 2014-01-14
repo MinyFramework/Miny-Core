@@ -38,10 +38,16 @@ class ControllerCollection
     /**
      * @param string $name
      * @param BaseController|Closure|string $controller
+     *
+     * @return string
+     *
      * @throws InvalidArgumentException
      */
-    public function register($name, $controller)
+    public function register($controller, $name = null)
     {
+        if ($name === null) {
+            $name = is_string($controller) ? $controller : $this->getNextName();
+        }
         if (!is_string($name)) {
             throw new InvalidArgumentException('Controller name must be a string');
         }
@@ -49,6 +55,7 @@ class ControllerCollection
             throw new InvalidArgumentException(sprintf('Invalid controller: %s (%s)', $name, gettype($controller)));
         }
         $this->controllers[$name] = $controller;
+        return $name;
     }
 
     /**

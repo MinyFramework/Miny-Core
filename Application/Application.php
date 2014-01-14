@@ -9,13 +9,15 @@
 
 namespace Miny\Application;
 
-use Exception;
 use Miny\Application\Handlers\ApplicationEventHandlers;
+use Miny\Controller\ControllerCollection;
 use Miny\HTTP\Request;
 use Miny\HTTP\Response;
 use Miny\Routing\Resource;
 use Miny\Routing\Resources;
 use Miny\Routing\Route;
+use Miny\Routing\Router;
+use Miny\Session\Session;
 use UnexpectedValueException;
 
 require_once __DIR__ . '/BaseApplication.php';
@@ -39,23 +41,9 @@ class Application extends BaseApplication
         ));
     }
 
-    private function registerEventHandlers()
+    protected function registerEventHandlers()
     {
-        $app = $this;
-
-        set_exception_handler(function (Exception $e) use ($app) {
-            $event = $app->events->raiseEvent('uncaught_exception', $e);
-            if (!$event->isHandled()) {
-                throw $e;
-            } else {
-                $response = $app->response;
-                echo $event->getResponse();
-                $response->setCode(500);
-                $response->send();
-            }
-        });
-
-        $eh = new ApplicationEventHandlers($this, $this->log);
+        $eh = new ApplicationEventHandlers($this->getFactory());
         $this->getBlueprint('events')
                 ->addMethodCall('register', 'filter_request', array($eh, 'logRequest'))
                 ->addMethodCall('register', 'filter_request', array($eh, 'filterRoutes'))
@@ -88,7 +76,7 @@ class Application extends BaseApplication
      */
     public function resource($name, $controller = null, array $parameters = array())
     {
-        $parameters['controller'] = $controller ? : $name;
+        $parameters['controller'] = $this->registerController($controller ? : $name, $name);
         return $this->router->resource($name, $parameters);
     }
 
@@ -101,15 +89,13 @@ class Application extends BaseApplication
      */
     public function resources($name, $controller = null, array $parameters = array())
     {
-        $parameters['controller'] = $controller ? : $name;
+        $parameters['controller'] = $this->registerController($controller ? : $name, $name);
         return $this->router->resources($name, $parameters);
     }
 
-    private function registerController($controller)
+    private function registerController($controller, $name = null)
     {
-        $controller_name = is_string($controller) ? $controller : $this->controllers->getNextName();
-        $this->controllers->register($controller_name, $controller);
-        return $controller_name;
+        return $this->getFactory()->controllers->register($controller, $name);
     }
 
     /**
@@ -138,8 +124,7 @@ class Application extends BaseApplication
     {
         $parameters['controller'] = $this->registerController($controller);
 
-        $method = strtoupper($method);
-        $route  = new Route($path, $method, $parameters);
+        $route = new Route($path, $method, $parameters);
         return $this->router->route($route, $name);
     }
 

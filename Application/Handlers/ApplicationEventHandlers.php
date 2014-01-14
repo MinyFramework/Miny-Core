@@ -9,7 +9,9 @@
 
 namespace Miny\Application\Handlers;
 
-use Miny\Application\Application;
+use Exception;
+use Miny\Factory\Factory;
+use Miny\Factory\ParameterContainer;
 use Miny\HTTP\Request;
 use Miny\HTTP\Response;
 use Miny\Log;
@@ -17,19 +19,40 @@ use Miny\Log;
 class ApplicationEventHandlers
 {
     /**
-     * @var Application
+     * @var Factory
      */
-    protected $app;
+    private $factory;
+
+    /**
+     * @var ParameterContainer
+     */
+    private $parameters;
 
     /**
      * @var Log
      */
     protected $log;
 
-    public function __construct(Application $app, Log $log)
+    public function __construct(Factory $factory)
     {
-        $this->app = $app;
-        $this->log = $log;
+        $this->factory    = $factory;
+        $this->parameters = $factory->getParameters();
+        $this->log        = $factory->log;
+
+        set_exception_handler(array($this, 'handleExceptions'));
+    }
+
+    public function handleExceptions(Exception $e)
+    {
+        $event = $this->factory->events->raiseEvent('uncaught_exception', $e);
+        if (!$event->isHandled()) {
+            throw $e;
+        } else {
+            $response = $this->factory->response;
+            $response->addContent($event->getResponse());
+            $response->setCode(500);
+            $response->send();
+        }
     }
 
     public function logRequest(Request $request)
@@ -81,21 +104,21 @@ class ApplicationEventHandlers
         );
         if (isset($content_types[$format])) {
             $this->log->info('Content type %s set for format %s', $content_types[$format], $format);
-            $this->app['content_type'] = $content_types[$format];
+            $this->parameters['content_type'] = $content_types[$format];
         }
     }
 
     public function filterRoutes(Request $request)
     {
-        if ($this->app->router->shortUrls()) {
+        if ($this->factory->router->shortUrls()) {
             $path = $request->path;
         } else {
             $path = $request->get('path', '/');
         }
-        $match = $this->app->router->match($path, $request->method);
+        $match = $this->factory->router->match($path, $request->method);
         if (!$match) {
             $this->log->info('Route was not found for path [%s] %s', $request->method, $path);
-            $response = $this->app->response;
+            $response = $this->factory->response;
             $response->setCode(404);
             return $response;
         }
@@ -109,8 +132,8 @@ class ApplicationEventHandlers
 
     public function setContentType(Request $request, Response $response)
     {
-        if (isset($this->app['content_type'])) {
-            $response->getHeaders()->set('content-type', $this->app['content_type']);
+        if (isset($this->parameters['content_type'])) {
+            $response->getHeaders()->set('content-type', $this->parameters['content_type']);
         }
     }
 }
