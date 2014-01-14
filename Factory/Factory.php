@@ -10,6 +10,7 @@
 namespace Miny\Factory;
 
 use ArrayAccess;
+use Closure;
 use InvalidArgumentException;
 use Miny\Utils\Utils;
 use OutOfBoundsException;
@@ -31,7 +32,7 @@ class Factory implements ArrayAccess
     protected $objects = array();
 
     /**
-     * @var Blueprint[]
+     * @var (Blueprint|Closure)[]
      */
     protected $blueprints = array();
 
@@ -103,11 +104,14 @@ class Factory implements ArrayAccess
      * Unsets any existing instances for the given alias.
      *
      * @param string $alias
-     * @param Blueprint $object
+     * @param Blueprint|Closure $object
      * @return Blueprint
      */
-    public function register($alias, Blueprint $object)
+    public function register($alias, $object)
     {
+        if (!$object instanceof Blueprint && !$object instanceof Closure) {
+            throw new InvalidArgumentException('Only Blueprint and Closure can be registered.');
+        }
         $this->blueprints[$alias] = $object;
         unset($this->objects[$alias]);
         return $object;
@@ -116,7 +120,7 @@ class Factory implements ArrayAccess
     /**
      * Adds an object instance.
      *
-     * @see Factory::create()
+     * @see Factory::__get()
      * @param string $alias
      * @param object $object
      */
@@ -136,7 +140,7 @@ class Factory implements ArrayAccess
     {
         if (is_string($object)) {
             $this->add($alias, $object);
-        } elseif ($object instanceof Blueprint) {
+        } elseif ($object instanceof Blueprint || $object instanceof Closure) {
             $this->register($alias, $object);
         } else {
             $this->setInstance($alias, $object);
@@ -226,8 +230,14 @@ class Factory implements ArrayAccess
         }
 
         $descriptor = $this->getBlueprint($alias);
-        $obj        = $this->instantiate($descriptor);
 
+        if ($descriptor instanceof Closure) {
+            $obj = $descriptor();
+            $this->setInstance($alias, $obj);
+            return $obj;
+        }
+
+        $obj = $this->instantiate($descriptor);
         if ($descriptor->isSingleton()) {
             $this->setInstance($alias, $obj);
         }
