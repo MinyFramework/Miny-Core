@@ -46,7 +46,7 @@ class WorkerApplication extends BaseApplication
             $runnable = new Job($runnable, $workload, $one_time, $condition);
         }
 
-        $this->log->info('Registering new %s "%s"', ($one_time ? 'one-time job' : 'job'), $name);
+        $this->getFactory()->get('log')->info('Registering new %s "%s"', ($one_time ? 'one-time job' : 'job'), $name);
         $this->jobs[$name] = $runnable;
         return $runnable;
     }
@@ -63,20 +63,21 @@ class WorkerApplication extends BaseApplication
 
     protected function onRun()
     {
+        $log = $this->getFactory()->get('log');
         while (!$this->exit_requested && !empty($this->jobs)) {
 
             foreach ($this->jobs as $name => $job) {
                 if ($job->canRun()) {
                     $job->run($this);
                     if ($job->isOneTimeJob()) {
-                        $this->log->info('Removing one-time job %s', $name);
+                        $log->info('Removing one-time job %s', $name);
                         $this->removeJob($name);
                     }
-                    $this->log->saveLog();
                 } else {
-                    $this->log->info('Skipping job %s', $name);
+                    $log->info('Skipping job %s', $name);
                 }
             }
+            $log->saveLog();
         }
     }
 }

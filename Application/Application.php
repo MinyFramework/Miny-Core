@@ -9,7 +9,6 @@
 
 namespace Miny\Application;
 
-use InvalidArgumentException;
 use Miny\Application\Handlers\ApplicationEventHandlers;
 use Miny\HTTP\Request;
 use Miny\HTTP\Response;
@@ -79,7 +78,7 @@ class Application extends BaseApplication
     public function resource($name, $controller = null, array $parameters = array())
     {
         $parameters['controller'] = $this->registerController($controller ? : $name, $name);
-        return $this->router->resource($name, $parameters);
+        return $this->getFactory()->get('router')->resource($name, $parameters);
     }
 
     /**
@@ -92,12 +91,12 @@ class Application extends BaseApplication
     public function resources($name, $controller = null, array $parameters = array())
     {
         $parameters['controller'] = $this->registerController($controller ? : $name, $name);
-        return $this->router->resources($name, $parameters);
+        return $this->getFactory()->get('router')->resources($name, $parameters);
     }
 
     private function registerController($controller, $name = null)
     {
-        return $this->getFactory()->controllers->register($controller, $name);
+        return $this->getFactory()->get('controllers')->register($controller, $name);
     }
 
     /**
@@ -109,7 +108,7 @@ class Application extends BaseApplication
     public function root($controller, array $parameters = array())
     {
         $parameters['controller'] = $this->registerController($controller);
-        return $this->router->root($parameters);
+        return $this->getFactory()->get('router')->root($parameters);
     }
 
     /**
@@ -129,7 +128,7 @@ class Application extends BaseApplication
         $parameters['controller'] = $this->registerController($controller);
 
         $route = new Route($path, $method, $parameters);
-        return $this->router->route($route, $name);
+        return $this->getFactory()->get('router')->route($route, $name);
     }
 
     /**
@@ -182,7 +181,7 @@ class Application extends BaseApplication
 
     protected function onRun()
     {
-        if (!$this->router->hasRoute('root')) {
+        if (!$this->getFactory()->get('router')->hasRoute('root')) {
             $this->root('index');
         }
         $this->dispatch(Request::getGlobal())->send();
@@ -195,9 +194,11 @@ class Application extends BaseApplication
      */
     public function dispatch(Request $request)
     {
-        $factory     = $this->getFactory();
+        $factory = $this->getFactory();
+        $events  = $factory->get('events');
+
         $old_request = $factory->replace('request', $request);
-        $event       = $this->events->raiseEvent('filter_request', $request);
+        $event       = $events->raiseEvent('filter_request', $request);
 
         $filter = true;
         if ($event->hasResponse()) {
@@ -213,12 +214,12 @@ class Application extends BaseApplication
         ob_start();
         if (!isset($response)) {
             $old_response = $factory->replace('response');
-            $this->controllers->resolve($request->get['controller'], $request, $this->response);
-            $response     = $old_response ? $factory->replace('response', $old_response) : $factory->response;
+            $factory->get('controllers')->resolve($request->get['controller'], $request, $factory->get('response'));
+            $response     = $old_response ? $factory->replace('response', $old_response) : $factory->get('response');
         }
 
         if ($filter) {
-            $this->events->raiseEvent('filter_response', $request, $response);
+            $events->raiseEvent('filter_response', $request, $response);
         }
         $response->addContent(ob_get_clean());
 

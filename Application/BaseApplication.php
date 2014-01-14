@@ -50,14 +50,14 @@ abstract class BaseApplication
         }
         $this->environment = $environment;
 
-        $autoloader          = new AutoLoader(array(
+        $autoloader    = new AutoLoader(array(
             '\Application' => '.',
             '\Miny'        => __DIR__ . '/..',
             '\Modules'     => __DIR__ . '/../../Modules'
         ));
-        $factory             = new Factory();
-        $factory->autoloader = $autoloader;
-        $this->factory       = $factory;
+        $factory       = new Factory();
+        $factory->setInstance('autoloader', $autoloader);
+        $this->factory = $factory;
 
         $this->setDefaultParameters();
         $this->loadConfigFiles();
@@ -65,14 +65,14 @@ abstract class BaseApplication
 
         //Log start of execution
         if (isset($warning)) {
-            $factory->log->warning($warning);
+            $factory->get('log')->warning($warning);
         }
-        $factory->log->info('Starting Miny in %s environment', $environment_names[$environment]);
+        $factory->get('log')->info('Starting Miny in %s environment', $environment_names[$environment]);
 
         //Load modules
         $parameters = $factory->getParameters();
         if (isset($parameters['modules']) && is_array($parameters['modules'])) {
-            $module_handler = $factory->module_handler;
+            $module_handler = $factory->get('module_handler');
             foreach ($parameters['modules'] as $module => $parameters) {
                 if (is_numeric($module) && !is_array($parameters)) {
                     $module     = $parameters;
@@ -205,7 +205,7 @@ abstract class BaseApplication
      */
     public function run()
     {
-        $event      = $this->factory->events;
+        $event      = $this->factory->get('events');
         $parameters = $this->factory->getParameters();
 
         date_default_timezone_set($parameters['default_timezone']);
@@ -227,6 +227,6 @@ abstract class BaseApplication
 
     public function __get($key)
     {
-        return $this->factory->__get($key);
+        return $this->factory->get($key);
     }
 }

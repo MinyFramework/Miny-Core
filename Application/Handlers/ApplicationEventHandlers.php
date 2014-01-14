@@ -37,18 +37,18 @@ class ApplicationEventHandlers
     {
         $this->factory    = $factory;
         $this->parameters = $factory->getParameters();
-        $this->log        = $factory->log;
+        $this->log        = $factory->get('log');
 
         set_exception_handler(array($this, 'handleExceptions'));
     }
 
     public function handleExceptions(Exception $e)
     {
-        $event = $this->factory->events->raiseEvent('uncaught_exception', $e);
+        $event = $this->factory->get('events')->raiseEvent('uncaught_exception', $e);
         if (!$event->isHandled()) {
             throw $e;
         } else {
-            $response = $this->factory->response;
+            $response = $this->factory->get('response');
             $response->addContent($event->getResponse());
             $response->setCode(500);
             $response->send();
@@ -66,11 +66,10 @@ class ApplicationEventHandlers
 
     public function logResponse(Request $request, Response $response)
     {
-        $log = $this->log;
-        $log->info('Response for request [%s] %s', $request->method, $request->path);
-        $log->info('Response status: %s %s', $response->getCode(), $response->getStatus());
+        $this->log->info('Response for request [%s] %s', $request->method, $request->path);
+        $this->log->info('Response status: %s %s', $response->getCode(), $response->getStatus());
         foreach ($response->getHeaders() as $header => $value) {
-            $log->info($header . ': ' . $value);
+            $this->log->info($header . ': ' . $value);
         }
     }
 
@@ -110,15 +109,15 @@ class ApplicationEventHandlers
 
     public function filterRoutes(Request $request)
     {
-        if ($this->factory->router->shortUrls()) {
+        if ($this->factory->get('router')->shortUrls()) {
             $path = $request->path;
         } else {
             $path = $request->get('path', '/');
         }
-        $match = $this->factory->router->match($path, $request->method);
+        $match = $this->factory->get('router')->match($path, $request->method);
         if (!$match) {
             $this->log->info('Route was not found for path [%s] %s', $request->method, $path);
-            $response = $this->factory->response;
+            $response = $this->factory->get('response');
             $response->setCode(404);
             return $response;
         }

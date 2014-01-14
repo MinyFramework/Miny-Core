@@ -92,6 +92,7 @@ class Factory implements ArrayAccess
      * @param string $alias
      * @param string $classname
      * @param boolean $singleton
+     *
      * @return Blueprint
      */
     public function add($alias, $classname, $singleton = true)
@@ -105,6 +106,7 @@ class Factory implements ArrayAccess
      *
      * @param string $alias
      * @param Blueprint|Closure $object
+     *
      * @return Blueprint
      */
     public function register($alias, $object)
@@ -121,6 +123,7 @@ class Factory implements ArrayAccess
      * Adds an object instance.
      *
      * @see Factory::__get()
+     *
      * @param string $alias
      * @param object $object
      */
@@ -139,8 +142,11 @@ class Factory implements ArrayAccess
     public function __set($alias, $object)
     {
         if (is_string($object)) {
-            $this->add($alias, $object);
-        } elseif ($object instanceof Blueprint || $object instanceof Closure) {
+            $object = new Blueprint($object);
+        } elseif (!is_object($object)) {
+            throw new InvalidArgumentException('Factory::__set expects a string or an object.');
+        }
+        if ($object instanceof Blueprint || $object instanceof Closure) {
             $this->register($alias, $object);
         } else {
             $this->setInstance($alias, $object);
@@ -151,9 +157,10 @@ class Factory implements ArrayAccess
      * Checks whether $alias is registered.
      *
      * @param string $alias
+     *
      * @return bool
      */
-    public function __isset($alias)
+    public function has($alias)
     {
         $alias = $this->getAlias($alias);
         return isset($this->blueprints[$alias]) || isset($this->objects[$alias]);
@@ -205,7 +212,7 @@ class Factory implements ArrayAccess
         }
 
         if ($object === null) {
-            $this->__get($alias);
+            $this->get($alias);
         } elseif (is_object($object)) {
             $this->__set($alias, $object);
         } else {
@@ -220,9 +227,10 @@ class Factory implements ArrayAccess
      * The method creates the object instance if needed.
      *
      * @param string $alias
+     *
      * @return object
      */
-    public function __get($alias)
+    public function get($alias)
     {
         $alias = $this->getAlias($alias);
         if (isset($this->objects[$alias])) {
@@ -347,7 +355,7 @@ class Factory implements ArrayAccess
                 //callback
                 if (strpos($var, '::') !== false) {
                     list($obj_name, $method) = explode('::', $str, 2);
-                    $var = array($this->__get($obj_name), $method);
+                    $var = array($this->get($obj_name), $method);
                 }
                 break;
 
@@ -375,7 +383,7 @@ class Factory implements ArrayAccess
             $arr      = explode('::', $str);
             $obj_name = array_shift($arr);
             $method   = array_shift($arr);
-            $object   = $this->__get($obj_name);
+            $object   = $this->get($obj_name);
 
             $callback = array($object, $method);
             if (!is_callable($callback)) {
@@ -385,11 +393,23 @@ class Factory implements ArrayAccess
             return call_user_func_array($callback, $this->parameters->resolveLinks($arr));
         } elseif (($pos = strpos($str, '->')) !== false) {
             list($obj_name, $property) = explode('->', $str, 2);
-            return $this->__get($obj_name)->$property;
+            return $this->get($obj_name)->$property;
         } else {
-            return $this->__get($str);
+            return $this->get($str);
         }
     }
+
+    public function __isset($alias)
+    {
+        return $this->has($alias);
+    }
+
+    public function __get($alias)
+    {
+        return $this->get($alias);
+    }
+
+    /* ArrayAccess interface */
 
     public function offsetExists($offset)
     {
