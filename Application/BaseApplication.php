@@ -87,9 +87,9 @@ abstract class BaseApplication
     {
         $this->factory->getParameters()->addParameters(array(
             'default_timezone' => 'UTC',
-            'root'             => '.',
+            'root'             => realpath('.'),
             'log'              => array(
-                'path'  => './logs',
+                'path'  => realpath('./logs'),
                 'debug' => $this->isDeveloperEnvironment()
             ),
         ));
