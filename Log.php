@@ -57,10 +57,9 @@ class Log
         $log        = $this;
         register_shutdown_function(function () use ($log) {
             if (defined('START_TIME')) {
-                $message = sprintf('Execution time: %lf s', microtime(true) - START_TIME);
-                $log->write($message, 'info');
+                $log->info('Execution time: %lf s', microtime(true) - START_TIME);
             }
-            $log->write("End of execution.\n", 'info');
+            $log->info("End of execution.\n");
             $log->saveLog();
         });
         $this->setDebugMode($debug);
