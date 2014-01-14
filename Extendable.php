@@ -18,6 +18,7 @@ class Extendable
      * @var callable[]
      */
     private $plugins = array();
+    private $setters = array();
 
     /**
      *
@@ -59,6 +60,25 @@ class Extendable
         }
     }
 
+    public function addSetter($property, $setter = null)
+    {
+        if ($setter === null) {
+            $setter = 'set' . ucfirst($property);
+        }
+        $this->setters[$setter] = $property;
+    }
+
+    public function addSetters(array $setters)
+    {
+        foreach ($setters as $property => $setter) {
+            if (is_numeric($property)) {
+                $property = $setter;
+                $setter   = 'set' . ucfirst($setter);
+            }
+            $this->setters[$setter] = $property;
+        }
+    }
+
     /**
      * @param string $method
      * @param array $args
@@ -70,9 +90,13 @@ class Extendable
         if (!is_string($method)) {
             throw new InvalidArgumentException('Parameter "method" must be string');
         }
-        if (!isset($this->plugins[$method])) {
-            throw new BadMethodCallException('Method not found: ' . $method);
+        if (isset($this->setters[$method])) {
+            $this->{$this->setters[$method]} = current($args);
+        } else {
+            if (!isset($this->plugins[$method])) {
+                throw new BadMethodCallException('Method not found: ' . $method);
+            }
+            return call_user_func_array($this->plugins[$method], $args);
         }
-        return call_user_func_array($this->plugins[$method], $args);
     }
 }

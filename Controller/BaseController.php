@@ -20,7 +20,7 @@ abstract class BaseController extends Extendable
     protected $app;
 
     /**
-     * @param Application $app
+     * @param BaseApplication $app
      */
     public function __construct(BaseApplication $app)
     {
