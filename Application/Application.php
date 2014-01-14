@@ -56,15 +56,16 @@ class Application extends BaseApplication
         parent::registerDefaultServices();
         $this->registerEventHandlers();
 
-        $this->add('controllers', '\Miny\Controller\ControllerCollection')
-                ->setArguments('&app', '{@controllers:namespace}');
-        $this->add('router', '\Miny\Routing\Router')
+        $factory = $this->getFactory();
+        $factory->add('controllers', '\Miny\Controller\ControllerCollection')
+                ->setArguments($this, '{@controllers:namespace}');
+        $factory->add('router', '\Miny\Routing\Router')
                 ->setArguments('@router:prefix', '@router:suffix', '@router:default_parameters', '@router:short_urls');
-        $this->add('session', '\Miny\Session\Session')
+        $factory->add('session', '\Miny\Session\Session')
                 ->addMethodCall('open');
-        $this->add('controller', '\Miny\Controller\Controller')
-                ->setArguments('&app');
-        $this->add('response', '\Miny\HTTP\Response');
+        $factory->add('controller', '\Miny\Controller\Controller')
+                ->setArguments($this);
+        $factory->add('response', '\Miny\HTTP\Response');
     }
 
     /**
