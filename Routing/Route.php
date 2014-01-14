@@ -61,7 +61,8 @@ class Route
         if (!is_string($path)) {
             throw new InvalidArgumentException('Path must be a string');
         }
-        if ($method !== null && !in_array(strtoupper($method), self::$methods)) {
+        $method = strtoupper($method);
+        if ($method !== null && !in_array($method, self::$methods)) {
             throw new BadMethodException('Unexpected route method: ' . $method);
         }
         $this->method     = $method;
