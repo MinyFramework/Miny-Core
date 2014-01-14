@@ -119,7 +119,9 @@ class Application extends BaseApplication
      * @param string|null $method
      * @param string|null $name
      * @param array $parameters
+     *
      * @return Route
+     *
      * @throws UnexpectedValueException
      */
     public function route($path, $controller, $method = null, $name = null, array $parameters = array())
@@ -130,20 +132,52 @@ class Application extends BaseApplication
         return $this->router->route($route, $name);
     }
 
-    public function __call($method, $args)
+    /**
+     *
+     * @param string $path
+     * @param mixed $controller
+     * @param string|null $name
+     * @param array $parameters
+     */
+    public function get($path, $controller, $name = null, array $parameters = array())
     {
-        switch ($method) {
-            case 'get':
-            case 'post':
-            case 'put':
-            case 'delete':
-                array_splice($args, 2, 0, $method);
-                call_user_func_array(array($this, 'route'), $args);
-                break;
+        $this->route($path, $controller, 'GET', $name, $parameters);
+    }
 
-            default:
-                throw new InvalidArgumentException(sprintf('Method %s does not exist.', $method));
-        }
+    /**
+     *
+     * @param string $path
+     * @param mixed $controller
+     * @param string|null $name
+     * @param array $parameters
+     */
+    public function post($path, $controller, $name = null, array $parameters = array())
+    {
+        $this->route($path, $controller, 'POST', $name, $parameters);
+    }
+
+    /**
+     *
+     * @param string $path
+     * @param mixed $controller
+     * @param string|null $name
+     * @param array $parameters
+     */
+    public function put($path, $controller, $name = null, array $parameters = array())
+    {
+        $this->route($path, $controller, 'PUT', $name, $parameters);
+    }
+
+    /**
+     *
+     * @param string $path
+     * @param mixed $controller
+     * @param string|null $name
+     * @param array $parameters
+     */
+    public function delete($path, $controller, $name = null, array $parameters = array())
+    {
+        $this->route($path, $controller, 'DELETE', $name, $parameters);
     }
 
     protected function onRun()
