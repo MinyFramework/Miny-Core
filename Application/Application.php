@@ -10,14 +10,11 @@
 namespace Miny\Application;
 
 use Miny\Application\Handlers\ApplicationEventHandlers;
-use Miny\Controller\ControllerCollection;
 use Miny\HTTP\Request;
 use Miny\HTTP\Response;
 use Miny\Routing\Resource;
 use Miny\Routing\Resources;
 use Miny\Routing\Route;
-use Miny\Routing\Router;
-use Miny\Session\Session;
 use UnexpectedValueException;
 
 require_once __DIR__ . '/BaseApplication.php';
