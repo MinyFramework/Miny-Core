@@ -91,8 +91,8 @@ class Session implements ArrayAccess, IteratorAggregate, Countable
      */
     private function updateFlash()
     {
-        foreach (array_keys($_SESSION['flash']) as $key) {
-            if ($_SESSION['flash'][$key]['ttl'] -- == 0) {
+        foreach ($_SESSION['flash'] as $key => &$data) {
+            if ($data['ttl'] -- == 0) {
                 unset($_SESSION['flash'][$key]);
             }
         }
@@ -167,9 +167,17 @@ class Session implements ArrayAccess, IteratorAggregate, Countable
 
     //Session data methods
 
+    public function flash($key, $data, $ttl)
+    {
+        if (!is_numeric($ttl)) {
+            throw new InvalidArgumentException('Time-to-live must be a number.');
+        }
+        $_SESSION['flash'][$key] = array('data' => $data, 'ttl' => $ttl);
+    }
+
     public function __set($key, $data)
     {
-        $_SESSION['flash'][$key] = array('data' => $data, 'ttl' => 1);
+        $this->flash($key, $data, 1);
     }
 
     public function &__get($key)
@@ -192,20 +200,15 @@ class Session implements ArrayAccess, IteratorAggregate, Countable
 
     public function __call($key, $arguments)
     {
-        $count = count($arguments);
-        switch ($count) {
+        switch (count($arguments)) {
             case 0:
-                throw new BadMethodCallException('Method must have at least one argument.');
+                throw new BadMethodCallException('Flash calls must have at least one argument.');
             case 1:
                 $arguments[1] = 1;
                 break;
-            default:
-                if (!is_numeric($arguments[1])) {
-                    throw new InvalidArgumentException('Secound argument must be a number.');
-                }
         }
 
-        $_SESSION['flash'][$key] = array('data' => $arguments[0], 'ttl' => $arguments[1]);
+        $this->flash($key, $arguments[0], $arguments[1]);
     }
 
     //Interfaces
