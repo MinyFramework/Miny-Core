@@ -9,6 +9,7 @@
 
 namespace Miny\Application;
 
+use InvalidArgumentException;
 use Miny\Application\Handlers\ApplicationEventHandlers;
 use Miny\HTTP\Request;
 use Miny\HTTP\Response;
@@ -24,6 +25,7 @@ class Application extends BaseApplication
 
     protected function setDefaultParameters()
     {
+        parent::setDefaultParameters();
         $this->getFactory()->getParameters()->addParameters(array(
             'router'      => array(
                 'prefix'             => '/',
@@ -40,12 +42,14 @@ class Application extends BaseApplication
 
     protected function registerEventHandlers()
     {
-        $eh = new ApplicationEventHandlers($this->getFactory());
-        $this->getBlueprint('events')
-                ->addMethodCall('register', 'filter_request', array($eh, 'logRequest'))
-                ->addMethodCall('register', 'filter_request', array($eh, 'filterRoutes'))
-                ->addMethodCall('register', 'filter_response', array($eh, 'setContentType'))
-                ->addMethodCall('register', 'filter_response', array($eh, 'logResponse'));
+        $factory = $this->getFactory();
+
+        $event_handlers = new ApplicationEventHandlers($factory);
+        $factory->getBlueprint('events')
+                ->addMethodCall('register', 'filter_request', array($event_handlers, 'logRequest'))
+                ->addMethodCall('register', 'filter_request', array($event_handlers, 'filterRoutes'))
+                ->addMethodCall('register', 'filter_response', array($event_handlers, 'setContentType'))
+                ->addMethodCall('register', 'filter_response', array($event_handlers, 'logResponse'));
     }
 
     protected function registerDefaultServices()
@@ -136,8 +140,9 @@ class Application extends BaseApplication
                 array_splice($args, 2, 0, $method);
                 call_user_func_array(array($this, 'route'), $args);
                 break;
+
             default:
-                return parent::__call($method, $args);
+                throw new InvalidArgumentException(sprintf('Method %s does not exist.', $method));
         }
     }
 

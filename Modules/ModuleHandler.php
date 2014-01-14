@@ -43,7 +43,7 @@ class ModuleHandler
         $this->application = $app;
         $this->log         = $log;
 
-        $app->getBlueprint('events')
+        $app->getFactory()->getBlueprint('events')
                 ->addMethodCall('register', 'before_run', array($this, 'processConditionalRunnables'));
     }
 

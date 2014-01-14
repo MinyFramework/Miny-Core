@@ -21,27 +21,12 @@ abstract class Controller extends BaseController
     protected $default_action = 'index';
 
     /**
-     * @param string $path
-     * @param array $get
-     * @param array $post
-     * @param array $cookie
-     * @return Response
-     */
-    public function request($path, array $get = null, array $post = null, array $cookie = null)
-    {
-        $response = $this->app->dispatch(new Request($path, $get, $post, $cookie, Request::SUB_REQUEST));
-        $this->getHeaders()->addHeaders($response->getHeaders());
-
-        foreach ($response->getCookies() as $name => $value) {
-            $this->cookie($name, $value);
-        }
-        return $response;
-    }
-
-    /**
      * @param string $action
      * @param Request $request
      * @param Response $response
+     *
+     * @return mixed
+     *
      * @throws InvalidArgumentException
      */
     public function run($action, Request $request, Response $response)

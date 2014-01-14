@@ -11,13 +11,12 @@ namespace Miny\Application;
 
 require_once __DIR__ . '/../AutoLoader.php';
 
-use ArrayAccess;
 use InvalidArgumentException;
 use Miny\AutoLoader;
 use Miny\Factory\Factory;
 use UnexpectedValueException;
 
-abstract class BaseApplication implements ArrayAccess
+abstract class BaseApplication
 {
     const ENV_PROD   = 1;
     const ENV_DEV    = 2;
@@ -37,36 +36,44 @@ abstract class BaseApplication implements ArrayAccess
     /**
      * @param string $directory
      * @param int $environment
-     * @param boolean $include_configs
      */
-    public function __construct($directory, $environment = self::ENV_PROD, $include_configs = true)
+    public function __construct($environment = self::ENV_PROD)
     {
+        $environment_names = array(
+            self::ENV_PROD => 'production',
+            self::ENV_DEV  => 'development',
+            self::ENV_TEST => 'testing'
+        );
+        if (!isset($environment_names[$environment])) {
+            $warning     = 'Unknown envitonment option "' . $environment . '". Assuming production environment.';
+            $environment = self::ENV_PROD;
+        }
         $this->environment = $environment;
-        $autoloader        = new AutoLoader(array(
-            '\Application' => $directory,
+
+        $autoloader          = new AutoLoader(array(
+            '\Application' => '.',
             '\Miny'        => __DIR__ . '/..',
             '\Modules'     => __DIR__ . '/../../Modules'
         ));
-        $this->factory     = new Factory(array(
-            'default_timezone' => 'UTC',
-            'root'             => $directory,
-            'log'              => array(
-                'path'  => $directory . '/logs',
-                'debug' => $this->isDeveloperEnvironment()
-            ),
-        ));
-        $this->autoloader  = $autoloader;
-        $this->setDefaultParameters();
-        if ($include_configs) {
-            $this->loadConfigFiles($directory);
-        }
-        $this->registerDefaultServices();
-        $env = $this->isProductionEnvironment() ? 'production' : 'development';
-        $this->log->info('Starting Miny in %s environment', $env);
+        $factory             = new Factory();
+        $factory->autoloader = $autoloader;
+        $this->factory       = $factory;
 
-        if (isset($this['modules']) && is_array($this['modules'])) {
-            $module_handler = $this->module_handler;
-            foreach ($this['modules'] as $module => $parameters) {
+        $this->setDefaultParameters();
+        $this->loadConfigFiles();
+        $this->registerDefaultServices();
+
+        //Log start of execution
+        if (isset($warning)) {
+            $factory->log->warning($warning);
+        }
+        $factory->log->info('Starting Miny in %s environment', $environment_names[$environment]);
+
+        //Load modules
+        $parameters = $factory->getParameters();
+        if (isset($parameters['modules']) && is_array($parameters['modules'])) {
+            $module_handler = $factory->module_handler;
+            foreach ($parameters['modules'] as $module => $parameters) {
                 if (is_numeric($module) && !is_array($parameters)) {
                     $module     = $parameters;
                     $parameters = array();
@@ -76,20 +83,32 @@ abstract class BaseApplication implements ArrayAccess
         }
     }
 
+    protected function setDefaultParameters()
+    {
+        $this->factory->getParameters()->addParameters(array(
+            'default_timezone' => 'UTC',
+            'root'             => '.',
+            'log'              => array(
+                'path'  => './logs',
+                'debug' => $this->isDeveloperEnvironment()
+            ),
+        ));
+    }
+
     /**
      * @param string $directory
      */
-    private function loadConfigFiles($directory)
+    private function loadConfigFiles()
     {
         $config_files = array(
-            '/config/config.common.php' => self::ENV_COMMON,
-            '/config/config.dev.php'    => self::ENV_DEV,
-            '/config/config.test.php'   => self::ENV_TEST,
-            '/config/config.php'        => self::ENV_PROD
+            './config/config.common.php' => self::ENV_COMMON,
+            './config/config.dev.php'    => self::ENV_DEV,
+            './config/config.test.php'   => self::ENV_TEST,
+            './config/config.php'        => self::ENV_PROD
         );
         foreach ($config_files as $file => $env) {
             try {
-                $this->loadConfig($directory . $file, $env);
+                $this->loadConfig($file, $env);
             } catch (InvalidArgumentException $e) {
 
             }
@@ -104,14 +123,10 @@ abstract class BaseApplication implements ArrayAccess
         return $this->factory;
     }
 
-    protected function setDefaultParameters()
-    {
-
-    }
-
     /**
      * @param string $file
      * @param int $env
+     *
      * @throws InvalidArgumentException
      * @throws UnexpectedValueException
      */
@@ -127,7 +142,7 @@ abstract class BaseApplication implements ArrayAccess
         if (!is_array($config)) {
             throw new UnexpectedValueException('Invalid configuration file: ' . $file);
         }
-        $this->getParameters()->addParameters($config);
+        $this->factory->getParameters()->addParameters($config);
     }
 
     /**
@@ -190,9 +205,10 @@ abstract class BaseApplication implements ArrayAccess
      */
     public function run()
     {
-        $event = $this->factory->events;
+        $event      = $this->factory->events;
+        $parameters = $this->factory->getParameters();
 
-        date_default_timezone_set($this['default_timezone']);
+        date_default_timezone_set($parameters['default_timezone']);
         $event->raiseEvent('before_run');
         register_shutdown_function(function () use ($event) {
             $event->raiseEvent('shutdown');
@@ -212,31 +228,5 @@ abstract class BaseApplication implements ArrayAccess
     public function __get($key)
     {
         return $this->factory->__get($key);
-    }
-
-    public function __call($method, $args)
-    {
-        return call_user_func_array(array($this->factory, $method), $args);
-    }
-    /* ArrayAccess interface */
-
-    public function offsetExists($offset)
-    {
-        return $this->factory->offsetExists($offset);
-    }
-
-    public function offsetGet($offset)
-    {
-        return $this->factory->offsetGet($offset);
-    }
-
-    public function offsetSet($offset, $value)
-    {
-        $this->factory->offsetSet($offset, $value);
-    }
-
-    public function offsetUnset($offset)
-    {
-        $this->factory->offsetUnset($offset);
     }
 }
