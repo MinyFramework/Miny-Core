@@ -9,6 +9,7 @@
 
 namespace Miny\Utils;
 
+use ArrayAccess;
 use InvalidArgumentException;
 use OutOfBoundsException;
 
@@ -23,7 +24,7 @@ class ArrayUtils
     /**
      * @param string|array $path
      * @return array
-     * 
+     *
      * @throws InvalidArgumentException
      */
     private static function createPath($path)
@@ -44,13 +45,16 @@ class ArrayUtils
     /**
      * Determines whether the value represented by $path exists in $array.
      *
-     * @param array $array
+     * @param array|ArrayAccess $array
      * @param array|string $parts An array containing the keys or a string delimited by :
      *
      * @return bool
      */
-    public static function existsByPath(array $array, $parts)
+    public static function existsByPath($array, $parts)
     {
+        if (!is_array($array) && !$array instanceof ArrayAccess) {
+            throw new InvalidArgumentException('ArrayUtils::existsByPath expects an array or an ArrayAccess object.');
+        }
         $parts = self::createPath($parts);
         foreach ($parts as $k) {
             if (!is_array($array) || !array_key_exists($k, $array)) {
@@ -65,14 +69,17 @@ class ArrayUtils
      * Walks through the given $array and returns the value represented by $path. Returns $default if the requested
      * element does not exist.
      *
-     * @param array $array
+     * @param array|ArrayAccess $array
      * @param array|string $parts An array containing the keys or a string delimited by :
      * @param mixed $default
      *
      * @return mixed
      */
-    public static function getByPath(array $array, $parts, $default = null)
+    public static function getByPath($array, $parts, $default = null)
     {
+        if (!is_array($array) && !$array instanceof ArrayAccess) {
+            throw new InvalidArgumentException('ArrayUtils::existsByPath expects an array or an ArrayAccess object.');
+        }
         $parts = self::createPath($parts);
         foreach ($parts as $k) {
             if (!array_key_exists($k, $array)) {
@@ -86,7 +93,7 @@ class ArrayUtils
     /**
      * Walks through the given $array and returns a reference to the value represented by $path.
      *
-     * @param array $array
+     * @param array|ArrayAccess $array
      * @param array|string $parts An array containing the keys or a string delimited by :
      * @param bool $create
      *
