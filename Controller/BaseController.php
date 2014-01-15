@@ -11,12 +11,11 @@ namespace Miny\Controller;
 
 use Miny\Application\BaseApplication;
 use Miny\Extendable;
-use Miny\Utils\ArrayUtils;
 
 abstract class BaseController extends Extendable
 {
     /**
-     * @var Application
+     * @var BaseApplication
      */
     protected $app;
 
@@ -29,9 +28,10 @@ abstract class BaseController extends Extendable
         $this->init();
     }
 
-    public function getConfig() {
+    public function getConfig()
+    {
         $parameters = $this->app->getFactory()->getParameters();
-        return ArrayUtils::getByPath($parameters, func_get_args());
+        return $parameters[implode(':', func_get_args())];
     }
 
     protected function init()
