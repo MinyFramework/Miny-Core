@@ -5,7 +5,6 @@ namespace Miny\Application;
 use Closure;
 use InvalidArgumentException;
 use Miny\Controller\WorkerController;
-use UnexpectedValueException;
 
 class Job
 {
@@ -25,24 +24,12 @@ class Job
             } else {
                 throw new InvalidArgumentException('Invalid runnable set.');
             }
-            $runnable = array($this->getClassName($class), $method);
+            $runnable = array($class, $method);
         }
         $this->runnable      = $runnable;
         $this->one_time      = $one_time;
         $this->run_condition = $run_condition;
         $this->workload      = $workload;
-    }
-
-    private function getClassName($name)
-    {
-        if (class_exists($name)) {
-            return $name;
-        }
-        $class = '\Application\Controllers\\' . ucfirst($name) . 'Controller';
-        if (class_exists($class)) {
-            return $class;
-        }
-        throw new UnexpectedValueException('Class not exists: ' . $class);
     }
 
     public function isOneTimeJob()
@@ -77,10 +64,20 @@ class Job
             if (is_string($class)) {
                 //Lazily instantiate WorkerController
                 //Keep it in the same variable for later use
-                $class = new $class($app);
-
+                $factory = $app->getFactory();
+                if ($factory->has($class . '_controller')) {
+                    $class = $factory->get($class . '_controller');
+                } else {
+                    if (!class_exists($class)) {
+                        $class = '\Application\Controllers\\' . ucfirst($class) . 'Controller';
+                        if (!class_exists($class)) {
+                            throw new \UnexpectedValueException('Class not found: ' . $class);
+                        }
+                    }
+                    $class = new $class($app);
+                }
                 //Cache our runnable to avoid reinstantiation
-                $this->runnable = array($class, $method);
+                $this->runnable[0] = $class;
             }
 
             if ($class instanceof WorkerController) {

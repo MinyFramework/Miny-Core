@@ -18,14 +18,22 @@ class WorkerApplication extends BaseApplication
     private $jobs           = array();
     private $exit_requested = false;
 
-    public function __construct($directory, $environment = self::ENV_PROD, $include_configs = true)
+    public function __construct($environment = self::ENV_PROD)
     {
         ignore_user_abort(true);
         set_time_limit(0);
         pcntl_signal(SIGTERM, function () {
             exit;
         });
-        parent::__construct($directory, $environment, $include_configs);
+        parent::__construct($environment);
+    }
+
+    protected function registerDefaultServices()
+    {
+        parent::registerDefaultServices();
+
+        $this->getFactory()->add('controller', '\Miny\Controller\WorkerController')
+                ->setArguments($this);
     }
 
     /**
