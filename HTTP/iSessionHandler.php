@@ -1,6 +1,6 @@
 <?php
 
-namespace Miny\Session;
+namespace Miny\HTTP;
 
 use SessionHandlerInterface;
 

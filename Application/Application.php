@@ -61,7 +61,7 @@ class Application extends BaseApplication
                 ->setArguments($this, '{@controllers:namespace}');
         $factory->add('router', '\Miny\Routing\Router')
                 ->setArguments('@router:prefix', '@router:suffix', '@router:default_parameters', '@router:short_urls');
-        $factory->add('session', '\Miny\Session\Session')
+        $factory->add('session', '\Miny\HTTP\Session')
                 ->addMethodCall('open');
         $factory->add('controller', '\Miny\Controller\Controller')
                 ->setArguments($this);

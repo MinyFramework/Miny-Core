@@ -7,7 +7,7 @@
  * For licensing information see the LICENSE file.
  */
 
-namespace Miny\Session;
+namespace Miny\HTTP;
 
 use ArrayAccess;
 use ArrayIterator;
