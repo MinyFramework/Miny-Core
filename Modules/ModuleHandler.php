@@ -92,10 +92,16 @@ class ModuleHandler
     public function registerEventHandlers()
     {
         $factory = $this->application->getFactory();
-        $events = $factory->get('events');
+        $events  = $factory->get('events');
         foreach ($this->modules as $module) {
             foreach ($module->eventHandlers() as $event_name => $handler) {
-                $events->register($event_name, $handler);
+                if (is_array($handler) && !is_callable($handler)) {
+                    foreach ($handler as $callback) {
+                        $events->register($event_name, $callback);
+                    }
+                } else {
+                    $events->register($event_name, $handler);
+                }
             }
         }
     }
