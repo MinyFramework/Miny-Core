@@ -15,10 +15,11 @@ use Miny\HTTP\Response;
 
 abstract class Controller extends BaseController
 {
-    /**
-     * @var string
-     */
-    protected $default_action = 'index';
+
+    public function getDefaultAction()
+    {
+        return 'index';
+    }
 
     /**
      * @param string $action
@@ -47,7 +48,6 @@ abstract class Controller extends BaseController
             $response->redirect($path);
         });
 
-        $action = $action ? : $this->default_action;
         return $this->{$action . 'Action'}($request, $response);
     }
 }

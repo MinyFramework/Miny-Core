@@ -113,6 +113,12 @@ class ControllerCollection
 
         $event_handler = $this->application->getFactory()->events;
 
+        if (empty($action)) {
+            if ($controller instanceof Controller) {
+                $action = $controller->getDefaultAction();
+            }
+        }
+
         $event_handler->raiseEvent('onControllerLoaded', $controller, $action);
 
         if ($controller instanceof Controller) {
