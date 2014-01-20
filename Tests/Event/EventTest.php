@@ -19,7 +19,6 @@ class EventTest extends \PHPUnit_Framework_TestCase
     {
         $event = new Event('test_event');
         $this->assertEquals('test_event', $event->getName());
-        $this->assertEquals('test_event', (string) $event);
     }
 
     public function testGetParameters()

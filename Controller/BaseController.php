@@ -20,7 +20,7 @@ abstract class BaseController extends Extendable
     protected $app;
 
     /**
-     * @param BaseApplication $app
+     * @param BaseApplication $app The current application instance.
      */
     public function __construct(BaseApplication $app)
     {
@@ -28,6 +28,11 @@ abstract class BaseController extends Extendable
         $this->init();
     }
 
+    /**
+     * Shortcut to fetch a configuration value.
+     *
+     * @return mixed
+     */
     public function getConfig()
     {
         $parameters = $this->app->getFactory()->getParameters();

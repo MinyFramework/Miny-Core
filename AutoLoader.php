@@ -60,12 +60,11 @@ class AutoLoader
     public function load($class)
     {
         $temp = '\\' . $class;
-        /*
-         * We look for the longest matching namespace so we are trimming
-         * from the right.
-         */
+
+        // We look for the longest matching namespace so we are trimming from the right.
         while (!isset($this->map[$temp])) {
             if (($pos = strrpos($temp, '\\')) === false) {
+                // The class/namespace was not registered.
                 return;
             }
             $temp = substr($temp, 0, $pos);

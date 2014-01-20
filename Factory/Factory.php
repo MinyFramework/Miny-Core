@@ -18,11 +18,10 @@ use UnexpectedValueException;
 
 /**
  * Factory class
+ *
  * Responsible for storing Blueprints and their dependencies, parameters.
  * Factory instantiates stored objects on demand and injects them with specified
  * dependencies.
- *
- * @author  Dániel Buga
  */
 class Factory implements ArrayAccess
 {

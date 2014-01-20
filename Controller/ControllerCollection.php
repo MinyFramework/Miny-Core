@@ -19,7 +19,7 @@ use UnexpectedValueException;
 class ControllerCollection
 {
     /**
-     * @var BaseController|Closure|string []
+     * @var (BaseController|Closure|string)[]
      */
     private $controllers = array();
     private $controller_namespace;
@@ -71,7 +71,7 @@ class ControllerCollection
      * @return BaseController|Closure
      * @throws UnexpectedValueException
      */
-    public function getController($class)
+    private function getController($class)
     {
         if (!is_string($class)) {
             throw new InvalidArgumentException('Controller name must be a string');
@@ -100,11 +100,17 @@ class ControllerCollection
     }
 
     /**
-     * @param string $class
-     * @param string $action
+     * Loads and runs the requested controller.
+     * This method looks for the registered class.
+     * If a string was registered it loads the controller from factory or instantiates it by its classname.
+     * This method also raises two events (onControllerLoaded and onControllerFinished) that allow modifying
+     * the behaviour of the controller.
+     *
+     * @param string $class The controller name or alias in Factory.
      * @param Request $request
      * @param Response $response
-     * @throws InvalidArgumentException
+     *
+     * @throws InvalidArgumentException when the controller is not an instance of Controller or Closure
      */
     public function resolve($class, Request $request, Response $response)
     {
