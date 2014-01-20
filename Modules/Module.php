@@ -63,6 +63,11 @@ abstract class Module
         return $this->conditional_runnables;
     }
 
+    public function eventHandlers()
+    {
+        return array();
+    }
+
     public function ifModule($module, $runnable)
     {
         if (!is_callable($runnable) || !$runnable instanceof Closure) {

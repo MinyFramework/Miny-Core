@@ -44,7 +44,8 @@ class ModuleHandler
         $this->log         = $log;
 
         $app->getFactory()->getBlueprint('events')
-                ->addMethodCall('register', 'before_run', array($this, 'processConditionalRunnables'));
+                ->addMethodCall('register', 'before_run', array($this, 'processConditionalRunnables'))
+                ->addMethodCall('register', 'before_run', array($this, 'registerEventHandlers'));
     }
 
     private function log()
@@ -84,6 +85,17 @@ class ModuleHandler
                 if (isset($this->modules[$module_name])) {
                     $runnable($this->application);
                 }
+            }
+        }
+    }
+
+    public function registerEventHandlers()
+    {
+        $factory = $this->application->getFactory();
+        $events = $factory->get('events');
+        foreach ($this->modules as $module) {
+            foreach ($module->eventHandlers() as $event_name => $handler) {
+                $events->register($event_name, $handler);
             }
         }
     }
