@@ -15,19 +15,19 @@ use Miny\Event\Exceptions\EventHandlerException;
 class EventDispatcher
 {
     /**
-     * @var callback[]
+     * @var (callback|Object)[]
      */
     private $handlers = array();
 
     /**
      * @param string $event
-     * @param callback $handler
+     * @param callback|Object $handler
      * @param int $place
      * @throws EventHandlerException
      */
     public function register($event, $handler, $place = null)
     {
-        if (!is_callable($handler)) {
+        if (!is_callable($handler) && !is_object($handler)) {
             throw new EventHandlerException('Handler is not callable for event ' . $event);
         }
         if (!isset($this->handlers[$event])) {
@@ -55,6 +55,13 @@ class EventDispatcher
             $parameters = $event->getParameters();
 
             foreach ($this->handlers[$name] as $handler) {
+                if (is_object($handler)) {
+                    if (!method_exists($handler, $name)) {
+                        $message = sprintf('Event handler %s does not have method "%s"', get_class($handler), $name);
+                        throw new EventHandlerException($message);
+                    }
+                    $handler = array($handler, $name);
+                }
                 $response = call_user_func_array($handler, $parameters);
                 if ($response !== null) {
                     $event->setResponse($response);
