@@ -111,12 +111,18 @@ class ControllerCollection
         $controller = $this->getController($class);
         $action     = $request->get('action');
 
+        $event_handler = $this->application->getFactory()->events;
+
+        $event_handler->raiseEvent('onControllerLoaded', $controller, $action);
+
         if ($controller instanceof Controller) {
-            $controller->run($action, $request, $response);
+            $retval = $controller->run($action, $request, $response);
         } elseif ($controller instanceof Closure) {
-            $controller($request, $action, $response);
+            $retval = $controller($request, $action, $response);
         } else {
             throw new InvalidArgumentException('Invalid controller: ' . $class);
         }
+
+        $event_handler->raiseEvent('onControllerFinished', $controller, $action, $retval);
     }
 }
