@@ -9,6 +9,7 @@
 
 namespace Miny\Event;
 
+use Closure;
 use InvalidArgumentException;
 use Miny\Event\Exceptions\EventHandlerException;
 
@@ -55,7 +56,7 @@ class EventDispatcher
             $parameters = $event->getParameters();
 
             foreach ($this->handlers[$name] as $handler) {
-                if (is_object($handler)) {
+                if (is_object($handler) && !$handler instanceof Closure) {
                     if (!method_exists($handler, $name)) {
                         $message = sprintf('Event handler %s does not have method "%s"', get_class($handler), $name);
                         throw new EventHandlerException($message);
