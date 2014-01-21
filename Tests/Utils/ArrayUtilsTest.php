@@ -5,8 +5,6 @@ namespace Miny\Utils;
 use OutOfBoundsException;
 use PHPUnit_Framework_TestCase;
 
-require_once dirname(__FILE__) . '/../../Utils/ArrayUtils.php';
-
 class ArrayUtilsTest extends PHPUnit_Framework_TestCase
 {
     private $array;
@@ -29,6 +27,24 @@ class ArrayUtilsTest extends PHPUnit_Framework_TestCase
         $this->assertFalse(ArrayUtils::existsByPath($this->array, array('key_b', 'subkey_a')));
     }
 
+    /**
+     * @expectedException InvalidArgumentException
+     * @expectedExceptionMessage Path must be an array or a string.
+     */
+    public function testExistsByPathException()
+    {
+        $this->assertTrue(ArrayUtils::existsByPath($this->array, 5));
+    }
+
+    /**
+     * @expectedException InvalidArgumentException
+     * @expectedExceptionMessage ArrayUtils::existsByPath expects an array or an ArrayAccess object.
+     */
+    public function testExistsByPathArrayException()
+    {
+        $this->assertTrue(ArrayUtils::existsByPath('something', 'path:to:something'));
+    }
+
     public function testGetByPath()
     {
         $this->assertEquals('value_a', ArrayUtils::getByPath($this->array, 'key_a:subkey_a'));
@@ -37,16 +53,29 @@ class ArrayUtilsTest extends PHPUnit_Framework_TestCase
         $this->assertEquals('default', ArrayUtils::getByPath($this->array, array('key_a', 'subkey_b'), 'default'));
     }
 
+    /**
+     * @expectedException InvalidArgumentException
+     * @expectedExceptionMessage ArrayUtils::getByPath expects an array or an ArrayAccess object.
+     */
+    public function testGetByPathArrayException()
+    {
+        $this->assertTrue(ArrayUtils::getByPath('something', 'path:to:something'));
+    }
+
     public function testFindByPath()
     {
         $this->assertEquals('value_a', ArrayUtils::findByPath($this->array, 'key_a:subkey_a'));
         $this->assertEquals('value_a', ArrayUtils::findByPath($this->array, array('key_a', 'subkey_a')));
-        try {
-            ArrayUtils::findByPath($this->array, array('key_a', 'subkey_b'));
-            $this->fail('findByPath should throw an exception when a nonexistent item is requested.');
-        } catch (OutOfBoundsException $e) {
+        $this->assertEquals(array(), ArrayUtils::findByPath($this->array, array('foo_path'), true));
+    }
 
-        }
+    /**
+     * @expectedException OutOfBoundsException
+     * @expectedExceptionMessage Array key not found: key_a:subkey_b
+     */
+    public function testFindByPathNonexistent()
+    {
+        ArrayUtils::findByPath($this->array, array('key_a', 'subkey_b'));
     }
 
     public function testSetByPath()
@@ -61,6 +90,8 @@ class ArrayUtilsTest extends PHPUnit_Framework_TestCase
     {
         ArrayUtils::unsetByPath($this->array, 'key_a:subkey_a');
         $this->assertEquals(array('key_a' => array(), 'key_b' => 'value'), $this->array);
+        // Should not throw an exception.
+        ArrayUtils::unsetByPath($this->array, 'key_a:subkey_a:foo');
     }
 
     public function testMergeNoOverwrite()
@@ -73,8 +104,8 @@ class ArrayUtilsTest extends PHPUnit_Framework_TestCase
             'key_c' => 'value_c'
         );
         $merge    = array(
-                    'key_a' => 'anything',
-                    'key_c' => 'value_c'
+            'key_a' => 'anything',
+            'key_c' => 'value_c'
         );
         $actual   = ArrayUtils::merge($this->array, $merge, false);
         $this->assertEquals($expected, $actual);

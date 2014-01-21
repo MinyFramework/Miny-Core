@@ -2,11 +2,6 @@
 
 namespace Miny\Routing;
 
-require_once dirname(__FILE__) . '/../../Routing/Match.php';
-require_once dirname(__FILE__) . '/../../Routing/Route.php';
-require_once dirname(__FILE__) . '/../../Routing/RouteCollection.php';
-require_once dirname(__FILE__) . '/../../Routing/RouteMatcher.php';
-
 class RouteMatcherTest extends \PHPUnit_Framework_TestCase
 {
     protected $route;

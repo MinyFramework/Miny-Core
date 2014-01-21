@@ -4,8 +4,6 @@ namespace Miny\Utils;
 
 use PHPUnit_Framework_TestCase;
 
-require_once dirname(__FILE__) . '/../../Utils/StringUtils.php';
-
 class StringUtilsTest extends PHPUnit_Framework_TestCase
 {
     public function testCompare()

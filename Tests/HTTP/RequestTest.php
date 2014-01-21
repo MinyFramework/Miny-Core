@@ -2,9 +2,6 @@
 
 namespace Miny\HTTP;
 
-require_once dirname(__FILE__) . '/../../HTTP/Headers.php';
-require_once dirname(__FILE__) . '/../../HTTP/Request.php';
-
 class RequestTest extends \PHPUnit_Framework_TestCase
 {
 

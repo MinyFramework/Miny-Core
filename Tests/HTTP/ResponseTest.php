@@ -2,8 +2,6 @@
 
 namespace Miny\HTTP;
 
-require_once dirname(__FILE__) . '/../../HTTP/Response.php';
-
 class ResponseTest extends \PHPUnit_Framework_TestCase
 {
     protected $response;

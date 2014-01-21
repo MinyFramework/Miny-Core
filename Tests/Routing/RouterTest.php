@@ -2,9 +2,6 @@
 
 namespace Miny\Routing;
 
-require_once dirname(__FILE__) . '/../../Routing/RouteCollection.php';
-require_once dirname(__FILE__) . '/../../Routing/Router.php';
-
 class RouterTest extends \PHPUnit_Framework_TestCase
 {
     protected $object;
@@ -16,6 +13,13 @@ class RouterTest extends \PHPUnit_Framework_TestCase
             'default_parameter' => 'default_value',
             'parameter'         => 'value'
         ));
+    }
+
+    public function testShortUrls()
+    {
+        $this->assertTrue($this->object->shortUrls());
+        $object = new Router(null, null, array(), false);
+        $this->assertFalse($object->shortUrls());
     }
 
     public function testRootShouldOnlyHavePrefixByDefault()

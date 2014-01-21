@@ -2,9 +2,6 @@
 
 namespace Miny\Event;
 
-require_once dirname(__FILE__) . '/../../Event/Event.php';
-require_once dirname(__FILE__) . '/../../Event/EventDispatcher.php';
-
 class EventDispatcherTest extends \PHPUnit_Framework_TestCase
 {
     protected $object;

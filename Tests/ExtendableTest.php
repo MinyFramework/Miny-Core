@@ -2,8 +2,6 @@
 
 namespace Miny;
 
-require_once dirname(__FILE__) . '/../Extendable.php';
-
 class FooPlugin
 {
 

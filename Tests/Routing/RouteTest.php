@@ -2,9 +2,6 @@
 
 namespace Miny\Routing;
 
-require_once dirname(__FILE__) . '/../../Routing/Route.php';
-require_once dirname(__FILE__) . '/../../Routing/Exceptions/BadMethodException.php';
-
 class RouteTest extends \PHPUnit_Framework_TestCase
 {
     protected $object;

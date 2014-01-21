@@ -2,11 +2,6 @@
 
 namespace Miny\Routing;
 
-require_once dirname(__FILE__) . '/../../Utils/StringUtils.php';
-require_once dirname(__FILE__) . '/../../Routing/RouteCollection.php';
-require_once dirname(__FILE__) . '/../../Routing/Resources.php';
-require_once dirname(__FILE__) . '/../../Routing/Route.php';
-
 class ResourcesTest extends \PHPUnit_Framework_TestCase
 {
     protected $object;
@@ -181,6 +176,20 @@ class ResourcesTest extends \PHPUnit_Framework_TestCase
             $actual_paths_and_methods[] = array($route->getPath(), $route->getMethod());
         }
         $this->assertEquals($expected_paths_and_methods, $actual_paths_and_methods);
+    }
+
+    public function testGetRoute()
+    {
+        $this->assertInstanceOf('Miny\Routing\Route', $this->object->getRoute('edit_resource'));
+    }
+
+    /**
+     * @expectedException OutOfBoundsException
+     * @expectedExceptionMessage Route not found: index
+     */
+    public function testNonExistingGetRoute()
+    {
+        $this->assertInstanceOf('Miny\Routing\Route', $this->object->getRoute('index'));
     }
 }
 

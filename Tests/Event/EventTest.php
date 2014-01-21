@@ -2,8 +2,6 @@
 
 namespace Miny\Event;
 
-require_once dirname(__FILE__) . '/../../Event/Event.php';
-
 class EventTest extends \PHPUnit_Framework_TestCase
 {
 

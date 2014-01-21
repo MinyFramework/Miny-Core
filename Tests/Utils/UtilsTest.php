@@ -5,9 +5,6 @@ namespace Miny\Utils;
 use Miny\Utils\Exceptions\AssertationException;
 use PHPUnit_Framework_TestCase;
 
-require_once dirname(__FILE__) . '/../../Utils/Exceptions/AssertationException.php';
-require_once dirname(__FILE__) . '/../../Utils/Utils.php';
-
 class TestClass
 {
     private $elements;
@@ -64,6 +61,15 @@ class UtilsTest extends PHPUnit_Framework_TestCase
     {
         $class = Utils::instantiate('Miny\Utils\TestClass');
         $this->assertEquals($class->getElements(), array());
+    }
+
+    /**
+     * @expectedException InvalidArgumentException
+     * @expectedExceptionMessage Class not found: Foo\BarClass
+     */
+    public function testInstantiateNonExistingClass()
+    {
+        Utils::instantiate('Foo\BarClass');
     }
 }
 

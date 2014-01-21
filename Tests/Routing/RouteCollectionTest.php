@@ -4,9 +4,6 @@ namespace Miny\Routing;
 
 use OutOfBoundsException;
 
-require_once dirname(__FILE__) . '/../../Routing/Route.php';
-require_once dirname(__FILE__) . '/../../Routing/RouteCollection.php';
-
 class RouteCollectionTest extends \PHPUnit_Framework_TestCase
 {
     protected $object;
@@ -27,10 +24,30 @@ class RouteCollectionTest extends \PHPUnit_Framework_TestCase
 
         $this->assertEquals(1, $other->getIterator()->count());
 
+        $this->assertFalse($other->hasRoute('some_name'));
         $other->addRoute(new Route('some_path'), 'some_name');
+        $this->assertTrue($other->hasRoute('some_name'));
 
         $this->assertEquals(2, $other->getIterator()->count());
         return $other;
+    }
+
+    /**
+     * @expectedException InvalidArgumentException
+     * @expectedException Parameter "name" must be a string or NULL.
+     */
+    public function testAddRouteNonStringName()
+    {
+        $this->object->addRoute(new Route('path'), 53);
+    }
+
+    /**
+     * @expectedException InvalidArgumentException
+     * @expectedException Parameter "name" must be a string.
+     */
+    public function testGetRouteNonStringName()
+    {
+        $this->object->getRoute(53);
     }
 
     /**
@@ -41,12 +58,15 @@ class RouteCollectionTest extends \PHPUnit_Framework_TestCase
         $this->object->merge($other);
         $this->assertEquals(3, $this->object->getIterator()->count());
         $this->assertEquals('some_path', $this->object->getRoute('some_name')->getPath());
-        try {
-            $this->object->getRoute('nonexistent');
-            $this->fail('Trying to retrieve a nonexistent route should throw an exception');
-        } catch (OutOfBoundsException $e) {
+    }
 
-        }
+    /**
+     * @expectedException OutOfBoundsException
+     * @expectedExceptionMessage Route not found: nonexistent
+     */
+    public function testGetNonExistentRoute()
+    {
+        $this->object->getRoute('nonexistent');
     }
 }
 

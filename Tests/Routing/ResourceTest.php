@@ -2,11 +2,6 @@
 
 namespace Miny\Routing;
 
-require_once dirname(__FILE__) . '/../../Routing/RouteCollection.php';
-require_once dirname(__FILE__) . '/../../Routing/Resources.php';
-require_once dirname(__FILE__) . '/../../Routing/Resource.php';
-require_once dirname(__FILE__) . '/../../Routing/Route.php';
-
 class ResourceTest extends \PHPUnit_Framework_TestCase
 {
     protected $object;

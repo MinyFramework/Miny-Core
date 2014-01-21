@@ -2,10 +2,6 @@
 
 namespace Miny\Factory;
 
-require_once dirname(__FILE__) . '/../../Utils/Utils.php';
-require_once dirname(__FILE__) . '/../../Factory/Blueprint.php';
-require_once dirname(__FILE__) . '/../../Factory/Factory.php';
-
 class TestClass
 {
     private $constructor;
