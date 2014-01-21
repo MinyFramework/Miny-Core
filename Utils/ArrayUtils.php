@@ -78,7 +78,7 @@ class ArrayUtils
     public static function getByPath($array, $parts, $default = null)
     {
         if (!is_array($array) && !$array instanceof ArrayAccess) {
-            throw new InvalidArgumentException('ArrayUtils::existsByPath expects an array or an ArrayAccess object.');
+            throw new InvalidArgumentException('ArrayUtils::getByPath expects an array or an ArrayAccess object.');
         }
         $parts = self::createPath($parts);
         foreach ($parts as $k) {
@@ -148,7 +148,7 @@ class ArrayUtils
         $last_key = array_pop($parts);
         foreach ($parts as $k) {
             if (!array_key_exists($k, $array)) {
-                $array[$k] = array();
+                return;
             }
             $array = & $array[$k];
         }
