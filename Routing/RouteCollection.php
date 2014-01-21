@@ -10,9 +10,9 @@
 namespace Miny\Routing;
 
 use ArrayIterator;
+use InvalidArgumentException;
 use IteratorAggregate;
 use OutOfBoundsException;
-use UnexpectedValueException;
 
 class RouteCollection implements IteratorAggregate
 {
@@ -32,7 +32,7 @@ class RouteCollection implements IteratorAggregate
     /**
      * @param Route $route
      * @param string $name
-     * @throws UnexpectedValueException
+     * @throws InvalidArgumentException
      */
     public function addRoute(Route $route, $name = null)
     {
@@ -40,7 +40,7 @@ class RouteCollection implements IteratorAggregate
             $this->routes[] = $route;
         } else {
             if (!is_string($name)) {
-                throw new UnexpectedValueException('Parameter "name" must be a string or NULL.');
+                throw new InvalidArgumentException('Parameter "name" must be a string or NULL.');
             }
             $this->routes[$name] = $route;
         }
@@ -51,16 +51,16 @@ class RouteCollection implements IteratorAggregate
      *
      * @return Route
      *
-     * @throws UnexpectedValueException
+     * @throws InvalidArgumentException
      * @throws OutOfBoundsException
      */
     public function getRoute($name)
     {
         if (!is_string($name)) {
-            throw new UnexpectedValueException('Parameter "name" must be a string.');
+            throw new InvalidArgumentException('Parameter "name" must be a string.');
         }
         if (!isset($this->routes[$name])) {
-            throw new OutOfBoundsException('Route not set: ' . $name);
+            throw new OutOfBoundsException('Route not found: ' . $name);
         }
         return $this->routes[$name];
     }

@@ -82,7 +82,7 @@ class RouteGenerator
             }
             return $path;
         } else {
-            $parameters['path'] = $path;
+            $parameters = array('path' => $path) + $parameters;
             return '?' . http_build_query($parameters, null, '&');
         }
     }
