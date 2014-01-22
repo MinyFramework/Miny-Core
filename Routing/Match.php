@@ -29,7 +29,7 @@ class Match
     public function __construct(Route $route, array $parameters = array())
     {
         $this->route      = $route;
-        $this->parameters = array_merge($parameters, $route->getParameters());
+        $this->parameters = $parameters + $route->getParameters();
     }
 
     /**

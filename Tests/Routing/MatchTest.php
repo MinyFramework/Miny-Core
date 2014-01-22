@@ -6,21 +6,24 @@ class MatchTest extends \PHPUnit_Framework_TestCase
 {
     protected $object;
     protected $route;
-    protected $parameters;
 
     protected function setUp()
     {
-        $this->parameters = array(
+        $parameters = array(
             'foo' => 'bar',
             'baz' => 'foobar'
         );
-        $this->route      = new Route('test/path', NULL, $this->parameters);
+        $this->route      = new Route('test/path', NULL, $parameters);
         $this->object     = new Match($this->route, array('foo' => 'bar_baz'));
     }
 
-    public function testGetParameters()
+    public function testMatchedParametersShouldOverrideDefaults()
     {
-        $this->assertEquals($this->parameters, $this->object->getParameters());
+        $expected = array(
+            'foo' => 'bar_baz',
+            'baz' => 'foobar'
+        );
+        $this->assertEquals($expected, $this->object->getParameters());
     }
 
     public function testGetRoute()
