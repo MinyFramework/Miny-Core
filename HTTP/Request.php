@@ -11,44 +11,43 @@ namespace Miny\HTTP;
 
 use InvalidArgumentException;
 use Miny\Utils\StringUtils;
+use OutOfBoundsException;
 
 class Request
 {
     const MASTER_REQUEST = 0;
     const SUB_REQUEST    = 1;
 
-    private static $request;
-
+    /**
+     * @return Request
+     */
     public static function getGlobal()
     {
-        if (!isset(self::$request)) {
-            if (!empty($_POST)) {
-                $method = isset($_POST['_method']) ? $_POST['_method'] : 'POST';
-            } else {
-                $method = $_SERVER['REQUEST_METHOD'];
-            }
-
-            $request         = new Request($method, $_SERVER['REQUEST_URI']);
-            $request->type   = self::MASTER_REQUEST;
-            $request->get    = $_GET;
-            $request->post   = $_POST;
-            $request->cookie = $_COOKIE;
-
-            foreach ($_SERVER as $key => $value) {
-                if (StringUtils::startsWith($key, 'HTTP_')) {
-                    $request->headers->set(substr($key, 5), $value);
-                }
-            }
-
-            if ($request->headers->has('x-forwarded-for')) {
-                $request->ip = $request->headers->get('x-forwarded-for');
-            } else {
-                $request->ip = $_SERVER['REMOTE_ADDR'];
-            }
-
-            self::$request = $request;
+        if (!empty($_POST)) {
+            $method = isset($_POST['_method']) ? $_POST['_method'] : 'POST';
+        } else {
+            $method = $_SERVER['REQUEST_METHOD'];
         }
-        return self::$request;
+
+        $request         = new Request($method, $_SERVER['REQUEST_URI']);
+        $request->type   = self::MASTER_REQUEST;
+        $request->get    = $_GET;
+        $request->post   = $_POST;
+        $request->cookie = $_COOKIE;
+
+        foreach ($_SERVER as $key => $value) {
+            if (StringUtils::startsWith($key, 'HTTP_')) {
+                $request->headers->set(substr($key, 5), $value);
+            }
+        }
+
+        if ($request->headers->has('x-forwarded-for')) {
+            $request->ip = $request->headers->get('x-forwarded-for');
+        } else {
+            $request->ip = $_SERVER['REMOTE_ADDR'];
+        }
+
+        return $request;
     }
     public $url;
     public $path;
@@ -71,7 +70,7 @@ class Request
     public function __get($field)
     {
         if (!property_exists($this, $field)) {
-            throw new InvalidArgumentException('Field not exists: ' . $field);
+            throw new OutOfBoundsException(sprintf('Field %s does not exist.', $field));
         }
         return $this->$field;
     }
@@ -92,11 +91,20 @@ class Request
         return null;
     }
 
+    /**
+     * @return bool
+     */
     public function isSubRequest()
     {
         return $this->type == self::SUB_REQUEST;
     }
 
+    /**
+     * @param string $method
+     * @param string $url
+     * @param array $post
+     * @return Request
+     */
     public function getSubRequest($method, $url, array $post = array())
     {
         $request = clone $this;
@@ -108,6 +116,9 @@ class Request
         return $request;
     }
 
+    /**
+     * @return bool
+     */
     public function isAjax()
     {
         if (!$this->headers->has('x-requested-with')) {
@@ -116,6 +127,9 @@ class Request
         return strtolower($this->headers->get('x-requested-with')) === 'xmlhttprequest';
     }
 
+    /**
+     * @return Headers
+     */
     public function getHeaders()
     {
         return $this->headers;

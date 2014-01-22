@@ -21,29 +21,29 @@ use Serializable;
 class Headers implements Iterator, Serializable
 {
     private static $multiple_values_allowed = array(
-        'Accept',
-        'Accept-Charset',
-        'Accept-Encoding',
-        'Accept-Language',
-        'Accept-Ranges',
-        'Allow',
-        'Cache-Control',
-        'Connection',
-        'Content-Encoding',
-        'Content-Language',
-        'Expect',
-        'If-Match',
-        'If-None-Match',
-        'Pragma',
-        'Proxy-Authenticate',
-        'TE',
-        'Trailer',
-        'Transfer-Encoding',
-        'Upgrade',
-        'Vary',
-        'Via',
-        'Warning',
-        'WWW-Authenticate'
+        'accept',
+        'accept-charset',
+        'accept-encoding',
+        'accept-language',
+        'accept-ranges',
+        'allow',
+        'cache-control',
+        'connection',
+        'content-encoding',
+        'content-language',
+        'expect',
+        'if-match',
+        'if-none-match',
+        'pragma',
+        'proxy-authenticate',
+        'te',
+        'trailer',
+        'transfer-encoding',
+        'upgrade',
+        'vary',
+        'via',
+        'warning',
+        'www-authenticate'
     );
     private $headers;
     private $raw_headers;
@@ -60,7 +60,10 @@ class Headers implements Iterator, Serializable
 
     public function addHeaders(Headers $headers)
     {
-        $this->headers = array_merge($this->headers, $headers->headers);
+        foreach ($headers->headers as $name => $value) {
+            $this->set($name, $value);
+        }
+        $this->raw_headers = array_merge($this->raw_headers, $headers->raw_headers);
     }
 
     public function set($name, $value)
@@ -95,6 +98,9 @@ class Headers implements Iterator, Serializable
             if (is_array($this->headers[$name])) {
                 if (($key = array_search($value, $this->headers[$name])) !== false) {
                     unset($this->headers[$name][$key]);
+                    if (count($this->headers[$name]) === 1) {
+                        $this->headers[$name] = current($this->headers[$name]);
+                    }
                 }
             } elseif ($this->headers[$name] === $value) {
                 unset($this->headers[$name]);
@@ -134,16 +140,6 @@ class Headers implements Iterator, Serializable
     public function getRawHeaders()
     {
         return $this->raw_headers;
-    }
-
-    public function send()
-    {
-        foreach ($this as $header => $value) {
-            header($header . ': ' . $value);
-        }
-        foreach ($this->raw_headers as $header) {
-            header($header);
-        }
     }
 
     public function __toString()

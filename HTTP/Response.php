@@ -63,7 +63,7 @@ class Response implements Serializable
 
     public function __construct()
     {
-        $this->headers     = new Headers();
+        $this->headers     = new ResponseHeaders();
         $this->cookies     = array();
         $this->content     = '';
         $this->status_code = 200;
