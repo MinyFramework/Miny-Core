@@ -9,7 +9,6 @@
 
 namespace Miny\Factory;
 
-use BadMethodCallException;
 use InvalidArgumentException;
 
 /**
@@ -94,9 +93,6 @@ class Blueprint
      */
     public function addMethodCall($method)
     {
-        if (func_num_args() == 0) {
-            throw new BadMethodCallException('Blueprint::addMethodCall needs at least one argument.');
-        }
         $arguments       = array_slice(func_get_args(), 1);
         $this->methods[] = array($method, $arguments);
         return $this;

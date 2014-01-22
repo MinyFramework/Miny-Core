@@ -69,6 +69,15 @@ class BlueprintTest extends \PHPUnit_Framework_TestCase
     }
 
     /**
+     * @expectedException InvalidArgumentException
+     * @expectedExceptionMessage Classname must be string.
+     */
+    public function testConstructorException()
+    {
+        new Blueprint(4);
+    }
+
+    /**
      * @covers Miny\Factory\Blueprint::setProperty
      * @covers Miny\Factory\Blueprint::getProperties
      */

@@ -46,23 +46,11 @@ class ParameterContainer implements ArrayAccess
     /**
      * Retrieves all stored parameters.
      *
-     * Note: this function returns unresolved parameters by reference. Modifying the returned array may lead to
-     * unexpected results.
-     *
      * @return array
      */
     public function &toArray()
     {
         return $this->parameters;
-    }
-
-    /**
-     * Notifies the container that the parameters array has changed
-     * and it is necessary to refresh the resolved values.
-     */
-    public function notify()
-    {
-        unset($this->resolved_parameters);
     }
 
     /**
