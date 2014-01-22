@@ -58,17 +58,14 @@ class Route
      */
     public function __construct($path, $method = null, array $params = array())
     {
-        if (!is_string($path)) {
-            throw new InvalidArgumentException('Path must be a string');
-        }
         if($method !== null) {
             $method = strtoupper($method);
         }
         if ($method !== null && !in_array($method, self::$methods)) {
             throw new BadMethodException('Unexpected route method: ' . $method);
         }
+        $this->setPath($path);
         $this->method     = $method;
-        $this->path       = $path;
         $this->parameters = $params;
     }
 

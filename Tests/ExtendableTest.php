@@ -50,26 +50,85 @@ class ExtendableTest extends \PHPUnit_Framework_TestCase
         $this->object = $object;
     }
 
-    /**
-     * Tears down the fixture, for example, closes a network connection.
-     * This method is called after a test is executed.
-     */
-    protected function tearDown()
-    {
-
-    }
-
-    public function test__call()
+    public function testCall()
     {
         $this->assertEquals('foo', $this->object->foo());
         $this->assertEquals('bar', $this->object->bar());
         $this->assertEquals('baz', $this->object->baz());
-        try {
-            $this->object->foobar();
-            $this->fail('Failed: should throw an exception.');
-        } catch (\BadMethodCallException $e) {
+    }
 
-        }
+    /**
+     * @expectedException BadMethodCallException
+     * @expectedExceptionMessage Method not found: foobar
+     */
+    public function testCallNotFoundException()
+    {
+        $this->object->foobar();
+    }
+
+    /**
+     * @expectedException InvalidArgumentException
+     * @expectedExceptionMessage Parameter "method" must be string
+     */
+    public function testCallBadTypeException()
+    {
+        $this->object->__call(5, array());
+    }
+
+    /**
+     * @expectedException InvalidArgumentException
+     * @expectedExceptionMessage Parameter "method" must be string
+     */
+    public function testAddMethodNameException()
+    {
+        $this->object->addMethod(5, null);
+    }
+
+    /**
+     * @expectedException InvalidArgumentException
+     * @expectedExceptionMessage Callback given for method method is not callable
+     */
+    public function testAddMethodCallbackException()
+    {
+        $this->object->addMethod('method', null);
+    }
+
+    /**
+     * @expectedException InvalidArgumentException
+     * @expectedExceptionMessage First argument must be an object
+     */
+    public function testAddMethodsObjectException()
+    {
+        $this->object->addMethods('object', array());
+    }
+
+    /**
+     * @expectedException InvalidArgumentException
+     * @expectedExceptionMessage Method "foo" not found in class stdClass
+     */
+    public function testAddMethodsMethodException()
+    {
+        $this->object->addMethods(new \stdClass, array('foo'));
+    }
+
+    /**
+     *
+     */
+    public function testSetterException()
+    {
+        $this->object->addSetter('foo');
+        $this->object->addSetter('asd', 'setAsdMethod');
+        $this->object->addSetters(array('foobar' => 'setFooBarMethod', 'baz'));
+
+        $this->object->setFoo('bar');
+        $this->object->setAsdMethod('bar');
+        $this->object->setFooBarMethod('bar');
+        $this->object->setBaz('bar');
+
+        $this->assertEquals('bar', $this->object->foo);
+        $this->assertEquals('bar', $this->object->asd);
+        $this->assertEquals('bar', $this->object->baz);
+        $this->assertEquals('bar', $this->object->foobar);
     }
 }
 

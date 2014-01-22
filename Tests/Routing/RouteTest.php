@@ -4,7 +4,8 @@ namespace Miny\Routing;
 
 class RouteTest extends \PHPUnit_Framework_TestCase
 {
-    protected $object;
+    protected $static_object;
+    protected $dynamic_object;
 
     protected function setUp()
     {
@@ -18,6 +19,33 @@ class RouteTest extends \PHPUnit_Framework_TestCase
             'param_foo' => 'val_foo',
             'param_bar' => 'val_bar',
         ));
+    }
+
+    /**
+     * @expectedException InvalidArgumentException
+     * @expectedExceptionMessage Path must be a string
+     */
+    public function testConstructorPathException()
+    {
+        new Route(5);
+    }
+
+    /**
+     * @expectedException \Miny\Routing\Exceptions\BadMethodException
+     * @expectedExceptionMessage Unexpected route method: 5
+     */
+    public function testConstructorMethodException()
+    {
+        new Route('foo', 5);
+    }
+
+    /**
+     * @expectedException InvalidArgumentException
+     * @expectedExceptionMessage Path must be a string
+     */
+    public function testSetPathException()
+    {
+        $this->static_object->setPath(5);
     }
 
     public function testPaths()

@@ -122,16 +122,15 @@ class Router extends RouteCollection
 
     private function buildResources()
     {
-        if ($this->resources_built) {
-            return;
-        }
-        $this->resources_built = true;
-        foreach ($this->resources as $resource) {
-            foreach ($resource as $name => $route) {
-                if (is_numeric($name)) {
-                    $name = null;
+        if (!$this->resources_built) {
+            $this->resources_built = true;
+            foreach ($this->resources as $resource) {
+                foreach ($resource as $name => $route) {
+                    if (is_numeric($name)) {
+                        $name = null;
+                    }
+                    $this->route($route, $name);
                 }
-                $this->route($route, $name);
             }
         }
     }

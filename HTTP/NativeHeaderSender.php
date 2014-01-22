@@ -16,4 +16,9 @@ class NativeHeaderSender extends AbstractHeaderSender
     {
         header($header);
     }
+
+    public function sendCookie($name, $value)
+    {
+        setcookie($name, $value);
+    }
 }

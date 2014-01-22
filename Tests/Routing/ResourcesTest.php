@@ -29,6 +29,15 @@ class ResourcesTest extends \PHPUnit_Framework_TestCase
         $this->assertEquals($expected, Resources::singularize($name));
     }
 
+    /**
+     * @expectedException UnexpectedValueException
+     * @expectedExceptionMessage Parameter "name" must be a string.
+     */
+    public function testConstructorException()
+    {
+        new Resources(5);
+    }
+
     public function testResourcesShouldAlsoHaveSingularizedName()
     {
         $this->assertEquals('resource', $this->object->getSingularName());
@@ -190,6 +199,57 @@ class ResourcesTest extends \PHPUnit_Framework_TestCase
     public function testNonExistingGetRoute()
     {
         $this->assertInstanceOf('Miny\Routing\Route', $this->object->getRoute('index'));
+    }
+
+    public function testSpecify()
+    {
+        $result = $this->object->specify('\d+');
+
+        $this->assertSame($result, $this->object);
+        $route = $this->object->getRoute('edit_resource');
+        $this->assertEquals('\d+', $route->getPattern('id'));
+    }
+
+    public function testAddParameter()
+    {
+        $this->object->addParameter('param', 'value');
+
+        $route = $this->object->getRoute('edit_resource');
+        $params = $route->getParameters();
+        $this->assertArrayHasKey('param', $params);
+        $this->assertEquals('value', $params['param']);
+    }
+
+    /**
+     * @expectedException UnexpectedValueException
+     * @expectedExceptionMessage Parameter "key" must be a string.
+     */
+    public function testAddParameterException()
+    {
+        $this->object->addParameter(5, 'value');
+    }
+
+    public function testAddParameters()
+    {
+        $this->object->addParameter('param', 'value');
+        $this->object->addParameters(array(
+            'foo'   => 'bar',
+            'param' => 'override'
+        ));
+
+        $route = $this->object->getRoute('edit_resource');
+        $params = $route->getParameters();
+        $this->assertArrayHasKey('foo', $params);
+        $this->assertEquals('override', $params['param']);
+    }
+
+    /**
+     * @expectedException InvalidArgumentException
+     * @expectedExceptionMessage Pattern must be a string
+     */
+    public function testSpecifyException()
+    {
+        $this->object->specify(54);
     }
 }
 

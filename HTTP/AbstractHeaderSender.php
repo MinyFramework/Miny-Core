@@ -13,4 +13,6 @@ abstract class AbstractHeaderSender
 {
 
     abstract public function send($header);
+
+    abstract public function sendCookie($name, $value);
 }

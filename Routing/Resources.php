@@ -95,13 +95,11 @@ class Resources extends RouteCollection
     /**
      * @param string $name
      * @param array $parameters
+     *
      * @throws UnexpectedValueException
      */
     public function __construct($name, array $parameters = array())
     {
-        if (!is_string($name)) {
-            throw new UnexpectedValueException('Parameter "name" must be a string.');
-        }
         if (!isset($parameters['controller'])) {
             $parameters['controller'] = $name;
         }
@@ -270,17 +268,16 @@ class Resources extends RouteCollection
 
     private function build()
     {
-        if ($this->built) {
-            return;
-        }
-        $this->built = true;
+        if (!$this->built) {
+            $this->built = true;
 
-        $this->generateCollectionActions();
-        $this->generateMemberActions();
+            $this->generateCollectionActions();
+            $this->generateMemberActions();
 
-        foreach ($this->resources as $resource) {
-            $resource->build();
-            $this->merge($resource);
+            foreach ($this->resources as $resource) {
+                $resource->build();
+                $this->merge($resource);
+            }
         }
     }
 

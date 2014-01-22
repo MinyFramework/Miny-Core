@@ -56,15 +56,16 @@ class Response implements Serializable
         504 => 'Gateway Timeout',
         505 => 'HTTP Version Not Supported'
     );
-    private $cookies;
+    /**
+     * @var ResponseHeaders
+     */
     private $headers;
     private $status_code;
     private $content;
 
-    public function __construct()
+    public function __construct(ResponseHeaders $headers = null)
     {
-        $this->headers     = new ResponseHeaders();
-        $this->cookies     = array();
+        $this->headers     = $headers ? : new ResponseHeaders();
         $this->content     = '';
         $this->status_code = 200;
     }
@@ -75,9 +76,14 @@ class Response implements Serializable
         $this->setCode($code);
     }
 
+    public function removeCookie($name)
+    {
+        $this->headers->removeCookie($name);
+    }
+
     public function setCookie($name, $value)
     {
-        $this->cookies[$name] = $value;
+        $this->headers->setCookie($name, $value);
     }
 
     public function setCode($code)
@@ -89,8 +95,7 @@ class Response implements Serializable
     }
 
     /**
-     *
-     * @return Headers
+     * @return ResponseHeaders
      */
     public function getHeaders()
     {
@@ -99,7 +104,7 @@ class Response implements Serializable
 
     public function getCookies()
     {
-        return $this->cookies;
+        return $this->headers->getCookies();
     }
 
     public function clearContent()
@@ -145,9 +150,6 @@ class Response implements Serializable
     public function send()
     {
         $this->headers->setRaw(sprintf('HTTP/1.1 %d: %s', $this->status_code, $this->getStatus()));
-        foreach ($this->cookies as $name => $value) {
-            setcookie($name, $value);
-        }
         $this->headers->send();
         if (!$this->headers->has('location')) {
             echo $this;
@@ -157,8 +159,6 @@ class Response implements Serializable
     public function serialize()
     {
         return serialize(array(
-            $this->content_type,
-            $this->cookies,
             $this->headers,
             $this->content,
             $this->status_code
@@ -167,12 +167,9 @@ class Response implements Serializable
 
     public function unserialize($serialized)
     {
-        $data               = unserialize($serialized);
-        $this->content_type = array_shift($data);
-        $this->cookies      = array_shift($data);
-        $this->headers      = array_shift($data);
-        $this->content      = array_shift($data);
-        $this->status_code  = array_shift($data);
-        ob_start();
+        $data              = unserialize($serialized);
+        $this->headers     = array_shift($data);
+        $this->content     = array_shift($data);
+        $this->status_code = array_shift($data);
     }
 }
