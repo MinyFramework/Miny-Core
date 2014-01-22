@@ -125,7 +125,11 @@ class ControllerCollection
             }
         }
 
-        $event_handler->raiseEvent('onControllerLoaded', $controller, $action);
+        $event = $event_handler->raiseEvent('onControllerLoaded', $controller, $action);
+
+        if($event->isHandled() && $event->hasResponse() && $event->getResponse() instanceof Response) {
+            return $event->getResponse();
+        }
 
         if ($controller instanceof Controller) {
             $retval = $controller->run($action, $request, $response);
@@ -136,5 +140,6 @@ class ControllerCollection
         }
 
         $event_handler->raiseEvent('onControllerFinished', $controller, $action, $retval);
+        return $response;
     }
 }

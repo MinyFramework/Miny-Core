@@ -214,8 +214,11 @@ class Application extends BaseApplication
         ob_start();
         if (!isset($response)) {
             $old_response = $factory->replace('response');
-            $factory->get('controllers')->resolve($request->get['controller'], $request, $factory->get('response'));
-            $response     = $old_response ? $factory->replace('response', $old_response) : $factory->get('response');
+            $controller_collection = $factory->get('controllers');
+            $controller = $request->get['controller'];
+
+            $controller_response = $controller_collection->resolve($controller, $request, $factory->get('response'));
+            $response     = $old_response ? $factory->replace('response', $old_response) : $controller_response;
         }
 
         if ($filter) {
