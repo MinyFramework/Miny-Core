@@ -119,7 +119,8 @@ class ParameterContainerTest extends \PHPUnit_Framework_TestCase
                 'additional_param'  => 'other_value', //new key
                 'something'         => 'prefix_{@value_b}',
                 'something_invalid' => 'prefix_{@invalid_link}'
-            )
+            ),
+            'not_a_string'  => 5
         );
         $expected_result          = array(
             'array_a'      => array(
@@ -140,7 +141,8 @@ class ParameterContainerTest extends \PHPUnit_Framework_TestCase
                 'array' => array(
                     'array' => 'value'
                 )
-            )
+            ),
+            'not_a_string'       => 5
         );
         $expected_result_resolved = array(
             'array_a'      => array(
@@ -161,7 +163,8 @@ class ParameterContainerTest extends \PHPUnit_Framework_TestCase
                 'array' => array(
                     'array' => 'value'
                 )
-            )
+            ),
+            'not_a_string'       => 5
         );
         $this->object->addParameters($new_parameters);
         $this->assertEquals($expected_result, $this->object->toArray());

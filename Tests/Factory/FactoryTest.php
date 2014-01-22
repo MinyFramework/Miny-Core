@@ -29,131 +29,249 @@ class TestClass
     }
 }
 
-class TestHelperClass
-{
-    public $property = 'property';
-
-    public function method($return = 'method')
-    {
-        return $return;
-    }
-}
-
 class FactoryTest extends \PHPUnit_Framework_TestCase
 {
+    /**
+     * @var Factory
+     */
     protected $object;
-    protected $parameters = array(
-        'array_a'      => array(
-            'param_b' => '{@value_b}',
-            'array_b' => array(
-                '{@param_c}'     => 'value_b_value',
-                'deep_parameter' => 'deep_value'
-            ),
-        ),
-        'param_c'      => '{@array_a:param_b}',
-        'value_b'      => 'value_c',
-        'invalid_link' => '{@not_exists}',
-        'some_item'    => 'some_value',
-        'array'        => array(
-            'array' => array(
-                'array' => 'value'
-            )
-        )
-    );
+    protected $parameters;
 
     protected function setUp()
     {
+        $this->parameters = $this->getMock('\Miny\Factory\ParameterContainer',
+                array('resolveLinks', 'offsetGet', 'offsetSet', 'offsetExists', 'offsetUnset'));
+
+        $this->parameters->expects($this->any())
+                ->method('offsetGet')
+                ->will($this->returnArgument(0));
+
+        $this->parameters->expects($this->any())
+                ->method('resolveLinks')
+                ->will($this->returnArgument(0));
+
         $this->object = new Factory($this->parameters);
     }
 
-    public function testSetter()
+    public function testGetParameters()
     {
-        $std       = new \stdClass;
-        $blueprint = new Blueprint('\stdClass');
-
-        //testing setInstance
-        $this->object->setInstance('std_name', $std);
-        $this->assertSame($std, $this->object->std_name);
-
-        //setter should call setInstance
-        $this->object->std = $std;
-        $this->assertSame($std, $this->object->std);
-
-        //testing register
-        $this->assertSame($blueprint, $this->object->register('some_name', $blueprint));
-        $this->assertInstanceOf('\stdClass', $this->object->some_name);
-
-        //setter should call register for Blueprints
-        $this->object->bp = $blueprint;
-        $this->assertInstanceOf('\stdClass', $this->object->bp);
-
-        //register should remove old instance
-        $this->object->std = $blueprint;
-        $this->assertNotSame($std, $this->object->std);
+        $this->assertInstanceOf('\Miny\Factory\ParameterContainer', $this->object->getParameters());
+        $factory = new Factory;
+        $this->assertInstanceOf('\Miny\Factory\ParameterContainer', $factory->getParameters());
     }
 
-    public function testCreateSingleton()
+    public function testArrayAccessInterface()
     {
-        $helper = new TestHelperClass;
+        $this->parameters->expects($this->once())
+                ->method('offsetExists')
+                ->with($this->equalTo('something'))
+                ->will($this->returnValue(true));
 
-        $this->object->helper = $helper;
-        $this->object->getParameters()->addParameters(array(
-            'link'                       => 'helper',
-            'link_to_instance_reference' => '&helper'
-        ));
+        $this->parameters->expects($this->once())
+                ->method('offsetUnset')
+                ->with($this->equalTo('something'));
 
-        $this->object->add('singleton', __NAMESPACE__ . '\TestClass')
-                ->setArguments('literal', '@param_c', '&helper')
-                ->setProperty('prop_a', 'literal')
-                ->setProperty('prop_b', '@param_c')
-                ->setProperty('prop_c', '&helper')
-                ->setProperty('prop_d', '&{@link}')
-                ->setProperty('prop_e', '@link_to_instance_reference')
-                ->setProperty('prop_f', '{@link_to_instance_reference}')
-                ->addMethodCall('method_a', 'literal_value', 'another_literal_value')
-                ->addMethodCall('method_b', '@param_c', '@array:array:array')
-                ->addMethodCall('method_c', '&helper', '&helper->property')
-                ->addMethodCall('method_d', '*helper::method', '&helper::method::return')
-                ->addMethodCall('method_e', '&helper::method::{@param_c}');
+        $this->parameters->expects($this->once())
+                ->method('offsetSet')
+                ->with($this->equalTo('something'), $this->equalTo('value'));
 
-        $obj = $this->object->singleton;
+        // The mock verifies that these get called once.
+        $this->assertTrue(isset($this->object['something']));
+        $this->object['something'] = 'value';
+        unset($this->object['something']);
+
+        $this->assertEquals('something', $this->object['something']);
+    }
+
+    public function testAliasses()
+    {
+        $this->object->main = new \stdClass;
+        $this->object->name = '\stdClass';
+
+        $this->object->addAlias('alias', 'main');
+        $this->object->addAlias('other', 'name');
+
+        $this->assertTrue(isset($this->object->alias));
+        $this->assertTrue(isset($this->object->other));
+    }
+
+    /**
+     * @expectedException InvalidArgumentException
+     * @expectedExceptionMessage Factory::__set expects a string or an object.
+     */
+    public function testSetException()
+    {
+        $this->object->something = 4;
+    }
+
+    /**
+     * @expectedException InvalidArgumentException
+     * @expectedExceptionMessage Factory::setInstance needs an object for alias something
+     */
+    public function testSetInstanceException()
+    {
+        $this->object->setInstance('something', 4);
+    }
+
+    /**
+     * @expectedException InvalidArgumentException
+     * @expectedExceptionMessage Only Blueprint and Closure can be registered.
+     */
+    public function testRegisterException()
+    {
+        $this->object->register('something', 4);
+    }
+
+    /**
+     * @expectedException OutOfBoundsException
+     * @expectedExceptionMessage Blueprint not found: something
+     */
+    public function testGetBlueprintException()
+    {
+        $this->object->getBlueprint('something');
+    }
+
+    /**
+     * @expectedException InvalidArgumentException
+     * @expectedExceptionMessage Class not found: barClass
+     */
+    public function testInstantiateClassNotFoundException()
+    {
+        $this->object->add('foo', 'barClass');
+        $this->object->foo;
+    }
+
+    public function testSetAndGetBlueprint()
+    {
+        $this->assertEmpty($this->object->getBlueprints());
+        $this->object->foo = 'bar';
+        $this->object->bar = new Blueprint('baz');
+        $this->object->baz = function() {
+
+        };
+        $this->assertNotEmpty($this->object->getBlueprints());
+        $this->assertInstanceOf('\Miny\Factory\Blueprint', $this->object->getBlueprint('foo'));
+        $this->assertInstanceOf('\Miny\Factory\Blueprint', $this->object->getBlueprint('bar'));
+        $this->assertInstanceOf('\Closure', $this->object->getBlueprint('baz'));
+    }
+
+    public function testGetObject()
+    {
+        $class = new \stdClass;
+
+        $this->object->foo = $class;
+        $this->object->bar = function() use($class) {
+            return $class;
+        };
+        $this->object->add('singleton', '\stdClass');
+        $this->object->add('non_singleton', '\stdClass', false);
+        $this->object->add('link', '@\stdClass');
+
+        $this->assertSame($class, $this->object->foo);
+        $this->assertSame($class, $this->object->bar);
+
+        $this->assertInstanceOf('\stdClass', $this->object->singleton);
+        $this->assertInstanceOf('\stdClass', $this->object->non_singleton);
+        $this->assertInstanceOf('\stdClass', $this->object->link);
+
         $this->assertSame($this->object->singleton, $this->object->singleton);
-
-        $constructor_args = array('literal', 'value_c', $helper);
-
-        $properties = array(
-            'prop_a' => 'literal',
-            'prop_b' => 'value_c',
-            'prop_c' => $helper,
-            'prop_d' => $helper,
-            'prop_e' => $helper,
-            'prop_f' => $helper
-        );
-
-        $method_calls = array(
-            'method_a' => array('literal_value', 'another_literal_value'),
-            'method_b' => array('value_c', 'value'),
-            'method_c' => array($helper, $helper->property),
-            'method_d' => array(array($helper, 'method'), $helper->method('return')),
-            'method_e' => array('value_c'),
-        );
-
-        $this->assertEquals($constructor_args, $obj->constructor);
-        $this->assertEquals($properties, $obj->property);
-        $this->assertEquals($method_calls, $obj->method);
+        $this->assertNotSame($this->object->non_singleton, $this->object->non_singleton);
     }
 
-    public function testCreateMultipleInstances()
+    public function testInjectingDependencies()
     {
-        $this->object->add('instance', __NAMESPACE__ . '\TestClass', false);
-        $this->assertNotSame($this->object->instance, $this->object->instance);
+        $class = new \stdClass;
+
+        $this->object->foo = $class;
+
+        $this->object->add('bar', __NAMESPACE__ . '\TestClass')
+                ->setArguments('a', 'b')
+                ->addMethodCall('foo', 'foo_value')
+                ->addMethodCall('bar', 'bar_1', 'bar_2')
+                ->setProperty('a', '&foo')
+                ->setProperty('b', '@param')
+                ->setProperty('c', '\@param');
+
+        $this->object->add('baz', __NAMESPACE__ . '\TestClass')
+                ->setParent('bar');
+
+        $this->object->add('foobar', __NAMESPACE__ . '\TestClass')
+                ->setParent('bar')
+                ->setArguments('c')
+                ->setProperty('foobar_blueprint', new Blueprint('\stdClass'))
+                ->addMethodCall('foobar_array', '&bar->constructor')
+                ->addMethodCall('foobar_callable', '*bar::property')
+                ->addMethodCall('foobar_method_call', '&bar::__get::constructor');
+
+        foreach (array('bar', 'baz') as $name) {
+            $obj = $this->object->$name;
+            $this->assertContains('a', $obj->constructor);
+            $this->assertContains('b', $obj->constructor);
+            $this->assertContains('foo_value', $obj->method['foo']);
+            $this->assertContains('bar_1', $obj->method['bar']);
+            $this->assertContains('bar_2', $obj->method['bar']);
+            $this->assertSame($class, $obj->property['a']);
+            $this->assertEquals('param', $obj->property['b']);
+            $this->assertEquals('@param', $obj->property['c']);
+        }
+
+        $foobar = $this->object->foobar;
+
+        $this->assertContains('c', $foobar->constructor);
+        $this->assertNotContains('a', $foobar->constructor);
+
+        $this->assertContains('a', $foobar->method['foobar_array'][0]);
+        $this->assertContains('b', $foobar->method['foobar_array'][0]);
+
+        $this->assertContains('a', $foobar->method['foobar_method_call'][0]);
+        $this->assertContains('b', $foobar->method['foobar_method_call'][0]);
+
+        $this->assertTrue(is_callable($foobar->method['foobar_callable'][0]));
+        $this->assertInstanceOf('\stdClass', $foobar->property['foobar_blueprint']);
     }
 
-    public function testShouldInjectObjectConstructedFromBlueprint()
+    /**
+     * @expectedException InvalidArgumentException
+     * @expectedExceptionMessage Class "foo" does not have a method "bar"
+     */
+    public function testMethodCallException()
     {
-        $this->object->add('object', __NAMESPACE__ . '\TestClass')
-                ->addMethodCall('method_name', new Blueprint(__NAMESPACE__ . '\TestClass'));
-        $this->assertInstanceOf(__NAMESPACE__ . '\TestClass', $this->object->object->method['method_name'][0]);
+        $this->object->foo = new \stdClass;
+
+        $this->object->add('bar', '\stdClass')
+                ->setProperty('foo', '&foo::bar::baz');
+        $this->object->bar;
+    }
+
+    public function testReplace()
+    {
+        $this->object->foo = '\stdClass';
+        $old = $this->object->replace('foo', null);
+
+        $this->assertNull($old);
+
+        $object = $this->object->replace('foo', new \stdClass);
+        $this->assertNotSame($object, $this->object->foo);
+    }
+
+    /**
+     * @expectedException OutOfBoundsException
+     * @expectedExceptionMessage Blueprint not found: foo
+     */
+    public function testReplaceExceptionWithoutBlueprint()
+    {
+        $this->object->foo = new \stdClass;
+        $this->object->replace('foo', null);
+    }
+
+    /**
+     * @expectedException InvalidArgumentException
+     * @expectedExceptionMessage Can only insert objects
+     */
+    public function testReplaceExceptionWrongType()
+    {
+        $this->object->foo = new \stdClass;
+        $this->object->replace('foo', 5);
     }
 }
 

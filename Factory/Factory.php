@@ -48,9 +48,13 @@ class Factory implements ArrayAccess
     /**
      * @param array $params Initial list of parameters to be stored.
      */
-    public function __construct(array $params = array())
+    public function __construct($params = null)
     {
-        $this->parameters = new ParameterContainer($params);
+        if ($params instanceof ParameterContainer) {
+            $this->parameters = $params;
+        } else {
+            $this->parameters = new ParameterContainer($params ? : array());
+        }
         $this->setInstance('factory', $this);
     }
 
@@ -141,14 +145,13 @@ class Factory implements ArrayAccess
     public function __set($alias, $object)
     {
         if (is_string($object)) {
-            $object = new Blueprint($object);
-        } elseif (!is_object($object)) {
-            throw new InvalidArgumentException('Factory::__set expects a string or an object.');
-        }
-        if ($object instanceof Blueprint || $object instanceof Closure) {
+            $this->add($alias, $object);
+        } elseif ($object instanceof Blueprint || $object instanceof Closure) {
             $this->register($alias, $object);
-        } else {
+        } elseif (is_object($object)) {
             $this->setInstance($alias, $object);
+        } else {
+            throw new InvalidArgumentException('Factory::__set expects a string or an object.');
         }
     }
 
@@ -198,7 +201,7 @@ class Factory implements ArrayAccess
      *
      * @return null|object The old object instance.
      *
-     * @throws UnexpectedValueException
+     * @throws InvalidArgumentException
      */
     public function replace($alias, $object = null)
     {
@@ -215,7 +218,7 @@ class Factory implements ArrayAccess
         } elseif (is_object($object)) {
             $this->__set($alias, $object);
         } else {
-            throw new UnexpectedValueException('Can only insert objects.');
+            throw new InvalidArgumentException('Can only insert objects.');
         }
 
         return $old;
