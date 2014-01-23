@@ -10,6 +10,7 @@
 namespace Miny\Application;
 
 use InvalidArgumentException;
+use Miny\AutoLoader;
 
 require_once __DIR__ . '/BaseApplication.php';
 
@@ -18,14 +19,14 @@ class WorkerApplication extends BaseApplication
     private $jobs           = array();
     private $exit_requested = false;
 
-    public function __construct($environment = self::ENV_PROD)
+    public function __construct($environment = self::ENV_PROD, AutoLoader $autoloader = null)
     {
         ignore_user_abort(true);
         set_time_limit(0);
         pcntl_signal(SIGTERM, function () {
             exit;
         });
-        parent::__construct($environment);
+        parent::__construct($environment, $autoloader);
     }
 
     protected function registerDefaultServices()

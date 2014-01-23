@@ -37,7 +37,7 @@ abstract class BaseApplication
      * @param string $directory
      * @param int $environment
      */
-    public function __construct($environment = self::ENV_PROD)
+    public function __construct($environment = self::ENV_PROD, AutoLoader $autoloader = null)
     {
         $environment_names = array(
             self::ENV_PROD => 'production',
@@ -50,11 +50,13 @@ abstract class BaseApplication
         }
         $this->environment = $environment;
 
-        $autoloader    = new AutoLoader(array(
-            '\Application' => '.',
-            '\Miny'        => __DIR__ . '/..',
-            '\Modules'     => __DIR__ . '/../../Modules'
-        ));
+        if ($autoloader === null) {
+            $autoloader = new AutoLoader(array(
+                '\Application' => '.',
+                '\Miny'        => __DIR__ . '/..',
+                '\Modules'     => __DIR__ . '/../../Modules'
+            ));
+        }
         $factory       = new Factory();
         $factory->setInstance('autoloader', $autoloader);
         $this->factory = $factory;
