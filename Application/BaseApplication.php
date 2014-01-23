@@ -219,16 +219,4 @@ abstract class BaseApplication
     }
 
     abstract protected function onRun();
-
-    /* Magic methods are dispatched to Factory */
-
-    public function __set($key, $value)
-    {
-        $this->factory->__set($key, $value);
-    }
-
-    public function __get($key)
-    {
-        return $this->factory->get($key);
-    }
 }
