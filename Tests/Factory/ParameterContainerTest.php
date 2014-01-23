@@ -9,7 +9,6 @@ class ParameterContainerTest extends \PHPUnit_Framework_TestCase
         'array_a'      => array(
             'param_b' => '{@value_b}',
             'array_b' => array(
-                '{@param_c}'     => 'value_b_value',
                 'deep_parameter' => 'deep_value'
             ),
         ),
@@ -41,7 +40,6 @@ class ParameterContainerTest extends \PHPUnit_Framework_TestCase
         $array_a_with_resolved_links = array(
             'param_b' => 'value_c',
             'array_b' => array(
-                'value_c'        => 'value_b_value',
                 'deep_parameter' => 'deep_value'
             )
         );
@@ -93,9 +91,7 @@ class ParameterContainerTest extends \PHPUnit_Framework_TestCase
         $this->assertFalse(isset($this->object['some_item']));
 
         unset($this->object['array_a:array_b:deep_parameter']);
-        $this->assertEquals(array(
-            'value_c' => 'value_b_value'
-                ), $this->object['array_a:array_b']);
+        $this->assertEquals(array(), $this->object['array_a:array_b']);
 
         //deleting a link
         unset($this->object['value_b']);
@@ -126,7 +122,6 @@ class ParameterContainerTest extends \PHPUnit_Framework_TestCase
             'array_a'      => array(
                 'param_b'           => 'some_value',
                 'array_b'           => array(
-                    '{@param_c}'     => 'value_b_value',
                     'deep_parameter' => 'deep_value'
                 ),
                 'additional_param'  => 'other_value',
@@ -148,7 +143,6 @@ class ParameterContainerTest extends \PHPUnit_Framework_TestCase
             'array_a'      => array(
                 'param_b'           => 'some_value',
                 'array_b'           => array(
-                    'some_value'     => 'value_b_value',
                     'deep_parameter' => 'deep_value'
                 ),
                 'additional_param'  => 'other_value',
@@ -183,7 +177,6 @@ class ParameterContainerTest extends \PHPUnit_Framework_TestCase
             'array_a'      => array(
                 'param_b'          => '{@value_b}',
                 'array_b'          => array(
-                    '{@param_c}'     => 'value_b_value',
                     'deep_parameter' => 'deep_value'
                 ),
                 'additional_param' => 'other_value'

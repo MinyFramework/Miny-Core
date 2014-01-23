@@ -14,7 +14,6 @@ use Closure;
 use InvalidArgumentException;
 use Miny\Utils\Utils;
 use OutOfBoundsException;
-use UnexpectedValueException;
 
 /**
  * Factory class
@@ -257,18 +256,18 @@ class Factory implements ArrayAccess
 
     /**
      * @param object $object
-     * @param Blueprint $descriptor
+     * @param Blueprint $blueprint
      */
-    private function injectDependencies($object, Blueprint $descriptor)
+    private function injectDependencies($object, Blueprint $blueprint)
     {
-        if ($descriptor->hasParent()) {
-            $parent = $this->getBlueprint($descriptor->getParent());
+        if ($blueprint->hasParent()) {
+            $parent = $this->getBlueprint($blueprint->getParent());
             $this->injectDependencies($object, $parent);
         }
-        foreach ($descriptor->getProperties() as $name => $value) {
+        foreach ($blueprint->getProperties() as $name => $value) {
             $object->$name = $this->resolveReferences($value);
         }
-        foreach ($descriptor->getMethodCalls() as $method) {
+        foreach ($blueprint->getMethodCalls() as $method) {
             list($name, $args) = $method;
             $arguments = $this->resolveReferences($args);
             call_user_func_array(array($object, $name), $arguments);
@@ -276,32 +275,31 @@ class Factory implements ArrayAccess
         return $object;
     }
 
-    protected function getConstructorArguments(Blueprint $descriptor)
+    protected function getConstructorArguments(Blueprint $blueprint)
     {
-        $arguments = $descriptor->getArguments();
-        if (empty($arguments) && $descriptor->hasParent()) {
-            $parent    = $this->getBlueprint($descriptor->getParent());
+        $arguments = $blueprint->getArguments();
+        if (empty($arguments) && $blueprint->hasParent()) {
+            $parent    = $this->getBlueprint($blueprint->getParent());
             $arguments = $this->getConstructorArguments($parent);
         }
         return $arguments;
     }
 
     /**
-     * @param Blueprint $descriptor
+     * @param Blueprint $blueprint
+     *
      * @return object
+     *
      * @throws InvalidArgumentException
      */
-    private function instantiate(Blueprint $descriptor)
+    private function instantiate(Blueprint $blueprint)
     {
-        $class = $descriptor->getClassName();
+        $class = $blueprint->getClassName();
         if ($class[0] == '@') {
-            $class = $this->offsetGet(substr($class, 1));
+            $class = $this->parameters[substr($class, 1)];
         }
 
-        if (!class_exists($class)) {
-            throw new InvalidArgumentException('Class not found: ' . $class);
-        }
-        $args      = $this->getConstructorArguments($descriptor);
+        $args      = $this->getConstructorArguments($blueprint);
         $arguments = $this->resolveReferences($args);
 
         return Utils::instantiate($class, $arguments);
@@ -335,8 +333,9 @@ class Factory implements ArrayAccess
         }
 
         //Resolve any links in $var
-        $var = $this->parameters->resolveLinks($var);
-
+        if (strpos($var, '@') !== false) {
+            $var = $this->parameters->resolveLinks($var);
+        }
         //see if $var is a reference to something
         $str = substr($var, 1);
         switch ($var[0]) {
@@ -410,7 +409,6 @@ class Factory implements ArrayAccess
     {
         return $this->get($alias);
     }
-
     /* ArrayAccess interface */
 
     public function offsetExists($offset)

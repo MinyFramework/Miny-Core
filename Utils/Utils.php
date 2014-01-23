@@ -36,7 +36,10 @@ class Utils
     /**
      * @param string $class
      * @param array $arguments
+     *
      * @return object
+     *
+     * @throws InvalidArgumentException when the class does not exist.
      */
     public static function instantiate($class, array $arguments = array())
     {
