@@ -278,9 +278,9 @@ class Factory implements ArrayAccess
     protected function getConstructorArguments(Blueprint $blueprint)
     {
         $arguments = $blueprint->getArguments();
-        if (empty($arguments) && $blueprint->hasParent()) {
-            $parent    = $this->getBlueprint($blueprint->getParent());
-            $arguments = $this->getConstructorArguments($parent);
+        while (empty($arguments) && $blueprint->hasParent()) {
+            $blueprint = $this->getBlueprint($blueprint->getParent());
+            $arguments = $blueprint->getArguments();
         }
         return $arguments;
     }
