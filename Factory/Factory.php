@@ -45,7 +45,7 @@ class Factory implements ArrayAccess
     protected $aliasses = array();
 
     /**
-     * @param array $params Initial list of parameters to be stored.
+     * @param array|ParameterContainer|null $params Initial list of parameters to be stored.
      */
     public function __construct($params = null)
     {
