@@ -333,7 +333,7 @@ class Factory implements ArrayAccess
         }
 
         //Resolve any links in $var
-        if (strpos($var, '@') !== false) {
+        if (strpos($var, '{@') !== false) {
             $var = $this->parameters->resolveLinks($var);
         }
         //see if $var is a reference to something
