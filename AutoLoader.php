@@ -69,9 +69,10 @@ class AutoLoader
             }
             $temp = substr($temp, 0, $pos);
         }
-        $subpath = substr($class, $pos - 1) . '.php';
+        $classname = substr($class, $pos - 1);
+        $subpath   = strtr($classname, '\\', DIRECTORY_SEPARATOR) . '.php';
         foreach ($this->map[$temp] as $path) {
-            $path = strtr($path . $subpath, '\\', DIRECTORY_SEPARATOR);
+            $path .= $subpath;
             if (is_file($path)) {
                 include_once $path;
                 return;
