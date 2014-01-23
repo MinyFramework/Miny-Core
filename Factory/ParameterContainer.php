@@ -83,12 +83,11 @@ class ParameterContainer implements ArrayAccess
         if (is_string($value) && strpos($value, '{@') !== false) {
             $container = $this;
             $callback  = function ($matches) use ($container) {
-                try {
-                    $return = ArrayUtils::findByPath($container->toArray(), $matches[1]);
-                    return $container->resolveLinks($return);
-                } catch (OutOfBoundsException $e) {
-                    return $matches[0];
+                $return = ArrayUtils::getByPath($container->toArray(), $matches[1], $matches[0]);
+                if ($return !== $matches[0]) {
+                    $return = $container->resolveLinks($return);
                 }
+                return $return;
             };
             return preg_replace_callback('/(?<!\\\){@(.*?)}/', $callback, $value);
         }

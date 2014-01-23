@@ -201,7 +201,8 @@ class FactoryTest extends \PHPUnit_Framework_TestCase
                 ->setProperty('foobar_blueprint', new Blueprint('\stdClass'))
                 ->addMethodCall('foobar_array', '&bar->constructor')
                 ->addMethodCall('foobar_callable', '*bar::property')
-                ->addMethodCall('foobar_method_call', '&bar::__get::constructor');
+                ->addMethodCall('foobar_method_call', '&bar::__get::constructor')
+                ->setProperty('resolved', '{@param}');
 
         foreach (array('bar', 'baz') as $name) {
             $obj = $this->object->$name;
@@ -228,6 +229,7 @@ class FactoryTest extends \PHPUnit_Framework_TestCase
 
         $this->assertTrue(is_callable($foobar->method['foobar_callable'][0]));
         $this->assertInstanceOf('\stdClass', $foobar->property['foobar_blueprint']);
+        $this->assertEquals('{@param}', $foobar->property['resolved']);
     }
 
     /**
