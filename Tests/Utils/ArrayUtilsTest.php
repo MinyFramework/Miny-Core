@@ -15,12 +15,16 @@ class ArrayUtilsTest extends PHPUnit_Framework_TestCase
             'key_a' => array(
                 'subkey_a' => 'value_a'
             ),
-            'key_b' => 'value'
+            'key_b' => 'value',
+            6       => 'six'
         );
     }
 
     public function testExistsByPath()
     {
+        $this->assertFalse(ArrayUtils::existsByPath($this->array, 5));
+        $this->assertTrue(ArrayUtils::existsByPath($this->array, 6));
+
         $this->assertTrue(ArrayUtils::existsByPath($this->array, 'key_a:subkey_a'));
         $this->assertTrue(ArrayUtils::existsByPath($this->array, array('key_a', 'subkey_a')));
         $this->assertFalse(ArrayUtils::existsByPath($this->array, array('key_b:subkey_a')));
@@ -29,24 +33,17 @@ class ArrayUtilsTest extends PHPUnit_Framework_TestCase
 
     /**
      * @expectedException InvalidArgumentException
-     * @expectedExceptionMessage Path must be an array or a string.
-     */
-    public function testExistsByPathException()
-    {
-        $this->assertTrue(ArrayUtils::existsByPath($this->array, 5));
-    }
-
-    /**
-     * @expectedException InvalidArgumentException
      * @expectedExceptionMessage ArrayUtils::existsByPath expects an array or an ArrayAccess object.
      */
     public function testExistsByPathArrayException()
     {
-        $this->assertTrue(ArrayUtils::existsByPath('something', 'path:to:something'));
+        ArrayUtils::existsByPath('something', 'path:to:something');
     }
 
     public function testGetByPath()
     {
+        $this->assertEquals('six', ArrayUtils::getByPath($this->array, 6));
+        $this->assertEquals('value', ArrayUtils::getByPath($this->array, 'key_b'));
         $this->assertEquals('value_a', ArrayUtils::getByPath($this->array, 'key_a:subkey_a'));
         $this->assertEquals('value_a', ArrayUtils::getByPath($this->array, array('key_a', 'subkey_a')));
         $this->assertEquals(null, ArrayUtils::getByPath($this->array, array('key_a', 'subkey_b')));
@@ -59,7 +56,7 @@ class ArrayUtilsTest extends PHPUnit_Framework_TestCase
      */
     public function testGetByPathArrayException()
     {
-        $this->assertTrue(ArrayUtils::getByPath('something', 'path:to:something'));
+        ArrayUtils::getByPath('something', 'path:to:something');
     }
 
     public function testFindByPath()
@@ -89,7 +86,7 @@ class ArrayUtilsTest extends PHPUnit_Framework_TestCase
     public function testUnsetByPath()
     {
         ArrayUtils::unsetByPath($this->array, 'key_a:subkey_a');
-        $this->assertEquals(array('key_a' => array(), 'key_b' => 'value'), $this->array);
+        $this->assertFalse(isset($this->array['key_a']['subkey_a']));
         // Should not throw an exception.
         ArrayUtils::unsetByPath($this->array, 'key_a:subkey_a:foo');
     }
@@ -101,7 +98,8 @@ class ArrayUtilsTest extends PHPUnit_Framework_TestCase
                 'subkey_a' => 'value_a'
             ),
             'key_b' => 'value',
-            'key_c' => 'value_c'
+            'key_c' => 'value_c',
+            6       => 'six'
         );
         $merge    = array(
             'key_a' => 'anything',
@@ -116,7 +114,8 @@ class ArrayUtilsTest extends PHPUnit_Framework_TestCase
         $expected = array(
             'key_a' => 'something',
             'key_b' => 'value',
-            'key_c' => 'value_c'
+            'key_c' => 'value_c',
+            6       => 'six'
         );
         $merge    = array(
             'key_a' => 'something',

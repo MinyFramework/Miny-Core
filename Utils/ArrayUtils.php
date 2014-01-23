@@ -22,27 +22,6 @@ class ArrayUtils
 {
 
     /**
-     * @param string|array $path
-     * @return array
-     *
-     * @throws InvalidArgumentException
-     */
-    private static function createPath($path)
-    {
-        if (is_array($path)) {
-            return $path;
-        }
-        if (is_string($path)) {
-            if (strpos($path, ':') === false) {
-                return array($path);
-            } else {
-                return explode(':', $path);
-            }
-        }
-        throw new InvalidArgumentException('Path must be an array or a string.');
-    }
-
-    /**
      * Determines whether the value represented by $path exists in $array.
      *
      * @param array|ArrayAccess $array
@@ -55,7 +34,9 @@ class ArrayUtils
         if (!is_array($array) && !$array instanceof ArrayAccess) {
             throw new InvalidArgumentException('ArrayUtils::existsByPath expects an array or an ArrayAccess object.');
         }
-        $parts = self::createPath($parts);
+        if (!is_array($parts)) {
+            $parts = explode(':', $parts);
+        }
         foreach ($parts as $k) {
             if (!is_array($array) || !array_key_exists($k, $array)) {
                 return false;
@@ -80,7 +61,9 @@ class ArrayUtils
         if (!is_array($array) && !$array instanceof ArrayAccess) {
             throw new InvalidArgumentException('ArrayUtils::getByPath expects an array or an ArrayAccess object.');
         }
-        $parts = self::createPath($parts);
+        if (!is_array($parts)) {
+            $parts = explode(':', $parts);
+        }
         foreach ($parts as $k) {
             if (!array_key_exists($k, $array)) {
                 return $default;
@@ -103,7 +86,9 @@ class ArrayUtils
      */
     public static function &findByPath(array &$array, $parts, $create = false)
     {
-        $parts = self::createPath($parts);
+        if (!is_array($parts)) {
+            $parts = explode(':', $parts);
+        }
         foreach ($parts as $k) {
             if (!array_key_exists($k, $array)) {
                 if ($create) {
@@ -126,7 +111,9 @@ class ArrayUtils
      */
     public static function setByPath(array &$array, $parts, $item)
     {
-        $parts = self::createPath($parts);
+        if (!is_array($parts)) {
+            $parts = explode(':', $parts);
+        }
         foreach ($parts as $k) {
             if (!array_key_exists($k, $array)) {
                 $array[$k] = array();
@@ -144,7 +131,9 @@ class ArrayUtils
      */
     public static function unsetByPath(array &$array, $parts)
     {
-        $parts    = self::createPath($parts);
+        if (!is_array($parts)) {
+            $parts = explode(':', $parts);
+        }
         $last_key = array_pop($parts);
         foreach ($parts as $k) {
             if (!array_key_exists($k, $array)) {
