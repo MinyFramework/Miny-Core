@@ -275,16 +275,6 @@ class Factory implements ArrayAccess
         return $object;
     }
 
-    protected function getConstructorArguments(Blueprint $blueprint)
-    {
-        $arguments = $blueprint->getArguments();
-        while (empty($arguments) && $blueprint->hasParent()) {
-            $blueprint = $this->getBlueprint($blueprint->getParent());
-            $arguments = $blueprint->getArguments();
-        }
-        return $arguments;
-    }
-
     /**
      * @param Blueprint $blueprint
      *
@@ -299,7 +289,11 @@ class Factory implements ArrayAccess
             $class = $this->parameters[substr($class, 1)];
         }
 
-        $args      = $this->getConstructorArguments($blueprint);
+        $args = $blueprint->getArguments();
+        while (empty($args) && $blueprint->hasParent()) {
+            $blueprint = $this->getBlueprint($blueprint->getParent());
+            $args = $blueprint->getArguments();
+        }
         $arguments = $this->resolveReferences($args);
 
         return Utils::instantiate($class, $arguments);
@@ -341,15 +335,13 @@ class Factory implements ArrayAccess
         switch ($var[0]) {
             case '@':
                 //parameter
-                $key = $this->parameters[$str];
-                $var = $this->resolveReferences($key);
+                $var = $this->offsetGet($str);
                 break;
 
             case '&':
                 //object or method call. Basically this is
                 //$factory->create('object')->method(parameters);
-                $key = $this->getObjectParameter($str);
-                $var = $this->resolveReferences($key);
+                $var = $this->getObjectParameter($str);
                 break;
 
             case '*':
@@ -391,13 +383,14 @@ class Factory implements ArrayAccess
                 $method = sprintf('Class "%s" does not have a method "%s"', $obj_name, $method);
                 throw new InvalidArgumentException($method);
             }
-            return call_user_func_array($callback, $this->parameters->resolveLinks($arr));
+            $retval = call_user_func_array($callback, $this->parameters->resolveLinks($arr));
         } elseif (($pos = strpos($str, '->')) !== false) {
             list($obj_name, $property) = explode('->', $str, 2);
-            return $this->get($obj_name)->$property;
+            $retval = $this->get($obj_name)->$property;
         } else {
-            return $this->get($str);
+            $retval = $this->get($str);
         }
+        return $this->resolveReferences($retval);
     }
 
     public function __isset($alias)
