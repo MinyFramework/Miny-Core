@@ -20,6 +20,7 @@ class AutoLoader
      * @var string[]
      */
     private $map = array();
+    private $max_ns_length;
 
     /**
      * @param array $map
@@ -27,6 +28,7 @@ class AutoLoader
     public function __construct(array $map = array())
     {
         spl_autoload_register(array($this, 'load'));
+        $this->max_ns_length = 0;
         $this->register($map);
     }
 
@@ -41,6 +43,10 @@ class AutoLoader
                 $this->register($ns, $path);
             }
         } else {
+            $length = strlen($namespace);
+            if ($this->max_ns_length < $length) {
+                $this->max_ns_length = $length;
+            }
             if (!isset($this->map[$namespace])) {
                 $this->map[$namespace] = array();
             }
@@ -59,7 +65,7 @@ class AutoLoader
      */
     public function load($class)
     {
-        $temp = '\\' . $class;
+        $temp = substr('\\' . $class, 0, $this->max_ns_length + 1);
 
         // We look for the longest matching namespace so we are trimming from the right.
         while (!isset($this->map[$temp])) {
