@@ -27,7 +27,7 @@ class ParameterContainer implements ArrayAccess
 
     public function __construct(array $params = array())
     {
-        $this->addParameters($params);
+        $this->parameters = $params;
     }
 
     /**

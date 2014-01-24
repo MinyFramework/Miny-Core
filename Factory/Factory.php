@@ -49,11 +49,10 @@ class Factory implements ArrayAccess
      */
     public function __construct($params = null)
     {
-        if ($params instanceof ParameterContainer) {
-            $this->parameters = $params;
-        } else {
-            $this->parameters = new ParameterContainer($params ? : array());
+        if (!$params instanceof ParameterContainer) {
+            $params = new ParameterContainer($params ? : array());
         }
+        $this->parameters = $params;
         $this->setObjectInstance('factory', $this);
     }
 

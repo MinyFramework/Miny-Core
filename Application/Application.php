@@ -10,6 +10,7 @@
 namespace Miny\Application;
 
 use Miny\Application\Handlers\ApplicationEventHandlers;
+use Miny\Factory\Factory;
 use Miny\HTTP\Request;
 use Miny\HTTP\Response;
 use Miny\Routing\Resource;
@@ -39,11 +40,9 @@ class Application extends BaseApplication
         ));
     }
 
-    protected function registerEventHandlers()
+    protected function registerEventHandlers(Factory $factory)
     {
-        $factory = $this->getFactory();
-
-        $event_handlers = new ApplicationEventHandlers($factory);
+        $event_handlers = new ApplicationEventHandlers($factory, $factory->get('log'));
         $factory->getBlueprint('events')
                 ->addMethodCall('register', 'filter_request', array($event_handlers, 'logRequest'))
                 ->addMethodCall('register', 'filter_request', array($event_handlers, 'filterRoutes'))
@@ -51,20 +50,19 @@ class Application extends BaseApplication
                 ->addMethodCall('register', 'filter_response', array($event_handlers, 'logResponse'));
     }
 
-    protected function registerDefaultServices()
+    protected function registerDefaultServices(Factory $factory)
     {
-        parent::registerDefaultServices();
-        $this->registerEventHandlers();
+        parent::registerDefaultServices($factory);
+        $this->registerEventHandlers($factory);
 
-        $factory = $this->getFactory();
         $factory->add('controllers', '\Miny\Controller\ControllerCollection')
                 ->setArguments($this, '{@controllers:namespace}');
+        $factory->add('controller', '\Miny\Controller\Controller')
+                ->setArguments($this);
         $factory->add('router', '\Miny\Routing\Router')
                 ->setArguments('@router:prefix', '@router:suffix', '@router:default_parameters', '@router:short_urls');
         $factory->add('session', '\Miny\HTTP\Session')
                 ->addMethodCall('open');
-        $factory->add('controller', '\Miny\Controller\Controller')
-                ->setArguments($this);
         $factory->add('response', '\Miny\HTTP\Response');
     }
 

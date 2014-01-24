@@ -58,13 +58,20 @@ abstract class BaseApplication
                 '\Modules'     => __DIR__ . '/../../Modules'
             ));
         }
-        $factory       = new Factory();
+        $factory       = new Factory(array(
+            'default_timezone' => 'UTC',
+            'root'             => realpath('.'),
+            'log'              => array(
+                'path'  => realpath('./logs'),
+                'debug' => $this->isDeveloperEnvironment()
+            ),
+        ));
         $factory->setInstance('autoloader', $autoloader);
         $this->factory = $factory;
 
         $this->setDefaultParameters();
         $this->loadConfigFiles();
-        $this->registerDefaultServices();
+        $this->registerDefaultServices($factory);
 
         //Log start of execution
         if (isset($warning)) {
@@ -88,14 +95,6 @@ abstract class BaseApplication
 
     protected function setDefaultParameters()
     {
-        $this->factory->getParameters()->addParameters(array(
-            'default_timezone' => 'UTC',
-            'root'             => realpath('.'),
-            'log'              => array(
-                'path'  => realpath('./logs'),
-                'debug' => $this->isDeveloperEnvironment()
-            ),
-        ));
     }
 
     /**
@@ -190,16 +189,16 @@ abstract class BaseApplication
         return $this->isEnvironment(self::ENV_TEST);
     }
 
-    protected function registerDefaultServices()
+    protected function registerDefaultServices(Factory $factory)
     {
-        $this->factory->setInstance('app', $this);
-        $this->factory->add('log', '\Miny\Log')
+        $factory->setInstance('app', $this);
+        $factory->add('log', '\Miny\Log')
                 ->setArguments('@log:path', '@log:debug');
-        $this->factory->add('error_handlers', '\Miny\Application\Handlers\ErrorHandlers')
+        $factory->add('error_handlers', '\Miny\Application\Handlers\ErrorHandlers')
                 ->setArguments('&log');
-        $this->factory->add('events', '\Miny\Event\EventDispatcher')
+        $factory->add('events', '\Miny\Event\EventDispatcher')
                 ->addMethodCall('register', 'uncaught_exception', '*error_handlers::logException');
-        $this->factory->add('module_handler', '\Miny\Modules\ModuleHandler')
+        $factory->add('module_handler', '\Miny\Modules\ModuleHandler')
                 ->setArguments('&app', '&log');
     }
 

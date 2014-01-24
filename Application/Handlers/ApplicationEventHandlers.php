@@ -33,11 +33,11 @@ class ApplicationEventHandlers
      */
     protected $log;
 
-    public function __construct(Factory $factory)
+    public function __construct(Factory $factory, Log $log)
     {
         $this->factory    = $factory;
         $this->parameters = $factory->getParameters();
-        $this->log        = $factory->get('log');
+        $this->log        = $log;
 
         set_exception_handler(array($this, 'handleExceptions'));
     }
