@@ -61,7 +61,7 @@ class Extendable
                 $message = sprintf('Method "%s" not found in class %s', $method, get_class($object));
                 throw new InvalidArgumentException($message);
             }
-            if (is_numeric($alias)) {
+            if (is_int($alias)) {
                 $alias = $method;
             }
             $this->plugins[$alias] = $callable;
@@ -85,7 +85,7 @@ class Extendable
 
     /**
      * Register multiple property setters.
-     * 
+     *
      * @param array $setters
      */
     public function addSetters(array $setters)

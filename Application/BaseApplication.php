@@ -34,7 +34,7 @@ abstract class BaseApplication
     private $factory;
 
     /**
-     * 
+     *
      * @param int $environment
      * @param AutoLoader|null $autoloader
      */
@@ -77,7 +77,7 @@ abstract class BaseApplication
         if (isset($parameters['modules']) && is_array($parameters['modules'])) {
             $module_handler = $factory->get('module_handler');
             foreach ($parameters['modules'] as $module => $parameters) {
-                if (is_numeric($module) && !is_array($parameters)) {
+                if (is_int($module) && !is_array($parameters)) {
                     $module     = $parameters;
                     $parameters = array();
                 }
