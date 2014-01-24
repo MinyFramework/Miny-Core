@@ -55,6 +55,13 @@ class ModuleHandler
         $this->log->debug('ModuleHandler: ' . $message, $args);
     }
 
+    public function initialize()
+    {
+        foreach ($this->modules as $module) {
+            $module->init($this->application);
+        }
+    }
+
     /**
      * @param string $module
      * @throws BadModuleException
@@ -75,7 +82,6 @@ class ModuleHandler
         foreach ($module_class->getDependencies() as $name) {
             $this->module($name);
         }
-        $module_class->init($this->application);
     }
 
     public function processConditionalRunnables()

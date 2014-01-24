@@ -91,6 +91,7 @@ abstract class BaseApplication
                 $module_handler->module($module, $parameters);
             }
         }
+        $module_handler->initialize();
     }
 
     protected function setDefaultParameters()
