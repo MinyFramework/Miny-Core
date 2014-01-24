@@ -34,8 +34,9 @@ abstract class BaseApplication
     private $factory;
 
     /**
-     * @param string $directory
+     * 
      * @param int $environment
+     * @param AutoLoader|null $autoloader
      */
     public function __construct($environment = self::ENV_PROD, AutoLoader $autoloader = null)
     {

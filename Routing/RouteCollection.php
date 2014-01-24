@@ -26,23 +26,30 @@ class RouteCollection implements IteratorAggregate
      */
     public function merge(RouteCollection $collection)
     {
-        $this->routes = array_merge($this->routes, $collection->routes);
+        $this->routes = array_merge($this->routes, $collection->getRoutes());
+    }
+
+    /**
+     * @return Route[]
+     */
+    public function getRoutes()
+    {
+        return $this->routes;
     }
 
     /**
      * @param Route $route
-     * @param string $name
+     * @param mixed $name
      * @throws InvalidArgumentException
      */
     public function addRoute(Route $route, $name = null)
     {
-        if ($name === null) {
+        if ($name === null || is_int($name)) {
             $this->routes[] = $route;
-        } else {
-            if (!is_string($name)) {
-                throw new InvalidArgumentException('Parameter "name" must be a string or NULL.');
-            }
+        } elseif (is_string($name)) {
             $this->routes[$name] = $route;
+        } else {
+            throw new InvalidArgumentException('Parameter "name" must be a string, integer or NULL.');
         }
     }
 

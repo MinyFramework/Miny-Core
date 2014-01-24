@@ -67,7 +67,7 @@ class Router extends RouteCollection
 
     /**
      * @param Route $route
-     * @param string $name
+     * @param mixed $name
      * @param boolean $prefix
      * @param boolean $suffix
      * @return Route
@@ -126,9 +126,6 @@ class Router extends RouteCollection
             $this->resources_built = true;
             foreach ($this->resources as $resource) {
                 foreach ($resource as $name => $route) {
-                    if (is_numeric($name)) {
-                        $name = null;
-                    }
                     $this->route($route, $name);
                 }
             }

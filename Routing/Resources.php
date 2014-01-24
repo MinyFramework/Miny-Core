@@ -350,6 +350,15 @@ class Resources extends RouteCollection
     }
 
     /**
+     * @return Route[]
+     */
+    public function getRoutes()
+    {
+        $this->build();
+        return parent::getRoutes();
+    }
+
+    /**
      * @return ArrayIterator
      */
     public function getIterator()

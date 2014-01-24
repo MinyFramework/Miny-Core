@@ -108,10 +108,16 @@ class Headers implements Iterator, Serializable
         }
     }
 
-    public function has($name)
+    public function has($name, $value = null)
     {
         $name = self::sanitize($name);
-        return isset($this->headers[$name]);
+        if(!isset($this->headers[$name])) {
+            return false;
+        }
+        if(is_array($this->headers[$name])) {
+            return in_array($value, $this->headers[$name]);
+        }
+        return $value === null || $this->headers[$name] === $value;
     }
 
     public function reset()

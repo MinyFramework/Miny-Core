@@ -32,13 +32,20 @@ class RouteCollectionTest extends \PHPUnit_Framework_TestCase
         return $other;
     }
 
+    public function testGetRoutes()
+    {
+        $routes = $this->object->getRoutes();
+        $this->assertCount(2, $routes);
+        $this->assertContainsOnlyInstancesOf('\Miny\Routing\Route', $routes);
+    }
+
     /**
      * @expectedException InvalidArgumentException
-     * @expectedException Parameter "name" must be a string or NULL.
+     * @expectedException Parameter "name" must be string, integer or NULL.
      */
-    public function testAddRouteNonStringName()
+    public function testAddRouteInvalidName()
     {
-        $this->object->addRoute(new Route('path'), 53);
+        $this->object->addRoute(new Route('path'), array());
     }
 
     /**

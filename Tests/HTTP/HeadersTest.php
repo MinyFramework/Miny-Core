@@ -27,7 +27,13 @@ class HeadersTest extends \PHPUnit_Framework_TestCase
 
         $this->assertFalse($headers->has('expect'));
         $headers->set('Expect', 'asd');
+        $headers->set('accept', 'asd');
+        $headers->set('accept', 'foo');
         $this->assertTrue($headers->has('expect'));
+        $this->assertTrue($headers->has('expect', 'asd'));
+        $this->assertFalse($headers->has('expect', 'foo'));
+        $this->assertTrue($headers->has('accept', 'asd'));
+        $this->assertTrue($headers->has('accept', 'foo'));
     }
 
     /**

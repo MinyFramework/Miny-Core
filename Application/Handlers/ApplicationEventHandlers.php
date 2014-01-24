@@ -131,8 +131,9 @@ class ApplicationEventHandlers
 
     public function setContentType(Request $request, Response $response)
     {
-        if (isset($this->parameters['content_type'])) {
-            $response->getHeaders()->set('content-type', $this->parameters['content_type']);
+        $headers = $response->getHeaders();
+        if (isset($this->parameters['content_type']) && !$headers->has('content-type')) {
+            $headers->set('content-type', $this->parameters['content_type']);
         }
     }
 }

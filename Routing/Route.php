@@ -58,11 +58,11 @@ class Route
      */
     public function __construct($path, $method = null, array $params = array())
     {
-        if($method !== null) {
+        if ($method !== null) {
             $method = strtoupper($method);
-        }
-        if ($method !== null && !in_array($method, self::$methods)) {
-            throw new BadMethodException('Unexpected route method: ' . $method);
+            if (!in_array($method, self::$methods)) {
+                throw new BadMethodException('Unexpected route method: ' . $method);
+            }
         }
         $this->setPath($path);
         $this->method     = $method;

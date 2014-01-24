@@ -54,7 +54,7 @@ class Factory implements ArrayAccess
         } else {
             $this->parameters = new ParameterContainer($params ? : array());
         }
-        $this->setInstance('factory', $this);
+        $this->setObjectInstance('factory', $this);
     }
 
     /**
@@ -121,6 +121,12 @@ class Factory implements ArrayAccess
         return $object;
     }
 
+    private function setObjectInstance($alias, $object)
+    {
+        $this->objects[$alias] = $object;
+        return $object;
+    }
+
     /**
      * Adds an object instance.
      *
@@ -128,13 +134,15 @@ class Factory implements ArrayAccess
      *
      * @param string $alias
      * @param object $object
+     *
+     * @return object $object
      */
     public function setInstance($alias, $object)
     {
         if (!is_object($object)) {
             throw new InvalidArgumentException('Factory::setInstance needs an object for alias ' . $alias);
         }
-        $this->objects[$alias] = $object;
+        return $this->setObjectInstance($alias, $object);
     }
 
     /**
@@ -148,7 +156,7 @@ class Factory implements ArrayAccess
         } elseif ($object instanceof Blueprint || $object instanceof Closure) {
             $this->register($alias, $object);
         } elseif (is_object($object)) {
-            $this->setInstance($alias, $object);
+            $this->setObjectInstance($alias, $object);
         } else {
             throw new InvalidArgumentException('Factory::__set expects a string or an object.');
         }
@@ -241,14 +249,12 @@ class Factory implements ArrayAccess
         $descriptor = $this->getBlueprint($alias);
 
         if ($descriptor instanceof Closure) {
-            $obj = $descriptor();
-            $this->setInstance($alias, $obj);
-            return $obj;
+            return $this->setInstance($alias, $descriptor($this));
         }
 
         $obj = $this->instantiate($descriptor);
         if ($descriptor->isSingleton()) {
-            $this->setInstance($alias, $obj);
+            $this->setObjectInstance($alias, $obj);
         }
 
         return $this->injectDependencies($obj, $descriptor);
@@ -292,7 +298,7 @@ class Factory implements ArrayAccess
         $args = $blueprint->getArguments();
         while (empty($args) && $blueprint->hasParent()) {
             $blueprint = $this->getBlueprint($blueprint->getParent());
-            $args = $blueprint->getArguments();
+            $args      = $blueprint->getArguments();
         }
         $arguments = $this->resolveReferences($args);
 
