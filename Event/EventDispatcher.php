@@ -70,8 +70,7 @@ class EventDispatcher
         if (is_string($event)) {
             $args = array_slice(func_get_args(), 1);
             $event = new Event($event, $args);
-        }
-        if (!$event instanceof Event) {
+        } elseif (!$event instanceof Event) {
             throw new InvalidArgumentException('The first parameter must be an Event object or a string.');
         }
         $name = $event->getName();
