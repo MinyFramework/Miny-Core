@@ -375,7 +375,7 @@ class Factory implements ArrayAccess
      */
     private function getObjectParameter($str)
     {
-        if (($pos = strpos($str, '::')) !== false) {
+        if (strpos($str, '::') !== false) {
             //method parameters are separated by ::
             //TOOD: use different separator for method names and arguments, support for nested method calls
             $arr      = explode('::', $str);
@@ -389,7 +389,7 @@ class Factory implements ArrayAccess
                 throw new InvalidArgumentException($method);
             }
             $retval = call_user_func_array($callback, $this->parameters->resolveLinks($arr));
-        } elseif (($pos = strpos($str, '->')) !== false) {
+        } elseif (strpos($str, '->') !== false) {
             list($obj_name, $property) = explode('->', $str, 2);
             $retval = $this->get($obj_name)->$property;
         } else {

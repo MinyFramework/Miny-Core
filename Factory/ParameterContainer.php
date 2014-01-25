@@ -81,6 +81,7 @@ class ParameterContainer implements ArrayAccess
             return $return;
         }
         if (is_string($value) && strpos($value, '{@') !== false) {
+            // This cannot be done by calling offsetGet as links are not resolved yet.
             $container = $this;
             $callback  = function ($matches) use ($container) {
                 $return = ArrayUtils::getByPath($container->toArray(), $matches[1], $matches[0]);

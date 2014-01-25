@@ -35,8 +35,8 @@ abstract class BaseController extends Extendable
      */
     public function getConfig()
     {
-        $parameters = $this->app->getFactory()->getParameters();
-        return $parameters[implode(':', func_get_args())];
+        $factory = $this->app->getFactory();
+        return $factory[func_get_args()];
     }
 
     protected function init()

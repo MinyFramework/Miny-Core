@@ -47,8 +47,7 @@ class ControllerCollection
     {
         if ($name === null) {
             $name = is_string($controller) ? $controller : $this->getNextName();
-        }
-        if (!is_string($name)) {
+        } elseif (!is_string($name)) {
             throw new InvalidArgumentException('Controller name must be a string');
         }
         if (!$controller instanceof Closure && !$controller instanceof BaseController && !is_string($controller)) {
@@ -93,10 +92,11 @@ class ControllerCollection
                 throw new UnexpectedValueException('Class not exists: ' . $class);
             }
         }
-        if (!is_subclass_of($class, __NAMESPACE__ . '\BaseController')) {
+        $controller = new $class($this->application);
+        if (!$controller instanceof BaseController) {
             throw new UnexpectedValueException('Class does not extend BaseController: ' . $class);
         }
-        return new $class($this->application);
+        return $controller;
     }
 
     /**
@@ -119,15 +119,13 @@ class ControllerCollection
 
         $event_handler = $this->application->getFactory()->events;
 
-        if (empty($action)) {
-            if ($controller instanceof Controller) {
-                $action = $controller->getDefaultAction();
-            }
+        if (empty($action) && $controller instanceof Controller) {
+            $action = $controller->getDefaultAction();
         }
 
         $event = $event_handler->raiseEvent('onControllerLoaded', $controller, $action);
 
-        if($event->isHandled() && $event->hasResponse() && $event->getResponse() instanceof Response) {
+        if ($event->isHandled() && $event->hasResponse() && $event->getResponse() instanceof Response) {
             return $event->getResponse();
         }
 

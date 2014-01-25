@@ -96,6 +96,7 @@ abstract class BaseApplication
 
     protected function setDefaultParameters()
     {
+
     }
 
     /**
@@ -208,10 +209,9 @@ abstract class BaseApplication
      */
     public function run()
     {
-        $event      = $this->factory->get('events');
-        $parameters = $this->factory->getParameters();
+        $event = $this->factory->get('events');
 
-        date_default_timezone_set($parameters['default_timezone']);
+        date_default_timezone_set($this->factory['default_timezone']);
         $event->raiseEvent('before_run');
         register_shutdown_function(function () use ($event) {
             $event->raiseEvent('shutdown');
