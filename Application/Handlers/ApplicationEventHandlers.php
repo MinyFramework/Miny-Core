@@ -73,7 +73,7 @@ class ApplicationEventHandlers
         }
     }
 
-    private function setResponseContentType($format)
+    private function getResponseContentType($format)
     {
         $content_types = array(
             //application
@@ -102,8 +102,9 @@ class ApplicationEventHandlers
             'html'  => 'text/html',
         );
         if (isset($content_types[$format])) {
-            $this->log->info('Content type %s set for format %s', $content_types[$format], $format);
-            $this->parameters['content_type'] = $content_types[$format];
+            return $content_types[$format];
+        } else {
+            return $format;
         }
     }
 
@@ -124,16 +125,18 @@ class ApplicationEventHandlers
         $this->log->info('Matched route %s', $match->getRoute()->getPath());
         parse_str(parse_url($request->url, PHP_URL_QUERY), $_GET);
         $request->get = $match->getParameters() + $_GET;
-        if (isset($request->get['format'])) {
-            $this->setResponseContentType($request->get['format']);
-        }
     }
 
     public function setContentType(Request $request, Response $response)
     {
         $headers = $response->getHeaders();
-        if (isset($this->parameters['content_type']) && !$headers->has('content-type')) {
-            $headers->set('content-type', $this->parameters['content_type']);
+        if (!$headers->has('content-type')) {
+            if (isset($request->get['format'])) {
+                $format = $request->get['format'];
+                $content_type = $this->getResponseContentType($format);
+                $this->log->info('Content type %s set for format %s', $content_type, $format);
+            }
+            $headers->set('content-type', $content_type);
         }
     }
 }
