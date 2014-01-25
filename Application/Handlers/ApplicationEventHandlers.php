@@ -130,12 +130,9 @@ class ApplicationEventHandlers
     public function setContentType(Request $request, Response $response)
     {
         $headers = $response->getHeaders();
-        if (!$headers->has('content-type')) {
-            if (isset($request->get['format'])) {
-                $format = $request->get['format'];
-                $content_type = $this->getResponseContentType($format);
-                $this->log->info('Content type %s set for format %s', $content_type, $format);
-            }
+        if (!$headers->has('content-type') && isset($request->get['format'])) {
+            $format       = $request->get['format'];
+            $content_type = $this->getResponseContentType($format);
             $headers->set('content-type', $content_type);
         }
     }
