@@ -53,15 +53,17 @@ class ResponseHeaders extends Headers
     {
         $array = array(
             'parent'  => parent::serialize(),
-            'cookies' => $this->cookies
+            'cookies' => $this->cookies,
+            'sender'  => $this->sender
         );
         return serialize($array);
     }
 
     public function unserialize($serialized)
     {
-        $array = unserialize($serialized);
+        $array         = unserialize($serialized);
         $this->cookies = $array['cookies'];
+        $this->sender  = $array['sender'];
         parent::unserialize($array['parent']);
     }
 }
