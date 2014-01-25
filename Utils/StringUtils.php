@@ -46,7 +46,7 @@ class StringUtils
      */
     public static function startsWith($string, $start)
     {
-        return substr($string, 0, strlen($start)) === $start;
+        return strpos($string, $start) === 0;
     }
 
     /**
@@ -58,6 +58,6 @@ class StringUtils
      */
     public static function endsWith($string, $end)
     {
-        return substr($string, -strlen($end)) === $end;
+        return strrpos($string, $end) === strlen($string) - strlen($end);
     }
 }

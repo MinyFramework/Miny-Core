@@ -17,12 +17,14 @@ class StringUtilsTest extends PHPUnit_Framework_TestCase
     {
         $this->assertTrue(StringUtils::startsWith('string', 'str'));
         $this->assertFalse(StringUtils::startsWith('foo', 'bar'));
+        $this->assertFalse(StringUtils::startsWith('bar', 'baz'));
     }
 
     public function testEndsWith()
     {
         $this->assertTrue(StringUtils::endsWith('string', 'ing'));
         $this->assertFalse(StringUtils::endsWith('foo', 'bar'));
+        $this->assertFalse(StringUtils::endsWith('foo', 'boo'));
     }
 }
 
