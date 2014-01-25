@@ -69,7 +69,7 @@ class ApplicationEventHandlers
         $this->log->info('Response for request [%s] %s', $request->method, $request->path);
         $this->log->info('Response status: %s %s', $response->getCode(), $response->getStatus());
         foreach ($response->getHeaders() as $header => $value) {
-            $this->log->info($header . ': ' . $value);
+            $this->log->info('Header: %s: %s', ucfirst($header), $value);
         }
     }
 
