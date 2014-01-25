@@ -35,6 +35,17 @@ class ParameterContainerTest extends \PHPUnit_Framework_TestCase
         $this->assertFalse(isset($this->object['array_a:param_not_exists']));
     }
 
+    /**
+     * Note: this also tests whether offsetGet accepts arrays.
+     *
+     * @expectedException OutOfBoundsException
+     * @expectedExceptionMessage Array key not found: no:path:that:exists
+     */
+    public function testOffsetGetException()
+    {
+        $this->object[array('no', 'path', 'that', 'exists')];
+    }
+
     public function testGetParameters()
     {
         $array_a_with_resolved_links = array(
@@ -109,16 +120,16 @@ class ParameterContainerTest extends \PHPUnit_Framework_TestCase
 
     public function testParameterMerge()
     {
-        $new_parameters           = array(
-            'array_a' => array(
+        $new_parameters  = array(
+            'array_a'      => array(
                 'param_b'           => 'some_value', //overwrite
                 'additional_param'  => 'other_value', //new key
                 'something'         => 'prefix_{@value_b}',
                 'something_invalid' => 'prefix_{@invalid_link}'
             ),
-            'not_a_string'  => 5
+            'not_a_string' => 5
         );
-        $expected_result          = array(
+        $expected_result = array(
             'array_a'      => array(
                 'param_b'           => 'some_value',
                 'array_b'           => array(
@@ -137,32 +148,10 @@ class ParameterContainerTest extends \PHPUnit_Framework_TestCase
                     'array' => 'value'
                 )
             ),
-            'not_a_string'       => 5
-        );
-        $expected_result_resolved = array(
-            'array_a'      => array(
-                'param_b'           => 'some_value',
-                'array_b'           => array(
-                    'deep_parameter' => 'deep_value'
-                ),
-                'additional_param'  => 'other_value',
-                'something'         => 'prefix_value_c',
-                'something_invalid' => 'prefix_{@not_exists}'
-            ),
-            'param_c'      => 'some_value',
-            'value_b'      => 'value_c',
-            'invalid_link' => '{@not_exists}',
-            'some_item'    => 'some_value',
-            'array'        => array(
-                'array' => array(
-                    'array' => 'value'
-                )
-            ),
-            'not_a_string'       => 5
+            'not_a_string' => 5
         );
         $this->object->addParameters($new_parameters);
         $this->assertEquals($expected_result, $this->object->toArray());
-        $this->assertEquals($expected_result_resolved, $this->object->getResolvedParameters());
     }
 
     public function testParameterMergeWithoutOverwrite()
