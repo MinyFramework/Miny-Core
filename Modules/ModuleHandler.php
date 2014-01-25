@@ -10,13 +10,11 @@
 namespace Miny\Modules;
 
 use Miny\Application\BaseApplication;
-use Miny\Application\Module;
 use Miny\Log;
 use Miny\Modules\Exceptions\BadModuleException;
 
 class ModuleHandler
 {
-    private static $base_module_class   = '\Miny\Modules\Module';
     private static $module_class_format = '\Modules\%s\Module';
 
     /**
@@ -73,11 +71,11 @@ class ModuleHandler
         }
 
         $this->log('Loading module: %s', $module);
-        $class = sprintf(self::$module_class_format, $module);
-        if (!is_subclass_of($class, self::$base_module_class)) {
-            throw new BadModuleException('Module descriptor should extend Module class: ' . $class);
+        $class        = sprintf(self::$module_class_format, $module);
+        $module_class = new $class($this->application);
+        if (!$module_class instanceof Module) {
+            throw new BadModuleException(sprintf('Module descriptor %s does not extend Module class.', $class));
         }
-        $module_class           = new $class($this->application);
         $this->modules[$module] = $module_class;
         foreach ($module_class->getDependencies() as $name) {
             $this->module($name);
