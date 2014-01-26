@@ -106,15 +106,12 @@ class Factory implements ArrayAccess
      * Unsets any existing instances for the given alias.
      *
      * @param string $alias
-     * @param Blueprint|Closure $object
+     * @param Blueprint $object
      *
      * @return Blueprint
      */
-    public function register($alias, $object)
+    public function register($alias, Blueprint $object)
     {
-        if (!$object instanceof Blueprint && !$object instanceof Closure) {
-            throw new InvalidArgumentException('Only Blueprint and Closure can be registered.');
-        }
         $this->blueprints[$alias] = $object;
         unset($this->objects[$alias]);
         return $object;
@@ -150,9 +147,9 @@ class Factory implements ArrayAccess
      */
     public function __set($alias, $object)
     {
-        if (is_string($object)) {
+        if (is_string($object) || $object instanceof Closure) {
             $this->add($alias, $object);
-        } elseif ($object instanceof Blueprint || $object instanceof Closure) {
+        } elseif ($object instanceof Blueprint) {
             $this->register($alias, $object);
         } elseif (is_object($object)) {
             $this->setObjectInstance($alias, $object);
@@ -247,10 +244,6 @@ class Factory implements ArrayAccess
 
         $descriptor = $this->getBlueprint($alias);
 
-        if ($descriptor instanceof Closure) {
-            return $this->setInstance($alias, $descriptor($this));
-        }
-
         $obj = $this->instantiate($descriptor);
         if ($descriptor->isSingleton()) {
             $this->setObjectInstance($alias, $obj);
@@ -290,9 +283,6 @@ class Factory implements ArrayAccess
     private function instantiate(Blueprint $blueprint)
     {
         $class = $blueprint->getClassName();
-        if ($class[0] == '@') {
-            $class = $this->parameters[substr($class, 1)];
-        }
 
         $args = $blueprint->getArguments();
         while (empty($args) && $blueprint->hasParent()) {
@@ -300,6 +290,14 @@ class Factory implements ArrayAccess
             $args      = $blueprint->getArguments();
         }
         $arguments = $this->resolveReferences($args);
+
+        if ($class instanceof Closure) {
+            return call_user_func_array($class, $arguments);
+        }
+
+        if ($class[0] == '@') {
+            $class = $this->parameters[substr($class, 1)];
+        }
 
         return Utils::instantiate($class, $arguments);
     }

@@ -9,6 +9,7 @@
 
 namespace Miny\Factory;
 
+use Closure;
 use InvalidArgumentException;
 
 /**
@@ -25,7 +26,7 @@ class Blueprint
     private $singleton;
 
     /**
-     * @var string
+     * @var string|Closure
      */
     private $classname;
 
@@ -50,15 +51,15 @@ class Blueprint
     private $parent;
 
     /**
-     * @param string $classname The classname of the described object.
+     * @param string|Closure $class The classname or Closure factory of the described object.
      * @param boolean $singleton Indicates, whether the object is a singleton.
      */
-    public function __construct($classname, $singleton = true)
+    public function __construct($class, $singleton = true)
     {
-        if (!is_string($classname)) {
-            throw new InvalidArgumentException('Classname must be string.');
+        if (!is_string($class) && !$class instanceof Closure) {
+            throw new InvalidArgumentException('Blueprint argument must be string or a Closure.');
         }
-        $this->classname = $classname;
+        $this->classname = $class;
         $this->singleton = $singleton;
     }
 
@@ -114,7 +115,7 @@ class Blueprint
     /**
      * Gets the class name to instantiate.
      *
-     * @return string
+     * @return string|Closure
      */
     public function getClassName()
     {
