@@ -23,6 +23,11 @@ class ModuleHandler
     private $modules = array();
 
     /**
+     * @var string[]
+     */
+    private $loaded = array();
+
+    /**
      * @var BaseApplication
      */
     private $application;
@@ -40,6 +45,9 @@ class ModuleHandler
     {
         $this->application = $app;
         $this->log         = $log;
+
+        $this->loaded  = array();
+        $this->modules = array();
 
         $app->getFactory()->getBlueprint('events')
                 ->addMethodCall('register', 'before_run', array($this, 'processConditionalRunnables'))
@@ -66,9 +74,10 @@ class ModuleHandler
      */
     public function module($module)
     {
-        if (isset($this->modules[$module])) {
+        if (in_array($module, $this->loaded)) {
             return;
         }
+        $this->loaded[] = $module;
 
         $this->log('Loading module: %s', $module);
         $class        = sprintf(self::$module_class_format, $module);
@@ -76,10 +85,10 @@ class ModuleHandler
         if (!$module_class instanceof Module) {
             throw new BadModuleException(sprintf('Module descriptor %s does not extend Module class.', $class));
         }
-        $this->modules[$module] = $module_class;
         foreach ($module_class->getDependencies() as $name) {
             $this->module($name);
         }
+        $this->modules[$module] = $module_class;
     }
 
     public function processConditionalRunnables()
