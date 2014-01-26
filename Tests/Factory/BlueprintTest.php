@@ -13,22 +13,9 @@ class BlueprintTest extends \PHPUnit_Framework_TestCase
      */
     protected $object;
 
-    /**
-     * Sets up the fixture, for example, opens a network connection.
-     * This method is called before a test is executed.
-     */
     protected function setUp()
     {
         $this->object = new Blueprint('SomeClass');
-    }
-
-    /**
-     * Tears down the fixture, for example, closes a network connection.
-     * This method is called after a test is executed.
-     */
-    protected function tearDown()
-    {
-
     }
 
     /**
@@ -70,7 +57,7 @@ class BlueprintTest extends \PHPUnit_Framework_TestCase
 
     /**
      * @expectedException InvalidArgumentException
-     * @expectedExceptionMessage Classname must be string.
+     * @expectedExceptionMessage Blueprint argument must be string or a Closure.
      */
     public function testConstructorException()
     {

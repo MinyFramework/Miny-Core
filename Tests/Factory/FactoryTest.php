@@ -114,15 +114,6 @@ class FactoryTest extends \PHPUnit_Framework_TestCase
     }
 
     /**
-     * @expectedException InvalidArgumentException
-     * @expectedExceptionMessage Only Blueprint and Closure can be registered.
-     */
-    public function testRegisterException()
-    {
-        $this->object->register('something', 4);
-    }
-
-    /**
      * @expectedException OutOfBoundsException
      * @expectedExceptionMessage Blueprint not found: something
      */
@@ -152,7 +143,7 @@ class FactoryTest extends \PHPUnit_Framework_TestCase
         $this->assertNotEmpty($this->object->getBlueprints());
         $this->assertInstanceOf('\Miny\Factory\Blueprint', $this->object->getBlueprint('foo'));
         $this->assertInstanceOf('\Miny\Factory\Blueprint', $this->object->getBlueprint('bar'));
-        $this->assertInstanceOf('\Closure', $this->object->getBlueprint('baz'));
+        $this->assertInstanceOf('\Miny\Factory\Blueprint', $this->object->getBlueprint('baz'));
     }
 
     public function testGetObject()
@@ -274,6 +265,12 @@ class FactoryTest extends \PHPUnit_Framework_TestCase
     {
         $this->object->foo = new \stdClass;
         $this->object->replace('foo', 5);
+    }
+
+    public function testSetInstance()
+    {
+        // Should not throw Exception.
+        $this->object->setInstance('foo', new \stdClass);
     }
 }
 
