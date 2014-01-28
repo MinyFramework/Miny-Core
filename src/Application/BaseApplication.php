@@ -44,7 +44,7 @@ abstract class BaseApplication
             self::ENV_TEST => 'testing'
         );
         if (!isset($environment_names[$environment])) {
-            $warning     = 'Unknown envitonment option "' . $environment . '". Assuming production environment.';
+            $warning     = 'Unknown environment option "' . $environment . '". Assuming production environment.';
             $environment = self::ENV_PROD;
         }
         $this->environment = $environment;
@@ -87,8 +87,8 @@ abstract class BaseApplication
                 }
                 $module_handler->module($module, $parameters);
             }
+            $module_handler->initialize();
         }
-        $module_handler->initialize();
     }
 
     protected function setDefaultParameters()
@@ -96,9 +96,6 @@ abstract class BaseApplication
 
     }
 
-    /**
-     * @param string $directory
-     */
     private function loadConfigFiles()
     {
         $config_files = array(
@@ -157,6 +154,7 @@ abstract class BaseApplication
     /**
      * Checks whether the given $env matches the current environment.
      *
+     * @param int $env
      * @return boolean
      */
     public function isEnvironment($env)
