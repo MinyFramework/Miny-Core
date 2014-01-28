@@ -16,7 +16,7 @@
     ],
     "autoload": {
         "psr-4": {
-            "Miny\\": "src/Miny/Core"
+            "Miny\\": "src/"
         }
     }
 }
