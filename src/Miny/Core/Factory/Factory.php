@@ -42,7 +42,7 @@ class Factory implements ArrayAccess
     /**
      * @var string[]
      */
-    protected $aliasses = array();
+    protected $aliases = array();
 
     /**
      * @param array|ParameterContainer|null $params Initial list of parameters to be stored.
@@ -72,7 +72,7 @@ class Factory implements ArrayAccess
      */
     public function addAlias($alias, $target)
     {
-        $this->aliasses[$alias] = $target;
+        $this->aliases[$alias] = $target;
     }
 
     /**
@@ -81,8 +81,8 @@ class Factory implements ArrayAccess
      */
     public function getAlias($alias)
     {
-        if (isset($this->aliasses[$alias])) {
-            $alias = $this->aliasses[$alias];
+        if (isset($this->aliases[$alias])) {
+            $alias = $this->aliases[$alias];
         }
         return $alias;
     }
@@ -131,6 +131,7 @@ class Factory implements ArrayAccess
      * @param string $alias
      * @param object $object
      *
+     * @throws InvalidArgumentException
      * @return object $object
      */
     public function setInstance($alias, $object)
@@ -144,6 +145,7 @@ class Factory implements ArrayAccess
     /**
      * @param string $alias
      * @param object $object
+     * @throws InvalidArgumentException
      */
     public function __set($alias, $object)
     {
@@ -255,6 +257,7 @@ class Factory implements ArrayAccess
     /**
      * @param object $object
      * @param Blueprint $blueprint
+     * @return object
      */
     private function injectDependencies($object, Blueprint $blueprint)
     {
@@ -368,6 +371,7 @@ class Factory implements ArrayAccess
 
     /**
      * @param string $str
+     * @throws \InvalidArgumentException
      * @return mixed
      * @throw InvalidArgumentException
      */
@@ -375,7 +379,7 @@ class Factory implements ArrayAccess
     {
         if (strpos($str, '::') !== false) {
             //method parameters are separated by ::
-            //TOOD: use different separator for method names and arguments, support for nested method calls
+            //TODO: use different separator for method names and arguments, support for nested method calls
             $arr      = explode('::', $str);
             $obj_name = array_shift($arr);
             $method   = array_shift($arr);

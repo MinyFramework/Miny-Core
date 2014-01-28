@@ -9,8 +9,6 @@
 
 namespace Miny\Application;
 
-require_once __DIR__ . '/../AutoLoader.php';
-
 use InvalidArgumentException;
 use Miny\AutoLoader;
 use Miny\Factory\Factory;
@@ -54,8 +52,7 @@ abstract class BaseApplication
         if ($autoloader === null) {
             $autoloader = new AutoLoader(array(
                 '\Application' => '.',
-                '\Miny'        => __DIR__ . '/..',
-                '\Modules'     => __DIR__ . '/../../Modules'
+                '\Modules'     => './vendor/Miny/Modules'
             ));
         }
         $factory       = new Factory(array(

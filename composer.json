@@ -1,0 +1,22 @@
+{
+    "name": "miny/framework",
+    "description": "The Core package of the Miny Framework.",
+    "minimum-stability": "dev",
+    "license": "MIT",
+    "type": "library",
+    "keywords": ["framework"],
+    "require": {
+        "php": ">=5.3.3"
+    },
+    "authors": [
+        {
+            "name": "Dániel Buga",
+            "email": "bugadani@gmail.com"
+        }
+    ],
+    "autoload": {
+        "psr-4": {
+            "Miny\\": "src/Miny/Core"
+        }
+    }
+}

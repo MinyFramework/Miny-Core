@@ -25,7 +25,7 @@ class Extendable
     private $setters = array();
 
     /**
-     * Dinamically add a method to the class.
+     * Dynamically add a method to the class.
      *
      * @param string $method
      * @param callable $callback
@@ -44,18 +44,18 @@ class Extendable
 
     /**
      * Link multiple methods from $object to the current class.
-     * Methods can be renamed by specifying aliasses as array keys in $method_aliasses
+     * Methods can be renamed by specifying aliases as array keys in $method_aliases
      *
      * @param object $object
-     * @param array $method_aliasses
+     * @param array $method_aliases
      * @throws InvalidArgumentException
      */
-    public function addMethods($object, array $method_aliasses = array())
+    public function addMethods($object, array $method_aliases = array())
     {
         if (!is_object($object)) {
             throw new InvalidArgumentException('First argument must be an object');
         }
-        foreach ($method_aliasses as $alias => $method) {
+        foreach ($method_aliases as $alias => $method) {
             $callable = array($object, $method);
             if (!is_callable($callable)) {
                 $message = sprintf('Method "%s" not found in class %s', $method, get_class($object));
@@ -102,8 +102,9 @@ class Extendable
     /**
      * @param string $method
      * @param array $args
-     * @return mixed
+     * @throws InvalidArgumentException
      * @throws BadMethodCallException
+     * @return mixed
      */
     public function __call($method, $args)
     {

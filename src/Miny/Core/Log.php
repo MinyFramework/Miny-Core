@@ -10,7 +10,7 @@
 namespace Miny;
 
 use Exception;
-use InvalidArgumentException;
+use InvalidArgumentExcexption;
 use RuntimeException;
 
 class Log
@@ -43,14 +43,11 @@ class Log
 
     /**
      * @param string $path
-     * @throws Exception
+     * @param bool $debug
      */
     public function __construct($path, $debug = true)
     {
-        try {
-            $this->checkPath($path);
-        } catch (Exception $e) {
-            $this->can_log = false;
+        if (!$this->checkPath($path)) {
             return;
         }
         $this->path = $path;
@@ -67,18 +64,17 @@ class Log
 
     /**
      * @param string $path
-     * @throws InvalidArgumentException
+     * @return bool
      */
     private function checkPath($path)
     {
-        if (!is_dir($path)) {
-            if (!mkdir($path, 0777, true)) {
-                throw new InvalidArgumentException('Could not create directory: ' . $path);
-            }
+        if (!is_dir($path) && !mkdir($path, 0777, true)) {
+            return false;
         }
         if (!is_writable($path)) {
-            throw new InvalidArgumentException('Path is not writable: ' . $path);
+            return false;
         }
+        return true;
     }
 
     /**
@@ -106,7 +102,7 @@ class Log
         if (!$this->can_log) {
             return;
         }
-        if ($level == self::DEBUG && !$this->debug_mode) {
+        if ($level === self::DEBUG && !$this->debug_mode) {
             return;
         }
         $key = time();

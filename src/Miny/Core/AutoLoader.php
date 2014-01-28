@@ -44,6 +44,9 @@ class AutoLoader
             }
         } else {
             $length = strlen($namespace);
+            if(strpos($namespace, '\\') === 0) {
+                ++$length;
+            }
             if ($this->max_ns_length < $length) {
                 $this->max_ns_length = $length;
             }
@@ -77,6 +80,7 @@ class AutoLoader
         }
         $classname = substr($class, $pos - 1);
         $subpath   = strtr($classname, '\\', DIRECTORY_SEPARATOR) . '.php';
+
         foreach ($this->map[$temp] as $path) {
             $path .= $subpath;
             if (is_file($path)) {

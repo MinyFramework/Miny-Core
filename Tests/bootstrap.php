@@ -1,5 +1,3 @@
 <?php
 
-require_once '../Autoloader.php';
-
-$autoloader = new \Miny\AutoLoader(array('\Miny' => __DIR__ . '/..'));
+require_once '../vendor/autoload.php';

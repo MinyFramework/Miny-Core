@@ -18,8 +18,6 @@ use Miny\Routing\Resources;
 use Miny\Routing\Route;
 use UnexpectedValueException;
 
-require_once __DIR__ . '/BaseApplication.php';
-
 class Application extends BaseApplication
 {
 
