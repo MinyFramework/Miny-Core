@@ -124,4 +124,10 @@ class ArrayUtilsTest extends PHPUnit_Framework_TestCase
         $actual   = ArrayUtils::merge($this->array, $merge);
         $this->assertEquals($expected, $actual);
     }
+
+    public function testImplodeIfArray()
+    {
+        $this->assertEquals(540, ArrayUtils::implodeIfArray(540, 'anything'));
+        $this->assertEquals('1 glue 2', ArrayUtils::implodeIfArray(array(1, 2), ' glue '));
+    }
 }
