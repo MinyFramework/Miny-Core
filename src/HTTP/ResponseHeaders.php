@@ -11,7 +11,14 @@ namespace Miny\HTTP;
 
 class ResponseHeaders extends Headers
 {
+    /**
+     * @var AbstractHeaderSender
+     */
     private $sender;
+
+    /**
+     * @var array
+     */
     private $cookies;
 
     public function __construct(AbstractHeaderSender $sender = null)

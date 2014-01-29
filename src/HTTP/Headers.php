@@ -59,6 +59,17 @@ class Headers implements Iterator, Serializable
         return strtolower(strtr($name, '_', '-'));
     }
 
+    private function isHeaderSimple($name)
+    {
+        if (!isset($this->headers[$name])) {
+            return true;
+        }
+        if (!in_array($name, self::$multiple_values_allowed)) {
+            return true;
+        }
+        return false;
+    }
+
     public function addHeaders(Headers $headers)
     {
         foreach ($headers->headers as $name => $value) {
@@ -76,35 +87,43 @@ class Headers implements Iterator, Serializable
             return;
         }
         $name = self::sanitize($name);
-        if (isset($this->headers[$name])) {
-            if (in_array($name, self::$multiple_values_allowed)) {
-                if (!is_array($this->headers[$name])) {
-                    $this->headers[$name] = array($this->headers[$name]);
-                }
-                $this->headers[$name][] = $value;
-            } else {
-                $this->headers[$name] = $value;
-            }
-        } else {
+        if ($this->isHeaderSimple($name)) {
             $this->headers[$name] = $value;
+        } else {
+            if (!is_array($this->headers[$name])) {
+                $this->headers[$name] = array($this->headers[$name]);
+            }
+            $this->headers[$name][] = $value;
         }
+    }
+
+    private function headerCanBeUnset($name, $value) {
+        if($value === null) {
+            return true;
+        }
+        if($this->headers[$name] === $value) {
+            return true;
+        }
+        return false;
     }
 
     public function remove($name, $value = null)
     {
         $name = self::sanitize($name);
-        if ($value === null) {
+        if (!isset($this->headers[$name])) {
+            return;
+        }
+        if ( $this->headerCanBeUnset($name, $value) ) {
             unset($this->headers[$name]);
-        } elseif (isset($this->headers[$name])) {
-            if (is_array($this->headers[$name])) {
-                if (($key = array_search($value, $this->headers[$name])) !== false) {
-                    unset($this->headers[$name][$key]);
-                    if (count($this->headers[$name]) === 1) {
-                        $this->headers[$name] = current($this->headers[$name]);
-                    }
-                }
-            } elseif ($this->headers[$name] === $value) {
-                unset($this->headers[$name]);
+            return;
+        }
+        if (!is_array($this->headers[$name])) {
+            return;
+        }
+        if (($key = array_search($value, $this->headers[$name])) !== false) {
+            unset($this->headers[$name][$key]);
+            if (count($this->headers[$name]) === 1) {
+                $this->headers[$name] = current($this->headers[$name]);
             }
         }
     }

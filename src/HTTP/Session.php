@@ -19,6 +19,9 @@ use Miny\Utils\ArrayUtils;
 
 class Session implements ArrayAccess, IteratorAggregate, Countable
 {
+    /**
+     * @var array
+     */
     private $data;
     /**
      * @var bool
@@ -40,31 +43,6 @@ class Session implements ArrayAccess, IteratorAggregate, Countable
                 );
             }
         }
-    }
-
-    private function initializeContainer($key)
-    {
-        if (!isset($this->data[$key]) || !is_array($this->data[$key])) {
-            $this->data[$key] = array();
-        }
-    }
-
-    /**
-     * Starts the session. Regenerates the session ID each request
-     * for security reasons and updates flash variables.
-     */
-    public function open(array $data = null)
-    {
-        $this->is_open = session_start();
-        session_regenerate_id(true);
-        if ($data === null) {
-            $this->data =& $_SESSION;
-        } else {
-            $this->data = $data;
-        }
-        $this->initializeContainer('data');
-        $this->initializeContainer('flash');
-        $this->updateFlash();
     }
 
     /**
@@ -90,6 +68,31 @@ class Session implements ArrayAccess, IteratorAggregate, Countable
         }
         if ($reopen) {
             $this->open();
+        }
+    }
+
+    /**
+     * Starts the session. Regenerates the session ID each request
+     * for security reasons and updates flash variables.
+     */
+    public function open(array $data = null)
+    {
+        $this->is_open = session_start();
+        session_regenerate_id(true);
+        if ($data === null) {
+            $this->data =& $_SESSION;
+        } else {
+            $this->data = $data;
+        }
+        $this->initializeContainer('data');
+        $this->initializeContainer('flash');
+        $this->updateFlash();
+    }
+
+    private function initializeContainer($key)
+    {
+        if (!isset($this->data[$key]) || !is_array($this->data[$key])) {
+            $this->data[$key] = array();
         }
     }
 
@@ -181,12 +184,9 @@ class Session implements ArrayAccess, IteratorAggregate, Countable
 
     //Session data methods
 
-    public function flash($key, $data, $ttl)
+    public function &__get($key)
     {
-        if (!is_int($ttl)) {
-            throw new InvalidArgumentException('Time-to-live must be a number.');
-        }
-        $this->data['flash'][$key] = array('data' => $data, 'ttl' => $ttl);
+        return ArrayUtils::findByPath($this->data, array('flash', $key, 'data'));
     }
 
     public function __set($key, $data)
@@ -194,9 +194,12 @@ class Session implements ArrayAccess, IteratorAggregate, Countable
         $this->flash($key, $data, 1);
     }
 
-    public function &__get($key)
+    public function flash($key, $data, $ttl)
     {
-        return ArrayUtils::findByPath($this->data, array('flash', $key, 'data'));
+        if (!is_int($ttl)) {
+            throw new InvalidArgumentException('Time-to-live must be a number.');
+        }
+        $this->data['flash'][$key] = array('data' => $data, 'ttl' => $ttl);
     }
 
     public function __isset($key)
