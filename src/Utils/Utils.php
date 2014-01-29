@@ -22,8 +22,9 @@ class Utils
     /**
      * Asserts that $expression is true or throws an exception.
      *
-     * @param mixed $expression
+     * @param mixed  $expression
      * @param string $on_failure
+     *
      * @throws AssertationException
      */
     public static function assert($expression, $on_failure = 'Assertation failed')
@@ -35,7 +36,7 @@ class Utils
 
     /**
      * @param string $class
-     * @param array $arguments
+     * @param array  $arguments
      *
      * @return object
      *

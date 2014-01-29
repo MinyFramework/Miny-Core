@@ -39,7 +39,7 @@ class ModuleHandler
 
     /**
      * @param BaseApplication $app
-     * @param Log $log
+     * @param Log             $log
      */
     public function __construct(BaseApplication $app, Log $log)
     {
@@ -50,8 +50,8 @@ class ModuleHandler
         $this->modules = array();
 
         $app->getFactory()->getBlueprint('events')
-                ->addMethodCall('register', 'before_run', array($this, 'processConditionalRunnables'))
-                ->addMethodCall('register', 'before_run', array($this, 'registerEventHandlers'));
+            ->addMethodCall('register', 'before_run', array($this, 'processConditionalRunnables'))
+            ->addMethodCall('register', 'before_run', array($this, 'registerEventHandlers'));
     }
 
     private function log()
@@ -70,6 +70,7 @@ class ModuleHandler
 
     /**
      * @param string $module
+     *
      * @throws BadModuleException
      */
     public function module($module)

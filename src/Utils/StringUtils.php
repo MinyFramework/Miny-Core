@@ -19,10 +19,12 @@ class StringUtils
 
     /**
      * Compares two strings securely.
+     *
      * @link http://blog.astrumfutura.com/2010/10/nanosecond-scale-remote-timing-attacks-on-php-applications-time-to-take-them-seriously/ Implementation source
      *
      * @param string $known
      * @param string $user
+     *
      * @return boolean
      */
     public static function compare($known, $user)
@@ -42,6 +44,7 @@ class StringUtils
      *
      * @param string $string
      * @param string $start
+     *
      * @return bool
      */
     public static function startsWith($string, $start)
@@ -54,6 +57,7 @@ class StringUtils
      *
      * @param string $string
      * @param string $end
+     *
      * @return bool
      */
     public static function endsWith($string, $end)

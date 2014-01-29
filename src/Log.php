@@ -9,7 +9,6 @@
 
 namespace Miny;
 
-use Exception;
 use InvalidArgumentExcexption;
 use RuntimeException;
 
@@ -43,7 +42,7 @@ class Log
 
     /**
      * @param string $path
-     * @param bool $debug
+     * @param bool   $debug
      */
     public function __construct($path, $debug = true)
     {
@@ -64,6 +63,7 @@ class Log
 
     /**
      * @param string $path
+     *
      * @return bool
      */
     private function checkPath($path)
@@ -114,7 +114,7 @@ class Log
 
     /**
      * @param string $name
-     * @param array $args
+     * @param array  $args
      */
     public function __call($name, $args)
     {

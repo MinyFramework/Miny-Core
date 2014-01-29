@@ -28,6 +28,7 @@ abstract class Module
 
     /**
      * @param BaseApplication $app
+     *
      * @throws BadModuleException
      */
     public function __construct(BaseApplication $app)

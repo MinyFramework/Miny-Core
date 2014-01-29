@@ -31,7 +31,8 @@ class RouteGenerator
 
     /**
      * @param string $route_name
-     * @param array $parameters
+     * @param array  $parameters
+     *
      * @return string
      * @throws InvalidArgumentException
      * @throws OutOfBoundsException

@@ -51,8 +51,10 @@ class Blueprint
     private $parent;
 
     /**
-     * @param string|Closure $class The classname or Closure factory of the described object.
-     * @param boolean $singleton Indicates, whether the object is a singleton.
+     * @param string|Closure $class     The classname or Closure factory of the described object.
+     * @param boolean        $singleton Indicates, whether the object is a singleton.
+     *
+     * @throws InvalidArgumentException
      */
     public function __construct($class, $singleton = true)
     {
@@ -78,6 +80,7 @@ class Blueprint
      * Sets parent object's name.
      *
      * @param string $parent
+     *
      * @return Blueprint
      */
     public function setParent($parent)
@@ -90,6 +93,7 @@ class Blueprint
      * Sets a method with its parameters to be called upon instantiation.
      *
      * @param string $method
+     *
      * @return Blueprint
      */
     public function addMethodCall($method)
@@ -103,7 +107,8 @@ class Blueprint
      * Sets a value for property given in $name.
      *
      * @param string $name
-     * @param mixed $value
+     * @param mixed  $value
+     *
      * @return Blueprint
      */
     public function setProperty($name, $value)

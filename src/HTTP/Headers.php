@@ -10,6 +10,7 @@
 namespace Miny\HTTP;
 
 use Iterator;
+use Miny\Utils\ArrayUtils;
 use OutOfBoundsException;
 use Serializable;
 
@@ -48,14 +49,14 @@ class Headers implements Iterator, Serializable
     private $headers;
     private $raw_headers;
 
-    public static function sanitize($name)
-    {
-        return strtolower(strtr($name, '_', '-'));
-    }
-
     public function __construct()
     {
         $this->reset();
+    }
+
+    public static function sanitize($name)
+    {
+        return strtolower(strtr($name, '_', '-'));
     }
 
     public function addHeaders(Headers $headers)
@@ -111,10 +112,10 @@ class Headers implements Iterator, Serializable
     public function has($name, $value = null)
     {
         $name = self::sanitize($name);
-        if(!isset($this->headers[$name])) {
+        if (!isset($this->headers[$name])) {
             return false;
         }
-        if(is_array($this->headers[$name])) {
+        if (is_array($this->headers[$name])) {
             return in_array($value, $this->headers[$name]);
         }
         return $value === null || $this->headers[$name] === $value;
@@ -162,11 +163,7 @@ class Headers implements Iterator, Serializable
 
     public function current()
     {
-        $item = current($this->headers);
-        if (is_array($item)) {
-            return implode(', ', $item);
-        }
-        return $item;
+        return ArrayUtils::implodeIfArray(current($this->headers), ', ');
     }
 
     public function key()

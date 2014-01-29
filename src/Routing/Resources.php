@@ -82,6 +82,7 @@ class Resources extends RouteCollection
 
     /**
      * @param string $name
+     *
      * @return string
      */
     public static function singularize($name)
@@ -94,7 +95,7 @@ class Resources extends RouteCollection
 
     /**
      * @param string $name
-     * @param array $parameters
+     * @param array  $parameters
      *
      * @throws UnexpectedValueException
      */
@@ -112,6 +113,7 @@ class Resources extends RouteCollection
 
     /**
      * @param string $pattern
+     *
      * @return Resources
      */
     public function specify($pattern)
@@ -157,7 +159,7 @@ class Resources extends RouteCollection
 
     /**
      * @param string $key
-     * @param mixed $value
+     * @param mixed  $value
      */
     public function addParameter($key, $value)
     {
@@ -169,6 +171,7 @@ class Resources extends RouteCollection
 
     /**
      * @param string $name
+     *
      * @return Resources
      * @throws UnexpectedValueException
      */
@@ -185,6 +188,7 @@ class Resources extends RouteCollection
      * Prefixes the given name with the parent name if needed.
      *
      * @param string $name
+     *
      * @return string
      */
     private function prefixName($name)
@@ -236,6 +240,7 @@ class Resources extends RouteCollection
     /**
      * @param string $method
      * @param string $name
+     *
      * @return Resources
      */
     public function member($method, $name)
@@ -247,6 +252,7 @@ class Resources extends RouteCollection
     /**
      * @param string $method
      * @param string $name
+     *
      * @return Resources
      */
     public function collection($method, $name)
@@ -257,6 +263,7 @@ class Resources extends RouteCollection
 
     /**
      * @param Resources $resource
+     *
      * @return Resources
      */
     public function resource(Resources $resource)
@@ -298,9 +305,9 @@ class Resources extends RouteCollection
     }
 
     /**
-     * @param array $actions
-     * @param array $unnamed_actions
-     * @param null $unnamed_route_name
+     * @param array  $actions
+     * @param array  $unnamed_actions
+     * @param null   $unnamed_route_name
      * @param string $path
      */
     protected function generateActions(array $actions, array $unnamed_actions, $unnamed_route_name, $path)
@@ -341,6 +348,7 @@ class Resources extends RouteCollection
 
     /**
      * @param string $name
+     *
      * @return Route
      */
     public function getRoute($name)

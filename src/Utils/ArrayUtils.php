@@ -25,8 +25,9 @@ class ArrayUtils
      * Determines whether the value represented by $path exists in $array.
      *
      * @param array|ArrayAccess $array
-     * @param array|string $parts An array containing the keys or a string delimited by :
+     * @param array|string      $parts An array containing the keys or a string delimited by :
      *
+     * @throws InvalidArgumentException
      * @return bool
      */
     public static function existsByPath($array, $parts)
@@ -51,9 +52,10 @@ class ArrayUtils
      * element does not exist.
      *
      * @param array|ArrayAccess $array
-     * @param array|string $parts An array containing the keys or a string delimited by :
-     * @param mixed $default
+     * @param array|string      $parts An array containing the keys or a string delimited by :
+     * @param mixed             $default
      *
+     * @throws InvalidArgumentException
      * @return mixed
      */
     public static function getByPath($array, $parts, $default = null)
@@ -77,8 +79,8 @@ class ArrayUtils
      * Walks through the given $array and returns a reference to the value represented by $path.
      *
      * @param array|ArrayAccess $array
-     * @param array|string $parts An array containing the keys or a string delimited by :
-     * @param bool $create
+     * @param array|string      $parts An array containing the keys or a string delimited by :
+     * @param bool              $create
      *
      * @return mixed
      *
@@ -105,9 +107,9 @@ class ArrayUtils
     /**
      * Inserts $item into $array. The place of $item is determined by $parts.
      *
-     * @param array $array
+     * @param array        $array
      * @param array|string $parts An array containing the keys or a string delimited by :
-     * @param mixed $item
+     * @param mixed        $item
      */
     public static function setByPath(array &$array, $parts, $item)
     {
@@ -126,7 +128,7 @@ class ArrayUtils
     /**
      * Removed the item from $array that is represented by $parts.
      *
-     * @param array $array
+     * @param array        $array
      * @param array|string $parts An array containing the keys or a string delimited by ":"
      */
     public static function unsetByPath(array &$array, $parts)
@@ -149,7 +151,7 @@ class ArrayUtils
      *
      * @param array $array1
      * @param array $array2
-     * @param bool $overwrite Overwrite value if it exists in $array1.
+     * @param bool  $overwrite Overwrite value if it exists in $array1.
      *
      * @return array The merged array
      */
@@ -167,5 +169,13 @@ class ArrayUtils
             }
         }
         return $array1;
+    }
+
+    public static function implodeIfArray($data, $glue)
+    {
+        if (is_array($data)) {
+            return implode($glue, $data);
+        }
+        return $data;
     }
 }

@@ -32,7 +32,7 @@ class Resource extends Resources
 
     /**
      * @param string $name
-     * @param array $parameters
+     * @param array  $parameters
      */
     public function __construct($name, array $parameters = array())
     {
@@ -43,6 +43,7 @@ class Resource extends Resources
     /**
      * @param string $method
      * @param string $name
+     *
      * @throws BadMethodCallException
      */
     public function member($method, $name)

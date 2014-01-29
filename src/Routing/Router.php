@@ -28,14 +28,14 @@ class Router extends RouteCollection
     /**
      * @var Resources[]
      */
-    private $resources       = array();
+    private $resources = array();
     private $resources_built = false;
 
     /**
      *
      * @param string $prefix
      * @param string $suffix
-     * @param array $parameters
+     * @param array  $parameters
      */
     public function __construct($prefix = null, $suffix = null, array $parameters = array(), $short_urls = true)
     {
@@ -54,9 +54,10 @@ class Router extends RouteCollection
 
     /**
      *
-     * @param array $parameters
+     * @param array   $parameters
      * @param boolean $prefix
      * @param boolean $suffix
+     *
      * @return Route
      */
     public function root(array $parameters = array(), $prefix = true, $suffix = false)
@@ -66,10 +67,11 @@ class Router extends RouteCollection
     }
 
     /**
-     * @param Route $route
-     * @param mixed $name
+     * @param Route   $route
+     * @param mixed   $name
      * @param boolean $prefix
      * @param boolean $suffix
+     *
      * @return Route
      */
     public function route(Route $route, $name, $prefix = true, $suffix = true)
@@ -94,9 +96,10 @@ class Router extends RouteCollection
     }
 
     /**
-     * @param type $name
+     * @param type  $name
      * @param array $parameters
-     * @param type $singular
+     * @param type  $singular
+     *
      * @return Resources
      */
     public function resources($name, array $parameters = array())
@@ -108,8 +111,9 @@ class Router extends RouteCollection
     }
 
     /**
-     * @param type $name
+     * @param type  $name
      * @param array $parameters
+     *
      * @return Resource
      */
     public function resource($name, array $parameters = array())
@@ -135,6 +139,7 @@ class Router extends RouteCollection
     /**
      * @param string $path
      * @param string $method
+     *
      * @return Match
      */
     public function match($path, $method = null)
@@ -145,7 +150,8 @@ class Router extends RouteCollection
 
     /**
      * @param string $route_name
-     * @param array $parameters
+     * @param array  $parameters
+     *
      * @return string
      */
     public function generate($route_name, array $parameters = array())

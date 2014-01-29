@@ -27,8 +27,9 @@ class Extendable
     /**
      * Dynamically add a method to the class.
      *
-     * @param string $method
+     * @param string   $method
      * @param callable $callback
+     *
      * @throws InvalidArgumentException
      */
     public function addMethod($method, $callback)
@@ -47,7 +48,8 @@ class Extendable
      * Methods can be renamed by specifying aliases as array keys in $method_aliases
      *
      * @param object $object
-     * @param array $method_aliases
+     * @param array  $method_aliases
+     *
      * @throws InvalidArgumentException
      */
     public function addMethods($object, array $method_aliases = array())
@@ -101,7 +103,8 @@ class Extendable
 
     /**
      * @param string $method
-     * @param array $args
+     * @param array  $args
+     *
      * @throws InvalidArgumentException
      * @throws BadMethodCallException
      * @return mixed

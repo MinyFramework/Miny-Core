@@ -49,6 +49,7 @@ class Request
 
         return $request;
     }
+
     public $url;
     public $path;
     public $get;
@@ -102,7 +103,8 @@ class Request
     /**
      * @param string $method
      * @param string $url
-     * @param array $post
+     * @param array  $post
+     *
      * @return Request
      */
     public function getSubRequest($method, $url, array $post = array())

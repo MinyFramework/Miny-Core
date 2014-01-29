@@ -32,7 +32,7 @@ class ParameterContainer implements ArrayAccess
      * Parameters are defined as a key-value pair (name => value)
      *
      * @param array $parameters
-     * @param bool $overwrite
+     * @param bool  $overwrite
      */
     public function addParameters(array $parameters, $overwrite = true)
     {
@@ -66,7 +66,7 @@ class ParameterContainer implements ArrayAccess
         }
         if (is_string($value) && strpos($value, '{@') !== false) {
             $container = $this;
-            return preg_replace_callback('/(?<!\\\){@(.*?)}/', function($matches) use($container) {
+            return preg_replace_callback('/(?<!\\\){@(.*?)}/', function ($matches) use ($container) {
                 try {
                     return $container->offsetGet($matches[1]);
                 } catch (OutOfBoundsException $e) {
@@ -89,11 +89,7 @@ class ParameterContainer implements ArrayAccess
      */
     public function offsetGet($key)
     {
-        if (is_array($key)) {
-            $arr_key = implode(':', $key);
-        } else {
-            $arr_key = $key;
-        }
+        $arr_key = ArrayUtils::implodeIfArray($key, ':');
         if (!isset($this->links[$arr_key])) {
             $val                   = ArrayUtils::findByPath($this->parameters, $key);
             $this->links[$arr_key] = $this->resolveLinks($val);
@@ -110,9 +106,7 @@ class ParameterContainer implements ArrayAccess
     public function offsetSet($key, $value)
     {
         ArrayUtils::setByPath($this->parameters, $key, $value);
-        if (is_array($key)) {
-            $key = implode(':', $key);
-        }
+        $key = ArrayUtils::implodeIfArray($key, ':');
         if (isset($this->links[$key])) {
             $this->links[$key] = $value;
         }
@@ -126,9 +120,7 @@ class ParameterContainer implements ArrayAccess
     public function offsetUnset($key)
     {
         ArrayUtils::unsetByPath($this->parameters, $key);
-        if (is_array($key)) {
-            $key = implode(':', $key);
-        }
+        $key = ArrayUtils::implodeIfArray($key, ':');
         if (isset($this->links[$key])) {
             unset($this->links[$key]);
         }

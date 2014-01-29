@@ -27,6 +27,7 @@ class RouteMatcher
     /**
      * @param string $path
      * @param string $method
+     *
      * @return Match|boolean
      */
     public function match($path, $method = null)

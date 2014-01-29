@@ -36,7 +36,7 @@ class ControllerCollection
     }
 
     /**
-     * @param string $name
+     * @param string                        $name
      * @param BaseController|Closure|string $controller
      *
      * @return string
@@ -67,6 +67,7 @@ class ControllerCollection
 
     /**
      * @param string $class
+     *
      * @return BaseController|Closure
      * @throws UnexpectedValueException
      */
@@ -106,8 +107,8 @@ class ControllerCollection
      * This method also raises two events (onControllerLoaded and onControllerFinished) that allow modifying
      * the behaviour of the controller.
      *
-     * @param string $class The controller name or alias in Factory.
-     * @param Request $request
+     * @param string   $class The controller name or alias in Factory.
+     * @param Request  $request
      * @param Response $response
      *
      * @throws InvalidArgumentException when the controller is not an instance of Controller or Closure

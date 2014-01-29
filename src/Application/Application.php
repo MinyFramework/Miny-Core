@@ -13,7 +13,6 @@ use Miny\Application\Handlers\ApplicationEventHandlers;
 use Miny\Factory\Factory;
 use Miny\HTTP\Request;
 use Miny\HTTP\Response;
-use Miny\Routing\Resource;
 use Miny\Routing\Resources;
 use Miny\Routing\Route;
 use UnexpectedValueException;
@@ -42,10 +41,10 @@ class Application extends BaseApplication
     {
         $event_handlers = new ApplicationEventHandlers($factory, $factory->get('log'));
         $factory->getBlueprint('events')
-                ->addMethodCall('register', 'filter_request', array($event_handlers, 'logRequest'))
-                ->addMethodCall('register', 'filter_request', array($event_handlers, 'filterRoutes'))
-                ->addMethodCall('register', 'filter_response', array($event_handlers, 'setContentType'))
-                ->addMethodCall('register', 'filter_response', array($event_handlers, 'logResponse'));
+            ->addMethodCall('register', 'filter_request', array($event_handlers, 'logRequest'))
+            ->addMethodCall('register', 'filter_request', array($event_handlers, 'filterRoutes'))
+            ->addMethodCall('register', 'filter_response', array($event_handlers, 'setContentType'))
+            ->addMethodCall('register', 'filter_response', array($event_handlers, 'logResponse'));
     }
 
     protected function registerDefaultServices(Factory $factory)
@@ -54,21 +53,22 @@ class Application extends BaseApplication
         $this->registerEventHandlers($factory);
 
         $factory->add('controllers', '\Miny\Controller\ControllerCollection')
-                ->setArguments($this, '{@controllers:namespace}');
+            ->setArguments($this, '{@controllers:namespace}');
         $factory->add('controller', '\Miny\Controller\Controller')
-                ->setArguments($this);
+            ->setArguments($this);
         $factory->add('router', '\Miny\Routing\Router')
-                ->setArguments('@router:prefix', '@router:suffix', '@router:default_parameters', '@router:short_urls');
+            ->setArguments('@router:prefix', '@router:suffix', '@router:default_parameters', '@router:short_urls');
         $factory->add('session', '\Miny\HTTP\Session')
-                ->addMethodCall('open');
+            ->addMethodCall('open');
         $factory->add('response', '\Miny\HTTP\Response');
     }
 
     /**
      *
      * @param string $name
-     * @param mixed $controller
-     * @param array $parameters
+     * @param mixed  $controller
+     * @param array  $parameters
+     *
      * @return Resource
      */
     public function resource($name, $controller = null, array $parameters = array())
@@ -80,8 +80,9 @@ class Application extends BaseApplication
     /**
      *
      * @param string $name
-     * @param mixed $controller
-     * @param array $parameters
+     * @param mixed  $controller
+     * @param array  $parameters
+     *
      * @return Resources
      */
     public function resources($name, $controller = null, array $parameters = array())
@@ -99,6 +100,7 @@ class Application extends BaseApplication
      *
      * @param mixed $controller
      * @param array $parameters
+     *
      * @return Route
      */
     public function root($controller, array $parameters = array())
@@ -109,11 +111,11 @@ class Application extends BaseApplication
 
     /**
      *
-     * @param string $path
-     * @param mixed $controller
+     * @param string      $path
+     * @param mixed       $controller
      * @param string|null $method
      * @param string|null $name
-     * @param array $parameters
+     * @param array       $parameters
      *
      * @return Route
      *
@@ -129,10 +131,10 @@ class Application extends BaseApplication
 
     /**
      *
-     * @param string $path
-     * @param mixed $controller
+     * @param string      $path
+     * @param mixed       $controller
      * @param string|null $name
-     * @param array $parameters
+     * @param array       $parameters
      */
     public function get($path, $controller, $name = null, array $parameters = array())
     {
@@ -141,10 +143,10 @@ class Application extends BaseApplication
 
     /**
      *
-     * @param string $path
-     * @param mixed $controller
+     * @param string      $path
+     * @param mixed       $controller
      * @param string|null $name
-     * @param array $parameters
+     * @param array       $parameters
      */
     public function post($path, $controller, $name = null, array $parameters = array())
     {
@@ -153,10 +155,10 @@ class Application extends BaseApplication
 
     /**
      *
-     * @param string $path
-     * @param mixed $controller
+     * @param string      $path
+     * @param mixed       $controller
      * @param string|null $name
-     * @param array $parameters
+     * @param array       $parameters
      */
     public function put($path, $controller, $name = null, array $parameters = array())
     {
@@ -165,10 +167,10 @@ class Application extends BaseApplication
 
     /**
      *
-     * @param string $path
-     * @param mixed $controller
+     * @param string      $path
+     * @param mixed       $controller
      * @param string|null $name
-     * @param array $parameters
+     * @param array       $parameters
      */
     public function delete($path, $controller, $name = null, array $parameters = array())
     {
@@ -186,6 +188,7 @@ class Application extends BaseApplication
     /**
      *
      * @param Request $request
+     *
      * @return Response
      */
     public function dispatch(Request $request)
@@ -209,12 +212,12 @@ class Application extends BaseApplication
 
         ob_start();
         if (!isset($response)) {
-            $old_response = $factory->replace('response');
+            $old_response          = $factory->replace('response');
             $controller_collection = $factory->get('controllers');
-            $controller = $request->get['controller'];
+            $controller            = $request->get['controller'];
 
             $controller_response = $controller_collection->resolve($controller, $request, $factory->get('response'));
-            $response     = $old_response ? $factory->replace('response', $old_response) : $controller_response;
+            $response            = $old_response ? $factory->replace('response', $old_response) : $controller_response;
         }
 
         if ($filter) {

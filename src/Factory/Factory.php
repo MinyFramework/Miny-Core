@@ -77,6 +77,7 @@ class Factory implements ArrayAccess
 
     /**
      * @param string $alias
+     *
      * @return string
      */
     public function getAlias($alias)
@@ -90,8 +91,8 @@ class Factory implements ArrayAccess
     /**
      * Creates a Blueprint for $classname and registers it with $alias.
      *
-     * @param string $alias
-     * @param string $classname
+     * @param string  $alias
+     * @param string  $classname
      * @param boolean $singleton
      *
      * @return Blueprint
@@ -105,7 +106,7 @@ class Factory implements ArrayAccess
      * Registers a Blueprint with the given alias.
      * Unsets any existing instances for the given alias.
      *
-     * @param string $alias
+     * @param string    $alias
      * @param Blueprint $object
      *
      * @return Blueprint
@@ -145,6 +146,7 @@ class Factory implements ArrayAccess
     /**
      * @param string $alias
      * @param object $object
+     *
      * @throws InvalidArgumentException
      */
     public function __set($alias, $object)
@@ -177,6 +179,7 @@ class Factory implements ArrayAccess
      * Gets the Blueprint stored for $alias.
      *
      * @param string $alias
+     *
      * @return Blueprint
      * @throws OutOfBoundsException
      */
@@ -201,7 +204,7 @@ class Factory implements ArrayAccess
     /**
      * Replaces an instance with another if instantiated.
      *
-     * @param string $alias
+     * @param string      $alias
      * @param object|null $object
      *
      * @return null|object The old object instance.
@@ -255,8 +258,9 @@ class Factory implements ArrayAccess
     }
 
     /**
-     * @param object $object
+     * @param object    $object
      * @param Blueprint $blueprint
+     *
      * @return object
      */
     private function injectDependencies($object, Blueprint $blueprint)
@@ -309,6 +313,7 @@ class Factory implements ArrayAccess
      * Resolves parameter references recursively.
      *
      * @param mixed $var
+     *
      * @return mixed
      */
     private function resolveReferences($var)
@@ -371,9 +376,9 @@ class Factory implements ArrayAccess
 
     /**
      * @param string $str
-     * @throws \InvalidArgumentException
+     *
+     * @throws InvalidArgumentException
      * @return mixed
-     * @throw InvalidArgumentException
      */
     private function getObjectParameter($str)
     {
@@ -409,6 +414,7 @@ class Factory implements ArrayAccess
     {
         return $this->get($alias);
     }
+
     /* ArrayAccess interface */
 
     public function offsetExists($offset)

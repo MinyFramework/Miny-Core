@@ -54,7 +54,7 @@ class Route
     /**
      * @param string $path
      * @param string $method
-     * @param array $params
+     * @param array  $params
      */
     public function __construct($path, $method = null, array $params = array())
     {
@@ -79,6 +79,7 @@ class Route
 
     /**
      * @param string $path
+     *
      * @throws InvalidArgumentException
      */
     public function setPath($path)
@@ -128,6 +129,7 @@ class Route
     /**
      * @param string $parameter
      * @param string $default
+     *
      * @return string
      */
     public function getPattern($parameter, $default = '(\w+)')

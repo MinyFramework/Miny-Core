@@ -34,8 +34,8 @@ class Session implements ArrayAccess, IteratorAggregate, Countable
                 session_set_save_handler($handler, true);
             } else {
                 session_set_save_handler(
-                        array($handler, 'open'), array($handler, 'close'), array($handler, 'read'),
-                        array($handler, 'write'), array($handler, 'destroy'), array($handler, 'gc')
+                    array($handler, 'open'), array($handler, 'close'), array($handler, 'read'),
+                    array($handler, 'write'), array($handler, 'destroy'), array($handler, 'gc')
                 );
             }
         }
@@ -87,12 +87,13 @@ class Session implements ArrayAccess, IteratorAggregate, Countable
 
     /**
      * Updates time to live values for flash variable and removes old items.
+     *
      * @access private
      */
     private function updateFlash()
     {
         foreach ($_SESSION['flash'] as $key => &$data) {
-            if ($data['ttl'] -- == 0) {
+            if ($data['ttl']-- == 0) {
                 unset($_SESSION['flash'][$key]);
             }
         }
@@ -111,6 +112,7 @@ class Session implements ArrayAccess, IteratorAggregate, Countable
 
     /**
      * Sets or gets the session name.
+     *
      * @param string $value the session name for the current session
      *
      * @return string the current session name
@@ -159,7 +161,7 @@ class Session implements ArrayAccess, IteratorAggregate, Countable
         if ($new_params !== null && !$this->is_open) {
             $params = $new_params + $params;
             session_set_cookie_params(
-                    $params['lifetime'], $params['path'], $params['domain'], $params['secure'], $params['http_only']
+                $params['lifetime'], $params['path'], $params['domain'], $params['secure'], $params['http_only']
             );
         }
         return $params;

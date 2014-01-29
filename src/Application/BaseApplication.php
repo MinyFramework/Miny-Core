@@ -33,7 +33,7 @@ abstract class BaseApplication
 
     /**
      *
-     * @param int $environment
+     * @param int             $environment
      * @param AutoLoader|null $autoloader
      */
     public function __construct($environment = self::ENV_PROD, AutoLoader $autoloader = null)
@@ -55,7 +55,7 @@ abstract class BaseApplication
                 '\Modules'     => './vendor/Miny/Modules'
             ));
         }
-        $factory       = new Factory(array(
+        $factory = new Factory(array(
             'default_timezone' => 'UTC',
             'root'             => realpath('.'),
             'log'              => array(
@@ -123,7 +123,7 @@ abstract class BaseApplication
 
     /**
      * @param string $file
-     * @param int $env
+     * @param int    $env
      *
      * @throws InvalidArgumentException
      * @throws UnexpectedValueException
@@ -155,6 +155,7 @@ abstract class BaseApplication
      * Checks whether the given $env matches the current environment.
      *
      * @param int $env
+     *
      * @return boolean
      */
     public function isEnvironment($env)
@@ -190,13 +191,13 @@ abstract class BaseApplication
     {
         $factory->setInstance('app', $this);
         $factory->add('log', '\Miny\Log')
-                ->setArguments('@log:path', '@log:debug');
+            ->setArguments('@log:path', '@log:debug');
         $factory->add('error_handlers', '\Miny\Application\Handlers\ErrorHandlers')
-                ->setArguments('&log');
+            ->setArguments('&log');
         $factory->add('events', '\Miny\Event\EventDispatcher')
-                ->addMethodCall('register', 'uncaught_exception', '*error_handlers::logException');
+            ->addMethodCall('register', 'uncaught_exception', '*error_handlers::logException');
         $factory->add('module_handler', '\Miny\Modules\ModuleHandler')
-                ->setArguments('&app', '&log');
+            ->setArguments('&app', '&log');
     }
 
     /**

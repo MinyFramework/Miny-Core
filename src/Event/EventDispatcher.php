@@ -27,16 +27,16 @@ class EventDispatcher
      *
      * If $place is specified, $handler will be inserted as the $place-th handler in the queue.
      *
-     * @param string $event
+     * @param string          $event
      * @param callable|object $handler
-     * @param int $place
+     * @param int             $place
      *
      * @throws EventHandlerException if the handler is not callable.
      */
     public function register($event, $handler, $place = null)
     {
-        if(is_object($handler)) {
-            if(!$handler instanceof Closure) {
+        if (is_object($handler)) {
+            if (!$handler instanceof Closure) {
                 $handler = array($handler, $event);
             }
         }
@@ -59,7 +59,7 @@ class EventDispatcher
      * arguments as event parameters.
      *
      * @param string|Event $event
-     * @param mixed ... Event parameters if $event is string.
+     * @param              mixed ... Event parameters if $event is string.
      *
      * @return Event The raised event.
      *
@@ -68,7 +68,7 @@ class EventDispatcher
     public function raiseEvent($event)
     {
         if (is_string($event)) {
-            $args = array_slice(func_get_args(), 1);
+            $args  = array_slice(func_get_args(), 1);
             $event = new Event($event, $args);
         } elseif (!$event instanceof Event) {
             throw new InvalidArgumentException('The first parameter must be an Event object or a string.');

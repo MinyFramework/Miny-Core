@@ -18,7 +18,7 @@ class Event
 
     /**
      * @param string $name The event name.
-     * @param mixed ... Event parameters.
+     * @param        mixed ... Event parameters.
      */
     public function __construct($name)
     {

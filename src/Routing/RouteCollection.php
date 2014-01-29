@@ -40,6 +40,7 @@ class RouteCollection implements IteratorAggregate
     /**
      * @param Route $route
      * @param mixed $name
+     *
      * @throws InvalidArgumentException
      */
     public function addRoute(Route $route, $name = null)

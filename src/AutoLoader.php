@@ -44,7 +44,7 @@ class AutoLoader
             }
         } else {
             $length = strlen($namespace);
-            if(strpos($namespace, '\\') === 0) {
+            if (strpos($namespace, '\\') === 0) {
                 ++$length;
             }
             if ($this->max_ns_length < $length) {

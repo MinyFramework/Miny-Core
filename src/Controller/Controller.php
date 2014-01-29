@@ -34,8 +34,8 @@ abstract class Controller extends BaseController
      *  * hasHeader - checks if a header is already set.
      *  * removeHeader - removes a header.
      *
-     * @param string $action
-     * @param Request $request
+     * @param string   $action
+     * @param Request  $request
      * @param Response $response
      *
      * @return mixed The return value of the action.
