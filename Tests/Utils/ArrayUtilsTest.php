@@ -79,8 +79,10 @@ class ArrayUtilsTest extends PHPUnit_Framework_TestCase
     {
         ArrayUtils::setByPath($this->array, 'key_a:subkey_a', 'new_value');
         ArrayUtils::setByPath($this->array, 'key_a:nonexistent:sub', 'value');
+        ArrayUtils::setByPath($this->array, array('key', 'another', null), 'value');
         $this->assertEquals('new_value', ArrayUtils::getByPath($this->array, 'key_a:subkey_a'));
         $this->assertEquals('value', ArrayUtils::getByPath($this->array, 'key_a:nonexistent:sub'));
+        $this->assertEquals('value', ArrayUtils::getByPath($this->array, 'key:another:0'));
     }
 
     public function testUnsetByPath()

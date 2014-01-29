@@ -15,17 +15,18 @@ use BadMethodCallException;
 use Countable;
 use InvalidArgumentException;
 use IteratorAggregate;
-use OutOfBoundsException;
+use Miny\Utils\ArrayUtils;
 
 class Session implements ArrayAccess, IteratorAggregate, Countable
 {
+    private $data;
     /**
      * @var bool
      */
     private $is_open = false;
 
     /**
-     * @param bool $custom_storage
+     * @param iSessionHandler $handler
      */
     public function __construct(iSessionHandler $handler = null)
     {
@@ -41,21 +42,28 @@ class Session implements ArrayAccess, IteratorAggregate, Countable
         }
     }
 
+    private function initializeContainer($key)
+    {
+        if (!isset($this->data[$key]) || !is_array($this->data[$key])) {
+            $this->data[$key] = array();
+        }
+    }
+
     /**
      * Starts the session. Regenerates the session ID each request
      * for security reasons and updates flash variables.
      */
-    public function open()
+    public function open(array $data = null)
     {
         $this->is_open = session_start();
         session_regenerate_id(true);
-
-        if (!isset($_SESSION['data']) || !is_array($_SESSION['data'])) {
-            $_SESSION['data'] = array();
+        if ($data === null) {
+            $this->data =& $_SESSION;
+        } else {
+            $this->data = $data;
         }
-        if (!isset($_SESSION['flash']) || !is_array($_SESSION['flash'])) {
-            $_SESSION['flash'] = array();
-        }
+        $this->initializeContainer('data');
+        $this->initializeContainer('flash');
         $this->updateFlash();
     }
 
@@ -92,9 +100,9 @@ class Session implements ArrayAccess, IteratorAggregate, Countable
      */
     private function updateFlash()
     {
-        foreach ($_SESSION['flash'] as $key => &$data) {
+        foreach ($this->data['flash'] as $key => &$data) {
             if ($data['ttl']-- == 0) {
-                unset($_SESSION['flash'][$key]);
+                unset($this->data['flash'][$key]);
             }
         }
     }
@@ -113,8 +121,9 @@ class Session implements ArrayAccess, IteratorAggregate, Countable
     /**
      * Sets or gets the session name.
      *
-     * @param string $value the session name for the current session
+     * @param string $name the session name for the current session
      *
+     * @throws InvalidArgumentException
      * @return string the current session name
      */
     public function sessionName($name = null)
@@ -133,6 +142,9 @@ class Session implements ArrayAccess, IteratorAggregate, Countable
     /**
      * Sets or gets the current session save path.
      *
+     * @param string|null $path
+     *
+     * @throws InvalidArgumentException
      * @return string the current session save path.
      */
     public function savePath($path = null)
@@ -171,10 +183,10 @@ class Session implements ArrayAccess, IteratorAggregate, Countable
 
     public function flash($key, $data, $ttl)
     {
-        if (!is_numeric($ttl)) {
+        if (!is_int($ttl)) {
             throw new InvalidArgumentException('Time-to-live must be a number.');
         }
-        $_SESSION['flash'][$key] = array('data' => $data, 'ttl' => $ttl);
+        $this->data['flash'][$key] = array('data' => $data, 'ttl' => $ttl);
     }
 
     public function __set($key, $data)
@@ -184,20 +196,17 @@ class Session implements ArrayAccess, IteratorAggregate, Countable
 
     public function &__get($key)
     {
-        if (!isset($_SESSION['flash'][$key])) {
-            throw new OutOfBoundsException('Session flash key not set: ' . $key);
-        }
-        return $_SESSION['flash'][$key]['data'];
+        return ArrayUtils::findByPath($this->data, array('flash', $key, 'data'));
     }
 
     public function __isset($key)
     {
-        return isset($_SESSION['flash'][$key]);
+        return isset($this->data['flash'][$key]);
     }
 
     public function __unset($key)
     {
-        unset($_SESSION['flash'][$key]);
+        unset($this->data['flash'][$key]);
     }
 
     public function __call($key, $arguments)
@@ -217,38 +226,31 @@ class Session implements ArrayAccess, IteratorAggregate, Countable
 
     public function getIterator()
     {
-        return new ArrayIterator($_SESSION['data']);
+        return new ArrayIterator($this->data['data']);
     }
 
     public function count()
     {
-        return count($_SESSION['data']);
+        return count($this->data['data']);
     }
 
     public function offsetSet($key, $value)
     {
-        if ($key === null) {
-            $_SESSION['data'][] = $value;
-        } else {
-            $_SESSION['data'][$key] = $value;
-        }
+        ArrayUtils::setByPath($this->data, array('data', $key), $value);
     }
 
     public function offsetExists($key)
     {
-        return isset($_SESSION['data'][$key]);
+        return isset($this->data['data'][$key]);
     }
 
     public function offsetUnset($key)
     {
-        unset($_SESSION['data'][$key]);
+        unset($this->data['data'][$key]);
     }
 
     public function &offsetGet($key)
     {
-        if (!isset($_SESSION['data'][$key])) {
-            throw new OutOfBoundsException('Session key not set: ' . $key);
-        }
-        return $_SESSION['data'][$key];
+        return ArrayUtils::findByPath($this->data, array('data', $key));
     }
 }

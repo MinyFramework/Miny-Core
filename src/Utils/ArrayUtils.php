@@ -117,6 +117,9 @@ class ArrayUtils
             $parts = explode(':', $parts);
         }
         foreach ($parts as $k) {
+            if($k === null || $k === '') {
+                $k = count($array);
+            }
             if (!array_key_exists($k, $array)) {
                 $array[$k] = array();
             }
