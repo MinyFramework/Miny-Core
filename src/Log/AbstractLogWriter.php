@@ -25,6 +25,11 @@ abstract class AbstractLogWriter
         $this->log = $log;
     }
 
+    public function getLevelName($level)
+    {
+        return $this->log->getLevelName($level);
+    }
+
     public function __destruct()
     {
         $this->detach();

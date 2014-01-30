@@ -55,7 +55,7 @@ class Profiler
         $time   = number_format((microtime(true) - $this->time) * 1000, 3);
         $memory = $this->normalizeMemory(memory_get_usage(true) - $this->memory);
         $pattern = 'Profiling %s: Run #: %d, Time: %s ms, Memory: %s';
-        return sprintf($pattern, $this->message, $this->runs, $time, $memory);
+        return sprintf($pattern, $this->name, $this->runs, $time, $memory);
     }
 
     private function normalizeMemory($memory)

@@ -64,7 +64,7 @@ abstract class BaseApplication
             'profile'          => $this->isDeveloperEnvironment(),
             'log'              => array(
                 'enable_file_writer' => true,
-                'path'               => realpath('./logs/'),
+                'path'               => realpath('./logs'),
                 'flush_limit'        => 100
             ),
         ));

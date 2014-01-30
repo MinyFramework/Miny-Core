@@ -29,14 +29,14 @@ class FileWriter extends AbstractLogWriter
             "[%s] %s: %s - %s\n",
             date('Y-m-d H:i:s', $message->getTime()),
             $message->getCategory(),
-            $message->getLevel(),
+            $this->getLevelName($message->getLevel()),
             $message->getMessage()
         );
     }
 
     public function commit()
     {
-        $file = 'log_' . date('Y_m_d') . '.txt';
+        $file = '/log_' . date('Y_m_d') . '.txt';
         file_put_contents($this->path . $file, $this->buffer, FILE_APPEND);
         $this->buffer = '';
     }

@@ -69,16 +69,13 @@ class Log
 
     public function write($level, $category, $message)
     {
-        $args    = array_slice(func_get_args(), 3);
-        if(is_array($args[0])) {
+        $args = array_slice(func_get_args(), 3);
+        if (isset($args[0]) && is_array($args[0])) {
             $args = $args[0];
         }
         $message = $this->formatMessage($message, $args);
-        if (!isset($this->messages[$level])) {
-            $this->messages[$level] = array();
-        }
         $this->messageNum++;
-        $this->messages[$level][] = new LogMessage($this->getLevelName($level), microtime(true), $category, $message);
+        $this->messages[] = new LogMessage($level, microtime(true), $category, $message);
 
         if ($this->messageNum === $this->flushLimit) {
             $this->flush();
@@ -119,16 +116,12 @@ class Log
         if (empty($this->messages) || empty($this->writers)) {
             return;
         }
-        foreach ($this->messages as $level => $messages) {
-            if (!isset($this->writers[$level])) {
-                continue;
-            }
+        foreach ($this->messages as $message) {
+            $level = $message->getLevel();
             foreach ($this->writers[$level] as $writer) {
-                foreach ($messages as $message) {
-                    $writer->add($message);
-                }
-                $writer->commit();
+                $writer->add($message);
             }
+            $writer->commit();
         }
         $this->reset();
     }
