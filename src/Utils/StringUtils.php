@@ -64,4 +64,29 @@ class StringUtils
     {
         return strrpos($string, $end) === strlen($string) - strlen($end);
     }
+
+    /**
+     * @param string $str The string that will be converted to camelCase
+     *
+     * @return string
+     */
+    public static function camelize($str)
+    {
+        $str = strtolower($str);
+        $str = strtr($str, '_', ' ');
+        $str = preg_replace('/\s+/', '', ucwords($str));
+        return lcfirst($str);
+    }
+
+    /**
+     * @param string $str The camelCase string that will be split to words
+     * @param string $separator
+     *
+     * @return string
+     */
+    public static function decamelize($str, $separator = ' ')
+    {
+        $str = preg_replace('/(?<=[a-z])([A-Z])/', $separator . '$1', $str);
+        return strtolower($str);
+    }
 }
