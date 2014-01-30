@@ -61,6 +61,7 @@ abstract class BaseApplication
         $factory = new Factory(array(
             'default_timezone' => 'UTC',
             'root'             => realpath('.'),
+            'profile'          => $this->isDeveloperEnvironment(),
             'log'              => array(
                 'enable_file_writer' => true,
                 'path'               => realpath('./logs/'),
@@ -93,6 +94,26 @@ abstract class BaseApplication
             }
             $module_handler->initialize();
         }
+    }
+
+    /**
+     * @return boolean
+     */
+    public function isDeveloperEnvironment()
+    {
+        return $this->isEnvironment(self::ENV_DEV);
+    }
+
+    /**
+     * Checks whether the given $env matches the current environment.
+     *
+     * @param int $env
+     *
+     * @return boolean
+     */
+    public function isEnvironment($env)
+    {
+        return ($this->environment & $env) !== 0;
     }
 
     protected function setDefaultParameters()
@@ -139,24 +160,12 @@ abstract class BaseApplication
         $this->factory->getParameters()->addParameters($config);
     }
 
-    /**
-     * Checks whether the given $env matches the current environment.
-     *
-     * @param int $env
-     *
-     * @return boolean
-     */
-    public function isEnvironment($env)
-    {
-        return ($this->environment & $env) !== 0;
-    }
-
     protected function registerDefaultServices(Factory $factory)
     {
         $factory->setInstance('app', $this);
 
         $shutdown = new ShutdownService;
-        $log = new Log($factory['log']['flush_limit']);
+        $log      = new Log($factory['log']['flush_limit']);
 
         $log->registerShutdownService($shutdown, 1000);
         if ($factory['log']['enable_file_writer']) {
@@ -182,14 +191,6 @@ abstract class BaseApplication
             ->addMethodCall('register', 'uncaught_exception', '*error_handlers::logException');
         $factory->add('module_handler', '\Miny\Modules\ModuleHandler')
             ->setArguments('&app', '&log');
-    }
-
-    /**
-     * @return boolean
-     */
-    public function isDeveloperEnvironment()
-    {
-        return $this->isEnvironment(self::ENV_DEV);
     }
 
     /**
