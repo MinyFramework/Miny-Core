@@ -190,6 +190,7 @@ abstract class BaseApplication
     protected function registerDefaultServices(Factory $factory)
     {
         $factory->setInstance('app', $this);
+        $factory->add('shutdown', '\Miny\Shutdown\ShutdownService');
         $factory->add('log', '\Miny\Log')
             ->setArguments('@log:path', '@log:debug');
         $factory->add('error_handlers', '\Miny\Application\Handlers\ErrorHandlers')
