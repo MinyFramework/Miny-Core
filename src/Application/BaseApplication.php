@@ -12,6 +12,8 @@ namespace Miny\Application;
 use InvalidArgumentException;
 use Miny\AutoLoader;
 use Miny\Factory\Factory;
+use Miny\Log\FileWriter;
+use Miny\Log\Log;
 use Miny\Shutdown\ShutdownService;
 use UnexpectedValueException;
 
@@ -60,8 +62,9 @@ abstract class BaseApplication
             'default_timezone' => 'UTC',
             'root'             => realpath('.'),
             'log'              => array(
-                'path'  => realpath('./logs'),
-                'debug' => $this->isDeveloperEnvironment()
+                'enable_file_writer' => true,
+                'path'               => realpath('./logs/'),
+                'flush_limit'        => 100
             ),
         ));
         $factory->setInstance('autoloader', $autoloader);
@@ -73,9 +76,9 @@ abstract class BaseApplication
 
         //Log start of execution
         if (isset($warning)) {
-            $factory->get('log')->warning($warning);
+            $factory->get('log')->write(Log::WARNING, 'Miny', $warning);
         }
-        $factory->get('log')->info('Starting Miny in %s environment', $environment_names[$environment]);
+        $factory->get('log')->write(Log::INFO, 'Miny', 'Starting Miny in %s environment', $environment_names[$environment]);
 
         //Load modules
         $parameters = $factory->getParameters();
@@ -90,26 +93,6 @@ abstract class BaseApplication
             }
             $module_handler->initialize();
         }
-    }
-
-    /**
-     * @return boolean
-     */
-    public function isDeveloperEnvironment()
-    {
-        return $this->isEnvironment(self::ENV_DEV);
-    }
-
-    /**
-     * Checks whether the given $env matches the current environment.
-     *
-     * @param int $env
-     *
-     * @return boolean
-     */
-    public function isEnvironment($env)
-    {
-        return ($this->environment & $env) !== 0;
     }
 
     protected function setDefaultParameters()
@@ -156,30 +139,57 @@ abstract class BaseApplication
         $this->factory->getParameters()->addParameters($config);
     }
 
+    /**
+     * Checks whether the given $env matches the current environment.
+     *
+     * @param int $env
+     *
+     * @return boolean
+     */
+    public function isEnvironment($env)
+    {
+        return ($this->environment & $env) !== 0;
+    }
+
     protected function registerDefaultServices(Factory $factory)
     {
         $factory->setInstance('app', $this);
-        $factory->add('log', '\Miny\Log')
-            ->setArguments('@log:path', '@log:debug');
+
+        $shutdown = new ShutdownService;
+        $log = new Log($factory['log']['flush_limit']);
+
+        $log->registerShutdownService($shutdown, 1000);
+        if ($factory['log']['enable_file_writer']) {
+            $log->registerWriter(new FileWriter($factory['log']['path']));
+        }
+        $shutdown->register(function () use ($log) {
+            $log->write(Log::INFO, 'Miny', "End of execution.\n");
+        }, 999);
+
+        if ($factory['profile']) {
+            $profile = $log->startProfiling('Miny', 'Application execution');
+            $shutdown->register(function () use ($profile) {
+                $profile->stop();
+            }, 998);
+        }
+
+        $factory->log      = $log;
+        $factory->shutdown = $shutdown;
+
         $factory->add('error_handlers', '\Miny\Application\Handlers\ErrorHandlers')
             ->setArguments('&log');
         $factory->add('events', '\Miny\Event\EventDispatcher')
             ->addMethodCall('register', 'uncaught_exception', '*error_handlers::logException');
         $factory->add('module_handler', '\Miny\Modules\ModuleHandler')
             ->setArguments('&app', '&log');
+    }
 
-        $shutdown = new ShutdownService();
-        if (defined('START_TIME')) {
-            $shutdown->register(function () use ($factory) {
-                $log = $factory->get('log');
-                $log->info('Execution time: %lf s', microtime(true) - START_TIME);
-            }, 999);
-        }
-        $shutdown->register(function () use ($factory) {
-            $log = $factory->get('log');
-            $log->info("End of execution.\n");
-            $log->saveLog();
-        }, 1000);
+    /**
+     * @return boolean
+     */
+    public function isDeveloperEnvironment()
+    {
+        return $this->isEnvironment(self::ENV_DEV);
     }
 
     /**
@@ -223,9 +233,9 @@ abstract class BaseApplication
 
         date_default_timezone_set($this->factory['default_timezone']);
         $event->raiseEvent('before_run');
-        register_shutdown_function(function () use ($event) {
+        $this->factory->get('shutdown')->register(function () use ($event) {
             $event->raiseEvent('shutdown');
-        });
+        }, 0);
         $this->onRun();
     }
 

@@ -10,7 +10,7 @@
 namespace Miny\Modules;
 
 use Miny\Application\BaseApplication;
-use Miny\Log;
+use Miny\Log\Log;
 use Miny\Modules\Exceptions\BadModuleException;
 
 class ModuleHandler
@@ -54,11 +54,10 @@ class ModuleHandler
             ->addMethodCall('register', 'before_run', array($this, 'registerEventHandlers'));
     }
 
-    private function log()
+    private function log($message)
     {
-        $args    = func_get_args();
-        $message = array_shift($args);
-        $this->log->debug('ModuleHandler: ' . $message, $args);
+        $args    = array_slice(func_get_args(), 1);
+        $this->log->write(Log::DEBUG, 'ModuleHandler', $message, $args);
     }
 
     public function initialize()

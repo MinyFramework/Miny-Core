@@ -11,33 +11,25 @@ namespace Miny\Application\Handlers;
 
 use Exception;
 use Miny\Factory\Factory;
-use Miny\Factory\ParameterContainer;
 use Miny\HTTP\Request;
 use Miny\HTTP\Response;
-use Miny\Log;
+use Miny\Log\Log;
 
 class ApplicationEventHandlers
 {
+    /**
+     * @var Log
+     */
+    protected $log;
     /**
      * @var Factory
      */
     private $factory;
 
-    /**
-     * @var ParameterContainer
-     */
-    private $parameters;
-
-    /**
-     * @var Log
-     */
-    protected $log;
-
     public function __construct(Factory $factory, Log $log)
     {
-        $this->factory    = $factory;
-        $this->parameters = $factory->getParameters();
-        $this->log        = $log;
+        $this->factory = $factory;
+        $this->log     = $log;
 
         set_exception_handler(array($this, 'handleExceptions'));
     }
@@ -57,19 +49,54 @@ class ApplicationEventHandlers
 
     public function logRequest(Request $request)
     {
-        $this->log->info('Request: [%s] %s Source: %s', $request->method, $request->url, $request->ip);
+        $this->log('Request', '[%s] %s Source: %s', $request->method, $request->url, $request->ip);
         $headers = $request->getHeaders();
         if ($headers->has('referer')) {
-            $this->log->info('Request: Referer: %s', $headers->get('referer'));
+            $this->log('Request', 'Referer: %s', $headers->get('referer'));
         }
+    }
+
+    private function log($category, $message)
+    {
+        $args = array_slice(func_get_args(), 2);
+        $this->log->write(Log::INFO, $category, $message, $args);
     }
 
     public function logResponse(Request $request, Response $response)
     {
-        $this->log->info('Response for request [%s] %s', $request->method, $request->path);
-        $this->log->info('Response status: %s %s', $response->getCode(), $response->getStatus());
+        $this->log('Response', 'Response for request [%s] %s', $request->method, $request->path);
+        $this->log('Response', 'Response status: %s %s', $response->getCode(), $response->getStatus());
         foreach ($response->getHeaders() as $header => $value) {
-            $this->log->info('Header: %s: %s', ucfirst($header), $value);
+            $this->log('Response', 'Header: %s: %s', ucfirst($header), $value);
+        }
+    }
+
+    public function filterRoutes(Request $request)
+    {
+        if ($this->factory->get('router')->shortUrls()) {
+            $path = $request->path;
+        } else {
+            $path = $request->get('path', '/');
+        }
+        $match = $this->factory->get('router')->match($path, $request->method);
+        if (!$match) {
+            $this->log->write(Log::INFO, 'Routing', 'Route was not found for path [%s] %s', $request->method, $path);
+            $response = $this->factory->get('response');
+            $response->setCode(404);
+            return $response;
+        }
+        $this->log('Routing', 'Matched route %s', $match->getRoute()->getPath());
+        parse_str(parse_url($request->url, PHP_URL_QUERY), $_GET);
+        $request->get = $match->getParameters() + $_GET;
+    }
+
+    public function setContentType(Request $request, Response $response)
+    {
+        $headers = $response->getHeaders();
+        if (!$headers->has('content-type') && isset($request->get['format'])) {
+            $format       = $request->get['format'];
+            $content_type = $this->getResponseContentType($format);
+            $headers->set('content-type', $content_type);
         }
     }
 
@@ -103,37 +130,7 @@ class ApplicationEventHandlers
         );
         if (isset($content_types[$format])) {
             return $content_types[$format];
-        } else {
-            return $format;
         }
-    }
-
-    public function filterRoutes(Request $request)
-    {
-        if ($this->factory->get('router')->shortUrls()) {
-            $path = $request->path;
-        } else {
-            $path = $request->get('path', '/');
-        }
-        $match = $this->factory->get('router')->match($path, $request->method);
-        if (!$match) {
-            $this->log->info('Route was not found for path [%s] %s', $request->method, $path);
-            $response = $this->factory->get('response');
-            $response->setCode(404);
-            return $response;
-        }
-        $this->log->info('Matched route %s', $match->getRoute()->getPath());
-        parse_str(parse_url($request->url, PHP_URL_QUERY), $_GET);
-        $request->get = $match->getParameters() + $_GET;
-    }
-
-    public function setContentType(Request $request, Response $response)
-    {
-        $headers = $response->getHeaders();
-        if (!$headers->has('content-type') && isset($request->get['format'])) {
-            $format       = $request->get['format'];
-            $content_type = $this->getResponseContentType($format);
-            $headers->set('content-type', $content_type);
-        }
+        return $format;
     }
 }

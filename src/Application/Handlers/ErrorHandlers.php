@@ -11,7 +11,7 @@ namespace Miny\Application\Handlers;
 
 use ErrorException;
 use Exception;
-use Miny\Log;
+use Miny\Log\Log;
 
 class ErrorHandlers
 {
@@ -39,7 +39,7 @@ class ErrorHandlers
     {
         if (isset(self::$loggable[$errno])) {
             $message = sprintf('%s in %s on line %s', $errstr, $errfile, $errline);
-            $this->log->write($message, self::$loggable[$errno]);
+            $this->log->write(Log::WARNING, self::$loggable[$errno], $message);
         } else {
             throw new ErrorException($errstr, $errno, 0, $errfile, $errline);
         }
@@ -48,6 +48,6 @@ class ErrorHandlers
     public function logException(Exception $e)
     {
         $class = get_class($e);
-        $this->log->$class("%s \n Trace: %s", $e->getMessage(), $e->getTraceAsString());
+        $this->log->write(Log::ERROR, $class, "%s \n Trace: %s", $e->getMessage(), $e->getTraceAsString());
     }
 }
