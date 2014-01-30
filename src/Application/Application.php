@@ -37,16 +37,6 @@ class Application extends BaseApplication
         ));
     }
 
-    protected function registerEventHandlers(Factory $factory)
-    {
-        $event_handlers = new ApplicationEventHandlers($factory, $factory->get('log'));
-        $factory->getBlueprint('events')
-            ->addMethodCall('register', 'filter_request', array($event_handlers, 'logRequest'))
-            ->addMethodCall('register', 'filter_request', array($event_handlers, 'filterRoutes'))
-            ->addMethodCall('register', 'filter_response', array($event_handlers, 'setContentType'))
-            ->addMethodCall('register', 'filter_response', array($event_handlers, 'logResponse'));
-    }
-
     protected function registerDefaultServices(Factory $factory)
     {
         parent::registerDefaultServices($factory);
@@ -63,37 +53,22 @@ class Application extends BaseApplication
         $factory->add('response', '\Miny\HTTP\Response');
     }
 
-    /**
-     *
-     * @param string $name
-     * @param mixed  $controller
-     * @param array  $parameters
-     *
-     * @return Resource
-     */
-    public function resource($name, $controller = null, array $parameters = array())
+    protected function registerEventHandlers(Factory $factory)
     {
-        $parameters['controller'] = $this->registerController($controller ? : $name, $name);
-        return $this->getFactory()->get('router')->resource($name, $parameters);
+        $event_handlers = new ApplicationEventHandlers($factory, $factory->get('log'));
+        $factory->getBlueprint('events')
+            ->addMethodCall('register', 'filter_request', array($event_handlers, 'logRequest'))
+            ->addMethodCall('register', 'filter_request', array($event_handlers, 'filterRoutes'))
+            ->addMethodCall('register', 'filter_response', array($event_handlers, 'setContentType'))
+            ->addMethodCall('register', 'filter_response', array($event_handlers, 'logResponse'));
     }
 
-    /**
-     *
-     * @param string $name
-     * @param mixed  $controller
-     * @param array  $parameters
-     *
-     * @return Resources
-     */
-    public function resources($name, $controller = null, array $parameters = array())
+    protected function onRun()
     {
-        $parameters['controller'] = $this->registerController($controller ? : $name, $name);
-        return $this->getFactory()->get('router')->resources($name, $parameters);
-    }
-
-    private function registerController($controller, $name = null)
-    {
-        return $this->getFactory()->get('controllers')->register($controller, $name);
+        if (!$this->getFactory()->get('router')->hasRoute('root')) {
+            $this->root('index');
+        }
+        $this->dispatch(Request::getGlobal())->send();
     }
 
     /**
@@ -107,82 +82,6 @@ class Application extends BaseApplication
     {
         $parameters['controller'] = $this->registerController($controller);
         return $this->getFactory()->get('router')->root($parameters);
-    }
-
-    /**
-     *
-     * @param string      $path
-     * @param mixed       $controller
-     * @param string|null $method
-     * @param string|null $name
-     * @param array       $parameters
-     *
-     * @return Route
-     *
-     * @throws UnexpectedValueException
-     */
-    public function route($path, $controller, $method = null, $name = null, array $parameters = array())
-    {
-        $parameters['controller'] = $this->registerController($controller);
-
-        $route = new Route($path, $method, $parameters);
-        return $this->getFactory()->get('router')->route($route, $name);
-    }
-
-    /**
-     *
-     * @param string      $path
-     * @param mixed       $controller
-     * @param string|null $name
-     * @param array       $parameters
-     */
-    public function get($path, $controller, $name = null, array $parameters = array())
-    {
-        $this->route($path, $controller, 'GET', $name, $parameters);
-    }
-
-    /**
-     *
-     * @param string      $path
-     * @param mixed       $controller
-     * @param string|null $name
-     * @param array       $parameters
-     */
-    public function post($path, $controller, $name = null, array $parameters = array())
-    {
-        $this->route($path, $controller, 'POST', $name, $parameters);
-    }
-
-    /**
-     *
-     * @param string      $path
-     * @param mixed       $controller
-     * @param string|null $name
-     * @param array       $parameters
-     */
-    public function put($path, $controller, $name = null, array $parameters = array())
-    {
-        $this->route($path, $controller, 'PUT', $name, $parameters);
-    }
-
-    /**
-     *
-     * @param string      $path
-     * @param mixed       $controller
-     * @param string|null $name
-     * @param array       $parameters
-     */
-    public function delete($path, $controller, $name = null, array $parameters = array())
-    {
-        $this->route($path, $controller, 'DELETE', $name, $parameters);
-    }
-
-    protected function onRun()
-    {
-        if (!$this->getFactory()->get('router')->hasRoute('root')) {
-            $this->root('index');
-        }
-        $this->dispatch(Request::getGlobal())->send();
     }
 
     /**
@@ -229,5 +128,106 @@ class Application extends BaseApplication
             $factory->replace('request', $old_request);
         }
         return $response;
+    }
+
+    /**
+     *
+     * @param string $name
+     * @param mixed  $controller
+     * @param array  $parameters
+     *
+     * @return Resource
+     */
+    public function resource($name, $controller = null, array $parameters = array())
+    {
+        $parameters['controller'] = $this->registerController($controller ? : $name, $name);
+        return $this->getFactory()->get('router')->resource($name, $parameters);
+    }
+
+    private function registerController($controller, $name = null)
+    {
+        return $this->getFactory()->get('controllers')->register($controller, $name);
+    }
+
+    /**
+     *
+     * @param string $name
+     * @param mixed  $controller
+     * @param array  $parameters
+     *
+     * @return Resources
+     */
+    public function resources($name, $controller = null, array $parameters = array())
+    {
+        $parameters['controller'] = $this->registerController($controller ? : $name, $name);
+        return $this->getFactory()->get('router')->resources($name, $parameters);
+    }
+
+    /**
+     *
+     * @param string      $path
+     * @param mixed       $controller
+     * @param string|null $name
+     * @param array       $parameters
+     */
+    public function get($path, $controller, $name = null, array $parameters = array())
+    {
+        $this->route($path, $controller, 'GET', $name, $parameters);
+    }
+
+    /**
+     *
+     * @param string      $path
+     * @param mixed       $controller
+     * @param string|null $method
+     * @param string|null $name
+     * @param array       $parameters
+     *
+     * @return Route
+     *
+     * @throws UnexpectedValueException
+     */
+    public function route($path, $controller, $method = null, $name = null, array $parameters = array())
+    {
+        $parameters['controller'] = $this->registerController($controller);
+
+        $route = new Route($path, $method, $parameters);
+        return $this->getFactory()->get('router')->route($route, $name);
+    }
+
+    /**
+     *
+     * @param string      $path
+     * @param mixed       $controller
+     * @param string|null $name
+     * @param array       $parameters
+     */
+    public function post($path, $controller, $name = null, array $parameters = array())
+    {
+        $this->route($path, $controller, 'POST', $name, $parameters);
+    }
+
+    /**
+     *
+     * @param string      $path
+     * @param mixed       $controller
+     * @param string|null $name
+     * @param array       $parameters
+     */
+    public function put($path, $controller, $name = null, array $parameters = array())
+    {
+        $this->route($path, $controller, 'PUT', $name, $parameters);
+    }
+
+    /**
+     *
+     * @param string      $path
+     * @param mixed       $controller
+     * @param string|null $name
+     * @param array       $parameters
+     */
+    public function delete($path, $controller, $name = null, array $parameters = array())
+    {
+        $this->route($path, $controller, 'DELETE', $name, $parameters);
     }
 }
