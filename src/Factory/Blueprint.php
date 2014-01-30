@@ -43,6 +43,11 @@ class Blueprint
     /**
      * @var array
      */
+    private $callbacks = array();
+
+    /**
+     * @var array
+     */
     private $properties = array();
 
     /**
@@ -77,19 +82,6 @@ class Blueprint
     }
 
     /**
-     * Sets parent object's name.
-     *
-     * @param string $parent
-     *
-     * @return Blueprint
-     */
-    public function setParent($parent)
-    {
-        $this->parent = $parent;
-        return $this;
-    }
-
-    /**
      * Sets a method with its parameters to be called upon instantiation.
      *
      * @param string $method
@@ -100,6 +92,20 @@ class Blueprint
     {
         $arguments       = array_slice(func_get_args(), 1);
         $this->methods[] = array($method, $arguments);
+        return $this;
+    }
+
+    /**
+     * Sets a callback with its parameters to be called upon instantiation.
+     *
+     * @param callable $callback
+     *
+     * @return Blueprint
+     */
+    public function addCallback($callback)
+    {
+        $arguments         = array_slice(func_get_args(), 1);
+        $this->callbacks[] = array($callback, $arguments);
         return $this;
     }
 
@@ -160,6 +166,17 @@ class Blueprint
     }
 
     /**
+     * Gets the callbacks and parameters which
+     * should be called.
+     *
+     * @return array
+     */
+    public function getCallbacks()
+    {
+        return $this->callbacks;
+    }
+
+    /**
      * Gets the parameters which should be injected as properties.
      *
      * @return array
@@ -185,5 +202,18 @@ class Blueprint
     public function getParent()
     {
         return $this->parent;
+    }
+
+    /**
+     * Sets parent object's name.
+     *
+     * @param string $parent
+     *
+     * @return Blueprint
+     */
+    public function setParent($parent)
+    {
+        $this->parent = $parent;
+        return $this;
     }
 }

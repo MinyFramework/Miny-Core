@@ -97,6 +97,17 @@ class BlueprintTest extends \PHPUnit_Framework_TestCase
         $object = new Blueprint('SomeClass', false);
         $this->assertFalse($object->isSingleton());
     }
+
+    public function testCallbacks()
+    {
+        $this->assertEmpty($this->object->getCallbacks());
+        $this->object->addCallback(function () {
+        }, 'param', 2, 3);
+        $callbacks = $this->object->getCallbacks();
+        $this->assertNotEmpty($callbacks);
+        $this->assertInstanceOf('\Closure', $callbacks[0][0]);
+        $this->assertEquals(array('param', 2, 3), $callbacks[0][1]);
+    }
 }
 
 ?>

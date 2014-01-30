@@ -277,6 +277,12 @@ class Factory implements ArrayAccess
             $arguments = $this->resolveReferences($args);
             call_user_func_array(array($object, $name), $arguments);
         }
+        foreach($blueprint->getCallbacks() as $callback) {
+            list($name, $args) = $callback;
+            $arguments = $this->resolveReferences($args);
+            array_unshift($arguments, $object);
+            call_user_func_array($name, $arguments);
+        }
         return $object;
     }
 

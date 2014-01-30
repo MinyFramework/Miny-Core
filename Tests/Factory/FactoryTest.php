@@ -18,14 +18,14 @@ class TestClass
         $this->method[$method] = $args;
     }
 
-    public function __set($prop, $value)
-    {
-        $this->property[$prop] = $value;
-    }
-
     public function __get($key)
     {
         return $this->$key;
+    }
+
+    public function __set($prop, $value)
+    {
+        $this->property[$prop] = $value;
     }
 }
 
@@ -271,6 +271,16 @@ class FactoryTest extends \PHPUnit_Framework_TestCase
     {
         // Should not throw Exception.
         $this->object->setInstance('foo', new \stdClass);
+    }
+
+    public function testFactoryShouldCallCallbacks()
+    {
+        $this->object->add('foo', '\stdClass')
+            ->addCallback(function($obj){
+                $obj->foo = 'bar';
+            });
+
+        $this->assertEquals('bar', $this->object->get('foo')->foo);
     }
 }
 
