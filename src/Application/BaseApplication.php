@@ -12,6 +12,7 @@ namespace Miny\Application;
 use InvalidArgumentException;
 use Miny\AutoLoader;
 use Miny\Factory\Factory;
+use Miny\Shutdown\ShutdownService;
 use UnexpectedValueException;
 
 abstract class BaseApplication
@@ -52,7 +53,7 @@ abstract class BaseApplication
         if ($autoloader === null) {
             $autoloader = new AutoLoader(array(
                 '\Application' => '.',
-                '\Modules'     => './vendor/Miny/Modules'
+                '\Modules'     => './vendor/miny/Modules'
             ));
         }
         $factory = new Factory(array(
@@ -91,6 +92,26 @@ abstract class BaseApplication
         }
     }
 
+    /**
+     * @return boolean
+     */
+    public function isDeveloperEnvironment()
+    {
+        return $this->isEnvironment(self::ENV_DEV);
+    }
+
+    /**
+     * Checks whether the given $env matches the current environment.
+     *
+     * @param int $env
+     *
+     * @return boolean
+     */
+    public function isEnvironment($env)
+    {
+        return ($this->environment & $env) !== 0;
+    }
+
     protected function setDefaultParameters()
     {
 
@@ -111,14 +132,6 @@ abstract class BaseApplication
 
             }
         }
-    }
-
-    /**
-     * @return Factory
-     */
-    public function getFactory()
-    {
-        return $this->factory;
     }
 
     /**
@@ -143,32 +156,46 @@ abstract class BaseApplication
         $this->factory->getParameters()->addParameters($config);
     }
 
+    protected function registerDefaultServices(Factory $factory)
+    {
+        $factory->setInstance('app', $this);
+        $factory->add('log', '\Miny\Log')
+            ->setArguments('@log:path', '@log:debug');
+        $factory->add('error_handlers', '\Miny\Application\Handlers\ErrorHandlers')
+            ->setArguments('&log');
+        $factory->add('events', '\Miny\Event\EventDispatcher')
+            ->addMethodCall('register', 'uncaught_exception', '*error_handlers::logException');
+        $factory->add('module_handler', '\Miny\Modules\ModuleHandler')
+            ->setArguments('&app', '&log');
+
+        $shutdown = new ShutdownService();
+        if (defined('START_TIME')) {
+            $shutdown->register(function () use ($factory) {
+                $log = $factory->get('log');
+                $log->info('Execution time: %lf s', microtime(true) - START_TIME);
+            }, 999);
+        }
+        $shutdown->register(function () use ($factory) {
+            $log = $factory->get('log');
+            $log->info("End of execution.\n");
+            $log->saveLog();
+        }, 1000);
+    }
+
+    /**
+     * @return Factory
+     */
+    public function getFactory()
+    {
+        return $this->factory;
+    }
+
     /**
      * @return int
      */
     public function getEnvironment()
     {
         return $this->environment;
-    }
-
-    /**
-     * Checks whether the given $env matches the current environment.
-     *
-     * @param int $env
-     *
-     * @return boolean
-     */
-    public function isEnvironment($env)
-    {
-        return ($this->environment & $env) !== 0;
-    }
-
-    /**
-     * @return boolean
-     */
-    public function isDeveloperEnvironment()
-    {
-        return $this->isEnvironment(self::ENV_DEV);
     }
 
     /**
@@ -185,20 +212,6 @@ abstract class BaseApplication
     public function isTestEnvironment()
     {
         return $this->isEnvironment(self::ENV_TEST);
-    }
-
-    protected function registerDefaultServices(Factory $factory)
-    {
-        $factory->setInstance('app', $this);
-        $factory->add('shutdown', '\Miny\Shutdown\ShutdownService');
-        $factory->add('log', '\Miny\Log')
-            ->setArguments('@log:path', '@log:debug');
-        $factory->add('error_handlers', '\Miny\Application\Handlers\ErrorHandlers')
-            ->setArguments('&log');
-        $factory->add('events', '\Miny\Event\EventDispatcher')
-            ->addMethodCall('register', 'uncaught_exception', '*error_handlers::logException');
-        $factory->add('module_handler', '\Miny\Modules\ModuleHandler')
-            ->setArguments('&app', '&log');
     }
 
     /**

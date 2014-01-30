@@ -50,14 +50,6 @@ class Log
             return;
         }
         $this->path = $path;
-        $log        = $this;
-        register_shutdown_function(function () use ($log) {
-            if (defined('START_TIME')) {
-                $log->info('Execution time: %lf s', microtime(true) - START_TIME);
-            }
-            $log->info("End of execution.\n");
-            $log->saveLog();
-        });
         $this->setDebugMode($debug);
     }
 
