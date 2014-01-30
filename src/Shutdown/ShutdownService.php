@@ -68,6 +68,7 @@ class ShutdownService
 
     public function callShutdownFunctions()
     {
+        ksort($this->callbacks);
         foreach ($this->callbacks as $callbacks) {
             foreach ($callbacks as $callback) {
                 $callback();
