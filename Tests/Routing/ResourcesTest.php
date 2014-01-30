@@ -107,7 +107,7 @@ class ResourcesTest extends \PHPUnit_Framework_TestCase
 
     public function testResourcesPathShouldNotContainIdParameterForParentWhenItIsSingular()
     {
-        $resource                   = new Resource('singular_resource');
+        $resource = new Resource('singular_resource');
         $resource->resource($this->object);
         $expected_paths_and_methods = array(
             array('singular_resource/resources', 'GET'),
@@ -178,7 +178,7 @@ class ResourcesTest extends \PHPUnit_Framework_TestCase
 
     private function checkGeneratedRoutes(Resources $resources, $expected_count, array $expected_paths_and_methods)
     {
-        $routes_iterator          = $resources->getIterator();
+        $routes_iterator = $resources->getIterator();
         $this->assertEquals($expected_count, $routes_iterator->count());
         $actual_paths_and_methods = array();
         foreach ($routes_iterator as $route) {
@@ -214,7 +214,7 @@ class ResourcesTest extends \PHPUnit_Framework_TestCase
     {
         $this->object->addParameter('param', 'value');
 
-        $route = $this->object->getRoute('edit_resource');
+        $route  = $this->object->getRoute('edit_resource');
         $params = $route->getParameters();
         $this->assertArrayHasKey('param', $params);
         $this->assertEquals('value', $params['param']);
@@ -237,7 +237,7 @@ class ResourcesTest extends \PHPUnit_Framework_TestCase
             'param' => 'override'
         ));
 
-        $route = $this->object->getRoute('edit_resource');
+        $route  = $this->object->getRoute('edit_resource');
         $params = $route->getParameters();
         $this->assertArrayHasKey('foo', $params);
         $this->assertEquals('override', $params['param']);

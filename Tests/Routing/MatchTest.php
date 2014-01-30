@@ -9,12 +9,12 @@ class MatchTest extends \PHPUnit_Framework_TestCase
 
     protected function setUp()
     {
-        $parameters = array(
+        $parameters   = array(
             'foo' => 'bar',
             'baz' => 'foobar'
         );
-        $this->route      = new Route('test/path', NULL, $parameters);
-        $this->object     = new Match($this->route, array('foo' => 'bar_baz'));
+        $this->route  = new Route('test/path', null, $parameters);
+        $this->object = new Match($this->route, array('foo' => 'bar_baz'));
     }
 
     public function testMatchedParametersShouldOverrideDefaults()

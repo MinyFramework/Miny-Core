@@ -97,11 +97,12 @@ class Headers implements Iterator, Serializable
         }
     }
 
-    private function headerCanBeUnset($name, $value) {
-        if($value === null) {
+    private function headerCanBeUnset($name, $value)
+    {
+        if ($value === null) {
             return true;
         }
-        if($this->headers[$name] === $value) {
+        if ($this->headers[$name] === $value) {
             return true;
         }
         return false;
@@ -113,7 +114,7 @@ class Headers implements Iterator, Serializable
         if (!isset($this->headers[$name])) {
             return;
         }
-        if ( $this->headerCanBeUnset($name, $value) ) {
+        if ($this->headerCanBeUnset($name, $value)) {
             unset($this->headers[$name]);
             return;
         }

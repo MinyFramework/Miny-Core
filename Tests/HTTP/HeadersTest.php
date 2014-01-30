@@ -65,7 +65,7 @@ class HeadersTest extends \PHPUnit_Framework_TestCase
         $this->assertEquals('asd, foo', $headers->get('expect', true));
     }
 
-    public function testOverrideeaders()
+    public function testOverrideHeaders()
     {
         $headers = new Headers;
 

@@ -66,10 +66,54 @@ class ControllerCollection
     }
 
     /**
+     * Loads and runs the requested controller.
+     * This method looks for the registered class.
+     * If a string was registered it loads the controller from factory or instantiates it by its classname.
+     * This method also raises two events (onControllerLoaded and onControllerFinished) that allow modifying
+     * the behaviour of the controller.
+     *
+     * @param string   $class The controller name or alias in Factory.
+     * @param Request  $request
+     * @param Response $response
+     *
+     * @return \Miny\HTTP\Response
+     * @throws InvalidArgumentException when the controller is not an instance of Controller or Closure
+     */
+    public function resolve($class, Request $request, Response $response)
+    {
+        $controller = $this->getController($class);
+        $action     = $request->get('action');
+
+        $event_handler = $this->application->getFactory()->get('events');
+
+        if (empty($action) && $controller instanceof Controller) {
+            $action = $controller->getDefaultAction();
+        }
+
+        $event = $event_handler->raiseEvent('onControllerLoaded', $controller, $action);
+
+        if ($event->isHandled() && $event->hasResponse() && $event->getResponse() instanceof Response) {
+            return $event->getResponse();
+        }
+
+        if ($controller instanceof Controller) {
+            $retval = $controller->run($action, $request, $response);
+        } elseif ($controller instanceof Closure) {
+            $retval = $controller($request, $action, $response);
+        } else {
+            throw new InvalidArgumentException('Invalid controller: ' . $class);
+        }
+
+        $event_handler->raiseEvent('onControllerFinished', $controller, $action, $retval);
+        return $response;
+    }
+
+    /**
      * @param string $class
      *
+     * @throws \UnexpectedValueException
+     * @throws \InvalidArgumentException
      * @return BaseController|Closure
-     * @throws UnexpectedValueException
      */
     private function getController($class)
     {
@@ -98,47 +142,5 @@ class ControllerCollection
             throw new UnexpectedValueException('Class does not extend BaseController: ' . $class);
         }
         return $controller;
-    }
-
-    /**
-     * Loads and runs the requested controller.
-     * This method looks for the registered class.
-     * If a string was registered it loads the controller from factory or instantiates it by its classname.
-     * This method also raises two events (onControllerLoaded and onControllerFinished) that allow modifying
-     * the behaviour of the controller.
-     *
-     * @param string   $class The controller name or alias in Factory.
-     * @param Request  $request
-     * @param Response $response
-     *
-     * @throws InvalidArgumentException when the controller is not an instance of Controller or Closure
-     */
-    public function resolve($class, Request $request, Response $response)
-    {
-        $controller = $this->getController($class);
-        $action     = $request->get('action');
-
-        $event_handler = $this->application->getFactory()->events;
-
-        if (empty($action) && $controller instanceof Controller) {
-            $action = $controller->getDefaultAction();
-        }
-
-        $event = $event_handler->raiseEvent('onControllerLoaded', $controller, $action);
-
-        if ($event->isHandled() && $event->hasResponse() && $event->getResponse() instanceof Response) {
-            return $event->getResponse();
-        }
-
-        if ($controller instanceof Controller) {
-            $retval = $controller->run($action, $request, $response);
-        } elseif ($controller instanceof Closure) {
-            $retval = $controller($request, $action, $response);
-        } else {
-            throw new InvalidArgumentException('Invalid controller: ' . $class);
-        }
-
-        $event_handler->raiseEvent('onControllerFinished', $controller, $action, $retval);
-        return $response;
     }
 }

@@ -27,14 +27,14 @@ class ResponseHeadersTest extends \PHPUnit_Framework_TestCase
     {
         $sender = $this->getMockForAbstractClass('\Miny\HTTP\AbstractHeaderSender');
         $sender->expects($this->at(0))
-                ->method('send')
-                ->with($this->equalTo('expect: foo, bar'));
+            ->method('send')
+            ->with($this->equalTo('expect: foo, bar'));
         $sender->expects($this->at(1))
-                ->method('send')
-                ->with($this->equalTo('Foobar'));
+            ->method('send')
+            ->with($this->equalTo('Foobar'));
         $sender->expects($this->once())
-                ->method('sendCookie')
-                ->with($this->equalTo('name'), $this->equalTo('value'));
+            ->method('sendCookie')
+            ->with($this->equalTo('name'), $this->equalTo('value'));
 
         $headers = new ResponseHeaders($sender);
         $headers->set('Expect', 'foo');

@@ -5,7 +5,7 @@ namespace Miny\Factory;
 class TestClass
 {
     private $constructor;
-    private $method   = array();
+    private $method = array();
     private $property = array();
 
     public function __construct()
@@ -40,15 +40,15 @@ class FactoryTest extends \PHPUnit_Framework_TestCase
     protected function setUp()
     {
         $this->parameters = $this->getMock('\Miny\Factory\ParameterContainer',
-                array('resolveLinks', 'offsetGet', 'offsetSet', 'offsetExists', 'offsetUnset'));
+            array('resolveLinks', 'offsetGet', 'offsetSet', 'offsetExists', 'offsetUnset'));
 
         $this->parameters->expects($this->any())
-                ->method('offsetGet')
-                ->will($this->returnArgument(0));
+            ->method('offsetGet')
+            ->will($this->returnArgument(0));
 
         $this->parameters->expects($this->any())
-                ->method('resolveLinks')
-                ->will($this->returnArgument(0));
+            ->method('resolveLinks')
+            ->will($this->returnArgument(0));
 
         $this->object = new Factory($this->parameters);
     }
@@ -63,17 +63,17 @@ class FactoryTest extends \PHPUnit_Framework_TestCase
     public function testArrayAccessInterface()
     {
         $this->parameters->expects($this->once())
-                ->method('offsetExists')
-                ->with($this->equalTo('something'))
-                ->will($this->returnValue(true));
+            ->method('offsetExists')
+            ->with($this->equalTo('something'))
+            ->will($this->returnValue(true));
 
         $this->parameters->expects($this->once())
-                ->method('offsetUnset')
-                ->with($this->equalTo('something'));
+            ->method('offsetUnset')
+            ->with($this->equalTo('something'));
 
         $this->parameters->expects($this->once())
-                ->method('offsetSet')
-                ->with($this->equalTo('something'), $this->equalTo('value'));
+            ->method('offsetSet')
+            ->with($this->equalTo('something'), $this->equalTo('value'));
 
         // The mock verifies that these get called once.
         $this->assertTrue(isset($this->object['something']));
@@ -137,7 +137,7 @@ class FactoryTest extends \PHPUnit_Framework_TestCase
         $this->assertEmpty($this->object->getBlueprints());
         $this->object->foo = 'bar';
         $this->object->bar = new Blueprint('baz');
-        $this->object->baz = function() {
+        $this->object->baz = function () {
 
         };
         $this->assertNotEmpty($this->object->getBlueprints());
@@ -151,7 +151,7 @@ class FactoryTest extends \PHPUnit_Framework_TestCase
         $class = new \stdClass;
 
         $this->object->foo = $class;
-        $this->object->bar = function() use($class) {
+        $this->object->bar = function () use ($class) {
             return $class;
         };
         $this->object->add('singleton', '\stdClass');
@@ -176,24 +176,24 @@ class FactoryTest extends \PHPUnit_Framework_TestCase
         $this->object->foo = $class;
 
         $this->object->add('bar', __NAMESPACE__ . '\TestClass')
-                ->setArguments('a', 'b')
-                ->addMethodCall('foo', 'foo_value')
-                ->addMethodCall('bar', 'bar_1', 'bar_2')
-                ->setProperty('a', '&foo')
-                ->setProperty('b', '@param')
-                ->setProperty('c', '\@param');
+            ->setArguments('a', 'b')
+            ->addMethodCall('foo', 'foo_value')
+            ->addMethodCall('bar', 'bar_1', 'bar_2')
+            ->setProperty('a', '&foo')
+            ->setProperty('b', '@param')
+            ->setProperty('c', '\@param');
 
         $this->object->add('baz', __NAMESPACE__ . '\TestClass')
-                ->setParent('bar');
+            ->setParent('bar');
 
         $this->object->add('foobar', __NAMESPACE__ . '\TestClass')
-                ->setParent('bar')
-                ->setArguments('c')
-                ->setProperty('foobar_blueprint', new Blueprint('\stdClass'))
-                ->addMethodCall('foobar_array', '&bar->constructor')
-                ->addMethodCall('foobar_callable', '*bar::property')
-                ->addMethodCall('foobar_method_call', '&bar::__get::constructor')
-                ->setProperty('resolved', '{@param}');
+            ->setParent('bar')
+            ->setArguments('c')
+            ->setProperty('foobar_blueprint', new Blueprint('\stdClass'))
+            ->addMethodCall('foobar_array', '&bar->constructor')
+            ->addMethodCall('foobar_callable', '*bar::property')
+            ->addMethodCall('foobar_method_call', '&bar::__get::constructor')
+            ->setProperty('resolved', '{@param}');
 
         foreach (array('bar', 'baz') as $name) {
             $obj = $this->object->$name;
@@ -232,14 +232,14 @@ class FactoryTest extends \PHPUnit_Framework_TestCase
         $this->object->foo = new \stdClass;
 
         $this->object->add('bar', '\stdClass')
-                ->setProperty('foo', '&foo::bar::baz');
+            ->setProperty('foo', '&foo::bar::baz');
         $this->object->bar;
     }
 
     public function testReplace()
     {
         $this->object->foo = '\stdClass';
-        $old = $this->object->replace('foo', null);
+        $old               = $this->object->replace('foo', null);
 
         $this->assertNull($old);
 

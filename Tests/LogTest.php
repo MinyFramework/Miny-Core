@@ -20,7 +20,7 @@ class LogTest extends \PHPUnit_Framework_TestCase
      */
     protected function setUp()
     {
-        $tmp            = sys_get_temp_dir();
+        $tmp = sys_get_temp_dir();
         date_default_timezone_set('UTC');
         $this->log_file = $tmp . '/log_' . date('Y_m_d') . '.log';
         $this->object   = new Log($tmp, true);

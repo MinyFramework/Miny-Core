@@ -52,7 +52,7 @@ class BlueprintTest extends \PHPUnit_Framework_TestCase
         $this->assertEquals(array(
             array('method_a', array('arg_1', 'arg_2')),
             array('method_b', array('arg_1'))
-                ), $this->object->getMethodCalls());
+        ), $this->object->getMethodCalls());
     }
 
     /**

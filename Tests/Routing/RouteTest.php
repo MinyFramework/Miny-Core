@@ -10,15 +10,15 @@ class RouteTest extends \PHPUnit_Framework_TestCase
     protected function setUp()
     {
         $this->static_object  = new Route('path', 'get',
-                array(
-            'param_foo' => 'val_foo',
-            'param_bar' => 'val_bar',
-        ));
+            array(
+                'param_foo' => 'val_foo',
+                'param_bar' => 'val_bar',
+            ));
         $this->dynamic_object = new Route('path/:field', 'get',
-                array(
-            'param_foo' => 'val_foo',
-            'param_bar' => 'val_bar',
-        ));
+            array(
+                'param_foo' => 'val_foo',
+                'param_bar' => 'val_bar',
+            ));
     }
 
     /**
@@ -100,7 +100,7 @@ class RouteTest extends \PHPUnit_Framework_TestCase
         $this->assertEquals(array(
             'param_foo' => 'val_foo',
             'param_bar' => 'val_bar',
-                ), $route->getParameters());
+        ), $route->getParameters());
 
         $route->addParameters(array(
             'param_foobar' => 'val_foobar',
@@ -110,7 +110,7 @@ class RouteTest extends \PHPUnit_Framework_TestCase
             'param_foo'    => 'val_foo',
             'param_bar'    => 'some_other',
             'param_foobar' => 'val_foobar',
-                ), $route->getParameters());
+        ), $route->getParameters());
     }
 }
 

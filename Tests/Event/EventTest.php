@@ -33,7 +33,7 @@ class EventTest extends \PHPUnit_Framework_TestCase
 
     public function testResponse()
     {
-        $event    = new Event('test_event');
+        $event = new Event('test_event');
         //no response set
         $this->assertFalse($event->hasResponse());
         $this->assertNull($event->getResponse());

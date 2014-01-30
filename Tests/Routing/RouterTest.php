@@ -9,10 +9,10 @@ class RouterTest extends \PHPUnit_Framework_TestCase
     protected function setUp()
     {
         $this->object = new Router('prefix/', '.suffix',
-                array(
-            'default_parameter' => 'default_value',
-            'parameter'         => 'value'
-        ));
+            array(
+                'default_parameter' => 'default_value',
+                'parameter'         => 'value'
+            ));
     }
 
     public function testShortUrls()
@@ -68,7 +68,7 @@ class RouterTest extends \PHPUnit_Framework_TestCase
 
     public function testRouterShouldMatchPathsWithPrefixAndSuffixByDefault()
     {
-        $route = new Route('path/:param', NULL, array('parameter' => 'other_value'));
+        $route = new Route('path/:param', null, array('parameter' => 'other_value'));
         $this->object->route($route, 'name');
         $match = $this->object->match('prefix/path/5.suffix');
         $this->assertInstanceOf(__NAMESPACE__ . '\Match', $match);
@@ -77,7 +77,7 @@ class RouterTest extends \PHPUnit_Framework_TestCase
             'default_parameter' => 'default_value',
             'parameter'         => 'other_value',
             'param'             => 5
-                ), $match->getParameters());
+        ), $match->getParameters());
     }
 
     public function testRouterShouldBuildResourcesBeforeMatch()
@@ -91,7 +91,7 @@ class RouterTest extends \PHPUnit_Framework_TestCase
             'id'                => '5',
             'controller'        => 'foo_resources',
             'action'            => 'show'
-                ), $match->getParameters());
+        ), $match->getParameters());
     }
 
     public function testRouterShouldBuildResourcesBeforeGenerate()

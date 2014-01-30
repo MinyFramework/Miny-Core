@@ -10,7 +10,7 @@ class ResponseTest extends \PHPUnit_Framework_TestCase
     public function setUp()
     {
         $this->mock = $this->getMock('\Miny\HTTP\ResponseHeaders',
-                array('setCookie', 'getCookies', 'removeCookie', 'send', 'set', 'setRaw', 'has'), array(), 'mockHeaders');
+            array('setCookie', 'getCookies', 'removeCookie', 'send', 'set', 'setRaw', 'has'), array(), 'mockHeaders');
 
         $this->response = new Response($this->mock);
     }
@@ -100,12 +100,12 @@ class ResponseTest extends \PHPUnit_Framework_TestCase
     public function testSetHeaders()
     {
         $this->mock->expects($this->at(0))
-                ->method('set')
-                ->with($this->equalTo('Location'), $this->equalTo('url'));
+            ->method('set')
+            ->with($this->equalTo('Location'), $this->equalTo('url'));
 
         $this->mock->expects($this->at(1))
-                ->method('set')
-                ->with($this->equalTo('Location'), $this->equalTo('otherurl'));
+            ->method('set')
+            ->with($this->equalTo('Location'), $this->equalTo('otherurl'));
 
         $this->response->redirect('url');
         $this->assertEquals(301, $this->response->getCode());
@@ -119,13 +119,13 @@ class ResponseTest extends \PHPUnit_Framework_TestCase
         $this->assertEmpty($this->response->getCookies());
 
         $this->mock->expects($this->once())
-                ->method('setCookie')
-                ->with($this->equalTo('foo'), $this->equalTo('bar'));
+            ->method('setCookie')
+            ->with($this->equalTo('foo'), $this->equalTo('bar'));
 
         $this->mock->expects($this->once())
-                ->method('getCookies');
+            ->method('getCookies');
         $this->mock->expects($this->once())
-                ->method('removeCookie');
+            ->method('removeCookie');
 
         $this->response->setCookie('foo', 'bar');
         $this->response->getCookies();
@@ -134,15 +134,15 @@ class ResponseTest extends \PHPUnit_Framework_TestCase
 
     public function testContent()
     {
-        $this->assertEmpty((string) $this->response);
+        $this->assertEmpty((string)$this->response);
 
         $this->response->addContent('string');
 
-        $this->assertEquals('string', (string) $this->response);
+        $this->assertEquals('string', (string)$this->response);
 
         $this->response->clearContent();
 
-        $this->assertEmpty((string) $this->response);
+        $this->assertEmpty((string)$this->response);
     }
 
     public function testAddResponse()
@@ -153,7 +153,7 @@ class ResponseTest extends \PHPUnit_Framework_TestCase
         $response->addContent(' and another');
         $this->response->addResponse($response);
 
-        $this->assertEquals('string and another', (string) $this->response);
+        $this->assertEquals('string and another', (string)$this->response);
     }
 
     public function testSerialize()
@@ -163,7 +163,7 @@ class ResponseTest extends \PHPUnit_Framework_TestCase
 
         $response = unserialize(serialize($this->response));
 
-        $this->assertEquals('content', (string) $response);
+        $this->assertEquals('content', (string)$response);
         $this->assertTrue($response->isCode(301));
         $this->assertInstanceof('\Miny\HTTP\ResponseHeaders', $response->getHeaders());
     }
@@ -174,9 +174,9 @@ class ResponseTest extends \PHPUnit_Framework_TestCase
     public function testSend()
     {
         $this->mock->expects($this->exactly(2))
-                ->method('has')
-                ->with($this->equalTo('location'))
-                ->will($this->onConsecutiveCalls(true, false));
+            ->method('has')
+            ->with($this->equalTo('location'))
+            ->will($this->onConsecutiveCalls(true, false));
 
         $this->response->addContent('content');
 
@@ -185,15 +185,15 @@ class ResponseTest extends \PHPUnit_Framework_TestCase
         $this->assertEmpty(ob_get_clean());
 
         $this->mock->expects($this->once())
-                ->method('setRaw')
-                ->with($this->equalTo('HTTP/1.1 200: OK'));
+            ->method('setRaw')
+            ->with($this->equalTo('HTTP/1.1 200: OK'));
 
         $this->mock->expects($this->once())
-                ->method('setCookie')
-                ->with($this->equalTo('foo'), $this->equalTo('bar'));
+            ->method('setCookie')
+            ->with($this->equalTo('foo'), $this->equalTo('bar'));
 
         $this->mock->expects($this->once())
-                ->method('send');
+            ->method('send');
 
         $this->response->setCookie('foo', 'bar');
 

@@ -8,7 +8,7 @@ class RouteGeneratorTest extends \PHPUnit_Framework_TestCase
 
     protected function setUp()
     {
-        $collection   = new RouteCollection;
+        $collection = new RouteCollection;
         $collection->addRoute(new Route('path/:parameter/:other_parameter'), 'route');
         $collection->addRoute(new Route('?path/:parameter'), 'other_route');
         $this->collection = $collection;
