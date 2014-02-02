@@ -58,7 +58,7 @@ class Application extends BaseApplication
         $factory->add('session', '\Miny\HTTP\Session')
             ->addMethodCall('open');
         $factory->add('response', '\Miny\HTTP\Response');
-        $factory->add('dispatcher', '\Miny\HTTP\Dispatcher')
+        $factory->add('dispatcher', '\Miny\Application\Dispatcher')
             ->setArguments($factory);
     }
 
