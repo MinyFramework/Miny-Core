@@ -12,7 +12,6 @@ namespace Miny\Application;
 use Miny\Application\Handlers\ApplicationEventHandlers;
 use Miny\Factory\Factory;
 use Miny\HTTP\Request;
-use Miny\HTTP\Response;
 use Miny\Routing\Resources;
 use Miny\Routing\Route;
 use UnexpectedValueException;
@@ -23,24 +22,32 @@ class Application extends BaseApplication
     protected function setDefaultParameters()
     {
         parent::setDefaultParameters();
-        $this->getFactory()->getParameters()->addParameters(array(
-            'router'      => array(
-                'prefix'             => '/',
-                'suffix'             => '',
-                'default_parameters' => array(),
-                'exception_paths'    => array(),
-                'short_urls'         => false
-            ),
-            'controllers' => array(
-                'namespace' => '\Application\Controllers\\'
+        $this->getFactory()->getParameters()->addParameters(
+            array(
+                'router'      => array(
+                    'prefix'             => '/',
+                    'suffix'             => '',
+                    'default_parameters' => array(),
+                    'exception_paths'    => array(),
+                    'short_urls'         => false
+                ),
+                'controllers' => array(
+                    'namespace' => '\Application\Controllers\\'
+                )
             )
-        ));
+        );
     }
 
     protected function registerDefaultServices(Factory $factory)
     {
         parent::registerDefaultServices($factory);
-        $this->registerEventHandlers($factory);
+
+        $event_handlers = new ApplicationEventHandlers($factory, $factory->get('log'));
+        $factory->getBlueprint('events')
+            ->addMethodCall('register', 'filter_request', array($event_handlers, 'logRequest'))
+            ->addMethodCall('register', 'filter_request', array($event_handlers, 'filterRoutes'))
+            ->addMethodCall('register', 'filter_response', array($event_handlers, 'setContentType'))
+            ->addMethodCall('register', 'filter_response', array($event_handlers, 'logResponse'));
 
         $factory->add('controllers', '\Miny\Controller\ControllerCollection')
             ->setArguments($this, '{@controllers:namespace}');
@@ -51,24 +58,17 @@ class Application extends BaseApplication
         $factory->add('session', '\Miny\HTTP\Session')
             ->addMethodCall('open');
         $factory->add('response', '\Miny\HTTP\Response');
-    }
-
-    protected function registerEventHandlers(Factory $factory)
-    {
-        $event_handlers = new ApplicationEventHandlers($factory, $factory->get('log'));
-        $factory->getBlueprint('events')
-            ->addMethodCall('register', 'filter_request', array($event_handlers, 'logRequest'))
-            ->addMethodCall('register', 'filter_request', array($event_handlers, 'filterRoutes'))
-            ->addMethodCall('register', 'filter_response', array($event_handlers, 'setContentType'))
-            ->addMethodCall('register', 'filter_response', array($event_handlers, 'logResponse'));
+        $factory->add('dispatcher', '\Miny\HTTP\Dispatcher')
+            ->setArguments($factory);
     }
 
     protected function onRun()
     {
-        if (!$this->getFactory()->get('router')->hasRoute('root')) {
+        $factory = $this->getFactory();
+        if (!$factory->get('router')->hasRoute('root')) {
             $this->root('index');
         }
-        $this->dispatch(Request::getGlobal())->send();
+        $factory->get('dispatcher')->dispatch(Request::getGlobal())->send();
     }
 
     /**
@@ -81,53 +81,8 @@ class Application extends BaseApplication
     public function root($controller, array $parameters = array())
     {
         $parameters['controller'] = $this->registerController($controller);
+
         return $this->getFactory()->get('router')->root($parameters);
-    }
-
-    /**
-     *
-     * @param Request $request
-     *
-     * @return Response
-     */
-    public function dispatch(Request $request)
-    {
-        $factory = $this->getFactory();
-        $events  = $factory->get('events');
-
-        $old_request = $factory->replace('request', $request);
-        $event       = $events->raiseEvent('filter_request', $request);
-
-        $filter = true;
-        if ($event->hasResponse()) {
-            $rsp = $event->getResponse();
-            if ($rsp instanceof Response) {
-                $response = $rsp;
-            } elseif ($rsp instanceof Request && $rsp !== $request) {
-                $response = $this->dispatch($rsp);
-                $filter   = false;
-            }
-        }
-
-        ob_start();
-        if (!isset($response)) {
-            $old_response          = $factory->replace('response');
-            $controller_collection = $factory->get('controllers');
-            $controller            = $request->get['controller'];
-
-            $controller_response = $controller_collection->resolve($controller, $request, $factory->get('response'));
-            $response            = $old_response ? $factory->replace('response', $old_response) : $controller_response;
-        }
-
-        if ($filter) {
-            $events->raiseEvent('filter_response', $request, $response);
-        }
-        $response->addContent(ob_get_clean());
-
-        if ($old_request) {
-            $factory->replace('request', $old_request);
-        }
-        return $response;
     }
 
     /**
@@ -141,6 +96,7 @@ class Application extends BaseApplication
     public function resource($name, $controller = null, array $parameters = array())
     {
         $parameters['controller'] = $this->registerController($controller ? : $name, $name);
+
         return $this->getFactory()->get('router')->resource($name, $parameters);
     }
 
@@ -160,6 +116,7 @@ class Application extends BaseApplication
     public function resources($name, $controller = null, array $parameters = array())
     {
         $parameters['controller'] = $this->registerController($controller ? : $name, $name);
+
         return $this->getFactory()->get('router')->resources($name, $parameters);
     }
 
@@ -192,6 +149,7 @@ class Application extends BaseApplication
         $parameters['controller'] = $this->registerController($controller);
 
         $route = new Route($path, $method, $parameters);
+
         return $this->getFactory()->get('router')->route($route, $name);
     }
 
