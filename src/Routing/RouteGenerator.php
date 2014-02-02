@@ -22,6 +22,7 @@ class RouteGenerator
 
     /**
      * @param RouteCollection $routes
+     * @param bool            $short_urls
      */
     public function __construct(RouteCollection $routes, $short_urls = true)
     {
