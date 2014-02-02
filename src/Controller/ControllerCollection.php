@@ -68,7 +68,7 @@ class ControllerCollection
     /**
      * Loads and runs the requested controller.
      * This method looks for the registered class.
-     * If a string was registered it loads the controller from factory or instantiates it by its classname.
+     * If a string was registered it loads the controller from factory or instantiates it by its class name.
      * This method also raises two events (onControllerLoaded and onControllerFinished) that allow modifying
      * the behaviour of the controller.
      *
@@ -131,16 +131,28 @@ class ControllerCollection
         if ($factory->has($class . '_controller')) {
             return $factory->get($class . '_controller');
         }
+        $class      = $this->resolveControllerClassname($class);
+        $controller = new $class($this->application);
+        if (!$controller instanceof BaseController) {
+            throw new UnexpectedValueException('Class does not extend BaseController: ' . $class);
+        }
+        return $controller;
+    }
+
+    /**
+     * @param $class
+     *
+     * @return string
+     * @throws \UnexpectedValueException
+     */
+    private function resolveControllerClassname($class)
+    {
         if (!class_exists($class)) {
             $class = $this->controller_namespace . ucfirst($class) . 'Controller';
             if (!class_exists($class)) {
                 throw new UnexpectedValueException('Class not exists: ' . $class);
             }
         }
-        $controller = new $class($this->application);
-        if (!$controller instanceof BaseController) {
-            throw new UnexpectedValueException('Class does not extend BaseController: ' . $class);
-        }
-        return $controller;
+        return $class;
     }
 }
