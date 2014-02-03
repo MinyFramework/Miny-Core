@@ -20,6 +20,18 @@ use OutOfBoundsException;
  */
 class ArrayUtils
 {
+    public static function isArrayType($array)
+    {
+        if (is_array($array)) {
+            return true;
+        }
+        if ($array instanceof ArrayAccess) {
+            return true;
+        }
+
+        return false;
+    }
+
     private static function arrayHasKey($array, $key)
     {
         if (is_array($array)) {
@@ -175,7 +187,7 @@ class ArrayUtils
     {
         foreach ($array2 as $key => $value) {
             if (isset($array1[$key])) {
-                if (is_array($array1[$key]) && is_array($value)) {
+                if (static::isArrayType($array1[$key]) && static::isArrayType($value)) {
                     $array1[$key] = self::merge($array1[$key], $value, $overwrite);
                 } elseif ($overwrite) {
                     $array1[$key] = $value;

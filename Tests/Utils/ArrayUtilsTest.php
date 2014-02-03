@@ -12,9 +12,9 @@ class ArrayUtilsTest extends PHPUnit_Framework_TestCase
     protected function setUp()
     {
         $this->array = array(
-            'key_a' => array(
-                'subkey_a' => 'value_a'
-            ),
+            'key_a' => new \ArrayObject(array(
+                    'subkey_a' => 'value_a'
+                )),
             'key_b' => 'value',
             6       => 'six'
         );
@@ -96,9 +96,9 @@ class ArrayUtilsTest extends PHPUnit_Framework_TestCase
     public function testMergeNoOverwrite()
     {
         $expected = array(
-            'key_a' => array(
-                'subkey_a' => 'value_a'
-            ),
+            'key_a' => new \ArrayObject(array(
+                    'subkey_a' => 'value_a'
+                )),
             'key_b' => 'value',
             'key_c' => 'value_c',
             6       => 'six'
