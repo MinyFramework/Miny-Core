@@ -20,6 +20,16 @@ use OutOfBoundsException;
  */
 class ArrayUtils
 {
+    private static function arrayHasKey($array, $key)
+    {
+        if (is_array($array)) {
+            return array_key_exists($key, $array);
+        } elseif ($array instanceof ArrayAccess) {
+            return isset($array[$key]);
+        } else {
+            return false;
+        }
+    }
 
     /**
      * Determines whether the value represented by $path exists in $array.
@@ -39,11 +49,12 @@ class ArrayUtils
             $parts = explode(':', $parts);
         }
         foreach ($parts as $k) {
-            if (!is_array($array) || !array_key_exists($k, $array)) {
+            if (!static::arrayHasKey($array, $k)) {
                 return false;
             }
             $array = $array[$k];
         }
+
         return true;
     }
 
@@ -67,11 +78,12 @@ class ArrayUtils
             $parts = explode(':', $parts);
         }
         foreach ($parts as $k) {
-            if (!array_key_exists($k, $array)) {
+            if (!static::arrayHasKey($array, $k)) {
                 return $default;
             }
             $array = $array[$k];
         }
+
         return $array;
     }
 
@@ -92,7 +104,7 @@ class ArrayUtils
             $parts = explode(':', $parts);
         }
         foreach ($parts as $k) {
-            if (!array_key_exists($k, $array)) {
+            if (!static::arrayHasKey($array, $k)) {
                 if ($create) {
                     $array[$k] = array();
                 } else {
@@ -101,6 +113,7 @@ class ArrayUtils
             }
             $array = & $array[$k];
         }
+
         return $array;
     }
 
@@ -120,7 +133,7 @@ class ArrayUtils
             if ($k === null || $k === '') {
                 $k = count($array);
             }
-            if (!array_key_exists($k, $array)) {
+            if (!static::arrayHasKey($array, $k)) {
                 $array[$k] = array();
             }
             $array = & $array[$k];
@@ -141,7 +154,7 @@ class ArrayUtils
         }
         $last_key = array_pop($parts);
         foreach ($parts as $k) {
-            if (!array_key_exists($k, $array)) {
+            if (!static::arrayHasKey($array, $k)) {
                 return;
             }
             $array = & $array[$k];
@@ -171,6 +184,7 @@ class ArrayUtils
                 $array1[$key] = $value;
             }
         }
+
         return $array1;
     }
 
@@ -179,6 +193,7 @@ class ArrayUtils
         if (is_array($data)) {
             return implode($glue, $data);
         }
+
         return $data;
     }
 }
