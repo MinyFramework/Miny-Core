@@ -11,6 +11,7 @@ namespace Miny\Application;
 
 use Miny\Controller\ControllerCollection;
 use Miny\Event\EventDispatcher;
+use Miny\Factory\Container;
 use Miny\Factory\Factory;
 use Miny\HTTP\Request;
 use Miny\HTTP\Response;
@@ -23,7 +24,7 @@ class Dispatcher
     private $controllerCollection;
 
     /**
-     * @var Factory
+     * @var Container
      */
     private $factory;
 
@@ -33,11 +34,11 @@ class Dispatcher
     private $events;
 
     /**
-     * @param Factory              $factory
+     * @param Container            $factory
      * @param EventDispatcher      $events
      * @param ControllerCollection $controllers
      */
-    public function __construct(Factory $factory, EventDispatcher $events, ControllerCollection $controllers)
+    public function __construct(Container $factory, EventDispatcher $events, ControllerCollection $controllers)
     {
         $this->factory              = $factory;
         $this->events               = $events;
@@ -51,8 +52,8 @@ class Dispatcher
      */
     public function dispatch(Request $request)
     {
-        $old_request = $this->factory->replace('request', $request);
-        $event       = $this->events->raiseEvent('filter_request', $request);
+        $oldRequest = $this->factory->setInstance($request);
+        $event      = $this->events->raiseEvent('filter_request', $request);
 
         $filter = true;
         if ($event->hasResponse()) {
@@ -67,13 +68,14 @@ class Dispatcher
 
         ob_start();
         if (!isset($response)) {
-            $oldResponse = $this->factory->replace('response');
-            $newResponse = $this->factory->get('response');
-            $controller  = $request->get['controller'];
+            $newResponse = $this->factory->get('\Miny\HTTP\Response', array(), true);
+            $oldResponse = $this->factory->setInstance($newResponse);
+
+            $controller = $request->get['controller'];
 
             $controller_response = $this->controllerCollection->resolve($controller, $request, $newResponse);
             if ($oldResponse) {
-                $response = $this->factory->replace('response', $oldResponse);
+                $response = $this->factory->setInstance($oldResponse);
             } else {
                 $response = $controller_response;
             }
@@ -84,8 +86,8 @@ class Dispatcher
         }
         $response->addContent(ob_get_clean());
 
-        if ($old_request) {
-            $this->factory->replace('request', $old_request);
+        if ($oldRequest) {
+            $this->factory->setInstance($oldRequest);
         }
 
         return $response;

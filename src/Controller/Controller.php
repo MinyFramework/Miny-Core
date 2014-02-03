@@ -52,7 +52,7 @@ abstract class Controller extends BaseController
             'removeHeader' => 'remove'
         ));
 
-        $router = $this->app->getFactory()->get('router');
+        $router = $this->app->getContainer()->get('\Miny\Routing\Router');
         $this->addMethod('redirectRoute', function ($route, array $params = array()) use ($response, $router) {
             $path = $router->generate($route, $params);
             $response->redirect($path);

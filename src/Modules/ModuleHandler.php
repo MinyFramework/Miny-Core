@@ -10,6 +10,8 @@
 namespace Miny\Modules;
 
 use Miny\Application\BaseApplication;
+use Miny\Event\EventDispatcher;
+use Miny\Factory\Container;
 use Miny\Log\Log;
 use Miny\Modules\Exceptions\BadModuleException;
 
@@ -38,26 +40,33 @@ class ModuleHandler
     private $log;
 
     /**
+     * @var Container
+     */
+    private $container;
+
+    /**
+     * @var EventDispatcher
+     */
+    private $events;
+
+    /**
      * @param BaseApplication $app
+     * @param Container       $container
+     * @param EventDispatcher $events
      * @param Log             $log
      */
-    public function __construct(BaseApplication $app, Log $log)
+    public function __construct(BaseApplication $app, Container $container, EventDispatcher $events, Log $log)
     {
         $this->application = $app;
         $this->log         = $log;
+        $this->container   = $container;
+        $this->events      = $events;
 
         $this->loaded  = array();
         $this->modules = array();
 
-        $app->getFactory()->getBlueprint('events')
-            ->addMethodCall('register', 'before_run', array($this, 'processConditionalRunnables'))
-            ->addMethodCall('register', 'before_run', array($this, 'registerEventHandlers'));
-    }
-
-    private function log($message)
-    {
-        $args    = array_slice(func_get_args(), 1);
-        $this->log->write(Log::DEBUG, 'ModuleHandler', $message, $args);
+        $events->register('before_run', array($this, 'processConditionalRunnables'));
+        $events->register('before_run', array($this, 'registerEventHandlers'));
     }
 
     public function initialize()
@@ -79,9 +88,9 @@ class ModuleHandler
         }
         $this->loaded[] = $module;
 
-        $this->log('Loading module: %s', $module);
+        $this->log->write(Log::DEBUG, 'ModuleHandler', 'Loading module: %s', $module);
         $class        = sprintf(self::$module_class_format, $module);
-        $module_class = new $class($this->application);
+        $module_class = $this->container->get($class);
         if (!$module_class instanceof Module) {
             throw new BadModuleException(sprintf('Module descriptor %s does not extend Module class.', $class));
         }
@@ -104,16 +113,14 @@ class ModuleHandler
 
     public function registerEventHandlers()
     {
-        $factory = $this->application->getFactory();
-        $events  = $factory->get('events');
         foreach ($this->modules as $module) {
             foreach ($module->eventHandlers() as $event_name => $handler) {
                 if (is_array($handler) && !is_callable($handler)) {
                     foreach ($handler as $callback) {
-                        $events->register($event_name, $callback);
+                        $this->events->register($event_name, $callback);
                     }
                 } else {
-                    $events->register($event_name, $handler);
+                    $this->events->register($event_name, $handler);
                 }
             }
         }

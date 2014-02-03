@@ -12,6 +12,8 @@ namespace Miny\Controller;
 use Closure;
 use InvalidArgumentException;
 use Miny\Application\Application;
+use Miny\Event\EventDispatcher;
+use Miny\Factory\Container;
 use Miny\HTTP\Request;
 use Miny\HTTP\Response;
 use UnexpectedValueException;
@@ -19,19 +21,25 @@ use UnexpectedValueException;
 class ControllerCollection
 {
     /**
+     * @var EventDispatcher
+     */
+    private $eventDispatcher;
+
+    /**
      * @var (BaseController|Closure|string)[]
      */
     private $controllers = array();
     private $controller_namespace;
 
     /**
-     * @var Application
+     * @var Container
      */
-    private $application;
+    private $container;
 
-    public function __construct(Application $application, $ns)
+    public function __construct(Container $container, EventDispatcher $eventDispatcher, $ns)
     {
-        $this->application          = $application;
+        $this->container          = $container;
+        $this->eventDispatcher      = $eventDispatcher;
         $this->controller_namespace = $ns;
     }
 
@@ -51,9 +59,10 @@ class ControllerCollection
             throw new InvalidArgumentException('Controller name must be a string');
         }
         if (!$controller instanceof Closure && !$controller instanceof BaseController && !is_string($controller)) {
-            throw new InvalidArgumentException(sprintf('Invalid controller: %s (%s)', $name, gettype($controller)));
+            throw new InvalidArgumentException(sprintf('Controller %s is invalid.', $name));
         }
         $this->controllers[$name] = $controller;
+
         return $name;
     }
 
@@ -84,13 +93,11 @@ class ControllerCollection
         $controller = $this->getController($class);
         $action     = $request->get('action');
 
-        $event_handler = $this->application->getFactory()->get('events');
-
         if (empty($action) && $controller instanceof Controller) {
             $action = $controller->getDefaultAction();
         }
 
-        $event = $event_handler->raiseEvent('onControllerLoaded', $controller, $action);
+        $event = $this->eventDispatcher->raiseEvent('onControllerLoaded', $controller, $action);
 
         if ($event->isHandled() && $event->hasResponse() && $event->getResponse() instanceof Response) {
             return $event->getResponse();
@@ -104,7 +111,8 @@ class ControllerCollection
             throw new InvalidArgumentException('Invalid controller: ' . $class);
         }
 
-        $event_handler->raiseEvent('onControllerFinished', $controller, $action, $retval);
+        $this->eventDispatcher->raiseEvent('onControllerFinished', $controller, $action, $retval);
+
         return $response;
     }
 
@@ -127,15 +135,13 @@ class ControllerCollection
                 return $class;
             }
         }
-        $factory = $this->application->getFactory();
-        if ($factory->has($class . '_controller')) {
-            return $factory->get($class . '_controller');
-        }
-        $class      = $this->resolveControllerClassname($class);
-        $controller = new $class($this->application);
+        $class = $this->checkControllerClassName($class);
+
+        $controller = $this->container->get($class);
         if (!$controller instanceof BaseController) {
             throw new UnexpectedValueException('Class does not extend BaseController: ' . $class);
         }
+
         return $controller;
     }
 
@@ -145,14 +151,16 @@ class ControllerCollection
      * @return string
      * @throws \UnexpectedValueException
      */
-    private function resolveControllerClassname($class)
+    private function checkControllerClassName($class)
     {
-        if (!class_exists($class)) {
-            $class = $this->controller_namespace . ucfirst($class) . 'Controller';
-            if (!class_exists($class)) {
-                throw new UnexpectedValueException('Class not exists: ' . $class);
-            }
+        if (class_exists($class)) {
+            return $class;
         }
+        $class = $this->controller_namespace . ucfirst($class) . 'Controller';
+        if (!class_exists($class)) {
+            throw new UnexpectedValueException('Class not exists: ' . $class);
+        }
+
         return $class;
     }
 }

@@ -40,7 +40,7 @@ abstract class Module
             }
             include_once $file;
         }
-        $parameters = $app->getFactory()->getParameters();
+        $parameters = $app->getContainer()->getParameters();
         $parameters->addParameters($this->defaultConfiguration(), false);
     }
 

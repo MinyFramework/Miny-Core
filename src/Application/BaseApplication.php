@@ -11,10 +11,12 @@ namespace Miny\Application;
 
 use InvalidArgumentException;
 use Miny\AutoLoader;
-use Miny\Factory\Factory;
+use Miny\Event\EventDispatcher;
+use Miny\Factory\Container;
+use Miny\Factory\LinkResolver;
+use Miny\Factory\ParameterContainer;
 use Miny\Log\FileWriter;
 use Miny\Log\Log;
-use Miny\Shutdown\ShutdownService;
 use UnexpectedValueException;
 
 abstract class BaseApplication
@@ -25,12 +27,17 @@ abstract class BaseApplication
     const ENV_COMMON = 7;
 
     /**
+     * @var ParameterContainer
+     */
+    private $parameterContainer;
+
+    /**
      * @var int
      */
     private $environment;
 
     /**
-     * @var Factory
+     * @var Container
      */
     private $factory;
 
@@ -58,7 +65,7 @@ abstract class BaseApplication
                 '\Modules'     => './vendor/miny/Modules'
             ));
         }
-        $factory = new Factory(array(
+        $parameterContainer = new ParameterContainer(array(
             'default_timezone' => 'UTC',
             'root'             => realpath('.'),
             'profile'          => $this->isDeveloperEnvironment(),
@@ -68,24 +75,32 @@ abstract class BaseApplication
                 'flush_limit'        => 100
             ),
         ));
-        $factory->setInstance('autoloader', $autoloader);
-        $this->factory = $factory;
+
+        $ioc = new Container(new LinkResolver($parameterContainer));
+        $ioc->setInstance($autoloader);
+
+        $this->parameterContainer = $parameterContainer;
+        $this->factory            = $ioc;
 
         $this->setDefaultParameters();
         $this->loadConfigFiles();
-        $this->registerDefaultServices($factory);
+        $this->registerDefaultServices($ioc);
 
         //Log start of execution
         if (isset($warning)) {
-            $factory->get('log')->write(Log::WARNING, 'Miny', $warning);
+            $ioc->get('\Miny\Log\Log')->write(Log::WARNING, 'Miny', $warning);
         }
-        $factory->get('log')->write(Log::INFO, 'Miny', 'Starting Miny in %s environment', $environment_names[$environment]);
+        $ioc->get('\Miny\Log\Log')->write(
+            Log::INFO,
+            'Miny',
+            'Starting Miny in %s environment',
+            $environment_names[$environment]
+        );
 
         //Load modules
-        $parameters = $factory->getParameters();
-        if (isset($parameters['modules']) && is_array($parameters['modules'])) {
-            $module_handler = $factory->get('module_handler');
-            foreach ($parameters['modules'] as $module => $parameters) {
+        if (isset($parameterContainer['modules']) && is_array($parameterContainer['modules'])) {
+            $module_handler = $ioc->get('\Miny\Modules\ModuleHandler');
+            foreach ($parameterContainer['modules'] as $module => $parameters) {
                 if (is_int($module) && !is_array($parameters)) {
                     $module     = $parameters;
                     $parameters = array();
@@ -157,48 +172,61 @@ abstract class BaseApplication
         if (!is_array($config)) {
             throw new UnexpectedValueException('Invalid configuration file: ' . $file);
         }
-        $this->factory->getParameters()->addParameters($config);
+        $this->parameterContainer->addParameters($config);
     }
 
-    protected function registerDefaultServices(Factory $factory)
+    protected function registerDefaultServices(Container $factory)
     {
-        $factory->setInstance('app', $this);
+        $factory->setInstance($this);
 
-        $shutdown = new ShutdownService;
-        $log      = new Log($factory['log']['flush_limit']);
-
+        $shutdown = $factory->get('\Miny\Shutdown\ShutdownService');
+        $log      = $factory->get('\Miny\Log\Log', array('@log:flush_limit'));
         $log->registerShutdownService($shutdown, 1000);
-        if ($factory['log']['enable_file_writer']) {
+        if ($this->parameterContainer['log']['enable_file_writer']) {
             $log->registerWriter(new FileWriter($factory['log']['path']));
         }
-        $shutdown->register(function () use ($log) {
-            $log->write(Log::INFO, 'Miny', "End of execution.\n");
-        }, 999);
+        $shutdown->register(
+            function () use ($log) {
+                $log->write(Log::INFO, 'Miny', "End of execution.\n");
+            },
+            999
+        );
 
-        if ($factory['profile']) {
+        if ($this->parameterContainer['profile']) {
             $profile = $log->startProfiling('Miny', 'Application execution');
-            $shutdown->register(function () use ($profile) {
-                $profile->stop();
-            }, 998);
+            $shutdown->register(
+                function () use ($profile) {
+                    $profile->stop();
+                },
+                998
+            );
         }
 
-        $factory->log      = $log;
-        $factory->shutdown = $shutdown;
-
-        $factory->add('error_handlers', '\Miny\Application\Handlers\ErrorHandlers')
-            ->setArguments('&log');
-        $factory->add('events', '\Miny\Event\EventDispatcher')
-            ->addMethodCall('register', 'uncaught_exception', '*error_handlers::logException');
-        $factory->add('module_handler', '\Miny\Modules\ModuleHandler')
-            ->setArguments('&app', '&log');
+        $factory->addCallback(
+            '\Miny\Event\EventDispatcher',
+            function (EventDispatcher $events, Container $container) {
+                $events->register(
+                    'uncaught_exception',
+                    array($container->get('\Miny\Application\Handlers\ErrorHandlers'), 'logException')
+                );
+            }
+        );
     }
 
     /**
-     * @return Factory
+     * @return Container
      */
-    public function getFactory()
+    public function getContainer()
     {
         return $this->factory;
+    }
+
+    /**
+     * @return ParameterContainer
+     */
+    public function getParameterContainer()
+    {
+        return $this->parameterContainer;
     }
 
     /**
@@ -230,13 +258,16 @@ abstract class BaseApplication
      */
     public function run()
     {
-        $event = $this->factory->get('events');
+        $event = $this->factory->get('\Miny\Event\EventDispatcher');
 
         date_default_timezone_set($this->factory['default_timezone']);
         $event->raiseEvent('before_run');
-        $this->factory->get('shutdown')->register(function () use ($event) {
-            $event->raiseEvent('shutdown');
-        }, 0);
+        $this->factory->get('\Miny\Shutdown\ShutdownService')->register(
+            function () use ($event) {
+                $event->raiseEvent('shutdown');
+            },
+            0
+        );
         $this->onRun();
     }
 

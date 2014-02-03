@@ -36,6 +36,7 @@ class Router extends RouteCollection
      * @param string $prefix
      * @param string $suffix
      * @param array  $parameters
+     * @param bool   $short_urls
      */
     public function __construct($prefix = null, $suffix = null, array $parameters = array(), $short_urls = true)
     {
