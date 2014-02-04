@@ -67,6 +67,7 @@ class Dispatcher
 
         ob_start();
         if (!isset($response)) {
+            /** @var $newResponse Response */
             $newResponse = $this->factory->get('\Miny\HTTP\Response', array(), true);
             $oldResponse = $this->factory->setInstance($newResponse);
 

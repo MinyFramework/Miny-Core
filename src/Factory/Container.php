@@ -1,5 +1,12 @@
 <?php
 
+/**
+ * This file is part of the Miny framework.
+ * (c) Dániel Buga <daniel@bugadani.hu>
+ *
+ * For licensing information see the LICENSE file.
+ */
+
 namespace Miny\Factory;
 
 use Closure;
@@ -57,6 +64,18 @@ class Container
     {
         $abstract                 = ltrim($abstract, '\\');
         $this->aliases[$abstract] = array($concrete ? : $abstract, $parameters);
+    }
+
+    /**
+     * @param string $concrete
+     */
+    public function addConstructorArguments($concrete /*, ...$parameters */)
+    {
+        if (func_num_args() === 1) {
+            return;
+        }
+        $parameters = array_slice(func_get_args(), 1);
+        $this->addAlias($concrete, null, $parameters);
     }
 
     public function addCallback($concrete, $callback)
@@ -126,6 +145,7 @@ class Container
     {
         $abstract = ltrim($abstract, '\\');
 
+        // try to find the constructor arguments for the most concrete definition
         if (isset($this->aliases[$abstract])) {
             do {
                 list($concrete, $registeredParameters) = $this->aliases[$abstract];

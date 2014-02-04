@@ -9,11 +9,27 @@
 
 namespace Miny\Controller;
 
+use Miny\Factory\ParameterContainer;
 use Miny\HTTP\Request;
 use Miny\HTTP\Response;
+use Miny\Routing\Router;
 
 abstract class Controller extends BaseController
 {
+    /**
+     * @var Router
+     */
+    private $router;
+
+    /**
+     * @param Router             $router
+     * @param ParameterContainer $parameterContainer
+     */
+    public function __construct(Router $router, ParameterContainer $parameterContainer)
+    {
+        $this->router = $router;
+        parent::__construct($parameterContainer);
+    }
 
     /**
      * @return string The default action to be executed when the request does not specify any.
@@ -42,21 +58,32 @@ abstract class Controller extends BaseController
      */
     public function run($action, Request $request, Response $response)
     {
-        $this->addMethods($response, array(
-            'setCode', 'redirect', 'getHeaders',
-            'cookie' => 'setCookie'
-        ));
-        $this->addMethods($response->getHeaders(), array(
-            'header'       => 'set',
-            'hasHeader'    => 'has',
-            'removeHeader' => 'remove'
-        ));
+        $this->addMethods(
+            $response,
+            array(
+                'setCode',
+                'redirect',
+                'getHeaders',
+                'cookie' => 'setCookie'
+            )
+        );
+        $this->addMethods(
+            $response->getHeaders(),
+            array(
+                'header'       => 'set',
+                'hasHeader'    => 'has',
+                'removeHeader' => 'remove'
+            )
+        );
 
-        $router = $this->app->getContainer()->get('\Miny\Routing\Router');
-        $this->addMethod('redirectRoute', function ($route, array $params = array()) use ($response, $router) {
-            $path = $router->generate($route, $params);
-            $response->redirect($path);
-        });
+        $router = $this->router;
+        $this->addMethod(
+            'redirectRoute',
+            function ($route, array $params = array()) use ($response, $router) {
+                $path = $router->generate($route, $params);
+                $response->redirect($path);
+            }
+        );
 
         return $this->{$action . 'Action'}($request, $response);
     }

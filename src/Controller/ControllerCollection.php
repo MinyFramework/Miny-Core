@@ -35,11 +35,16 @@ class ControllerCollection
      */
     private $container;
 
-    public function __construct(Container $container, EventDispatcher $eventDispatcher, $ns)
+    /**
+     * @param string          $namespace
+     * @param Container       $container
+     * @param EventDispatcher $eventDispatcher
+     */
+    public function __construct($namespace, Container $container, EventDispatcher $eventDispatcher)
     {
         $this->container           = $container;
         $this->eventDispatcher     = $eventDispatcher;
-        $this->controllerNamespace = $ns;
+        $this->controllerNamespace = $namespace;
     }
 
     /**
@@ -84,7 +89,7 @@ class ControllerCollection
      * @param Request  $request
      * @param Response $response
      *
-     * @return \Miny\HTTP\Response
+     * @return Response
      * @throws InvalidArgumentException when the controller is not an instance of Controller or Closure
      */
     public function resolve($class, Request $request, Response $response)
@@ -118,8 +123,8 @@ class ControllerCollection
     /**
      * @param string $class
      *
-     * @throws \UnexpectedValueException
-     * @throws \InvalidArgumentException
+     * @throws UnexpectedValueException
+     * @throws InvalidArgumentException
      * @return BaseController|Closure
      */
     private function getController($class)
@@ -145,10 +150,10 @@ class ControllerCollection
     }
 
     /**
-     * @param $class
+     * @param string $class
      *
      * @return string
-     * @throws \UnexpectedValueException
+     * @throws UnexpectedValueException
      */
     private function checkControllerClassName($class)
     {

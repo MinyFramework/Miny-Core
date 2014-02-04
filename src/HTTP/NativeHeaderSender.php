@@ -12,11 +12,17 @@ namespace Miny\HTTP;
 class NativeHeaderSender extends AbstractHeaderSender
 {
 
+    /**
+     * @inheritdoc
+     */
     public function send($header)
     {
         header($header);
     }
 
+    /**
+     * @inheritdoc
+     */
     public function sendCookie($name, $value)
     {
         setcookie($name, $value);

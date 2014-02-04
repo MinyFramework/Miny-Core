@@ -1,5 +1,12 @@
 <?php
 
+/**
+ * This file is part of the Miny framework.
+ * (c) Dániel Buga <daniel@bugadani.hu>
+ *
+ * For licensing information see the LICENSE file.
+ */
+
 namespace Miny\Factory;
 
 class LinkResolver extends AbstractLinkResolver
@@ -18,6 +25,9 @@ class LinkResolver extends AbstractLinkResolver
         $this->parameterContainer = $parameterContainer;
     }
 
+    /**
+     * @inheritdoc
+     */
     public function resolveReferences($argument)
     {
         if (is_array($argument)) {

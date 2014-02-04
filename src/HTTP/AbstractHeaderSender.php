@@ -12,7 +12,14 @@ namespace Miny\HTTP;
 abstract class AbstractHeaderSender
 {
 
+    /**
+     * @param $header
+     */
     abstract public function send($header);
 
+    /**
+     * @param $name
+     * @param $value
+     */
     abstract public function sendCookie($name, $value);
 }

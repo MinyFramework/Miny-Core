@@ -11,20 +11,21 @@ namespace Miny\Controller;
 
 use Miny\Application\Application;
 use Miny\Extendable;
+use Miny\Factory\ParameterContainer;
 
 abstract class BaseController extends Extendable
 {
     /**
      * @var Application
      */
-    protected $app;
+    protected $container;
 
     /**
-     * @param Application $app The current application instance.
+     * @param ParameterContainer $container The current application configuration.
      */
-    public function __construct(Application $app)
+    public function __construct(ParameterContainer $container)
     {
-        $this->app = $app;
+        $this->container = $container;
         $this->init();
     }
 
@@ -35,8 +36,7 @@ abstract class BaseController extends Extendable
      */
     public function getConfig()
     {
-        $parameterContainer = $this->app->getParameterContainer();
-        return $parameterContainer->offsetGet(func_get_args());
+        return $this->container->offsetGet(func_get_args());
     }
 
     protected function init()

@@ -17,6 +17,7 @@ use Miny\Factory\LinkResolver;
 use Miny\Factory\ParameterContainer;
 use Miny\Log\FileWriter;
 use Miny\Log\Log;
+use Miny\Modules\ModuleHandler;
 use Miny\Shutdown\ShutdownService;
 use UnexpectedValueException;
 
@@ -45,9 +46,9 @@ abstract class BaseApplication
     /**
      *
      * @param int             $environment
-     * @param AutoLoader|null $autoloader
+     * @param AutoLoader|null $autoLoader
      */
-    public function __construct($environment = self::ENV_PROD, AutoLoader $autoloader = null)
+    public function __construct($environment = self::ENV_PROD, AutoLoader $autoLoader = null)
     {
         $environment_names = array(
             self::ENV_PROD => 'production',
@@ -60,8 +61,8 @@ abstract class BaseApplication
         }
         $this->environment = $environment;
 
-        if ($autoloader === null) {
-            $autoloader = new AutoLoader(array(
+        if ($autoLoader === null) {
+            $autoLoader = new AutoLoader(array(
                 '\Application' => '.',
                 '\Modules'     => './vendor/miny/Modules'
             ));
@@ -78,12 +79,13 @@ abstract class BaseApplication
         ));
 
         $ioc = new Container(new LinkResolver($parameterContainer));
-        $ioc->setInstance($autoloader);
+        $ioc->setInstance($autoLoader);
+        $ioc->setInstance($parameterContainer);
 
         $this->parameterContainer = $parameterContainer;
         $this->factory            = $ioc;
 
-        $this->setDefaultParameters();
+        $this->setDefaultParameters($parameterContainer);
         $this->loadConfigFiles();
         $this->registerDefaultServices($ioc);
 
@@ -100,39 +102,32 @@ abstract class BaseApplication
 
         //Load modules
         if (isset($parameterContainer['modules']) && is_array($parameterContainer['modules'])) {
-            $module_handler = $ioc->get('\Miny\Modules\ModuleHandler');
-            foreach ($parameterContainer['modules'] as $module => $parameters) {
-                if (is_int($module) && !is_array($parameters)) {
-                    $module     = $parameters;
-                    $parameters = array();
-                }
-                $module_handler->module($module, $parameters);
-            }
-            $module_handler->initialize();
+            $this->loadModules($ioc, $parameterContainer['modules']);
         }
     }
 
     /**
-     * @return boolean
+     * @param Container $ioc
+     * @param array     $moduleArray
      */
-    public function isDeveloperEnvironment()
+    private function loadModules(Container $ioc, array $moduleArray)
     {
-        return $this->isEnvironment(self::ENV_DEV);
+        /** @var $moduleHandler ModuleHandler */
+        $moduleHandler = $ioc->get('\Miny\Modules\ModuleHandler');
+        foreach ($moduleArray as $module => $parameters) {
+            if (is_int($module) && !is_array($parameters)) {
+                $module     = $parameters;
+                $parameters = array();
+            }
+            $moduleHandler->module($module, $parameters);
+        }
+        $moduleHandler->initialize();
     }
 
     /**
-     * Checks whether the given $env matches the current environment.
-     *
-     * @param int $env
-     *
-     * @return boolean
+     * @param ParameterContainer $parameterContainer
      */
-    public function isEnvironment($env)
-    {
-        return ($this->environment & $env) !== 0;
-    }
-
-    protected function setDefaultParameters()
+    protected function setDefaultParameters(ParameterContainer $parameterContainer)
     {
 
     }
@@ -176,15 +171,16 @@ abstract class BaseApplication
         $this->parameterContainer->addParameters($config);
     }
 
-    protected function registerDefaultServices(Container $factory)
+    protected function registerDefaultServices(Container $container)
     {
-        $factory->setInstance($this);
+        date_default_timezone_set($this->parameterContainer['default_timezone']);
+        $container->setInstance($this);
 
         /** @var $shutdown ShutdownService */
-        $shutdown = $factory->get('\Miny\Shutdown\ShutdownService');
+        $shutdown = $container->get('\Miny\Shutdown\ShutdownService');
 
         /** @var $log Log */
-        $log = $factory->get('\Miny\Log\Log', array('@log:flush_limit'));
+        $log = $container->get('\Miny\Log\Log', array('@log:flush_limit'));
 
         $log->registerShutdownService($shutdown, 1000);
         if ($this->parameterContainer['log']['enable_file_writer']) {
@@ -207,12 +203,13 @@ abstract class BaseApplication
             );
         }
 
-        $factory->addCallback(
+        $container->addCallback(
             '\Miny\Event\EventDispatcher',
             function (EventDispatcher $events, Container $container) {
+                $errorHandlers = $container->get('\Miny\Application\Handlers\ErrorHandlers');
                 $events->register(
                     'uncaught_exception',
-                    array($container->get('\Miny\Application\Handlers\ErrorHandlers'), 'logException')
+                    array($errorHandlers, 'logException')
                 );
             }
         );
@@ -243,6 +240,26 @@ abstract class BaseApplication
     }
 
     /**
+     * Checks whether the given $env matches the current environment.
+     *
+     * @param int $env
+     *
+     * @return boolean
+     */
+    public function isEnvironment($env)
+    {
+        return ($this->environment & $env) !== 0;
+    }
+
+    /**
+     * @return boolean
+     */
+    public function isDeveloperEnvironment()
+    {
+        return $this->isEnvironment(self::ENV_DEV);
+    }
+
+    /**
      * @return boolean
      */
     public function isProductionEnvironment()
@@ -269,7 +286,6 @@ abstract class BaseApplication
         /** @var $shutdown ShutdownService */
         $shutdown = $this->factory->get('\Miny\Shutdown\ShutdownService');
 
-        date_default_timezone_set($this->parameterContainer['default_timezone']);
         $event->raiseEvent('before_run');
         $shutdown->register(
             function () use ($event) {
