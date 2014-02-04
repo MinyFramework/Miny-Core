@@ -44,7 +44,7 @@ class ApplicationEventHandlers
         if (!$event->isHandled()) {
             throw $e;
         } else {
-            $response = $this->container->get('response');
+            $response = $this->container->get('\Miny\HTTP\Response');
             $response->addContent($event->getResponse());
             $response->setCode(500);
             $response->send();
