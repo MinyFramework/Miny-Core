@@ -22,8 +22,8 @@ class LinkResolver extends AbstractLinkResolver
     {
         if (is_array($argument)) {
             $return = array();
-            foreach ($argument as $arg) {
-                $return[] = $this->resolveReferences($arg);
+            foreach ($argument as $k => $arg) {
+                $return[$k] = $this->resolveReferences($arg);
             }
 
             return $return;
