@@ -259,14 +259,14 @@ class Container
      * @param ReflectionParameter $dependency
      *
      * @return mixed|object
-     * @throws ReflectionException
+     * @throws InvalidArgumentException
      */
     private function resolveClassParameter(ReflectionParameter $dependency)
     {
         $class = $dependency->getClass();
         try {
             return $this->get($class->getName());
-        } catch (ReflectionException $e) {
+        } catch (InvalidArgumentException $e) {
             if ($dependency->isDefaultValueAvailable()) {
                 return $dependency->getDefaultValue();
             } else {
