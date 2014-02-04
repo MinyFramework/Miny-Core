@@ -12,7 +12,6 @@ namespace Miny\Application;
 use Miny\Controller\ControllerCollection;
 use Miny\Event\EventDispatcher;
 use Miny\Factory\Container;
-use Miny\Factory\Factory;
 use Miny\HTTP\Request;
 use Miny\HTTP\Response;
 

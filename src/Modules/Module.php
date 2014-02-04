@@ -9,7 +9,6 @@
 
 namespace Miny\Modules;
 
-use Closure;
 use InvalidArgumentException;
 use Miny\Application\BaseApplication;
 use Miny\Modules\Exceptions\BadModuleException;

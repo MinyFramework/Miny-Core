@@ -2,6 +2,8 @@
 
 namespace Miny\Routing;
 
+use InvalidArgumentException;
+
 class RouteTest extends \PHPUnit_Framework_TestCase
 {
     protected $static_object;

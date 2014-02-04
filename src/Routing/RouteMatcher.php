@@ -33,6 +33,7 @@ class RouteMatcher
     public function match($path, $method = null)
     {
         foreach ($this->routes as $route) {
+            /** @var $route Route */
             $route_method = $route->getMethod();
             if ($method !== null && $route_method !== null && $method !== $route_method) {
                 continue;

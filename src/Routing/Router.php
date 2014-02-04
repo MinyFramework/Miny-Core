@@ -64,6 +64,7 @@ class Router extends RouteCollection
     public function root(array $parameters = array(), $prefix = true, $suffix = false)
     {
         $route = new Route('', 'GET', $parameters);
+
         return $this->route($route, 'root', $prefix, $suffix);
     }
 
@@ -93,13 +94,13 @@ class Router extends RouteCollection
             $route->addParameters($parameters);
         }
         $this->addRoute($route, $name);
+
         return $route;
     }
 
     /**
-     * @param type  $name
-     * @param array $parameters
-     * @param type  $singular
+     * @param string $name
+     * @param array  $parameters
      *
      * @return Resources
      */
@@ -108,12 +109,13 @@ class Router extends RouteCollection
         $parameters        = $parameters + $this->default_parameters;
         $resource          = new Resources($name, $parameters);
         $this->resources[] = $resource;
+
         return $resource;
     }
 
     /**
-     * @param type  $name
-     * @param array $parameters
+     * @param string $name
+     * @param array  $parameters
      *
      * @return Resource
      */
@@ -122,6 +124,7 @@ class Router extends RouteCollection
         $parameters        = $parameters + $this->default_parameters;
         $resource          = new Resource($name, $parameters);
         $this->resources[] = $resource;
+
         return $resource;
     }
 
@@ -146,6 +149,7 @@ class Router extends RouteCollection
     public function match($path, $method = null)
     {
         $this->buildResources();
+
         return $this->matcher->match($path, $method);
     }
 
@@ -158,6 +162,7 @@ class Router extends RouteCollection
     public function generate($route_name, array $parameters = array())
     {
         $this->buildResources();
+
         return $this->generator->generate($route_name, $parameters);
     }
 }

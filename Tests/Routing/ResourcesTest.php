@@ -2,9 +2,18 @@
 
 namespace Miny\Routing;
 
+use UnexpectedValueException;
+
 class ResourcesTest extends \PHPUnit_Framework_TestCase
 {
+    /**
+     * @var Resources
+     */
     protected $object;
+
+    /**
+     * @var Resources
+     */
     protected $sub_resources;
 
     protected function setUp()

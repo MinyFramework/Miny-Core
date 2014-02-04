@@ -10,10 +10,12 @@
 namespace Miny\Application\Handlers;
 
 use Exception;
-use Miny\Factory\Factory;
+use Miny\Event\Event;
+use Miny\Factory\Container;
 use Miny\HTTP\Request;
 use Miny\HTTP\Response;
 use Miny\Log\Log;
+use Miny\Routing\Match;
 
 class ApplicationEventHandlers
 {
@@ -21,14 +23,15 @@ class ApplicationEventHandlers
      * @var Log
      */
     protected $log;
-    /**
-     * @var Factory
-     */
-    private $factory;
 
-    public function __construct(Factory $factory, Log $log)
+    /**
+     * @var Container
+     */
+    private $container;
+
+    public function __construct(Container $container, Log $log)
     {
-        $this->factory = $factory;
+        $this->container = $container;
         $this->log     = $log;
 
         set_exception_handler(array($this, 'handleExceptions'));
@@ -36,11 +39,12 @@ class ApplicationEventHandlers
 
     public function handleExceptions(Exception $e)
     {
-        $event = $this->factory->get('events')->raiseEvent('uncaught_exception', $e);
+        /** @var $event Event */
+        $event = $this->container->get('\Miny\Event\EventDispatcher')->raiseEvent('uncaught_exception', $e);
         if (!$event->isHandled()) {
             throw $e;
         } else {
-            $response = $this->factory->get('response');
+            $response = $this->container->get('response');
             $response->addContent($event->getResponse());
             $response->setCode(500);
             $response->send();
@@ -73,15 +77,17 @@ class ApplicationEventHandlers
 
     public function filterRoutes(Request $request)
     {
-        if ($this->factory->get('router')->shortUrls()) {
+        $router = $this->container->get('\Miny\Routing\Router');
+        if ($router->shortUrls()) {
             $path = $request->path;
         } else {
             $path = $request->get('path', '/');
         }
-        $match = $this->factory->get('router')->match($path, $request->method);
+        /** @var $match Match */
+        $match = $router->match($path, $request->method);
         if (!$match) {
             $this->log->write(Log::INFO, 'Routing', 'Route was not found for path [%s] %s', $request->method, $path);
-            $response = $this->factory->get('response');
+            $response = $this->container->get('response');
             $response->setCode(404);
             return $response;
         }

@@ -17,7 +17,7 @@ namespace Miny;
 class AutoLoader
 {
     /**
-     * @var string[]
+     * @var array[]
      */
     private $map = array();
     private $max_ns_length;

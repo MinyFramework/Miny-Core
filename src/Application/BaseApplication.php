@@ -17,6 +17,7 @@ use Miny\Factory\LinkResolver;
 use Miny\Factory\ParameterContainer;
 use Miny\Log\FileWriter;
 use Miny\Log\Log;
+use Miny\Shutdown\ShutdownService;
 use UnexpectedValueException;
 
 abstract class BaseApplication
@@ -179,8 +180,12 @@ abstract class BaseApplication
     {
         $factory->setInstance($this);
 
+        /** @var $shutdown ShutdownService */
         $shutdown = $factory->get('\Miny\Shutdown\ShutdownService');
-        $log      = $factory->get('\Miny\Log\Log', array('@log:flush_limit'));
+
+        /** @var $log Log */
+        $log = $factory->get('\Miny\Log\Log', array('@log:flush_limit'));
+
         $log->registerShutdownService($shutdown, 1000);
         if ($this->parameterContainer['log']['enable_file_writer']) {
             $log->registerWriter(new FileWriter($factory['log']['path']));
@@ -258,11 +263,15 @@ abstract class BaseApplication
      */
     public function run()
     {
+        /** @var $event EventDispatcher */
         $event = $this->factory->get('\Miny\Event\EventDispatcher');
 
-        date_default_timezone_set($this->factory['default_timezone']);
+        /** @var $shutdown ShutdownService */
+        $shutdown = $this->factory->get('\Miny\Shutdown\ShutdownService');
+
+        date_default_timezone_set($this->parameterContainer['default_timezone']);
         $event->raiseEvent('before_run');
-        $this->factory->get('\Miny\Shutdown\ShutdownService')->register(
+        $shutdown->register(
             function () use ($event) {
                 $event->raiseEvent('shutdown');
             },

@@ -49,6 +49,7 @@ class Log
     {
         $profiler = $this->createProfiler($category, $name);
         $profiler->start();
+
         return $profiler;
     }
 
@@ -64,6 +65,7 @@ class Log
         if (!isset($this->profilers[$key])) {
             $this->profilers[$key] = new Profiler($this, $category, $name);
         }
+
         return $this->profilers[$key];
     }
 
@@ -93,6 +95,7 @@ class Log
         if (!empty($args)) {
             $message = vsprintf($message, $args);
         }
+
         return $message;
     }
 
@@ -108,6 +111,7 @@ class Log
         if (isset($names[$level])) {
             return $names[$level];
         }
+
         return 'Unknown (' . $level . ')';
     }
 
@@ -117,11 +121,19 @@ class Log
             return;
         }
         foreach ($this->messages as $message) {
+            /** @var $message LogMessage */
             $level = $message->getLevel();
             foreach ($this->writers[$level] as $writer) {
+                /** @var $writer AbstractLogWriter */
                 $writer->add($message);
             }
-            $writer->commit();
+        }
+
+        foreach ($this->writers as $writers) {
+            foreach ($writers as $writer) {
+                /** @var $writer AbstractLogWriter */
+                $writer->commit();
+            }
         }
         $this->reset();
     }

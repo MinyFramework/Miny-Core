@@ -11,7 +11,6 @@ namespace Miny\Controller;
 
 use Closure;
 use InvalidArgumentException;
-use Miny\Application\Application;
 use Miny\Event\EventDispatcher;
 use Miny\Factory\Container;
 use Miny\HTTP\Request;
