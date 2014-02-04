@@ -55,7 +55,7 @@ class Container
      */
     public function addAlias($abstract, $concrete = null, array $parameters = array())
     {
-        $abstract = ltrim($abstract, '\\');
+        $abstract                 = ltrim($abstract, '\\');
         $this->aliases[$abstract] = array($concrete ? : $abstract, $parameters);
     }
 
@@ -125,19 +125,26 @@ class Container
     public function get($abstract, array $parameters = array(), $forceNew = false)
     {
         $abstract = ltrim($abstract, '\\');
+
         if (isset($this->aliases[$abstract])) {
-            list($concrete, $registeredParameters) = $this->aliases[$abstract];
+            do {
+                list($concrete, $registeredParameters) = $this->aliases[$abstract];
+                if ($concrete !== $abstract) {
+                    $abstract = $concrete;
+                    $abstract = ltrim($abstract, '\\');
+                } else {
+                    break;
+                }
+            } while (isset($this->aliases[$abstract]));
         } else {
-            $concrete = $abstract;
+            $concrete             = $abstract;
             $registeredParameters = array();
         }
-
         if (isset($this->objects[$concrete]) && !$forceNew) {
             return $this->objects[$concrete];
         }
 
         $parameters = $parameters + $registeredParameters;
-
 
         $object = $this->instantiate($concrete, $parameters);
 
@@ -218,10 +225,10 @@ class Container
     private function resolvePrimitiveParameter(ReflectionParameter $dependency)
     {
         if (!$dependency->isDefaultValueAvailable()) {
-            $class = $dependency->getDeclaringClass()->getName();
-            $method = $dependency->getDeclaringFunction()->getName();
+            $class         = $dependency->getDeclaringClass()->getName();
+            $method        = $dependency->getDeclaringFunction()->getName();
             $parameterName = $dependency->getName();
-            $message = sprintf('Parameter %s is not supplied for %s::%s.', $parameterName, $class, $method);
+            $message       = sprintf('Parameter %s is not supplied for %s::%s.', $parameterName, $class, $method);
             throw new OutOfBoundsException($message);
         }
 
