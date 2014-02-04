@@ -138,6 +138,7 @@ class Container
 
         $parameters = $parameters + $registeredParameters;
 
+
         $object = $this->instantiate($concrete, $parameters);
 
         if (isset($this->callbacks[$concrete])) {
@@ -217,7 +218,11 @@ class Container
     private function resolvePrimitiveParameter(ReflectionParameter $dependency)
     {
         if (!$dependency->isDefaultValueAvailable()) {
-            throw new OutOfBoundsException(sprintf('Parameter %s is not supplied.', $dependency->getName()));
+            $class = $dependency->getDeclaringClass()->getName();
+            $method = $dependency->getDeclaringFunction()->getName();
+            $parameterName = $dependency->getName();
+            $message = sprintf('Parameter %s is not supplied for %s::%s.', $parameterName, $class, $method);
+            throw new OutOfBoundsException($message);
         }
 
         return $dependency->getDefaultValue();
