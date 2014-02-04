@@ -63,7 +63,7 @@ class Container
     public function addAlias($abstract, $concrete = null, array $parameters = array())
     {
         $abstract                 = ltrim($abstract, '\\');
-        $this->aliases[$abstract] = array($concrete ? : $abstract, $parameters);
+        $this->aliases[$abstract] = array($concrete ? ltrim($concrete, '\\') : $abstract, $parameters);
     }
 
     /**
@@ -151,7 +151,6 @@ class Container
                 list($concrete, $registeredParameters) = $this->aliases[$abstract];
                 if ($concrete !== $abstract) {
                     $abstract = $concrete;
-                    $abstract = ltrim($abstract, '\\');
                 } else {
                     break;
                 }

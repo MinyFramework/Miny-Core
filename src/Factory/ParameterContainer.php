@@ -62,19 +62,37 @@ class ParameterContainer implements ArrayAccess
             foreach ($value as $k => $v) {
                 $return[$k] = $this->resolveLinks($v);
             }
+
             return $return;
         }
+
         if (is_string($value) && strpos($value, '{@') !== false) {
-            $container = $this;
-            return preg_replace_callback('/(?<!\\\){@(.*?)}/', function ($matches) use ($container) {
+            $value = $this->resolveLinksInString($value);
+        }
+
+        return $value;
+    }
+
+    /**
+     * @param string $string
+     *
+     * @return string mixed
+     */
+    public function resolveLinksInString($string)
+    {
+        $container = $this;
+
+        return preg_replace_callback(
+            '/(?<!\\\){@(.*?)}/',
+            function ($matches) use ($container) {
                 try {
                     return $container->offsetGet($matches[1]);
                 } catch (OutOfBoundsException $e) {
                     return $matches[0];
                 }
-            }, $value);
-        }
-        return $value;
+            },
+            $string
+        );
     }
 
     /**
@@ -94,6 +112,7 @@ class ParameterContainer implements ArrayAccess
             $val                   = ArrayUtils::findByPath($this->parameters, $key);
             $this->links[$arr_key] = $this->resolveLinks($val);
         }
+
         return $this->links[$arr_key];
     }
 

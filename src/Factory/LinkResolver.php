@@ -45,13 +45,12 @@ class LinkResolver extends AbstractLinkResolver
         }
 
         if (strpos($argument, '{@') !== false) {
-            $argument = $this->parameterContainer->resolveLinks($argument);
+            $argument = $this->parameterContainer->resolveLinksInString($argument);
         }
 
-        //see if $var is a reference to something
+        //see if $argument is a reference to something
         if ($argument[0] === '@') {
             $value = $this->parameterContainer->offsetGet(substr($argument, 1));
-
             $argument = $this->resolveReferences($value);
         } elseif ($argument[0] === '\\') {
             $argument = substr($argument, 1);
