@@ -100,7 +100,7 @@ class Container
             $name = get_class($object);
         }
         if (isset($this->aliases[$name])) {
-            $name = $this->aliases[$name];
+            list($name) = $this->aliases[$name];
         }
         if (isset($this->objects[$name])) {
             $old = $this->objects[$name];
@@ -121,7 +121,12 @@ class Container
      */
     public function get($abstract, array $parameters = array(), $forceNew = false)
     {
-        list($concrete, $registeredParameters) = $this->getAlias($abstract);
+        if (isset($this->aliases[$abstract])) {
+            list($concrete, $registeredParameters) = $this->aliases[$name];
+        } else {
+            $concrete = $abstract;
+            $registeredParameters = array();
+        }
 
         if (isset($this->objects[$concrete]) && !$forceNew) {
             return $this->objects[$concrete];
