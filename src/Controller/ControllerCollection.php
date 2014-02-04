@@ -28,7 +28,7 @@ class ControllerCollection
      * @var (BaseController|Closure|string)[]
      */
     private $controllers = array();
-    private $controller_namespace;
+    private $controllerNamespace;
 
     /**
      * @var Container
@@ -37,9 +37,9 @@ class ControllerCollection
 
     public function __construct(Container $container, EventDispatcher $eventDispatcher, $ns)
     {
-        $this->container          = $container;
-        $this->eventDispatcher      = $eventDispatcher;
-        $this->controller_namespace = $ns;
+        $this->container           = $container;
+        $this->eventDispatcher     = $eventDispatcher;
+        $this->controllerNamespace = $ns;
     }
 
     /**
@@ -155,7 +155,7 @@ class ControllerCollection
         if (class_exists($class)) {
             return $class;
         }
-        $class = $this->controller_namespace . ucfirst($class) . 'Controller';
+        $class = $this->controllerNamespace . ucfirst($class) . 'Controller';
         if (!class_exists($class)) {
             throw new UnexpectedValueException('Class not exists: ' . $class);
         }

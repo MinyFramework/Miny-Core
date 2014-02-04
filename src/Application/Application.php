@@ -52,7 +52,7 @@ class Application extends BaseApplication
 
         $factory->addAlias('\Miny\Application\BaseApplication', __CLASS__);
         $factory->addAlias('\Miny\HTTP\AbstractHeaderSender', '\Miny\HTTP\NativeHeaderSender');
-        $factory->addAlias('\Miny\Controller\ControllerCollection', null, array(1 => '@controllers:namespace'));
+        $factory->addAlias('\Miny\Controller\ControllerCollection', null, array(2 => '@controllers:namespace'));
         $factory->addAlias(
             '\Miny\Routing\Router',
             null,

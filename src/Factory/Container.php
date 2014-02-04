@@ -136,7 +136,8 @@ class Container
             return $this->objects[$concrete];
         }
 
-        $parameters += $registeredParameters;
+        $parameters = $parameters + $registeredParameters;
+
         $object = $this->instantiate($concrete, $parameters);
 
         if (isset($this->callbacks[$concrete])) {
@@ -179,7 +180,7 @@ class Container
         $constructorArgs = $constructor->getParameters();
         $unsuppliedArgs  = array_diff_key($constructorArgs, $parameters);
         $resolvedArgs    = $this->resolveDependencies($unsuppliedArgs);
-        $arguments       = array_merge($parameters, $resolvedArgs);
+        $arguments       = $resolvedArgs + $parameters;
         $arguments       = $this->linkResolver->resolveReferences($arguments);
 
         return $reflector->newInstanceArgs($arguments);
