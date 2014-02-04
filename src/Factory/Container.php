@@ -55,6 +55,7 @@ class Container
      */
     public function addAlias($abstract, $concrete = null, array $parameters = array())
     {
+        $abstract = ltrim($abstract, '\\');
         $this->aliases[$abstract] = array($concrete ? : $abstract, $parameters);
     }
 
