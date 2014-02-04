@@ -211,6 +211,7 @@ class Container
         $arguments       = $resolvedArgs + $parameters;
         $arguments       = $this->linkResolver->resolveReferences($arguments);
 
+        ksort($arguments);
         return $reflector->newInstanceArgs($arguments);
     }
 
