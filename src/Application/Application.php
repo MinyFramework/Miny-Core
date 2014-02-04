@@ -50,6 +50,7 @@ class Application extends BaseApplication
         $events->register('filter_response', array($eventHandlers, 'setContentType'));
         $events->register('filter_response', array($eventHandlers, 'logResponse'));
 
+        $factory->addAlias('\Miny\Application\BaseApplication', __CLASS__);
         $factory->addAlias('\Miny\HTTP\AbstractHeaderSender', '\Miny\HTTP\NativeHeaderSender');
         $factory->addAlias('\Miny\Controller\ControllerCollection', null, array(1 => '@controllers:namespace'));
         $factory->addAlias(

@@ -63,6 +63,7 @@ class Container
         if (!is_callable($callback)) {
             throw new InvalidArgumentException('$callback is not callable.');
         }
+        $concrete = ltrim($concrete, '\\');
         if (!isset($this->callbacks[$concrete])) {
             $this->callbacks[$concrete] = array();
         }
@@ -77,6 +78,7 @@ class Container
      */
     public function getAlias($abstract)
     {
+        $abstract = ltrim($abstract, '\\');
         if (!isset($this->aliases[$abstract])) {
             throw new OutOfBoundsException(sprintf('%s is not registered.', $abstract));
         }

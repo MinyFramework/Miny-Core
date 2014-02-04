@@ -188,7 +188,7 @@ abstract class BaseApplication
 
         $log->registerShutdownService($shutdown, 1000);
         if ($this->parameterContainer['log']['enable_file_writer']) {
-            $log->registerWriter(new FileWriter($factory['log']['path']));
+            $log->registerWriter(new FileWriter($this->parameterContainer['log']['path']));
         }
         $shutdown->register(
             function () use ($log) {
