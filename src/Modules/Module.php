@@ -23,7 +23,7 @@ abstract class Module
     /**
      * @var callback[]
      */
-    private $conditionalRunnables = array();
+    private $conditionalCallbacks = array();
 
     /**
      * @param BaseApplication $app
@@ -58,9 +58,9 @@ abstract class Module
         return array();
     }
 
-    public function getConditionalRunnables()
+    public function getConditionalCallbacks()
     {
-        return $this->conditionalRunnables;
+        return $this->conditionalCallbacks;
     }
 
     public function eventHandlers()
@@ -73,7 +73,7 @@ abstract class Module
         if (!is_callable($runnable)) {
             throw new InvalidArgumentException('Runnable must be a callable variable.');
         }
-        $this->conditionalRunnables[$module] = $runnable;
+        $this->conditionalCallbacks[$module] = $runnable;
     }
 
     abstract public function init(BaseApplication $app);

@@ -2,7 +2,7 @@
 
 namespace Miny\Utils;
 
-use Miny\Utils\Exceptions\AssertationException;
+use Miny\Utils\Exceptions\AssertionException;
 use PHPUnit_Framework_TestCase;
 
 class TestClass
@@ -29,7 +29,7 @@ class UtilsTest extends PHPUnit_Framework_TestCase
         try {
             Utils::assert(false, 'message');
             $this->fail('Assert should throw an AssertationException');
-        } catch (AssertationException $e) {
+        } catch (AssertionException $e) {
             $this->assertEquals('message', $e->getMessage());
         }
     }

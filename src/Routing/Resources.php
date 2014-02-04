@@ -114,6 +114,7 @@ class Resources extends RouteCollection
     /**
      * @param string $pattern
      *
+     * @throws InvalidArgumentException
      * @return Resources
      */
     public function specify($pattern)
@@ -160,6 +161,8 @@ class Resources extends RouteCollection
     /**
      * @param string $key
      * @param mixed  $value
+     *
+     * @throws UnexpectedValueException
      */
     public function addParameter($key, $value)
     {

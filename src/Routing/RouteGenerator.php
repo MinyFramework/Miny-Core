@@ -40,6 +40,7 @@ class RouteGenerator
      */
     public function generate($route_name, array $parameters = array())
     {
+        /** @var $route Route */
         foreach ($this->routes as $name => $route) {
             if ($route_name !== $name) {
                 continue;

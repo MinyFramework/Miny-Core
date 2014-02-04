@@ -15,7 +15,7 @@ use Miny\Log\Log;
 
 class ErrorHandlers
 {
-    private static $loggable = array(
+    private static $internalLogCategories = array(
         E_NOTICE       => 'Notice (PHP)',
         E_USER_NOTICE  => 'Notice',
         E_WARNING      => 'Warning (PHP)',
@@ -35,13 +35,13 @@ class ErrorHandlers
         set_error_handler(array($this, 'logError'));
     }
 
-    public function logError($errno, $errstr, $errfile, $errline)
+    public function logError($errNo, $errStr, $errFile, $errLine)
     {
-        if (isset(self::$loggable[$errno])) {
-            $message = sprintf('%s in %s on line %s', $errstr, $errfile, $errline);
-            $this->log->write(Log::WARNING, self::$loggable[$errno], $message);
+        if (isset(self::$internalLogCategories[$errNo])) {
+            $message = sprintf('%s in %s on line %s', $errStr, $errFile, $errLine);
+            $this->log->write(Log::WARNING, self::$internalLogCategories[$errNo], $message);
         } else {
-            throw new ErrorException($errstr, $errno, 0, $errfile, $errline);
+            throw new ErrorException($errStr, $errNo, 0, $errFile, $errLine);
         }
     }
 

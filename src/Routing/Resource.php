@@ -44,7 +44,8 @@ class Resource extends Resources
      * @param string $method
      * @param string $name
      *
-     * @throws BadMethodCallException
+     * @return void
+     * @throws \BadMethodCallException
      */
     public function member($method, $name)
     {

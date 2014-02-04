@@ -10,7 +10,7 @@
 namespace Miny\Utils;
 
 use InvalidArgumentException;
-use Miny\Utils\Exceptions\AssertationException;
+use Miny\Utils\Exceptions\AssertionException;
 use ReflectionClass;
 
 /**
@@ -25,12 +25,12 @@ class Utils
      * @param mixed  $expression
      * @param string $on_failure
      *
-     * @throws AssertationException
+     * @throws AssertionException
      */
-    public static function assert($expression, $on_failure = 'Assertation failed')
+    public static function assert($expression, $on_failure = 'Assertion failed')
     {
         if (!$expression) {
-            throw new AssertationException($on_failure);
+            throw new AssertionException($on_failure);
         }
     }
 

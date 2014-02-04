@@ -14,7 +14,7 @@ use RuntimeException;
 /**
  * @author Dániel Buga
  */
-class AssertationException extends RuntimeException
+class AssertionException extends RuntimeException
 {
 
 }

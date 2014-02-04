@@ -62,7 +62,7 @@ class Profiler
     {
         static $units = array(' B', ' kiB', ' MiB', ' GiB', ' TiB', ' PiB');
 
-        $power = floor(log($memory, 1024));
+        $power = (int) floor(log($memory, 1024));
         $value = round($memory / pow(1024, $power), 2);
 
         return $value . $units[$power];

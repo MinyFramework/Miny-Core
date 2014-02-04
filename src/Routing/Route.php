@@ -55,6 +55,8 @@ class Route
      * @param string $path
      * @param string $method
      * @param array  $params
+     *
+     * @throws BadMethodException
      */
     public function __construct($path, $method = null, array $params = array())
     {

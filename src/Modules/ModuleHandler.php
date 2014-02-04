@@ -65,7 +65,7 @@ class ModuleHandler
         $this->loaded  = array();
         $this->modules = array();
 
-        $events->register('before_run', array($this, 'processConditionalRunnables'));
+        $events->register('before_run', array($this, 'processConditionalCallbacks'));
         $events->register('before_run', array($this, 'registerEventHandlers'));
     }
 
@@ -100,10 +100,10 @@ class ModuleHandler
         $this->modules[$module] = $module_class;
     }
 
-    public function processConditionalRunnables()
+    public function processConditionalCallbacks()
     {
         foreach ($this->modules as $module) {
-            foreach ($module->getConditionalRunnables() as $module_name => $runnable) {
+            foreach ($module->getConditionalCallbacks() as $module_name => $runnable) {
                 if (isset($this->modules[$module_name])) {
                     $runnable($this->application);
                 }

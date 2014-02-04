@@ -108,14 +108,14 @@ class ControllerCollection
         }
 
         if ($controller instanceof Controller) {
-            $retval = $controller->run($action, $request, $response);
+            $retVal = $controller->run($action, $request, $response);
         } elseif ($controller instanceof Closure) {
-            $retval = $controller($request, $action, $response);
+            $retVal = $controller($request, $action, $response);
         } else {
             throw new InvalidArgumentException('Invalid controller: ' . $class);
         }
 
-        $this->eventDispatcher->raiseEvent('onControllerFinished', $controller, $action, $retval);
+        $this->eventDispatcher->raiseEvent('onControllerFinished', $controller, $action, $retVal);
 
         return $response;
     }

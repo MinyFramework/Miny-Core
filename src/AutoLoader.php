@@ -10,7 +10,7 @@
 namespace Miny;
 
 /**
- * AutoLoader is a simple autoloader class to be used with the Miny framework.
+ * AutoLoader is a simple class loader class to be used with the Miny framework.
  *
  * @author Dániel Buga
  */
@@ -20,7 +20,7 @@ class AutoLoader
      * @var array[]
      */
     private $map = array();
-    private $max_ns_length;
+    private $maxNameSpaceLength;
 
     /**
      * @param array $map
@@ -28,7 +28,7 @@ class AutoLoader
     public function __construct(array $map = array())
     {
         spl_autoload_register(array($this, 'load'));
-        $this->max_ns_length = 0;
+        $this->maxNameSpaceLength = 0;
         $this->register($map);
     }
 
@@ -47,8 +47,8 @@ class AutoLoader
             if (strpos($namespace, '\\') === 0) {
                 ++$length;
             }
-            if ($this->max_ns_length < $length) {
-                $this->max_ns_length = $length;
+            if ($this->maxNameSpaceLength < $length) {
+                $this->maxNameSpaceLength = $length;
             }
             if (!isset($this->map[$namespace])) {
                 $this->map[$namespace] = array();
@@ -68,7 +68,7 @@ class AutoLoader
      */
     public function load($class)
     {
-        $temp = substr('\\' . $class, 0, $this->max_ns_length + 1);
+        $temp = substr('\\' . $class, 0, $this->maxNameSpaceLength + 1);
 
         // We look for the longest matching namespace so we are trimming from the right.
         while (!isset($this->map[$temp])) {
@@ -78,13 +78,17 @@ class AutoLoader
             }
             $temp = substr($temp, 0, $pos);
         }
-        $classname = substr($class, $pos - 1);
-        $subpath   = strtr($classname, '\\', DIRECTORY_SEPARATOR) . '.php';
-
+        if (isset($pos)) {
+            $className = substr($class, $pos - 1);
+            $subPath   = strtr($className, '\\', DIRECTORY_SEPARATOR) . '.php';
+        } else {
+            $subPath = '';
+        }
         foreach ($this->map[$temp] as $path) {
-            $path .= $subpath;
+            $path .= $subPath;
             if (is_file($path)) {
                 include_once $path;
+
                 return;
             }
         }
