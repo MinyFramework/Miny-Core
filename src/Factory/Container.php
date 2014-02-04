@@ -122,7 +122,7 @@ class Container
     public function get($abstract, array $parameters = array(), $forceNew = false)
     {
         if (isset($this->aliases[$abstract])) {
-            list($concrete, $registeredParameters) = $this->aliases[$name];
+            list($concrete, $registeredParameters) = $this->aliases[$abstract];
         } else {
             $concrete = $abstract;
             $registeredParameters = array();
