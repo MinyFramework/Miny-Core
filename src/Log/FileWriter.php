@@ -19,7 +19,10 @@ class FileWriter extends AbstractLogWriter
 
     public function __construct($path)
     {
-        $this->path   = $path;
+        $this->path = $path;
+        if (!is_dir($path)) {
+            mkdir($path, 777, true);
+        }
         $this->buffer = '';
     }
 
