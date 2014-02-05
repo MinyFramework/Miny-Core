@@ -40,11 +40,11 @@ class ApplicationEventHandlers
     public function handleExceptions(Exception $e)
     {
         /** @var $event Event */
-        $event = $this->container->get('\Miny\Event\EventDispatcher')->raiseEvent('uncaught_exception', $e);
+        $event = $this->container->get('\\Miny\\Event\\EventDispatcher')->raiseEvent('uncaught_exception', $e);
         if (!$event->isHandled()) {
             throw $e;
         } else {
-            $response = $this->container->get('\Miny\HTTP\Response');
+            $response = $this->container->get('\\Miny\\HTTP\\Response');
             $response->addContent($event->getResponse());
             $response->setCode(500);
             $response->send();
@@ -87,7 +87,7 @@ class ApplicationEventHandlers
         $match = $router->match($path, $request->method);
         if (!$match) {
             $this->log->write(Log::INFO, 'Routing', 'Route was not found for path [%s] %s', $request->method, $path);
-            $response = $this->container->get('response');
+            $response = $this->container->get('\\Miny\\HTTP\\Response');
             $response->setCode(404);
             return $response;
         }
