@@ -168,10 +168,12 @@ class Application extends BaseApplication
      * @param mixed       $controller
      * @param string|null $name
      * @param array       $parameters
+     *
+     * @return Route
      */
     public function get($path, $controller, $name = null, array $parameters = array())
     {
-        $this->route($path, $controller, 'GET', $name, $parameters);
+        return $this->route($path, $controller, 'GET', $name, $parameters);
     }
 
     /**
@@ -180,10 +182,12 @@ class Application extends BaseApplication
      * @param mixed       $controller
      * @param string|null $name
      * @param array       $parameters
+     *
+     * @return Route
      */
     public function post($path, $controller, $name = null, array $parameters = array())
     {
-        $this->route($path, $controller, 'POST', $name, $parameters);
+        return $this->route($path, $controller, 'POST', $name, $parameters);
     }
 
     /**
@@ -192,10 +196,12 @@ class Application extends BaseApplication
      * @param mixed       $controller
      * @param string|null $name
      * @param array       $parameters
+     *
+     * @return Route
      */
     public function put($path, $controller, $name = null, array $parameters = array())
     {
-        $this->route($path, $controller, 'PUT', $name, $parameters);
+        return $this->route($path, $controller, 'PUT', $name, $parameters);
     }
 
     /**
@@ -204,9 +210,11 @@ class Application extends BaseApplication
      * @param mixed       $controller
      * @param string|null $name
      * @param array       $parameters
+     *
+     * @return Route
      */
     public function delete($path, $controller, $name = null, array $parameters = array())
     {
-        $this->route($path, $controller, 'DELETE', $name, $parameters);
+        return $this->route($path, $controller, 'DELETE', $name, $parameters);
     }
 }
