@@ -21,7 +21,7 @@ class FileWriter extends AbstractLogWriter
     {
         $this->path = $path;
         if (!is_dir($path)) {
-            mkdir($path, 777, true);
+            mkdir($path, 0777, true);
         }
         $this->buffer = '';
     }
