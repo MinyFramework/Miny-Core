@@ -13,7 +13,6 @@ use Closure;
 use InvalidArgumentException;
 use OutOfBoundsException;
 use ReflectionClass;
-use ReflectionException;
 use ReflectionParameter;
 
 class Container
@@ -108,28 +107,28 @@ class Container
 
     /**
      * @param object $object
-     * @param string $name
+     * @param string $abstract
      *
      * @return object|false
      * @throws InvalidArgumentException
      */
-    public function setInstance($object, $name = null)
+    public function setInstance($object, $abstract = null)
     {
         if (!is_object($object)) {
             throw new InvalidArgumentException('$object must be an object');
         }
-        if ($name === null) {
-            $name = get_class($object);
+        $abstract = $abstract ? : get_class($object);
+        if (isset($this->aliases[$abstract])) {
+            list($concrete) = $this->findMostConcreteDefinition($abstract);
+        } else {
+            $concrete = $abstract;
         }
-        if (isset($this->aliases[$name])) {
-            list($name) = $this->aliases[$name];
-        }
-        if (isset($this->objects[$name])) {
-            $old = $this->objects[$name];
+        if (isset($this->objects[$concrete])) {
+            $old = $this->objects[$concrete];
         } else {
             $old = false;
         }
-        $this->objects[$name] = $object;
+        $this->objects[$concrete] = $object;
 
         return $old;
     }
@@ -147,18 +146,12 @@ class Container
 
         // try to find the constructor arguments for the most concrete definition
         if (isset($this->aliases[$abstract])) {
-            do {
-                list($concrete, $registeredParameters) = $this->aliases[$abstract];
-                if ($concrete !== $abstract) {
-                    $abstract = $concrete;
-                } else {
-                    break;
-                }
-            } while (isset($this->aliases[$abstract]));
+            list($concrete, $registeredParameters) = $this->findMostConcreteDefinition($abstract);
         } else {
             $concrete             = $abstract;
             $registeredParameters = array();
         }
+
         if (isset($this->objects[$concrete]) && !$forceNew) {
             return $this->objects[$concrete];
         }
@@ -166,18 +159,44 @@ class Container
         $parameters = $parameters + $registeredParameters;
 
         $object = $this->instantiate($concrete, $parameters);
-
-        if (isset($this->callbacks[$concrete])) {
-            foreach ($this->callbacks[$concrete] as $callback) {
-                $callback($object, $this);
-            }
-        }
+        $this->callCallbacks($concrete, $object);
 
         if (!$forceNew) {
             $this->objects[$concrete] = $object;
         }
 
         return $object;
+    }
+
+    /**
+     * @param $concrete
+     * @param $object
+     */
+    private function callCallbacks($concrete, $object)
+    {
+        if (isset($this->callbacks[$concrete])) {
+            foreach ($this->callbacks[$concrete] as $callback) {
+                $callback($object, $this);
+            }
+        }
+    }
+
+    /**
+     * @param $abstract
+     *
+     * @return array
+     */
+    private function findMostConcreteDefinition($abstract)
+    {
+        do {
+            list($concrete, $registeredParameters) = $this->aliases[$abstract];
+            if ($concrete === $abstract) {
+                return array($concrete, $registeredParameters);
+            }
+            $abstract = $concrete;
+        } while (isset($this->aliases[$abstract]));
+
+        return array($concrete, $registeredParameters);
     }
 
     /**
@@ -205,12 +224,15 @@ class Container
         }
 
         $constructorArgs = $constructor->getParameters();
-        $unsuppliedArgs  = array_diff_key($constructorArgs, $parameters);
-        $resolvedArgs    = $this->resolveDependencies($unsuppliedArgs);
-        $arguments       = $resolvedArgs + $parameters;
-        $arguments       = $this->linkResolver->resolveReferences($arguments);
+        if (!empty($parameters)) {
+            $constructorArgs = array_diff_key($constructorArgs, $parameters);
+        }
+        $resolvedArgs = $this->resolveDependencies($constructorArgs);
+        $arguments    = $resolvedArgs + $parameters;
+        $arguments    = $this->linkResolver->resolveReferences($arguments);
 
         ksort($arguments);
+
         return $reflector->newInstanceArgs($arguments);
     }
 
@@ -267,11 +289,11 @@ class Container
         try {
             return $this->get($class->getName());
         } catch (InvalidArgumentException $e) {
-            if ($dependency->isDefaultValueAvailable()) {
-                return $dependency->getDefaultValue();
-            } else {
+            if (!$dependency->isDefaultValueAvailable()) {
                 throw $e;
             }
         }
+
+        return $dependency->getDefaultValue();
     }
 }
