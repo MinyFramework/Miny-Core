@@ -11,7 +11,7 @@ class LinkResolverTest extends \PHPUnit_Framework_TestCase
     {
         $this->parameterContainerMock = $this->getMock(
             '\Miny\Factory\ParameterContainer',
-            array('offsetGet', 'resolveLinks')
+            array('offsetGet', 'resolveLinks', 'resolveLinksInString')
         );
 
         $this->resolver = new LinkResolver($this->parameterContainerMock);
@@ -44,17 +44,18 @@ class LinkResolverTest extends \PHPUnit_Framework_TestCase
         $this->resolver->resolveReferences('@foo');
     }
 
-    public function testLinksInCurlyBracesShouldBeResolvedByResolveLinks()
+    public function testLinksInCurlyBracesShouldBeResolvedByResolveLinksInString()
     {
+        $this->parameterContainerMock
+            ->expects($this->once())
+            ->method('resolveLinksInString')
+            ->will($this->returnValue('foo'));
+
         $this->parameterContainerMock
             ->expects($this->never())
             ->method('offsetGet');
 
-        $this->parameterContainerMock
-            ->expects($this->once())
-            ->method('resolveLinks');
-
-        $this->resolver->resolveReferences('{@foo}');
+        $this->assertEquals('foo', $this->resolver->resolveReferences('{@foo}'));
     }
 
 }
