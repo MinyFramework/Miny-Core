@@ -57,10 +57,22 @@ class Application extends BaseApplication
                 $eventHandlers = $container->get(
                     '\\Miny\\Application\\Handlers\\ApplicationEventHandlers'
                 );
-                $events->register('filter_request', array($eventHandlers, 'logRequest'));
-                $events->register('filter_request', array($eventHandlers, 'filterRoutes'));
-                $events->register('filter_response', array($eventHandlers, 'setContentType'));
-                $events->register('filter_response', array($eventHandlers, 'logResponse'));
+                $events->register(
+                    CoreEvents::FILTER_REQUEST,
+                    array($eventHandlers, 'logRequest')
+                );
+                $events->register(
+                    CoreEvents::FILTER_REQUEST,
+                    array($eventHandlers, 'filterRoutes')
+                );
+                $events->register(
+                    CoreEvents::FILTER_RESPONSE,
+                    array($eventHandlers, 'setContentType')
+                );
+                $events->register(
+                    CoreEvents::FILTER_RESPONSE,
+                    array($eventHandlers, 'logResponse')
+                );
             }
         );
 

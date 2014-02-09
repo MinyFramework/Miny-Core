@@ -14,6 +14,7 @@ use Miny\Event\EventDispatcher;
 use Miny\Factory\Container;
 use Miny\HTTP\Request;
 use Miny\HTTP\Response;
+use UnexpectedValueException;
 
 class Dispatcher
 {
@@ -33,16 +34,16 @@ class Dispatcher
     private $events;
 
     /**
-     * @param Container            $factory
+     * @param Container            $container
      * @param EventDispatcher      $events
      * @param ControllerCollection $controllers
      */
     public function __construct(
-        Container $factory,
+        Container $container,
         EventDispatcher $events,
         ControllerCollection $controllers
     ) {
-        $this->container              = $factory;
+        $this->container            = $container;
         $this->events               = $events;
         $this->controllerCollection = $controllers;
     }
@@ -55,26 +56,23 @@ class Dispatcher
     public function dispatch(Request $request)
     {
         $oldRequest = $this->container->setInstance($request);
-        $event      = $this->events->raiseEvent('filter_request', $request);
+        $event      = $this->events->raiseEvent(CoreEvents::FILTER_REQUEST, $request);
 
-        $filter = true;
+        ob_start();
         if ($event->hasResponse()) {
             $rsp = $event->getResponse();
             if ($rsp instanceof Response) {
                 $response = $rsp;
-            } elseif ($rsp instanceof Request && $rsp !== $request) {
+                $this->events->raiseEvent(CoreEvents::FILTER_RESPONSE, $request, $response);
+            } elseif ($rsp instanceof Request) {
+                $this->guardAgainstInfiniteRedirection($request, $rsp);
                 $response = $this->dispatch($rsp);
-                $filter   = false;
             }
         }
 
-        ob_start();
         if (!isset($response)) {
             $response = $this->runController($request);
-        }
-
-        if ($filter) {
-            $this->events->raiseEvent('filter_response', $request, $response);
+            $this->events->raiseEvent(CoreEvents::FILTER_RESPONSE, $request, $response);
         }
         $response->addContent(ob_get_clean());
 
@@ -112,6 +110,20 @@ class Dispatcher
             return $this->container->setInstance($oldResponse);
         } else {
             return $controllerResponse;
+        }
+    }
+
+    /**
+     * @param Request $request
+     * @param Request $rsp
+     *
+     * @throws UnexpectedValueException
+     */
+    protected function guardAgainstInfiniteRedirection(Request $request, Request $rsp)
+    {
+        if ($rsp === $request) {
+            $message = 'This redirection would lead to an infinite loop.';
+            throw new UnexpectedValueException($message);
         }
     }
 }

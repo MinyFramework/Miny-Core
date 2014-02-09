@@ -10,6 +10,7 @@
 namespace Miny\Application\Handlers;
 
 use Exception;
+use Miny\Application\CoreEvents;
 use Miny\Event\Event;
 use Miny\Factory\Container;
 use Miny\HTTP\Request;
@@ -40,7 +41,8 @@ class ApplicationEventHandlers
     public function handleExceptions(Exception $e)
     {
         /** @var $event Event */
-        $event = $this->container->get('\\Miny\\Event\\EventDispatcher')->raiseEvent('uncaught_exception', $e);
+        $event = $this->container->get('\\Miny\\Event\\EventDispatcher')
+            ->raiseEvent(CoreEvents::UNCAUGHT_EXCEPTION, $e);
         if (!$event->isHandled()) {
             // Rethrow the exception that we did not handle.
             throw $e;
@@ -69,7 +71,12 @@ class ApplicationEventHandlers
     public function logResponse(Request $request, Response $response)
     {
         $this->log('Response', 'Response for request [%s] %s', $request->method, $request->path);
-        $this->log('Response', 'Response status: %s %s', $response->getCode(), $response->getStatus());
+        $this->log(
+            'Response',
+            'Response status: %s %s',
+            $response->getCode(),
+            $response->getStatus()
+        );
         foreach ($response->getHeaders() as $header => $value) {
             $this->log('Response', 'Header: %s: %s', ucfirst($header), $value);
         }

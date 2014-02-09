@@ -10,6 +10,7 @@
 namespace Miny\Modules;
 
 use Miny\Application\BaseApplication;
+use Miny\Application\CoreEvents;
 use Miny\Event\EventDispatcher;
 use Miny\Factory\Container;
 use Miny\Log\Log;
@@ -22,12 +23,12 @@ class ModuleHandler
     /**
      * @var Module[]
      */
-    private $modules = array();
+    private $modules;
 
     /**
      * @var string[]
      */
-    private $loaded = array();
+    private $loaded;
 
     /**
      * @var BaseApplication
@@ -69,8 +70,8 @@ class ModuleHandler
         $this->loaded  = array();
         $this->modules = array();
 
-        $events->register('before_run', array($this, 'processConditionalCallbacks'));
-        $events->register('before_run', array($this, 'registerEventHandlers'));
+        $events->register(CoreEvents::BEFORE_RUN, array($this, 'processConditionalCallbacks'));
+        $events->register(CoreEvents::BEFORE_RUN, array($this, 'registerEventHandlers'));
     }
 
     /**

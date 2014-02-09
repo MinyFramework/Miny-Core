@@ -67,6 +67,7 @@ class Headers implements Iterator, Serializable
         if (!in_array($name, self::$multiple_values_allowed)) {
             return true;
         }
+
         return false;
     }
 
@@ -82,10 +83,19 @@ class Headers implements Iterator, Serializable
     {
         if (is_array($value)) {
             foreach ($value as $item) {
-                $this->set($name, $item);
+                $this->setHeader($name, $item);
             }
-            return;
+        } else {
+            $this->setHeader($name, $value);
         }
+    }
+
+    /**
+     * @param $name
+     * @param $value
+     */
+    protected function setHeader($name, $value)
+    {
         $name = self::sanitize($name);
         if ($this->isHeaderSimple($name)) {
             $this->headers[$name] = $value;
@@ -105,6 +115,7 @@ class Headers implements Iterator, Serializable
         if ($this->headers[$name] === $value) {
             return true;
         }
+
         return false;
     }
 
@@ -116,6 +127,7 @@ class Headers implements Iterator, Serializable
         }
         if ($this->headerCanBeUnset($name, $value)) {
             unset($this->headers[$name]);
+
             return;
         }
         if (!is_array($this->headers[$name])) {
@@ -138,6 +150,7 @@ class Headers implements Iterator, Serializable
         if (is_array($this->headers[$name])) {
             return in_array($value, $this->headers[$name]);
         }
+
         return $value === null || $this->headers[$name] === $value;
     }
 
@@ -161,6 +174,7 @@ class Headers implements Iterator, Serializable
         if (is_array($this->headers[$name]) && $join) {
             return implode(', ', $this->headers[$name]);
         }
+
         return $this->headers[$name];
     }
 
@@ -178,6 +192,7 @@ class Headers implements Iterator, Serializable
         foreach ($this->raw_headers as $header) {
             $return .= $header . "\n";
         }
+
         return $return;
     }
 
@@ -208,10 +223,12 @@ class Headers implements Iterator, Serializable
 
     public function serialize()
     {
-        return serialize(array(
-            $this->headers,
-            $this->raw_headers
-        ));
+        return serialize(
+            array(
+                $this->headers,
+                $this->raw_headers
+            )
+        );
     }
 
     public function unserialize($serialized)

@@ -208,7 +208,7 @@ abstract class BaseApplication
             function (EventDispatcher $events, Container $container) {
                 $errorHandlers = $container->get('\\Miny\\Application\\Handlers\\ErrorHandlers');
                 $events->register(
-                    'uncaught_exception',
+                    CoreEvents::UNCAUGHT_EXCEPTION,
                     array($errorHandlers, 'logException')
                 );
             }
@@ -286,7 +286,7 @@ abstract class BaseApplication
         /** @var $shutdown ShutdownService */
         $shutdown = $this->container->get('\\Miny\\Shutdown\\ShutdownService');
 
-        $event->raiseEvent('before_run');
+        $event->raiseEvent(CoreEvents::BEFORE_RUN);
         $shutdown->register(
             function () use ($event) {
                 $event->raiseEvent('shutdown');
