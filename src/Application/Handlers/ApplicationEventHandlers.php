@@ -32,7 +32,7 @@ class ApplicationEventHandlers
     public function __construct(Container $container, Log $log)
     {
         $this->container = $container;
-        $this->log     = $log;
+        $this->log       = $log;
 
         set_exception_handler(array($this, 'handleExceptions'));
     }
@@ -42,13 +42,19 @@ class ApplicationEventHandlers
         /** @var $event Event */
         $event = $this->container->get('\\Miny\\Event\\EventDispatcher')->raiseEvent('uncaught_exception', $e);
         if (!$event->isHandled()) {
+            // Rethrow the exception that we did not handle.
             throw $e;
-        } else {
-            $response = $this->container->get('\\Miny\\HTTP\\Response');
-            $response->addContent($event->getResponse());
-            $response->setCode(500);
-            $response->send();
         }
+        $response = $this->container->get('\\Miny\\HTTP\\Response');
+        $response->addContent($event->getResponse());
+        $response->setCode(500);
+        $response->send();
+    }
+
+    private function log($category, $message)
+    {
+        $args = array_slice(func_get_args(), 2);
+        $this->log->write(Log::INFO, $category, $message, $args);
     }
 
     public function logRequest(Request $request)
@@ -58,12 +64,6 @@ class ApplicationEventHandlers
         if ($headers->has('referer')) {
             $this->log('Request', 'Referer: %s', $headers->get('referer'));
         }
-    }
-
-    private function log($category, $message)
-    {
-        $args = array_slice(func_get_args(), 2);
-        $this->log->write(Log::INFO, $category, $message, $args);
     }
 
     public function logResponse(Request $request, Response $response)
@@ -77,7 +77,7 @@ class ApplicationEventHandlers
 
     public function filterRoutes(Request $request)
     {
-        $router = $this->container->get('\Miny\Routing\Router');
+        $router = $this->container->get('\\Miny\\Routing\\Router');
         if ($router->shortUrls()) {
             $path = $request->path;
         } else {
@@ -86,9 +86,10 @@ class ApplicationEventHandlers
         /** @var $match Match */
         $match = $router->match($path, $request->method);
         if (!$match) {
-            $this->log->write(Log::INFO, 'Routing', 'Route was not found for path [%s] %s', $request->method, $path);
+            $this->log('Routing', 'Route was not found for path [%s] %s', $request->method, $path);
             $response = $this->container->get('\\Miny\\HTTP\\Response');
             $response->setCode(404);
+
             return $response;
         }
         $this->log('Routing', 'Matched route %s', $match->getRoute()->getPath());
@@ -98,12 +99,16 @@ class ApplicationEventHandlers
 
     public function setContentType(Request $request, Response $response)
     {
-        $headers = $response->getHeaders();
-        if (!$headers->has('content-type') && isset($request->get['format'])) {
-            $format       = $request->get['format'];
-            $content_type = $this->getResponseContentType($format);
-            $headers->set('content-type', $content_type);
+        if (!isset($request->get['format'])) {
+            return;
         }
+        $headers = $response->getHeaders();
+        if ($headers->has('content-type')) {
+            return;
+        }
+        $format       = $request->get['format'];
+        $content_type = $this->getResponseContentType($format);
+        $headers->set('content-type', $content_type);
     }
 
     private function getResponseContentType($format)
@@ -137,6 +142,7 @@ class ApplicationEventHandlers
         if (isset($content_types[$format])) {
             return $content_types[$format];
         }
+
         return $format;
     }
 }

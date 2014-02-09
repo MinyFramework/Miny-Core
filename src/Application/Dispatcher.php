@@ -25,7 +25,7 @@ class Dispatcher
     /**
      * @var Container
      */
-    private $factory;
+    private $container;
 
     /**
      * @var EventDispatcher
@@ -37,9 +37,12 @@ class Dispatcher
      * @param EventDispatcher      $events
      * @param ControllerCollection $controllers
      */
-    public function __construct(Container $factory, EventDispatcher $events, ControllerCollection $controllers)
-    {
-        $this->factory              = $factory;
+    public function __construct(
+        Container $factory,
+        EventDispatcher $events,
+        ControllerCollection $controllers
+    ) {
+        $this->container              = $factory;
         $this->events               = $events;
         $this->controllerCollection = $controllers;
     }
@@ -51,7 +54,7 @@ class Dispatcher
      */
     public function dispatch(Request $request)
     {
-        $oldRequest = $this->factory->setInstance($request);
+        $oldRequest = $this->container->setInstance($request);
         $event      = $this->events->raiseEvent('filter_request', $request);
 
         $filter = true;
@@ -67,18 +70,7 @@ class Dispatcher
 
         ob_start();
         if (!isset($response)) {
-            /** @var $newResponse Response */
-            $newResponse = $this->factory->get('\Miny\HTTP\Response', array(), true);
-            $oldResponse = $this->factory->setInstance($newResponse);
-
-            $controller = $request->get['controller'];
-
-            $controller_response = $this->controllerCollection->resolve($controller, $request, $newResponse);
-            if ($oldResponse) {
-                $response = $this->factory->setInstance($oldResponse);
-            } else {
-                $response = $controller_response;
-            }
+            $response = $this->runController($request);
         }
 
         if ($filter) {
@@ -87,9 +79,39 @@ class Dispatcher
         $response->addContent(ob_get_clean());
 
         if ($oldRequest) {
-            $this->factory->setInstance($oldRequest);
+            $this->container->setInstance($oldRequest);
         }
 
         return $response;
+    }
+
+    /**
+     * @param Request $request
+     *
+     * @return false|Response|object
+     */
+    protected function runController(Request $request)
+    {
+        /** @var $newResponse Response */
+        $newResponse = $this->container->get(
+            '\\Miny\\HTTP\\Response',
+            array(),
+            true
+        );
+        $oldResponse = $this->container->setInstance($newResponse);
+
+        $controller = $request->get['controller'];
+
+        $controllerResponse = $this->controllerCollection->resolve(
+            $controller,
+            $request,
+            $newResponse
+        );
+
+        if ($oldResponse) {
+            return $this->container->setInstance($oldResponse);
+        } else {
+            return $controllerResponse;
+        }
     }
 }

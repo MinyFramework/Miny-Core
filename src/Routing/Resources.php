@@ -90,6 +90,7 @@ class Resources extends RouteCollection
         if (StringUtils::endsWith($name, 's')) {
             return substr($name, 0, -1);
         }
+
         return $name;
     }
 
@@ -123,6 +124,7 @@ class Resources extends RouteCollection
             throw new InvalidArgumentException('Pattern must be a string');
         }
         $this->id_pattern = $pattern;
+
         return $this;
     }
 
@@ -184,6 +186,7 @@ class Resources extends RouteCollection
             throw new UnexpectedValueException('Parameter "name" must be a string.');
         }
         $this->singular_name = $name;
+
         return $this;
     }
 
@@ -199,6 +202,7 @@ class Resources extends RouteCollection
         if ($this->hasParent()) {
             return $this->getParent()->getName() . '_' . $name;
         }
+
         return $name;
     }
 
@@ -226,6 +230,7 @@ class Resources extends RouteCollection
         $only                     = array_flip(func_get_args());
         $this->collection_actions = array_intersect_key($this->collection_actions, $only);
         $this->member_actions     = array_intersect_key($this->member_actions, $only);
+
         return $this;
     }
 
@@ -237,6 +242,7 @@ class Resources extends RouteCollection
         $except                   = array_flip(func_get_args());
         $this->collection_actions = array_diff_key($this->collection_actions, $except);
         $this->member_actions     = array_diff_key($this->member_actions, $except);
+
         return $this;
     }
 
@@ -249,6 +255,7 @@ class Resources extends RouteCollection
     public function member($method, $name)
     {
         $this->member_actions[$name] = $method;
+
         return $this;
     }
 
@@ -261,6 +268,7 @@ class Resources extends RouteCollection
     public function collection($method, $name)
     {
         $this->collection_actions[$name] = $method;
+
         return $this;
     }
 
@@ -273,21 +281,23 @@ class Resources extends RouteCollection
     {
         $this->resources[] = $resource;
         $resource->setParent($this);
+
         return $resource;
     }
 
     private function build()
     {
-        if (!$this->built) {
-            $this->built = true;
+        if ($this->built) {
+            return;
+        }
+        $this->built = true;
 
-            $this->generateCollectionActions();
-            $this->generateMemberActions();
+        $this->generateCollectionActions();
+        $this->generateMemberActions();
 
-            foreach ($this->resources as $resource) {
-                $resource->build();
-                $this->merge($resource);
-            }
+        foreach ($this->resources as $resource) {
+            $resource->build();
+            $this->merge($resource);
         }
     }
 
@@ -304,6 +314,7 @@ class Resources extends RouteCollection
                 $path .= ':' . $parent->singular_name . '_id/';
             }
         }
+
         return $path . $this->name;
     }
 
@@ -313,40 +324,56 @@ class Resources extends RouteCollection
      * @param null   $unnamed_route_name
      * @param string $path
      */
-    protected function generateActions(array $actions, array $unnamed_actions, $unnamed_route_name, $path)
-    {
+    protected function generateActions(
+        array $actions,
+        array $unnamed_actions,
+        $unnamed_route_name,
+        $path
+    ) {
         $parameters    = $this->parameters;
         $singular_name = $this->getSingularName();
         $parent        = $this->getParent();
         foreach ($actions as $action => $method) {
             $parameters['action'] = $action;
+            $currentPath          = $path;
             if (in_array($action, $unnamed_actions)) {
                 $name               = $unnamed_route_name;
                 $unnamed_route_name = null;
-                $route              = new Route($path, $method, $parameters);
             } else {
-                $name  = $action . '_' . $singular_name;
-                $route = new Route($path . '/' . $action, $method, $parameters);
+                $name = $action . '_' . $singular_name;
+                $currentPath .= '/' . $action;
             }
+            $route = $this->addRoute(
+                new Route($currentPath, $method, $parameters),
+                $name
+            );
             $route->specify('id', $this->id_pattern);
             if ($parent !== null) {
                 $route->specify($parent->name . '_id', $parent->id_pattern);
             }
-            $this->addRoute($route, $name);
         }
     }
 
     protected function generateMemberActions()
     {
         $unnamed = array('show', 'update', 'destroy');
-        $path    = $this->getPathBase() . '/:id';
-        $this->generateActions($this->member_actions, $unnamed, $this->getSingularName(), $path);
+        $this->generateActions(
+            $this->member_actions,
+            $unnamed,
+            $this->getSingularName(),
+            $this->getPathBase() . '/:id'
+        );
     }
 
     protected function generateCollectionActions()
     {
         $unnamed = array('index', 'create');
-        $this->generateActions($this->collection_actions, $unnamed, $this->getName(), $this->getPathBase());
+        $this->generateActions(
+            $this->collection_actions,
+            $unnamed,
+            $this->getName(),
+            $this->getPathBase()
+        );
     }
 
     /**
@@ -357,6 +384,7 @@ class Resources extends RouteCollection
     public function getRoute($name)
     {
         $this->build();
+
         return parent::getRoute($name);
     }
 
@@ -366,6 +394,7 @@ class Resources extends RouteCollection
     public function getRoutes()
     {
         $this->build();
+
         return parent::getRoutes();
     }
 
@@ -375,6 +404,7 @@ class Resources extends RouteCollection
     public function getIterator()
     {
         $this->build();
+
         return parent::getIterator();
     }
 }

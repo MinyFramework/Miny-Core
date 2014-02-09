@@ -55,8 +55,12 @@ class ModuleHandler
      * @param EventDispatcher $events
      * @param Log             $log
      */
-    public function __construct(BaseApplication $app, Container $container, EventDispatcher $events, Log $log)
-    {
+    public function __construct(
+        BaseApplication $app,
+        Container $container,
+        EventDispatcher $events,
+        Log $log
+    ) {
         $this->application = $app;
         $this->log         = $log;
         $this->container   = $container;
@@ -67,6 +71,24 @@ class ModuleHandler
 
         $events->register('before_run', array($this, 'processConditionalCallbacks'));
         $events->register('before_run', array($this, 'registerEventHandlers'));
+    }
+
+    /**
+     * @param array $configuration
+     *
+     * @return $this
+     */
+    public function loadModules(array $configuration)
+    {
+        foreach ($configuration as $module => $parameters) {
+            if (is_int($module) && !is_array($parameters)) {
+                $module     = $parameters;
+                $parameters = array();
+            }
+            $this->module($module, $parameters);
+        }
+
+        return $this;
     }
 
     public function initialize()
@@ -92,7 +114,8 @@ class ModuleHandler
         $class        = sprintf(self::$module_class_format, $module);
         $module_class = $this->container->get($class);
         if (!$module_class instanceof Module) {
-            throw new BadModuleException(sprintf('Module descriptor %s does not extend Module class.', $class));
+            $message = sprintf('Module descriptor %s does not extend Module class.', $class);
+            throw new BadModuleException($message);
         }
         foreach ($module_class->getDependencies() as $name) {
             $this->module($name);

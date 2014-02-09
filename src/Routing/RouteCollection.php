@@ -41,6 +41,7 @@ class RouteCollection implements IteratorAggregate
      * @param Route $route
      * @param mixed $name
      *
+     * @return Route
      * @throws InvalidArgumentException
      */
     public function addRoute(Route $route, $name = null)
@@ -52,6 +53,7 @@ class RouteCollection implements IteratorAggregate
         } else {
             throw new InvalidArgumentException('Parameter "name" must be a string, integer or NULL.');
         }
+        return $route;
     }
 
     /**

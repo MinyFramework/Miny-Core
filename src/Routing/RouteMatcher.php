@@ -34,8 +34,7 @@ class RouteMatcher
     {
         foreach ($this->routes as $route) {
             /** @var $route Route */
-            $route_method = $route->getMethod();
-            if ($method !== null && $route_method !== null && $method !== $route_method) {
+            if (!$this->methodMatches($method, $route)) {
                 continue;
             }
 
@@ -43,6 +42,7 @@ class RouteMatcher
                 if ($path != $route->getPath()) {
                     continue;
                 }
+
                 return new Match($route);
             }
 
@@ -51,9 +51,30 @@ class RouteMatcher
                 foreach ($route->getParameterNames() as $i => $name) {
                     $matched_params[$name] = $matched[$i + 1];
                 }
+
                 return new Match($route, $matched_params);
             }
         }
+
         return false;
+    }
+
+    /**
+     * @param string $method
+     * @param Route  $route
+     *
+     * @return bool
+     */
+    private function methodMatches($method, Route $route)
+    {
+        $route_method = $route->getMethod();
+        if ($method === null) {
+            return true;
+        }
+        if ($route_method === null) {
+            return true;
+        }
+
+        return $method === $route_method;
     }
 }

@@ -45,7 +45,7 @@ class Resource extends Resources
      * @param string $name
      *
      * @return void
-     * @throws \BadMethodCallException
+     * @throws BadMethodCallException
      */
     public function member($method, $name)
     {
@@ -60,6 +60,11 @@ class Resource extends Resources
     protected function generateCollectionActions()
     {
         $unnamed = array('create', 'show', 'destroy', 'update');
-        $this->generateActions($this->collection_actions, $unnamed, $this->getName(), $this->getPathBase());
+        $this->generateActions(
+            $this->collection_actions,
+            $unnamed,
+            $this->getName(),
+            $this->getPathBase()
+        );
     }
 }

@@ -139,6 +139,7 @@ class Route
         if (isset($this->patterns[$parameter])) {
             return $this->patterns[$parameter];
         }
+
         return $default;
     }
 
@@ -168,6 +169,7 @@ class Route
         if (!isset($this->parameter_count)) {
             $this->build();
         }
+
         return $this->parameter_count;
     }
 
@@ -179,6 +181,7 @@ class Route
         if (!isset($this->parameter_count)) {
             $this->build();
         }
+
         return $this->parameter_names;
     }
 
@@ -192,7 +195,11 @@ class Route
         $this->parameter_names = $parameter_names[1];
         $this->regex           = strtr($this->path, array('#' => '\#', '?' => '\?'));
         foreach ($parameter_names[1] as $k => $name) {
-            $this->regex = str_replace($parameter_names[0][$k], $this->getPattern($name), $this->regex);
+            $this->regex = str_replace(
+                $parameter_names[0][$k],
+                $this->getPattern($name),
+                $this->regex
+            );
         }
     }
 }

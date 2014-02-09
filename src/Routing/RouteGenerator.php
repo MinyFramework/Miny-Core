@@ -18,7 +18,7 @@ class RouteGenerator
      * @var RouteCollection
      */
     private $routes;
-    private $short_urls;
+    private $shortUrlsEnabled;
 
     /**
      * @param RouteCollection $routes
@@ -26,8 +26,8 @@ class RouteGenerator
      */
     public function __construct(RouteCollection $routes, $short_urls = true)
     {
-        $this->routes     = $routes;
-        $this->short_urls = $short_urls;
+        $this->routes           = $routes;
+        $this->shortUrlsEnabled = $short_urls;
     }
 
     /**
@@ -50,21 +50,38 @@ class RouteGenerator
             $missing         = array_diff($required_params, array_keys($parameters));
 
             if (!empty($missing)) {
-                $route_params = $route->getParameters();
-                foreach ($missing as $i => $key) {
-                    if (isset($route_params[$key])) {
-                        $parameters[$key] = $route_params[$key];
-                        unset($missing[$i]);
-                    }
-                }
-                if (!empty($missing)) {
-                    throw new InvalidArgumentException('Parameters not set: ' . join(', ', $missing));
-                }
+                $parameters = $this->insertDefaultParameterValues($route, $missing, $parameters);
             }
 
             return $this->buildPath($route, $parameters);
         }
         throw new OutOfBoundsException('Route not found: ' . $route_name);
+    }
+
+    /**
+     * @param Route $route
+     * @param array $missing
+     *
+     * @param array $parameters
+     *
+     * @throws InvalidArgumentException
+     * @return array
+     */
+    private function insertDefaultParameterValues(Route $route, array $missing, array $parameters)
+    {
+        $route_params = $route->getParameters();
+        foreach ($missing as $i => $key) {
+            if (isset($route_params[$key])) {
+                $parameters[$key] = $route_params[$key];
+                unset($missing[$i]);
+            }
+        }
+        if (!empty($missing)) {
+            $message = sprintf('Parameters not set: %s', join(', ', $missing));
+            throw new InvalidArgumentException($message);
+        }
+
+        return $parameters;
     }
 
     private function buildPath(Route $route, array $parameters)
@@ -78,14 +95,16 @@ class RouteGenerator
                 unset($parameters[$name]);
             }
         }
-        if ($this->short_urls) {
+        if ($this->shortUrlsEnabled) {
             if (!empty($parameters)) {
                 $path .= (strpos($path, '?') === false) ? '?' : '&';
                 $path .= http_build_query($parameters, null, '&');
             }
+
             return $path;
         } else {
             $parameters = array('path' => $path) + $parameters;
+
             return '?' . http_build_query($parameters, null, '&');
         }
     }

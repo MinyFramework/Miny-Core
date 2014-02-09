@@ -20,10 +20,10 @@ class Router extends RouteCollection
      * @var RouteGenerator
      */
     private $generator;
-    private $route_prefix;
-    private $route_suffix;
-    private $default_parameters;
-    private $short_urls;
+    private $routePrefix;
+    private $routeSuffix;
+    private $defaultParameters;
+    private $shortUrlsEnabled;
 
     /**
      * @var Resources[]
@@ -38,19 +38,23 @@ class Router extends RouteCollection
      * @param array  $parameters
      * @param bool   $short_urls
      */
-    public function __construct($prefix = null, $suffix = null, array $parameters = array(), $short_urls = true)
-    {
-        $this->matcher            = new RouteMatcher($this);
-        $this->generator          = new RouteGenerator($this, $short_urls);
-        $this->route_prefix       = $prefix;
-        $this->route_suffix       = $suffix;
-        $this->default_parameters = $parameters;
-        $this->short_urls         = $short_urls;
+    public function __construct(
+        $prefix = null,
+        $suffix = null,
+        array $parameters = array(),
+        $short_urls = true
+    ) {
+        $this->matcher           = new RouteMatcher($this);
+        $this->generator         = new RouteGenerator($this, $short_urls);
+        $this->routePrefix       = $prefix;
+        $this->routeSuffix       = $suffix;
+        $this->defaultParameters = $parameters;
+        $this->shortUrlsEnabled  = $short_urls;
     }
 
     public function shortUrls()
     {
-        return $this->short_urls;
+        return $this->shortUrlsEnabled;
     }
 
     /**
@@ -78,19 +82,18 @@ class Router extends RouteCollection
      */
     public function route(Route $route, $name, $prefix = true, $suffix = true)
     {
-        if ($this->route_prefix !== null || $this->route_suffix !== null) {
-            $path = $route->getPath();
-            if ($prefix) {
-                $path = $this->route_prefix . $path;
-            }
-            if ($suffix) {
-                $path .= $this->route_suffix;
-            }
+        $path = $route->getPath();
+        if ($this->routePrefix !== null && $prefix) {
+            $path = $this->routePrefix . $path;
             $route->setPath($path);
         }
-        if (!empty($this->default_parameters)) {
+        if ($this->routeSuffix !== null && $suffix) {
+            $path .= $this->routeSuffix;
+            $route->setPath($path);
+        }
+        if (!empty($this->defaultParameters)) {
             $parameters = $route->getParameters();
-            $route->addParameters($this->default_parameters);
+            $route->addParameters($this->defaultParameters);
             $route->addParameters($parameters);
         }
         $this->addRoute($route, $name);
@@ -106,7 +109,7 @@ class Router extends RouteCollection
      */
     public function resources($name, array $parameters = array())
     {
-        $parameters        = $parameters + $this->default_parameters;
+        $parameters        = $parameters + $this->defaultParameters;
         $resource          = new Resources($name, $parameters);
         $this->resources[] = $resource;
 
@@ -121,7 +124,7 @@ class Router extends RouteCollection
      */
     public function resource($name, array $parameters = array())
     {
-        $parameters        = $parameters + $this->default_parameters;
+        $parameters        = $parameters + $this->defaultParameters;
         $resource          = new Resource($name, $parameters);
         $this->resources[] = $resource;
 
@@ -130,12 +133,13 @@ class Router extends RouteCollection
 
     private function buildResources()
     {
-        if (!$this->resources_built) {
-            $this->resources_built = true;
-            foreach ($this->resources as $resource) {
-                foreach ($resource as $name => $route) {
-                    $this->route($route, $name);
-                }
+        if ($this->resources_built) {
+            return;
+        }
+        $this->resources_built = true;
+        foreach ($this->resources as $resource) {
+            foreach ($resource as $name => $route) {
+                $this->route($route, $name);
             }
         }
     }

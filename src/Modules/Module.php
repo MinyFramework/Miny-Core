@@ -35,7 +35,8 @@ abstract class Module
         $this->application = $app;
         foreach ($this->includes() as $file) {
             if (!is_file($file)) {
-                throw new BadModuleException('Required file not found: ' . $file);
+                $message = sprintf('Required file not found: %s', $file);
+                throw new BadModuleException($message);
             }
             include_once $file;
         }

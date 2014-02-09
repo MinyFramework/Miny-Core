@@ -62,12 +62,30 @@ class ControllerCollection
         } elseif (!is_string($name)) {
             throw new InvalidArgumentException('Controller name must be a string');
         }
-        if (!$controller instanceof Closure && !$controller instanceof BaseController && !is_string($controller)) {
-            throw new InvalidArgumentException(sprintf('Controller %s is invalid.', $name));
+        if (!$this->isControllerValid($controller)) {
+            $message = sprintf('Controller %s is invalid.', $name);
+            throw new InvalidArgumentException($message);
         }
         $this->controllers[$name] = $controller;
 
         return $name;
+    }
+
+    /**
+     * @param $controller
+     *
+     * @return bool
+     */
+    protected function isControllerValid($controller)
+    {
+        if ($controller instanceof Closure) {
+            return true;
+        }
+        if ($controller instanceof BaseController) {
+            return true;
+        }
+
+        return is_string($controller);
     }
 
     /**
@@ -103,7 +121,7 @@ class ControllerCollection
 
         $event = $this->eventDispatcher->raiseEvent('onControllerLoaded', $controller, $action);
 
-        if ($event->isHandled() && $event->hasResponse() && $event->getResponse() instanceof Response) {
+        if ($event->isHandled() && $event->getResponse() instanceof Response) {
             return $event->getResponse();
         }
 

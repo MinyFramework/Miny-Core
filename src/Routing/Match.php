@@ -22,7 +22,6 @@ class Match
     private $parameters;
 
     /**
-     *
      * @param Route $route
      * @param array $parameters
      */
