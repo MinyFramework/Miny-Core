@@ -62,7 +62,12 @@ class Container
     public function addAlias($abstract, $concrete = null, array $parameters = array())
     {
         $abstract                 = ltrim($abstract, '\\');
-        $this->aliases[$abstract] = array($concrete ? ltrim($concrete, '\\') : $abstract, $parameters);
+        if(is_string($concrete)) {
+            $concrete = ltrim($concrete, '\\');
+        } elseif($concrete === null) {
+            $concrete = $abstract;
+        }
+        $this->aliases[$abstract] = array($concrete, $parameters);
     }
 
     /**
@@ -152,17 +157,23 @@ class Container
             $registeredParameters = array();
         }
 
-        if (isset($this->objects[$concrete]) && !$forceNew) {
-            return $this->objects[$concrete];
+        if (is_string($concrete)) {
+            $key = $concrete;
+        } else {
+            $key = $abstract;
+        }
+
+        if (isset($this->objects[$key]) && !$forceNew) {
+            return $this->objects[$key];
         }
 
         $parameters = $parameters + $registeredParameters;
 
         $object = $this->instantiate($concrete, $parameters);
-        $this->callCallbacks($concrete, $object);
+        $this->callCallbacks($key, $object);
 
         if (!$forceNew) {
-            $this->objects[$concrete] = $object;
+            $this->objects[$key] = $object;
         }
 
         return $object;
@@ -190,7 +201,7 @@ class Container
     {
         do {
             list($concrete, $registeredParameters) = $this->aliases[$abstract];
-            if ($concrete === $abstract) {
+            if ($concrete === $abstract || !is_string($concrete)) {
                 return array($concrete, $registeredParameters);
             }
             $abstract = $concrete;
