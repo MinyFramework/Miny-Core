@@ -61,10 +61,10 @@ class Container
      */
     public function addAlias($abstract, $concrete = null, array $parameters = array())
     {
-        $abstract                 = ltrim($abstract, '\\');
-        if(is_string($concrete)) {
+        $abstract = ltrim($abstract, '\\');
+        if (is_string($concrete)) {
             $concrete = ltrim($concrete, '\\');
-        } elseif($concrete === null) {
+        } elseif ($concrete === null) {
             $concrete = $abstract;
         }
         $this->aliases[$abstract] = array($concrete, $parameters);
@@ -185,10 +185,11 @@ class Container
      */
     private function callCallbacks($concrete, $object)
     {
-        if (isset($this->callbacks[$concrete])) {
-            foreach ($this->callbacks[$concrete] as $callback) {
-                $callback($object, $this);
-            }
+        if (!isset($this->callbacks[$concrete])) {
+            return;
+        }
+        foreach ($this->callbacks[$concrete] as $callback) {
+            $callback($object, $this);
         }
     }
 
@@ -281,7 +282,12 @@ class Container
             $class         = $dependency->getDeclaringClass()->getName();
             $method        = $dependency->getDeclaringFunction()->getName();
             $parameterName = $dependency->getName();
-            $message       = sprintf('Parameter %s is not supplied for %s::%s.', $parameterName, $class, $method);
+            $message       = sprintf(
+                'Parameter %s is not supplied for %s::%s.',
+                $parameterName,
+                $class,
+                $method
+            );
             throw new OutOfBoundsException($message);
         }
 
