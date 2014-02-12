@@ -56,6 +56,14 @@ abstract class Module
         $this->configuration = $parameterContainer->getSubTree($name);
     }
 
+    /**
+     * @return AbstractConfigurationTree
+     */
+    public function getConfigurationTree()
+    {
+        return $this->configuration;
+    }
+
     public function getConfiguration($key)
     {
         return $this->configuration[$key];
