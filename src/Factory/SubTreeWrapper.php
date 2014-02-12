@@ -17,7 +17,7 @@ class SubTreeWrapper extends AbstractConfigurationTree
     public function __construct(ParameterContainer $parameterContainer, $root)
     {
         $this->parameterContainer = $parameterContainer;
-        if (strpos($root, ':') !== false) {
+        if (!is_array($root)) {
             $root = explode(':', $root);
         }
         $this->root = $root;
@@ -30,7 +30,7 @@ class SubTreeWrapper extends AbstractConfigurationTree
 
     public function offsetGet($offset)
     {
-        $this->parameterContainer->offsetGet($this->modifyOffset($offset));
+        return $this->parameterContainer->offsetGet($this->modifyOffset($offset));
     }
 
     public function offsetSet($offset, $value)
@@ -49,7 +49,7 @@ class SubTreeWrapper extends AbstractConfigurationTree
             $offset = explode(':', $offset);
         }
 
-        return $this->root + $offset;
+        return array_merge($this->root, $offset);
     }
 
     public function getSubTree($root)
