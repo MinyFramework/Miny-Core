@@ -9,11 +9,10 @@
 
 namespace Miny\Factory;
 
-use ArrayAccess;
 use Miny\Utils\ArrayUtils;
 use OutOfBoundsException;
 
-class ParameterContainer implements ArrayAccess
+class ParameterContainer extends AbstractConfigurationTree
 {
     /**
      * @var array
@@ -93,6 +92,11 @@ class ParameterContainer implements ArrayAccess
             },
             $string
         );
+    }
+
+    public function getSubTree($root)
+    {
+        return new SubTreeWrapper($this, $root);
     }
 
     /**

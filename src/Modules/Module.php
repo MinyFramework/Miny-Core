@@ -11,6 +11,7 @@ namespace Miny\Modules;
 
 use InvalidArgumentException;
 use Miny\Application\BaseApplication;
+use Miny\Factory\AbstractConfigurationTree;
 use Miny\Modules\Exceptions\BadModuleException;
 
 abstract class Module
@@ -26,11 +27,16 @@ abstract class Module
     private $conditionalCallbacks = array();
 
     /**
+     * @var AbstractConfigurationTree
+     */
+    private $configuration;
+
+    /**
      * @param BaseApplication $app
      *
      * @throws BadModuleException
      */
-    public function __construct(BaseApplication $app)
+    public function __construct($name, BaseApplication $app)
     {
         $this->application = $app;
         foreach ($this->includes() as $file) {
@@ -40,8 +46,28 @@ abstract class Module
             }
             include_once $file;
         }
-        $parameters = $app->getParameterContainer();
-        $parameters->addParameters($this->defaultConfiguration(), false);
+
+        $parameterContainer = $app->getParameterContainer();
+        $parameterContainer->addParameters(
+            $this->defaultConfiguration(),
+            false
+        );
+        $this->configuration = $parameterContainer->getSubTree($module);
+    }
+
+    public function getConfiguration($key)
+    {
+        return $this->configuration[$key];
+    }
+
+    public function setConfiguration($key, $value)
+    {
+        $this->configuration[$key] = $value;
+    }
+
+    public function hasConfiguration($key)
+    {
+        return isset($this->configuration[$key]);
     }
 
     public function getDependencies()

@@ -74,6 +74,13 @@ class ModuleHandler
         $events->register(CoreEvents::BEFORE_RUN, array($this, 'registerEventHandlers'));
     }
 
+    public function initialize()
+    {
+        foreach ($this->modules as $module) {
+            $module->init($this->application);
+        }
+    }
+
     /**
      * @param array $configuration
      *
@@ -81,22 +88,11 @@ class ModuleHandler
      */
     public function loadModules(array $configuration)
     {
-        foreach ($configuration as $module => $parameters) {
-            if (is_int($module) && !is_array($parameters)) {
-                $module     = $parameters;
-                $parameters = array();
-            }
-            $this->module($module, $parameters);
+        foreach ($configuration as $module) {
+            $this->module($module);
         }
 
         return $this;
-    }
-
-    public function initialize()
-    {
-        foreach ($this->modules as $module) {
-            $module->init($this->application);
-        }
     }
 
     /**
@@ -113,15 +109,15 @@ class ModuleHandler
 
         $this->log->write(Log::DEBUG, 'ModuleHandler', 'Loading module: %s', $module);
         $class        = sprintf(self::$module_class_format, $module);
-        $module_class = $this->container->get($class);
-        if (!$module_class instanceof Module) {
+        $moduleObject = $this->container->get($class, array($module));
+        if (!$moduleObject instanceof Module) {
             $message = sprintf('Module descriptor %s does not extend Module class.', $class);
             throw new BadModuleException($message);
         }
-        foreach ($module_class->getDependencies() as $name) {
+        foreach ($moduleObject->getDependencies() as $name) {
             $this->module($name);
         }
-        $this->modules[$module] = $module_class;
+        $this->modules[$module] = $moduleObject;
     }
 
     public function processConditionalCallbacks()
