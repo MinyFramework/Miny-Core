@@ -32,9 +32,10 @@ abstract class Module
     private $configuration;
 
     /**
+     * @param string          $name
      * @param BaseApplication $app
      *
-     * @throws BadModuleException
+     * @throws Exceptions\BadModuleException
      */
     public function __construct($name, BaseApplication $app)
     {
@@ -49,10 +50,10 @@ abstract class Module
 
         $parameterContainer = $app->getParameterContainer();
         $parameterContainer->addParameters(
-            $this->defaultConfiguration(),
+            array($name => $this->defaultConfiguration()),
             false
         );
-        $this->configuration = $parameterContainer->getSubTree($module);
+        $this->configuration = $parameterContainer->getSubTree($name);
     }
 
     public function getConfiguration($key)
