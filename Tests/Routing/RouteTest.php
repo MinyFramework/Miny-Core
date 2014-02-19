@@ -77,7 +77,7 @@ class RouteTest extends \PHPUnit_Framework_TestCase
         $route->specify('field', '(.*?)');
         $this->assertEquals('(.*?)', $route->getPattern('field'));
         $this->assertEquals('(\w+)', $route->getPattern('nonexistent'));
-        $this->assertEquals('path/([^\]+)', $route->getRegex());
+        $this->assertEquals('path/(.*?)', $route->getRegex());
     }
 
     public function testDynamic()
