@@ -16,7 +16,7 @@ class RouteTest extends \PHPUnit_Framework_TestCase
                 'param_foo' => 'val_foo',
                 'param_bar' => 'val_bar',
             ));
-        $this->dynamic_object = new Route('path/:field', 'get',
+        $this->dynamic_object = new Route('path/:field([^\]+)', 'get',
             array(
                 'param_foo' => 'val_foo',
                 'param_bar' => 'val_bar',
@@ -67,7 +67,7 @@ class RouteTest extends \PHPUnit_Framework_TestCase
 
     public function testRegex()
     {
-        $this->assertEquals('path/(\w+)', $this->dynamic_object->getRegex());
+        $this->assertEquals('path/([^\]+)', $this->dynamic_object->getRegex());
         $this->assertNull($this->static_object->getRegex());
     }
 
@@ -77,7 +77,7 @@ class RouteTest extends \PHPUnit_Framework_TestCase
         $route->specify('field', '(.*?)');
         $this->assertEquals('(.*?)', $route->getPattern('field'));
         $this->assertEquals('(\w+)', $route->getPattern('nonexistent'));
-        $this->assertEquals('path/(.*?)', $route->getRegex());
+        $this->assertEquals('path/([^\]+)', $route->getRegex());
     }
 
     public function testDynamic()

@@ -15,6 +15,8 @@ use Miny\Routing\Exceptions\BadMethodException;
 class Route
 {
     private static $methods = array('GET', 'POST', 'PUT', 'DELETE');
+    const PARAMETER_WITH_PATTERN = '/:(\w+)(?:\((.*?)\))?/';
+    const PARAMETER_PATTERN      = '/:(\w+)/';
 
     /**
      * @var string
@@ -76,6 +78,10 @@ class Route
      */
     public function getPath()
     {
+        if (!isset($this->parameterCount)) {
+            $this->build();
+        }
+
         return $this->path;
     }
 
@@ -197,21 +203,41 @@ class Route
         return $this->parameterNames;
     }
 
+    private function addParameter($matches)
+    {
+        ++$this->parameterCount;
+        $this->parameterNames[] = $matches[1];
+        if (!isset($matches[2])) {
+            return $matches[0];
+        }
+        $this->specify($matches[1], '(' . $matches[2] . ')');
+
+        return ':' . $matches[1];
+    }
+
     private function build()
     {
-        $parameter_names      = array();
-        $this->parameterCount = preg_match_all('/:(\w+)/', $this->path, $parameter_names);
+        $this->parameterCount = 0;
+        $this->extractPatterns();
         if ($this->parameterCount === 0) {
             return;
         }
-        $this->parameterNames = $parameter_names[1];
-        $this->regex          = strtr($this->path, array('#' => '\#', '?' => '\?'));
-        foreach ($parameter_names[1] as $k => $name) {
+        $this->regex = preg_quote($this->path, '#');
+        foreach ($this->parameterNames as $name) {
             $this->regex = str_replace(
-                $parameter_names[0][$k],
+                '\:' . $name,
                 $this->getPattern($name),
                 $this->regex
             );
         }
+    }
+
+    private function extractPatterns()
+    {
+        $this->path = preg_replace_callback(
+            self::PARAMETER_WITH_PATTERN,
+            array($this, 'addParameter'),
+            $this->path
+        );
     }
 }
