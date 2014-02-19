@@ -34,7 +34,7 @@ class Route
     /**
      * @var string[]
      */
-    private $parameter_names = array();
+    private $parameterNames = array();
 
     /**
      * @var string[]
@@ -49,7 +49,7 @@ class Route
     /**
      * @var int
      */
-    private $parameter_count;
+    private $parameterCount;
 
     /**
      * @param string $path
@@ -89,10 +89,10 @@ class Route
         if (!is_string($path)) {
             throw new InvalidArgumentException('Path must be a string.');
         }
-        $this->path            = $path;
-        $this->parameter_count = null;
-        $this->parameter_names = array();
-        $this->regex           = null;
+        $this->path           = $path;
+        $this->parameterCount = null;
+        $this->parameterNames = array();
+        $this->regex          = null;
     }
 
     /**
@@ -101,6 +101,18 @@ class Route
     public function getMethod()
     {
         return $this->method;
+    }
+
+    public function isMethod($method)
+    {
+        if ($method === null) {
+            return true;
+        }
+        if ($this->method === null) {
+            return true;
+        }
+
+        return $method === $this->method;
     }
 
     /**
@@ -166,11 +178,11 @@ class Route
      */
     public function getParameterCount()
     {
-        if (!isset($this->parameter_count)) {
+        if (!isset($this->parameterCount)) {
             $this->build();
         }
 
-        return $this->parameter_count;
+        return $this->parameterCount;
     }
 
     /**
@@ -178,22 +190,22 @@ class Route
      */
     public function getParameterNames()
     {
-        if (!isset($this->parameter_count)) {
+        if (!isset($this->parameterCount)) {
             $this->build();
         }
 
-        return $this->parameter_names;
+        return $this->parameterNames;
     }
 
     private function build()
     {
-        $parameter_names       = array();
-        $this->parameter_count = preg_match_all('/:(\w+)/', $this->path, $parameter_names);
-        if ($this->parameter_count === 0) {
+        $parameter_names      = array();
+        $this->parameterCount = preg_match_all('/:(\w+)/', $this->path, $parameter_names);
+        if ($this->parameterCount === 0) {
             return;
         }
-        $this->parameter_names = $parameter_names[1];
-        $this->regex           = strtr($this->path, array('#' => '\#', '?' => '\?'));
+        $this->parameterNames = $parameter_names[1];
+        $this->regex          = strtr($this->path, array('#' => '\#', '?' => '\?'));
         foreach ($parameter_names[1] as $k => $name) {
             $this->regex = str_replace(
                 $parameter_names[0][$k],
