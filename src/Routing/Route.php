@@ -170,6 +170,7 @@ class Route
         if ($this->getParameterCount()) {
             return $this->regex;
         }
+        return $this->path;
     }
 
     /**
