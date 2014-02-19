@@ -68,7 +68,7 @@ class RouteTest extends \PHPUnit_Framework_TestCase
     public function testRegex()
     {
         $this->assertEquals('path/([^\]+)', $this->dynamic_object->getRegex());
-        $this->assertNull($this->static_object->getRegex());
+        $this->assertEquals($this->static_object->getPath(), $this->static_object->getRegex());
     }
 
     public function testPatterns()

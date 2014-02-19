@@ -40,7 +40,7 @@ class Route
     /**
      * @var string[]
      */
-    private $patterns = array();
+    private $patterns;
 
     /**
      * @var string
@@ -170,6 +170,7 @@ class Route
         if ($this->getParameterCount()) {
             return $this->regex;
         }
+
         return $this->path;
     }
 
@@ -200,38 +201,34 @@ class Route
     private function addParameter($matches)
     {
         $this->parameterNames[] = $matches[1];
-        if (isset($matches[2])) {
-            $pattern = $matches[2];
-            $retVal  = ':' . $matches[1];
-        } else {
-            $pattern = '\w+';
-            $retVal  = $matches[0];
-        }
+
         $key = '\:' . $matches[1];
         if (!isset($this->patterns[$key])) {
-            $this->patterns[$key] = '(' . $pattern . ')';
+            if (!isset($matches[2])) {
+                $matches[2] = '\w+';
+            }
+            $this->patterns[$key] = '(' . $matches[2] . ')';
         }
 
-        return $retVal;
+        return ':' . $matches[1];
     }
 
     private function build()
     {
         $this->parameterNames = array();
-        $this->extractPatterns();
-        if ($this->isStatic()) {
-            return;
-        }
-        $this->regex = preg_quote($this->path, '#');
-        $this->regex = str_replace(array_keys($this->patterns), $this->patterns, $this->regex);
-    }
 
-    private function extractPatterns()
-    {
-        $this->path = preg_replace_callback(
+        $path = preg_replace_callback(
             self::PARAMETER_WITH_PATTERN,
             array($this, 'addParameter'),
             $this->path
+        );
+        if ($this->isStatic()) {
+            return;
+        }
+        $this->regex = str_replace(
+            array_keys($this->patterns),
+            $this->patterns,
+            preg_quote($path, '#')
         );
     }
 }
