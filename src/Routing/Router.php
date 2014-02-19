@@ -9,7 +9,7 @@
 
 namespace Miny\Routing;
 
-class Router extends RouteCollection
+class Router
 {
     /**
      * @var RouteMatcher
@@ -20,6 +20,11 @@ class Router extends RouteCollection
      * @var RouteGenerator
      */
     private $generator;
+
+    /**
+     * @var RouteCollection
+     */
+    private $collection;
     private $routePrefix;
     private $routeSuffix;
     private $defaultParameters;
@@ -29,7 +34,7 @@ class Router extends RouteCollection
      * @var Resources[]
      */
     private $resources = array();
-    private $resources_built = false;
+    private $resourcesBuilt = false;
 
     /**
      *
@@ -44,8 +49,9 @@ class Router extends RouteCollection
         array $parameters = array(),
         $short_urls = true
     ) {
-        $this->matcher           = new RouteMatcher($this);
-        $this->generator         = new RouteGenerator($this, $short_urls);
+        $this->collection = new RouteCollection();
+        $this->matcher           = new RouteMatcher($this->collection);
+        $this->generator         = new RouteGenerator($this->collection, $short_urls);
         $this->routePrefix       = $prefix;
         $this->routeSuffix       = $suffix;
         $this->defaultParameters = $parameters;
@@ -96,7 +102,7 @@ class Router extends RouteCollection
             $route->addParameters($this->defaultParameters);
             $route->addParameters($parameters);
         }
-        $this->addRoute($route, $name);
+        $this->collection->addRoute($route, $name);
 
         return $route;
     }
@@ -133,10 +139,10 @@ class Router extends RouteCollection
 
     private function buildResources()
     {
-        if ($this->resources_built) {
+        if ($this->resourcesBuilt) {
             return;
         }
-        $this->resources_built = true;
+        $this->resourcesBuilt = true;
         foreach ($this->resources as $resource) {
             foreach ($resource as $name => $route) {
                 $this->route($route, $name);
@@ -168,5 +174,13 @@ class Router extends RouteCollection
         $this->buildResources();
 
         return $this->generator->generate($route_name, $parameters);
+    }
+
+    /**
+     * @return RouteCollection
+     */
+    public function getRouteCollection()
+    {
+        return $this->collection;
     }
 }

@@ -25,25 +25,39 @@ class RouterTest extends \PHPUnit_Framework_TestCase
     public function testRootShouldOnlyHavePrefixByDefault()
     {
         $this->object->root(array('parameter' => 'other_value'));
-        $this->assertEquals('prefix/', $this->object->getRoute('root')->getPath());
-        $this->assertEquals(array(
-            'default_parameter' => 'default_value',
-            'parameter'         => 'other_value'), $this->object->getRoute('root')->getParameters());
+        $this->assertEquals(
+            'prefix/',
+            $this->object->getRouteCollection()->getRoute('root')->getPath()
+        );
+        $this->assertEquals(
+            array(
+                'default_parameter' => 'default_value',
+                'parameter'         => 'other_value'
+            ),
+            $this->object->getRouteCollection()->getRoute('root')->getParameters()
+        );
     }
 
     public function testRootShouldOverwriteDefaultParameters()
     {
         $this->object->root(array('parameter' => 'other_value'));
-        $this->assertEquals(array(
-            'default_parameter' => 'default_value',
-            'parameter'         => 'other_value'), $this->object->getRoute('root')->getParameters());
+        $this->assertEquals(
+            array(
+                'default_parameter' => 'default_value',
+                'parameter'         => 'other_value'
+            ),
+            $this->object->getRouteCollection()->getRoute('root')->getParameters()
+        );
     }
 
     public function testRoutesHaveBothPrefixAndSuffixByDefault()
     {
         $route = new Route('path');
         $this->object->route($route, 'name');
-        $this->assertEquals('prefix/path.suffix', $this->object->getRoute('name')->getPath());
+        $this->assertEquals(
+            'prefix/path.suffix',
+            $this->object->getRouteCollection()->getRoute('name')->getPath()
+        );
     }
 
     public function testRouteShouldReturnTheGivenRoute()
@@ -56,14 +70,20 @@ class RouterTest extends \PHPUnit_Framework_TestCase
     {
         $route = new Route('path');
         $this->object->route($route, 'name', false, false);
-        $this->assertEquals('path', $this->object->getRoute('name')->getPath());
+        $this->assertEquals(
+            'path',
+            $this->object->getRouteCollection()->getRoute('name')->getPath()
+        );
     }
 
     public function testRouterShouldGeneratePathsWithPrefixAndSuffixByDefault()
     {
         $route = new Route('path/:param');
         $this->object->route($route, 'name');
-        $this->assertEquals('prefix/path/value.suffix', $this->object->generate('name', array('param' => 'value')));
+        $this->assertEquals(
+            'prefix/path/value.suffix',
+            $this->object->generate('name', array('param' => 'value'))
+        );
     }
 
     public function testRouterShouldMatchPathsWithPrefixAndSuffixByDefault()
@@ -73,11 +93,14 @@ class RouterTest extends \PHPUnit_Framework_TestCase
         $match = $this->object->match('prefix/path/5.suffix');
         $this->assertInstanceOf(__NAMESPACE__ . '\Match', $match);
         $this->assertSame($route, $match->getRoute());
-        $this->assertEquals(array(
-            'default_parameter' => 'default_value',
-            'parameter'         => 'other_value',
-            'param'             => 5
-        ), $match->getParameters());
+        $this->assertEquals(
+            array(
+                'default_parameter' => 'default_value',
+                'parameter'         => 'other_value',
+                'param'             => 5
+            ),
+            $match->getParameters()
+        );
     }
 
     public function testRouterShouldBuildResourcesBeforeMatch()
@@ -85,19 +108,25 @@ class RouterTest extends \PHPUnit_Framework_TestCase
         $this->object->resources('foo_resources', array('parameter' => 'resource_parameter'));
         $match = $this->object->match('prefix/foo_resources/5.suffix', 'GET');
         $this->assertInstanceOf(__NAMESPACE__ . '\Match', $match);
-        $this->assertEquals(array(
-            'default_parameter' => 'default_value',
-            'parameter'         => 'resource_parameter',
-            'id'                => '5',
-            'controller'        => 'foo_resources',
-            'action'            => 'show'
-        ), $match->getParameters());
+        $this->assertEquals(
+            array(
+                'default_parameter' => 'default_value',
+                'parameter'         => 'resource_parameter',
+                'id'                => '5',
+                'controller'        => 'foo_resources',
+                'action'            => 'show'
+            ),
+            $match->getParameters()
+        );
     }
 
     public function testRouterShouldBuildResourcesBeforeGenerate()
     {
         $this->object->resources('foo_resources', array('parameter' => 'resource_parameter'));
-        $this->assertEquals('prefix/foo_resources/5.suffix', $this->object->generate('foo_resource', array('id' => 5)));
+        $this->assertEquals(
+            'prefix/foo_resources/5.suffix',
+            $this->object->generate('foo_resource', array('id' => 5))
+        );
     }
 
     public function testResource()

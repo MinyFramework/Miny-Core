@@ -100,12 +100,12 @@ class RouteGenerator
                 $path .= (strpos($path, '?') === false) ? '?' : '&';
                 $path .= http_build_query($parameters, null, '&');
             }
-
-            return $path;
         } else {
             $parameters = array('path' => $path) + $parameters;
 
-            return '?' . http_build_query($parameters, null, '&');
+            $path = '?' . http_build_query($parameters, null, '&');
         }
+
+        return $path;
     }
 }

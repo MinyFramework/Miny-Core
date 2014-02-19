@@ -53,7 +53,6 @@ class RouteTest extends \PHPUnit_Framework_TestCase
     public function testPaths()
     {
         $this->assertEquals('path', $this->static_object->getPath());
-        $this->assertEquals('path/:field', $this->dynamic_object->getPath());
 
         $this->static_object->setPath('path2');
 
