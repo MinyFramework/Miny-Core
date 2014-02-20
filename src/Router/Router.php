@@ -19,6 +19,7 @@ class Router
      */
     private $routes;
     private $staticRoutes;
+    private $globalValues;
 
     /**
      * @var RouteParser
@@ -34,6 +35,7 @@ class Router
         $this->postfix      = '';
         $this->routes       = array();
         $this->staticRoutes = array();
+        $this->globalValues = array();
     }
 
     public function root()
@@ -62,6 +64,7 @@ class Router
         if ($route->isStatic()) {
             $this->staticRoutes[$uri] = $route;
         }
+        $route->set($this->globalValues);
 
         return $route;
     }
@@ -172,5 +175,10 @@ class Router
             throw new InvalidArgumentException('$postfix must be a string');
         }
         $this->postfix = $postfix;
+    }
+
+    public function addGlobalValues($values)
+    {
+        $this->globalValues = $values + $values;
     }
 }

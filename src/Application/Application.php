@@ -89,6 +89,7 @@ class Application extends BaseApplication
         $container->addCallback(
             '\\Miny\\Router\\Router',
             function (Router $router) use ($parameterContainer) {
+                $router->addGlobalValues($parameterContainer['router:default_parameters']);
                 $router->setPrefix($parameterContainer['router:prefix']);
                 $router->setPostfix($parameterContainer['router:postfix']);
             }
