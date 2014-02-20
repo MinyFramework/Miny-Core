@@ -4,6 +4,9 @@ namespace Miny\Routing;
 
 class RouterTest extends \PHPUnit_Framework_TestCase
 {
+    /**
+     * @var Router
+     */
     protected $object;
 
     protected function setUp()
@@ -24,17 +27,18 @@ class RouterTest extends \PHPUnit_Framework_TestCase
 
     public function testRootShouldOnlyHavePrefixByDefault()
     {
-        $this->object->root(array('parameter' => 'other_value'));
+        $root = $this->object->root(array('parameter' => 'other_value'));
+        //$root = $this->object->getRouteCollection()->getRoute('root');
         $this->assertEquals(
             'prefix/',
-            $this->object->getRouteCollection()->getRoute('root')->getPath()
+            $root->getPath()
         );
         $this->assertEquals(
             array(
                 'default_parameter' => 'default_value',
                 'parameter'         => 'other_value'
             ),
-            $this->object->getRouteCollection()->getRoute('root')->getParameters()
+            $root->getParameters()
         );
     }
 
@@ -101,37 +105,6 @@ class RouterTest extends \PHPUnit_Framework_TestCase
             ),
             $match->getParameters()
         );
-    }
-
-    public function testRouterShouldBuildResourcesBeforeMatch()
-    {
-        $this->object->resources('foo_resources', array('parameter' => 'resource_parameter'));
-        $match = $this->object->match('prefix/foo_resources/5.suffix', 'GET');
-        $this->assertInstanceOf(__NAMESPACE__ . '\Match', $match);
-        $this->assertEquals(
-            array(
-                'default_parameter' => 'default_value',
-                'parameter'         => 'resource_parameter',
-                'id'                => '5',
-                'controller'        => 'foo_resources',
-                'action'            => 'show'
-            ),
-            $match->getParameters()
-        );
-    }
-
-    public function testRouterShouldBuildResourcesBeforeGenerate()
-    {
-        $this->object->resources('foo_resources', array('parameter' => 'resource_parameter'));
-        $this->assertEquals(
-            'prefix/foo_resources/5.suffix',
-            $this->object->generate('foo_resource', array('id' => 5))
-        );
-    }
-
-    public function testResource()
-    {
-        $this->assertInstanceOf('\Miny\Routing\Resource', $this->object->resource('foo'));
     }
 }
 

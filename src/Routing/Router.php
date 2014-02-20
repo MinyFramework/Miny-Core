@@ -29,11 +29,6 @@ class Router
     private $routeSuffix;
     private $defaultParameters;
     private $shortUrlsEnabled;
-
-    /**
-     * @var Resources[]
-     */
-    private $resources = array();
     private $resourcesBuilt = false;
 
     /**
@@ -41,21 +36,21 @@ class Router
      * @param string $prefix
      * @param string $suffix
      * @param array  $parameters
-     * @param bool   $short_urls
+     * @param bool   $shortUrls
      */
     public function __construct(
         $prefix = null,
         $suffix = null,
         array $parameters = array(),
-        $short_urls = true
+        $shortUrls = true
     ) {
-        $this->collection = new RouteCollection();
+        $this->collection        = new RouteCollection();
         $this->matcher           = new RouteMatcher($this->collection);
-        $this->generator         = new RouteGenerator($this->collection, $short_urls);
+        $this->generator         = new RouteGenerator($this->collection, $shortUrls);
         $this->routePrefix       = $prefix;
         $this->routeSuffix       = $suffix;
         $this->defaultParameters = $parameters;
-        $this->shortUrlsEnabled  = $short_urls;
+        $this->shortUrlsEnabled  = $shortUrls;
     }
 
     public function shortUrls()
@@ -108,49 +103,6 @@ class Router
     }
 
     /**
-     * @param string $name
-     * @param array  $parameters
-     *
-     * @return Resources
-     */
-    public function resources($name, array $parameters = array())
-    {
-        $parameters        = $parameters + $this->defaultParameters;
-        $resource          = new Resources($name, $parameters);
-        $this->resources[] = $resource;
-
-        return $resource;
-    }
-
-    /**
-     * @param string $name
-     * @param array  $parameters
-     *
-     * @return Resource
-     */
-    public function resource($name, array $parameters = array())
-    {
-        $parameters        = $parameters + $this->defaultParameters;
-        $resource          = new Resource($name, $parameters);
-        $this->resources[] = $resource;
-
-        return $resource;
-    }
-
-    private function buildResources()
-    {
-        if ($this->resourcesBuilt) {
-            return;
-        }
-        $this->resourcesBuilt = true;
-        foreach ($this->resources as $resource) {
-            foreach ($resource as $name => $route) {
-                $this->route($route, $name);
-            }
-        }
-    }
-
-    /**
      * @param string $path
      * @param string $method
      *
@@ -158,8 +110,6 @@ class Router
      */
     public function match($path, $method = null)
     {
-        $this->buildResources();
-
         return $this->matcher->match($path, $method);
     }
 
@@ -171,8 +121,6 @@ class Router
      */
     public function generate($route_name, array $parameters = array())
     {
-        $this->buildResources();
-
         return $this->generator->generate($route_name, $parameters);
     }
 

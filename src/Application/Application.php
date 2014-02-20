@@ -133,35 +133,6 @@ class Application extends BaseApplication
     }
 
     /**
-     * @param string $name
-     * @param mixed  $controller
-     * @param array  $parameters
-     *
-     * @return Resource
-     */
-    public function resource($name, $controller = null, array $parameters = array())
-    {
-        $parameters['controller'] = $this->registerController($controller ? : $name, $name);
-
-        return $this->getContainer()->get('\\Miny\\Routing\\Router')->resource($name, $parameters);
-    }
-
-    /**
-     *
-     * @param string $name
-     * @param mixed  $controller
-     * @param array  $parameters
-     *
-     * @return Resources
-     */
-    public function resources($name, $controller = null, array $parameters = array())
-    {
-        $parameters['controller'] = $this->registerController($controller ? : $name, $name);
-
-        return $this->getContainer()->get('\\Miny\\Routing\\Router')->resources($name, $parameters);
-    }
-
-    /**
      *
      * @param string      $path
      * @param mixed       $controller

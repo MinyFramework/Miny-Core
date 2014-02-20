@@ -11,11 +11,12 @@ namespace Miny\Controller;
 
 use Closure;
 use InvalidArgumentException;
+use Miny\Controller\Exceptions\InvalidControllerException;
+use Miny\Controller\Exceptions\MissingControllerException;
 use Miny\Event\EventDispatcher;
 use Miny\Factory\Container;
 use Miny\HTTP\Request;
 use Miny\HTTP\Response;
-use UnexpectedValueException;
 
 class ControllerCollection
 {
@@ -48,12 +49,14 @@ class ControllerCollection
     }
 
     /**
-     * @param string                        $name
      * @param BaseController|Closure|string $controller
      *
-     * @return string
+     * @param string                        $name
      *
      * @throws InvalidArgumentException
+     * @throws InvalidControllerException
+     * @return string
+     *
      */
     public function register($controller, $name = null)
     {
@@ -64,7 +67,7 @@ class ControllerCollection
         }
         if (!$this->isControllerValid($controller)) {
             $message = sprintf('Controller %s is invalid.', $name);
-            throw new InvalidArgumentException($message);
+            throw new InvalidControllerException($message);
         }
         $this->controllers[$name] = $controller;
 
@@ -79,9 +82,6 @@ class ControllerCollection
     protected function isControllerValid($controller)
     {
         if ($controller instanceof Closure) {
-            return true;
-        }
-        if ($controller instanceof BaseController) {
             return true;
         }
 
@@ -141,8 +141,8 @@ class ControllerCollection
     /**
      * @param string $class
      *
-     * @throws UnexpectedValueException
      * @throws InvalidArgumentException
+     * @throws InvalidControllerException
      * @return BaseController|Closure
      */
     private function getController($class)
@@ -153,15 +153,16 @@ class ControllerCollection
         if (isset($this->controllers[$class])) {
             $class = $this->controllers[$class];
             if (!is_string($class)) {
-                //In this case $class is either a Closure or a Controller
+                //In this case $class is a Closure
                 return $class;
             }
         }
-        $class = $this->checkControllerClassName($class);
+        $class = $this->getControllerClassName($class);
 
         $controller = $this->container->get($class);
         if (!$controller instanceof BaseController) {
-            throw new UnexpectedValueException('Class does not extend BaseController: ' . $class);
+            $message = sprintf('Class %s does not extend BaseController', $class);
+            throw new InvalidControllerException($message);
         }
 
         return $controller;
@@ -171,16 +172,16 @@ class ControllerCollection
      * @param string $class
      *
      * @return string
-     * @throws UnexpectedValueException
+     * @throws MissingControllerException
      */
-    private function checkControllerClassName($class)
+    private function getControllerClassName($class)
     {
         if (class_exists($class)) {
             return $class;
         }
         $class = $this->controllerNamespace . ucfirst($class) . 'Controller';
         if (!class_exists($class)) {
-            throw new UnexpectedValueException('Class not exists: ' . $class);
+            throw new MissingControllerException(sprintf('Class %s does not exist.', $class));
         }
 
         return $class;
