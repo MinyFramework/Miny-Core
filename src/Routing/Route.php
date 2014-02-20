@@ -15,7 +15,7 @@ use Miny\Routing\Exceptions\BadMethodException;
 class Route
 {
     private static $methods = array('GET', 'POST', 'PUT', 'DELETE');
-    const PARAMETER_WITH_PATTERN = '/:(\w+)(?:\((.*?)\))?/';
+    const PARAMETER_WITH_PATTERN = '/{(\w+)(?::(.*?))?}/';
 
     /**
      * @var string
@@ -136,7 +136,7 @@ class Route
      */
     public function specify($parameter, $pattern)
     {
-        $this->patterns['\:' . $parameter] = $pattern;
+        $this->patterns[$parameter] = $pattern;
     }
 
     /**
@@ -145,10 +145,10 @@ class Route
      *
      * @return string
      */
-    public function getPattern($parameter, $default = '(\w+)')
+    public function getPattern($parameter, $default = '([^/]+)')
     {
-        if (isset($this->patterns['\:' . $parameter])) {
-            return $this->patterns['\:' . $parameter];
+        if (isset($this->patterns[$parameter])) {
+            return $this->patterns[$parameter];
         }
 
         return $default;
@@ -198,19 +198,23 @@ class Route
         return $this->parameterNames;
     }
 
+    public function makePlaceholder($name)
+    {
+        return '{' . $name . '}';
+    }
+
     private function addParameter($matches)
     {
         $this->parameterNames[] = $matches[1];
 
-        $key = '\:' . $matches[1];
-        if (!isset($this->patterns[$key])) {
+        if (!isset($this->patterns[$matches[1]])) {
             if (!isset($matches[2])) {
                 $matches[2] = '\w+';
             }
-            $this->patterns[$key] = '(' . $matches[2] . ')';
+            $this->patterns[$matches[1]] = '(' . $matches[2] . ')';
         }
 
-        return ':' . $matches[1];
+        return $this->makePlaceholder($matches[1]);
     }
 
     private function build()
@@ -225,8 +229,12 @@ class Route
         if ($this->isStatic()) {
             return;
         }
+        $keys = array();
+        foreach (array_keys($this->patterns) as $key) {
+            $keys[] = preg_quote($this->makePlaceholder($key), '#');
+        }
         $this->regex = str_replace(
-            array_keys($this->patterns),
+            $keys,
             $this->patterns,
             preg_quote($this->path, '#')
         );

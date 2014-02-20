@@ -89,7 +89,7 @@ class RouteGenerator
         $path = $route->getPath();
         krsort($parameters);
         foreach ($parameters as $name => $value) {
-            $token = ':' . $name;
+            $token = '{' . $name . '}';
             if (strpos($path, $token) !== false) {
                 $path = str_replace($token, $value, $path);
                 unset($parameters[$name]);

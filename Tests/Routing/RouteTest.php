@@ -6,17 +6,24 @@ use InvalidArgumentException;
 
 class RouteTest extends \PHPUnit_Framework_TestCase
 {
-    protected $static_object;
-    protected $dynamic_object;
+    /**
+     * @var Route
+     */
+    protected $staticRoute;
+
+    /**
+     * @var Route
+     */
+    protected $dynamicRoute;
 
     protected function setUp()
     {
-        $this->static_object  = new Route('path', 'get',
+        $this->staticRoute  = new Route('path', 'get',
             array(
                 'param_foo' => 'val_foo',
                 'param_bar' => 'val_bar',
             ));
-        $this->dynamic_object = new Route('path/:field([^\]+)', 'get',
+        $this->dynamicRoute = new Route('path/{field:\w+}', 'get',
             array(
                 'param_foo' => 'val_foo',
                 'param_bar' => 'val_bar',
@@ -47,71 +54,75 @@ class RouteTest extends \PHPUnit_Framework_TestCase
      */
     public function testSetPathException()
     {
-        $this->static_object->setPath(5);
+        $this->staticRoute->setPath(5);
     }
 
     public function testPaths()
     {
-        $this->assertEquals('path', $this->static_object->getPath());
+        $this->assertEquals('path', $this->staticRoute->getPath());
 
-        $this->static_object->setPath('path2');
+        $this->staticRoute->setPath('path2');
 
-        $this->assertEquals('path2', $this->static_object->getPath());
+        $this->assertEquals('path2', $this->staticRoute->getPath());
     }
 
     public function testGetMethod()
     {
-        $this->assertEquals('GET', $this->static_object->getMethod());
+        $this->assertEquals('GET', $this->staticRoute->getMethod());
     }
 
     public function testRegex()
     {
-        $this->assertEquals('path/([^\]+)', $this->dynamic_object->getRegex());
-        $this->assertEquals($this->static_object->getPath(), $this->static_object->getRegex());
+        $this->assertEquals('path/(\w+)', $this->dynamicRoute->getRegex());
+        $this->assertEquals($this->staticRoute->getPath(), $this->staticRoute->getRegex());
     }
 
     public function testPatterns()
     {
-        $route = $this->dynamic_object;
-        $route->specify('field', '(.*?)');
-        $this->assertEquals('(.*?)', $route->getPattern('field'));
-        $this->assertEquals('(\w+)', $route->getPattern('nonexistent'));
-        $this->assertEquals('path/(.*?)', $route->getRegex());
+        $this->dynamicRoute->specify('field', '(.*?)');
+        $this->assertEquals('(.*?)', $this->dynamicRoute->getPattern('field'));
+        $this->assertEquals('([^/]+)', $this->dynamicRoute->getPattern('nonexistent'));
+        $this->assertEquals('path/(.*?)', $this->dynamicRoute->getRegex());
     }
 
     public function testDynamic()
     {
-        $route = $this->dynamic_object;
-        $this->assertEquals(array('field'), $route->getParameterNames());
-        $this->assertEquals(1, $route->getParameterCount());
-        $this->assertFalse($route->isStatic());
+        $this->assertEquals(array('field'), $this->dynamicRoute->getParameterNames());
+        $this->assertEquals(1, $this->dynamicRoute->getParameterCount());
+        $this->assertFalse($this->dynamicRoute->isStatic());
     }
 
     public function testStatic()
     {
-        $route = $this->static_object;
-        $this->assertEquals(array(), $route->getParameterNames());
-        $this->assertEquals(0, $route->getParameterCount());
-        $this->assertTrue($route->isStatic());
+        $this->assertEquals(array(), $this->staticRoute->getParameterNames());
+        $this->assertEquals(0, $this->staticRoute->getParameterCount());
+        $this->assertTrue($this->staticRoute->isStatic());
     }
 
     public function testParameters()
     {
-        $route = $this->static_object;
-        $this->assertEquals(array(
-            'param_foo' => 'val_foo',
-            'param_bar' => 'val_bar',
-        ), $route->getParameters());
+        $this->assertEquals(
+            array(
+                'param_foo' => 'val_foo',
+                'param_bar' => 'val_bar',
+            ),
+            $this->staticRoute->getParameters()
+        );
 
-        $route->addParameters(array(
-            'param_foobar' => 'val_foobar',
-            'param_bar'    => 'some_other'
-        ));
-        $this->assertEquals(array(
-            'param_foo'    => 'val_foo',
-            'param_bar'    => 'some_other',
-            'param_foobar' => 'val_foobar',
-        ), $route->getParameters());
+        $this->staticRoute->addParameters(
+            array(
+                'param_foobar' => 'val_foobar',
+                'param_bar'    => 'some_other'
+            )
+        );
+        $this->assertEquals(
+            array(
+                'param_foo'    => 'val_foo',
+                'param_bar'    => 'some_other',
+                'param_foobar' => 'val_foobar',
+            ),
+            $this->staticRoute->getParameters()
+        );
     }
 }
 

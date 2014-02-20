@@ -15,8 +15,7 @@ class RouteMatcherTest extends \PHPUnit_Framework_TestCase
 
         $this->static_route      = new Route('static_path');
         $this->static_route_post = new Route('other_static_path', 'POST');
-        $this->route             = new Route('path/:parameter', 'POST');
-        $this->route->specify('parameter', '(\d+)');
+        $this->route             = new Route('path/{parameter:\d+}', 'POST');
 
         $collection->addRoute($this->route);
         $collection->addRoute($this->static_route);

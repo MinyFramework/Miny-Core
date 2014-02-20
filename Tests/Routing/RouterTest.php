@@ -28,7 +28,6 @@ class RouterTest extends \PHPUnit_Framework_TestCase
     public function testRootShouldOnlyHavePrefixByDefault()
     {
         $root = $this->object->root(array('parameter' => 'other_value'));
-        //$root = $this->object->getRouteCollection()->getRoute('root');
         $this->assertEquals(
             'prefix/',
             $root->getPath()
@@ -82,7 +81,7 @@ class RouterTest extends \PHPUnit_Framework_TestCase
 
     public function testRouterShouldGeneratePathsWithPrefixAndSuffixByDefault()
     {
-        $route = new Route('path/:param');
+        $route = new Route('path/{param}');
         $this->object->route($route, 'name');
         $this->assertEquals(
             'prefix/path/value.suffix',
@@ -92,7 +91,7 @@ class RouterTest extends \PHPUnit_Framework_TestCase
 
     public function testRouterShouldMatchPathsWithPrefixAndSuffixByDefault()
     {
-        $route = new Route('path/:param', null, array('parameter' => 'other_value'));
+        $route = new Route('path/{param}', null, array('parameter' => 'other_value'));
         $this->object->route($route, 'name');
         $match = $this->object->match('prefix/path/5.suffix');
         $this->assertInstanceOf(__NAMESPACE__ . '\Match', $match);

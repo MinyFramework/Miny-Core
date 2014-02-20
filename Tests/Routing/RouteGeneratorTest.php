@@ -9,8 +9,8 @@ class RouteGeneratorTest extends \PHPUnit_Framework_TestCase
     protected function setUp()
     {
         $collection = new RouteCollection;
-        $collection->addRoute(new Route('path/:parameter/:other_parameter'), 'route');
-        $collection->addRoute(new Route('?path/:parameter'), 'other_route');
+        $collection->addRoute(new Route('path/{parameter}/{other_parameter}'), 'route');
+        $collection->addRoute(new Route('?path/{parameter}'), 'other_route');
         $this->collection = $collection;
     }
 
@@ -56,7 +56,8 @@ class RouteGeneratorTest extends \PHPUnit_Framework_TestCase
 
     public function testGenerateWithMissingParametersSuppliedByRoute()
     {
-        $this->collection->addRoute(new Route('path/:a', 'GET', array('a' => 'foo')), 'some_route');
+        $this->collection->addRoute(new Route('path/{a}', 'GET', array('a' => 'foo')),
+            'some_route');
         $generator = new RouteGenerator($this->collection);
         $this->assertEquals('path/foo', $generator->generate('some_route'));
     }
