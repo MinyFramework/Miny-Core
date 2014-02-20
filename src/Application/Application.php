@@ -9,14 +9,14 @@
 
 namespace Miny\Application;
 
+use Miny\Controller\ControllerDispatcher;
 use Miny\Event\EventDispatcher;
 use Miny\Factory\Container;
 use Miny\Factory\ParameterContainer;
 use Miny\HTTP\Request;
 use Miny\HTTP\Session;
-use Miny\Routing\Resources;
-use Miny\Routing\Route;
-use Miny\Routing\Router;
+use Miny\Router\Route;
+use Miny\Router\Router;
 use UnexpectedValueException;
 
 class Application extends BaseApplication
@@ -27,15 +27,12 @@ class Application extends BaseApplication
         parent::setDefaultParameters($parameterContainer);
         $parameterContainer->addParameters(
             array(
-                'router'      => array(
+                'router' => array(
                     'prefix'             => '/',
-                    'suffix'             => '',
+                    'postfix'            => '',
                     'default_parameters' => array(),
                     'exception_paths'    => array(),
                     'short_urls'         => false
-                ),
-                'controllers' => array(
-                    'namespace' => '\\Application\\Controllers\\'
                 )
             )
         );
@@ -52,7 +49,7 @@ class Application extends BaseApplication
         parent::registerDefaultServices($container);
 
         $container->addCallback(
-            '\Miny\Event\EventDispatcher',
+            '\\Miny\\Event\\EventDispatcher',
             function (EventDispatcher $events, Container $container) {
                 $eventHandlers = $container->get(
                     '\\Miny\\Application\\Handlers\\ApplicationEventHandlers'
@@ -76,17 +73,33 @@ class Application extends BaseApplication
             }
         );
 
-        $container->addConstructorArguments(
-            '\\Miny\\Controller\\ControllerCollection',
-            '@controllers:namespace'
+        $container->addCallback(
+            '\\Miny\\Controller\\ControllerDispatcher',
+            function (ControllerDispatcher $dispatcher, Container $container) {
+                $dispatcher->addRunner(
+                    $container->get('\\Miny\\Controller\\Runners\\StringControllerRunner')
+                );
+                $dispatcher->addRunner(
+                    $container->get('\\Miny\\Controller\\Runners\\ClosureControllerRunner')
+                );
+            }
         );
-        $container->addConstructorArguments(
-            '\\Miny\\Routing\\Router',
-            '@router:prefix',
-            '@router:suffix',
-            '@router:default_parameters',
-            '@router:short_urls'
+
+        $parameterContainer = $this->getParameterContainer();
+        $container->addCallback(
+            '\\Miny\\Router\\Router',
+            function (Router $router) use ($parameterContainer) {
+                $router->setPrefix($parameterContainer['router:prefix']);
+                $router->setPostfix($parameterContainer['router:postfix']);
+            }
         );
+
+        $container->addAlias(
+            '\\Miny\\Router\\RouteGenerator',
+            null,
+            array(1 => '@router:short_urls')
+        );
+
         $container->addCallback(
             '\\Miny\\HTTP\\Session',
             function (Session $session) {
@@ -100,36 +113,28 @@ class Application extends BaseApplication
         $container = $this->getContainer();
 
         /** @var $router Router */
-        $router = $container->get('\\Miny\\Routing\\Router');
+        $router = $container->get('\\Miny\\Router\\Router');
 
         /** @var $dispatcher Dispatcher */
         $dispatcher = $container->get('\\Miny\\Application\\Dispatcher');
 
-        if (!$router->getRouteCollection()->hasRoute('root')) {
+        if (!$router->has('root')) {
             $this->root('index');
         }
         $dispatcher->dispatch(Request::getGlobal())->send();
     }
 
-    private function registerController($controller, $name = null)
-    {
-        return $this
-            ->getContainer()
-            ->get('\\Miny\\Controller\\ControllerCollection')
-            ->register($controller, $name);
-    }
-
     /**
      * @param mixed $controller
-     * @param array $parameters
      *
      * @return Route
      */
-    public function root($controller, array $parameters = array())
+    public function root($controller)
     {
-        $parameters['controller'] = $this->registerController($controller);
+        /** @var $router Router */
+        $router = $this->getContainer()->get('\\Miny\\Router\\Router');
 
-        return $this->getContainer()->get('\\Miny\\Routing\\Router')->root($parameters);
+        return $router->root()->set('controller', $controller);
     }
 
     /**
@@ -138,76 +143,75 @@ class Application extends BaseApplication
      * @param mixed       $controller
      * @param string|null $method
      * @param string|null $name
-     * @param array       $parameters
      *
      * @return Route
      *
      * @throws UnexpectedValueException
      */
-    public function route(
-        $path,
-        $controller,
-        $method = null,
-        $name = null,
-        array $parameters = array()
-    ) {
-        $parameters['controller'] = $this->registerController($controller);
-
-        return $this->getContainer()->get('\\Miny\\Routing\\Router')->route(
-            new Route($path, $method, $parameters),
-            $name
-        );
+    public function route($path, $controller, $method = null, $name = null)
+    {
+        /** @var $router Router */
+        $router = $this->getContainer()->get('\\Miny\\Router\\Router');
+        return $router->add($path, $method, $name)->set('controller', $controller);
     }
 
     /**
      * @param string      $path
      * @param mixed       $controller
      * @param string|null $name
-     * @param array       $parameters
      *
      * @return Route
      */
-    public function get($path, $controller, $name = null, array $parameters = array())
+    public function get($path, $controller, $name = null)
     {
-        return $this->route($path, $controller, 'GET', $name, $parameters);
+        /** @var $router Router */
+        $router = $this->getContainer()->get('\\Miny\\Router\\Router');
+
+        return $router->get($path, $name)->set('controller', $controller);
     }
 
     /**
      * @param string      $path
      * @param mixed       $controller
      * @param string|null $name
-     * @param array       $parameters
      *
      * @return Route
      */
-    public function post($path, $controller, $name = null, array $parameters = array())
+    public function post($path, $controller, $name = null)
     {
-        return $this->route($path, $controller, 'POST', $name, $parameters);
+        /** @var $router Router */
+        $router = $this->getContainer()->get('\\Miny\\Router\\Router');
+
+        return $router->post($path, $name)->set('controller', $controller);
     }
 
     /**
      * @param string      $path
      * @param mixed       $controller
      * @param string|null $name
-     * @param array       $parameters
      *
      * @return Route
      */
-    public function put($path, $controller, $name = null, array $parameters = array())
+    public function put($path, $controller, $name = null)
     {
-        return $this->route($path, $controller, 'PUT', $name, $parameters);
+        /** @var $router Router */
+        $router = $this->getContainer()->get('\\Miny\\Router\\Router');
+
+        return $router->put($path, $name)->set('controller', $controller);
     }
 
     /**
      * @param string      $path
      * @param mixed       $controller
      * @param string|null $name
-     * @param array       $parameters
      *
      * @return Route
      */
-    public function delete($path, $controller, $name = null, array $parameters = array())
+    public function delete($path, $controller, $name = null)
     {
-        return $this->route($path, $controller, 'DELETE', $name, $parameters);
+        /** @var $router Router */
+        $router = $this->getContainer()->get('\\Miny\\Router\\Router');
+
+        return $router->delete($path, $name)->set('controller', $controller);
     }
 }

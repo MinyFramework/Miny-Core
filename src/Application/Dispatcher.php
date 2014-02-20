@@ -9,7 +9,7 @@
 
 namespace Miny\Application;
 
-use Miny\Controller\ControllerCollection;
+use Miny\Controller\ControllerDispatcher;
 use Miny\Event\EventDispatcher;
 use Miny\Factory\Container;
 use Miny\HTTP\Request;
@@ -18,11 +18,6 @@ use UnexpectedValueException;
 
 class Dispatcher
 {
-    /**
-     * @var ControllerCollection
-     */
-    private $controllerCollection;
-
     /**
      * @var Container
      */
@@ -34,18 +29,23 @@ class Dispatcher
     private $events;
 
     /**
+     * @var ControllerDispatcher
+     */
+    private $controllerDispatcher;
+
+    /**
      * @param Container            $container
      * @param EventDispatcher      $events
-     * @param ControllerCollection $controllers
+     * @param ControllerDispatcher $controllerRunner
      */
     public function __construct(
         Container $container,
         EventDispatcher $events,
-        ControllerCollection $controllers
+        ControllerDispatcher $controllerRunner
     ) {
         $this->container            = $container;
         $this->events               = $events;
-        $this->controllerCollection = $controllers;
+        $this->controllerDispatcher = $controllerRunner;
     }
 
     /**
@@ -71,7 +71,7 @@ class Dispatcher
         }
 
         if (!isset($response)) {
-            $response = $this->runController($request);
+            $response = $this->controllerDispatcher->runController($request);
             $this->events->raiseEvent(CoreEvents::FILTER_RESPONSE, $request, $response);
         }
         $response->addContent(ob_get_clean());
@@ -81,36 +81,6 @@ class Dispatcher
         }
 
         return $response;
-    }
-
-    /**
-     * @param Request $request
-     *
-     * @return false|Response|object
-     */
-    protected function runController(Request $request)
-    {
-        /** @var $newResponse Response */
-        $newResponse = $this->container->get(
-            '\\Miny\\HTTP\\Response',
-            array(),
-            true
-        );
-        $oldResponse = $this->container->setInstance($newResponse);
-
-        $controller = $request->get['controller'];
-
-        $controllerResponse = $this->controllerCollection->resolve(
-            $controller,
-            $request,
-            $newResponse
-        );
-
-        if ($oldResponse) {
-            return $this->container->setInstance($oldResponse);
-        } else {
-            return $controllerResponse;
-        }
     }
 
     /**

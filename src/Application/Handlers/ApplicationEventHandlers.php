@@ -13,9 +13,12 @@ use Exception;
 use Miny\Application\CoreEvents;
 use Miny\Event\Event;
 use Miny\Factory\Container;
+use Miny\Factory\ParameterContainer;
 use Miny\HTTP\Request;
 use Miny\HTTP\Response;
 use Miny\Log\Log;
+use Miny\Router\RouteMatcher;
+use Miny\Router\Router;
 use Miny\Routing\Match;
 
 class ApplicationEventHandlers
@@ -30,10 +33,16 @@ class ApplicationEventHandlers
      */
     private $container;
 
-    public function __construct(Container $container, Log $log)
+    /**
+     * @var ParameterContainer
+     */
+    private $parameterContainer;
+
+    public function __construct(Container $container, Log $log, ParameterContainer $parameterContainer)
     {
         $this->container = $container;
         $this->log       = $log;
+        $this->parameterContainer = $parameterContainer;
 
         set_exception_handler(array($this, 'handleExceptions'));
     }
@@ -84,8 +93,9 @@ class ApplicationEventHandlers
 
     public function filterRoutes(Request $request)
     {
-        $router = $this->container->get('\\Miny\\Routing\\Router');
-        if ($router->shortUrls()) {
+        /** @var $router RouteMatcher */
+        $router = $this->container->get('\\Miny\\Router\\RouteMatcher');
+        if ($this->parameterContainer['router:short_urls']) {
             $path = $request->path;
         } else {
             $path = $request->get('path', '/');
