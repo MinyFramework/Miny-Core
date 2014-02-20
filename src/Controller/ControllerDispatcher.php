@@ -41,7 +41,7 @@ class ControllerDispatcher
      *
      * @throws InvalidControllerException
      *
-     * @return false|Response
+     * @return Response
      */
     public function runController(Request $request)
     {
@@ -50,13 +50,15 @@ class ControllerDispatcher
         $oldResponse = $this->container->setInstance($response);
 
         $controller = $request->get['controller'];
+        $runnerExecuted = false;
         foreach ($this->runners as $runner) {
             if ($runner->canRun($controller)) {
-                $retVal = $runner->run($controller, $request, $response);
+                $runner->run($controller, $request, $response);
+                $runnerExecuted = true;
                 break;
             }
         }
-        if (!isset($retVal)) {
+        if (!$runnerExecuted) {
             $message = sprintf('Invalid controller set for path %s', $request->path);
             throw new InvalidControllerException($message);
         }

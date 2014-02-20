@@ -29,8 +29,6 @@ abstract class AbstractControllerRunner
      * @param          $controller
      * @param Request  $request
      * @param Response $response
-     *
-     * @return Response
      */
     public function run($controller, Request $request, Response $response)
     {
@@ -55,8 +53,6 @@ abstract class AbstractControllerRunner
             $action,
             $retVal
         );
-
-        return $retVal;
     }
 
     abstract protected function loadController($class);
