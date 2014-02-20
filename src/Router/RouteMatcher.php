@@ -7,54 +7,67 @@
  * For licensing information see the LICENSE file.
  */
 
-namespace Miny\Routing;
+namespace Miny\Router;
 
 class RouteMatcher
 {
     const CHUNK_SIZE = 10;
+
     /**
-     * @var RouteCollection
+     * @var Router
      */
     private $routes;
 
     /**
-     * @param RouteCollection $routes
+     * @param Router $routes
      */
-    public function __construct(RouteCollection $routes)
+    public function __construct(Router $routes)
     {
         $this->routes = $routes;
     }
 
     /**
      * @param string $path
-     * @param string $method
+     * @param int    $method
      *
      * @return Match|boolean
      */
-    public function match($path, $method = null)
+    public function match($path, $method = Route::METHOD_ALL)
+    {
+        if ($this->routes->hasStatic($path)) {
+            $route = $this->routes->getStaticByURI($path);
+            if ($route->isMethod($method)) {
+                return new Match($route);
+            }
+        }
+
+        $variableRoutes = $this->createChunks($method);
+
+        return $this->matchChunkedVariableRoutes($path, $variableRoutes);
+    }
+
+    /**
+     * @param $method
+     *
+     * @return array
+     */
+    private function createChunks($method)
     {
         $variableRoutes = array(array());
         $group          = 0;
-        foreach ($this->routes as $route) {
+        foreach ($this->routes->getAll() as $route) {
             /** @var $route Route */
-            if (!$route->isMethod($method)) {
+            if ($route->isStatic() || !$route->isMethod($method)) {
                 continue;
             }
 
-            if ($route->isStatic()) {
-                if ($path !== $route->getPath()) {
-                    continue;
-                }
-
-                return new Match($route);
-            }
             $variableRoutes[$group][] = $route;
             if (count($variableRoutes[$group]) === self::CHUNK_SIZE) {
                 ++$group;
             }
         }
 
-        return $this->matchChunkedVariableRoutes($path, $variableRoutes);
+        return $variableRoutes;
     }
 
     /**
@@ -66,9 +79,6 @@ class RouteMatcher
     private function matchChunkedVariableRoutes($path, $variableRoutes)
     {
         foreach ($variableRoutes as $routes) {
-            if (empty($variableRoutes)) {
-                continue;
-            }
             $return = $this->matchVariableRoutes($path, $routes);
             if ($return) {
                 return $return;
@@ -86,24 +96,28 @@ class RouteMatcher
      */
     private function matchVariableRoutes($path, $variableRoutes)
     {
+        if (empty($variableRoutes)) {
+            return false;
+        }
         $numGroups = 0;
         $indexes   = array();
-        $patterns  = array();
+        $pattern   = '#^(?';
         foreach ($variableRoutes as $i => $route) {
             /** @var $route Route */
             $numVariables = $route->getParameterCount();
             $numGroups    = max($numGroups, $numVariables);
 
-            $patterns[] = $route->getRegex() . str_repeat('()', $numGroups - $numVariables);
+            $pattern .= '|' . $route->getRegexp() . str_repeat('()', $numGroups - $numVariables);
 
             $indexes[$numGroups++] = $i;
         }
-        $pattern = '#^(?|' . implode('|', $patterns) . ')$#';
+        $pattern .= ')$#';
         if (!preg_match($pattern, $path, $matched)) {
             return false;
         }
 
         $route = $variableRoutes[$indexes[count($matched) - 1]];
+
         return $this->createMatch($route, $matched);
     }
 

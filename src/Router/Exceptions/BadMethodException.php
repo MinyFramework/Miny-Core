@@ -7,11 +7,9 @@
  * For licensing information see the LICENSE file.
  */
 
-namespace Miny\Routing\Exceptions;
+namespace Miny\Router\Exceptions;
 
-use RuntimeException;
-
-class PageNotFoundException extends RuntimeException
+class BadMethodException extends \RuntimeException
 {
 
 }

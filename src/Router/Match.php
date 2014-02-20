@@ -7,7 +7,7 @@
  * For licensing information see the LICENSE file.
  */
 
-namespace Miny\Routing;
+namespace Miny\Router;
 
 class Match
 {
@@ -15,10 +15,6 @@ class Match
      * @var Route
      */
     private $route;
-
-    /**
-     * @var array
-     */
     private $parameters;
 
     /**
@@ -28,7 +24,7 @@ class Match
     public function __construct(Route $route, array $parameters = array())
     {
         $this->route      = $route;
-        $this->parameters = $parameters + $route->getParameters();
+        $this->parameters = $parameters + $route->getDefaultValues();
     }
 
     /**

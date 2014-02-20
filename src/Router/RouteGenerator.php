@@ -7,7 +7,7 @@
  * For licensing information see the LICENSE file.
  */
 
-namespace Miny\Routing;
+namespace Miny\Router;
 
 use InvalidArgumentException;
 use OutOfBoundsException;
@@ -15,47 +15,44 @@ use OutOfBoundsException;
 class RouteGenerator
 {
     /**
-     * @var RouteCollection
+     * @var Router
      */
-    private $routes;
+    private $collection;
     private $shortUrlsEnabled;
 
     /**
-     * @param RouteCollection $routes
+     * @param Router $routes
      * @param bool            $short_urls
      */
-    public function __construct(RouteCollection $routes, $short_urls = true)
+    public function __construct(Router $routes, $short_urls = true)
     {
-        $this->routes           = $routes;
+        $this->collection       = $routes;
         $this->shortUrlsEnabled = $short_urls;
     }
 
     /**
-     * @param string $route_name
+     * @param string $routeName
      * @param array  $parameters
      *
      * @return string
      * @throws InvalidArgumentException
      * @throws OutOfBoundsException
      */
-    public function generate($route_name, array $parameters = array())
+    public function generate($routeName, array $parameters = array())
     {
-        /** @var $route Route */
-        foreach ($this->routes as $name => $route) {
-            if ($route_name !== $name) {
-                continue;
-            }
-
-            $required_params = $route->getParameterNames();
-            $missing         = array_diff($required_params, array_keys($parameters));
-
-            if (!empty($missing)) {
-                $parameters = $this->insertDefaultParameterValues($route, $missing, $parameters);
-            }
-
-            return $this->buildPath($route, $parameters);
+        if (!$this->collection->has($routeName)) {
+            throw new OutOfBoundsException(sprintf('Route %s is not found', $routeName));
         }
-        throw new OutOfBoundsException('Route not found: ' . $route_name);
+        $route = $this->collection->getRoute($routeName);
+
+        $required = $route->getParameterNames();
+        $missing  = array_diff($required, array_keys($parameters));
+
+        if (!empty($missing)) {
+            $parameters = $this->insertDefaultParameterValues($route, $missing, $parameters);
+        }
+
+        return $this->buildPath($route, $parameters);
     }
 
     /**
@@ -69,10 +66,10 @@ class RouteGenerator
      */
     private function insertDefaultParameterValues(Route $route, array $missing, array $parameters)
     {
-        $route_params = $route->getParameters();
+        $values = $route->getDefaultValues();
         foreach ($missing as $i => $key) {
-            if (isset($route_params[$key])) {
-                $parameters[$key] = $route_params[$key];
+            if (isset($values[$key])) {
+                $parameters[$key] = $values[$key];
                 unset($missing[$i]);
             }
         }
@@ -86,15 +83,16 @@ class RouteGenerator
 
     private function buildPath(Route $route, array $parameters)
     {
-        $path = $route->getPath();
-        krsort($parameters);
+        $path    = $route->getPath();
+        $replace = array();
         foreach ($parameters as $name => $value) {
             $token = '{' . $name . '}';
             if (strpos($path, $token) !== false) {
-                $path = str_replace($token, $value, $path);
+                $replace[$token] = $value;
                 unset($parameters[$name]);
             }
         }
+        $path = strtr($path, $replace);
         if ($this->shortUrlsEnabled) {
             if (!empty($parameters)) {
                 $path .= (strpos($path, '?') === false) ? '?' : '&';

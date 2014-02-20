@@ -7,9 +7,13 @@
  * For licensing information see the LICENSE file.
  */
 
-namespace Miny\Routing\Exceptions;
+namespace Miny\Router;
 
-class BadMethodException extends \RuntimeException
+abstract class AbstractRouteParser
 {
-
+    /**
+     * @param $route
+     * @return Route
+     */
+    abstract public function parse($route);
 }
