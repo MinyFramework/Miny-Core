@@ -12,7 +12,7 @@ namespace Miny\Controller;
 use Miny\Factory\ParameterContainer;
 use Miny\HTTP\Request;
 use Miny\HTTP\Response;
-use Miny\Routing\Router;
+use Miny\Router\Router;
 
 abstract class Controller extends BaseController
 {
