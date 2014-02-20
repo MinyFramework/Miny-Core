@@ -217,7 +217,7 @@ class Route
     {
         $this->parameterNames = array();
 
-        $path = preg_replace_callback(
+        $this->path = preg_replace_callback(
             self::PARAMETER_WITH_PATTERN,
             array($this, 'addParameter'),
             $this->path
@@ -228,7 +228,7 @@ class Route
         $this->regex = str_replace(
             array_keys($this->patterns),
             $this->patterns,
-            preg_quote($path, '#')
+            preg_quote($this->path, '#')
         );
     }
 }
