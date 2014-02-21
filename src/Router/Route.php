@@ -38,7 +38,7 @@ class Route
 
     public function isStatic()
     {
-        return $this->getParameterCount() === 0;
+        return empty($this->parameterPatterns);
     }
 
     /**
@@ -135,6 +135,7 @@ class Route
         } else {
             $this->defaultValues[$key] = $value;
         }
+
         return $this;
     }
 }

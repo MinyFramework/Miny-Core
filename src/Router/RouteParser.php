@@ -67,7 +67,7 @@ class RouteParser extends AbstractRouteParser
         $keys     = array();
         $patterns = array();
         foreach ($route->getParameterPatterns() as $key => $pattern) {
-            $keys[]     = preg_quote($this->makePlaceholder($key), '#');
+            $keys[] = '\\{' . $key . '\\}';
             $patterns[] = '('.$pattern.')';
         }
         $uri    = preg_quote($uri, '#');

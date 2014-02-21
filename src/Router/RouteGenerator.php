@@ -52,7 +52,7 @@ class RouteGenerator
             $parameters = $this->insertDefaultParameterValues($route, $missing, $parameters);
         }
 
-        return $this->buildPath($route, $parameters);
+        return $this->buildPath($route->getPath(), $parameters, $required);
     }
 
     /**
@@ -81,16 +81,13 @@ class RouteGenerator
         return $parameters;
     }
 
-    private function buildPath(Route $route, array $parameters)
+    private function buildPath($path, array $parameters, array $parameterNames)
     {
-        $path    = $route->getPath();
         $replace = array();
-        foreach ($parameters as $name => $value) {
+        foreach($parameterNames as $name) {
             $token = '{' . $name . '}';
-            if (strpos($path, $token) !== false) {
-                $replace[$token] = $value;
-                unset($parameters[$name]);
-            }
+            $replace[$token] = $parameters[$name];
+            unset($parameters[$name]);
         }
         $path = strtr($path, $replace);
         if ($this->shortUrlsEnabled) {

@@ -179,6 +179,6 @@ class Router
 
     public function addGlobalValues($values)
     {
-        $this->globalValues = $values + $values;
+        $this->globalValues = $values + $this->globalValues;
     }
 }
