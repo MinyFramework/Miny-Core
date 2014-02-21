@@ -22,14 +22,7 @@ class ArrayUtils
 {
     public static function isArrayType($array)
     {
-        if (is_array($array)) {
-            return true;
-        }
-        if ($array instanceof ArrayAccess) {
-            return true;
-        }
-
-        return false;
+        return is_array($array) || $array instanceof ArrayAccess;
     }
 
     private static function arrayHasKey($array, $key)
@@ -117,11 +110,10 @@ class ArrayUtils
         }
         foreach ($parts as $k) {
             if (!static::arrayHasKey($array, $k)) {
-                if ($create) {
-                    $array[$k] = array();
-                } else {
+                if (!$create) {
                     throw new OutOfBoundsException('Array key not found: ' . implode(':', $parts));
                 }
+                $array[$k] = array();
             }
             $array = & $array[$k];
         }
