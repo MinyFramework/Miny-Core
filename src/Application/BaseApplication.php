@@ -11,6 +11,7 @@ namespace Miny\Application;
 
 use InvalidArgumentException;
 use Miny\AutoLoader;
+use Miny\CoreEvents;
 use Miny\Event\EventDispatcher;
 use Miny\Factory\Container;
 use Miny\Factory\LinkResolver;

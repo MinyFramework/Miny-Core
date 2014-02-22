@@ -10,7 +10,7 @@
 namespace Miny\Application\Handlers;
 
 use Exception;
-use Miny\Application\CoreEvents;
+use Miny\CoreEvents;
 use Miny\Event\Event;
 use Miny\Factory\Container;
 use Miny\Factory\ParameterContainer;
@@ -18,7 +18,6 @@ use Miny\HTTP\Request;
 use Miny\HTTP\Response;
 use Miny\Log\Log;
 use Miny\Router\RouteMatcher;
-use Miny\Router\Router;
 use Miny\Routing\Match;
 
 class ApplicationEventHandlers

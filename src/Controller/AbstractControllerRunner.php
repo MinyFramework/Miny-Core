@@ -9,7 +9,7 @@
 
 namespace Miny\Controller;
 
-use Miny\Application\CoreEvents;
+use Miny\CoreEvents;
 use Miny\Event\EventDispatcher;
 use Miny\HTTP\Request;
 use Miny\HTTP\Response;

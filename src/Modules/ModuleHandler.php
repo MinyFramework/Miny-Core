@@ -10,7 +10,7 @@
 namespace Miny\Modules;
 
 use Miny\Application\BaseApplication;
-use Miny\Application\CoreEvents;
+use Miny\CoreEvents;
 use Miny\Event\EventDispatcher;
 use Miny\Factory\Container;
 use Miny\Log\Log;

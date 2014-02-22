@@ -10,6 +10,7 @@
 namespace Miny\Application;
 
 use Miny\Controller\ControllerDispatcher;
+use Miny\CoreEvents;
 use Miny\Event\EventDispatcher;
 use Miny\Factory\Container;
 use Miny\Factory\ParameterContainer;
