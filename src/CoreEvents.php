@@ -13,8 +13,8 @@ class CoreEvents
 {
     const FILTER_REQUEST      = 'filter_request';
     const FILTER_RESPONSE     = 'filter_response';
-    const UNCAUGHT_EXCEPTION  = 'uncaught_exception';
-    const BEFORE_RUN          = 'before_run';
+    const UNCAUGHT_EXCEPTION  = 'onUncaughtException';
+    const BEFORE_RUN          = 'onBeforeRun';
     const CONTROLLER_LOADED   = 'onControllerLoaded';
     const CONTROLLER_FINISHED = 'onControllerFinished';
 }
