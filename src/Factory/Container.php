@@ -25,6 +25,11 @@ class Container
     /**
      * @var array
      */
+    private $constructorArguments;
+
+    /**
+     * @var array
+     */
     private $objects;
 
     /**
@@ -45,10 +50,11 @@ class Container
         if (!$resolver) {
             $resolver = new NullResolver();
         }
-        $this->linkResolver = $resolver;
-        $this->objects      = array();
-        $this->aliases      = array();
-        $this->callbacks    = array();
+        $this->linkResolver         = $resolver;
+        $this->objects              = array();
+        $this->aliases              = array();
+        $this->constructorArguments = array();
+        $this->callbacks            = array();
 
         $this->setInstance($this, __CLASS__);
         $this->setInstance($resolver);
@@ -67,7 +73,10 @@ class Container
         } elseif ($concrete === null) {
             $concrete = $abstract;
         }
-        $this->aliases[$abstract] = array($concrete, $parameters);
+        if($abstract !== $concrete) {
+            $this->aliases[$abstract] = $concrete;
+        }
+        $this->constructorArguments[$abstract] = $parameters;
     }
 
     /**
@@ -111,6 +120,22 @@ class Container
     }
 
     /**
+     * @param $abstract
+     *
+     * @throws OutOfBoundsException
+     * @return array
+     */
+    public function getConstructorArguments($abstract)
+    {
+        $abstract = ltrim($abstract, '\\');
+        if (!isset($this->constructorArguments[$abstract])) {
+            throw new OutOfBoundsException(sprintf('%s is not registered.', $abstract));
+        }
+
+        return $this->constructorArguments[$abstract];
+    }
+
+    /**
      * @param object $object
      * @param string $abstract
      *
@@ -122,12 +147,7 @@ class Container
         if (!is_object($object)) {
             throw new InvalidArgumentException('$object must be an object');
         }
-        $abstract = $abstract ? : get_class($object);
-        if (isset($this->aliases[$abstract])) {
-            list($concrete) = $this->findMostConcreteDefinition($abstract);
-        } else {
-            $concrete = $abstract;
-        }
+        $concrete = $this->findMostConcreteDefinition($abstract ? : get_class($object));
         if (isset($this->objects[$concrete])) {
             $old = $this->objects[$concrete];
         } else {
@@ -150,10 +170,10 @@ class Container
         $abstract = ltrim($abstract, '\\');
 
         // try to find the constructor arguments for the most concrete definition
-        if (isset($this->aliases[$abstract])) {
-            list($concrete, $registeredParameters) = $this->findMostConcreteDefinition($abstract);
+        $concrete = $this->findMostConcreteDefinition($abstract);
+        if (isset($this->constructorArguments[$abstract])) {
+            $registeredParameters = $this->constructorArguments[$concrete];
         } else {
-            $concrete             = $abstract;
             $registeredParameters = array();
         }
 
@@ -194,21 +214,21 @@ class Container
     }
 
     /**
-     * @param $abstract
+     * @param $class
      *
-     * @return array
+     * @return string
      */
-    private function findMostConcreteDefinition($abstract)
+    private function findMostConcreteDefinition($class)
     {
+        if(!isset($this->aliases[$class])) {
+            return $class;
+        }
         do {
-            list($concrete, $registeredParameters) = $this->aliases[$abstract];
-            if ($concrete === $abstract || !is_string($concrete)) {
-                return array($concrete, $registeredParameters);
-            }
-            $abstract = $concrete;
-        } while (isset($this->aliases[$abstract]));
+            $abstract = $class;
+            $class    = $this->aliases[$abstract];
+        } while (is_string($class) && isset($this->aliases[$class]));
 
-        return array($concrete, $registeredParameters);
+        return $class;
     }
 
     /**

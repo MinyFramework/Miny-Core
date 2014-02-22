@@ -18,8 +18,9 @@ class ContainerTest extends \PHPUnit_Framework_TestCase
 
     public function testAlias()
     {
-        $this->container->addAlias('foobar', 'FooClass');
-        $this->assertEquals(array('FooClass', array()), $this->container->getAlias('foobar'));
+        $this->container->addAlias('foobar', 'FooClass', array('a', 'b'));
+        $this->assertEquals('FooClass', $this->container->getAlias('foobar'));
+        $this->assertEquals(array('a', 'b'), $this->container->getConstructorArguments('foobar'));
     }
 
     /**
