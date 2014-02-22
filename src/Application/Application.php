@@ -121,7 +121,7 @@ class Application extends BaseApplication
         $dispatcher = $container->get('\\Miny\\Application\\Dispatcher');
 
         if (!$router->has('root')) {
-            $this->root('index');
+            $router->root()->set('controller', 'index');
         }
         $dispatcher->dispatch(Request::getGlobal())->send();
     }
@@ -154,6 +154,7 @@ class Application extends BaseApplication
     {
         /** @var $router Router */
         $router = $this->getContainer()->get('\\Miny\\Router\\Router');
+
         return $router->add($path, $method, $name)->set('controller', $controller);
     }
 

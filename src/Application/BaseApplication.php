@@ -196,12 +196,7 @@ abstract class BaseApplication
 
         if ($this->parameterContainer['profile']) {
             $profile = $log->startProfiling('Miny', 'Application execution');
-            $shutdown->register(
-                function () use ($profile) {
-                    $profile->stop();
-                },
-                998
-            );
+            $shutdown->register(array($profile, 'stop'), 998);
         }
 
         $container->addCallback(
