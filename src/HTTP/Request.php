@@ -11,7 +11,6 @@ namespace Miny\HTTP;
 
 use InvalidArgumentException;
 use Miny\Utils\StringUtils;
-use OutOfBoundsException;
 
 class Request
 {
@@ -50,11 +49,11 @@ class Request
         return $request;
     }
 
-    public $url;
-    public $path;
-    public $get;
-    public $post;
-    public $cookie;
+    private $url;
+    private $path;
+    private $get;
+    private $post;
+    private $cookie;
     private $headers;
     private $method;
     private $ip;
@@ -66,30 +65,6 @@ class Request
         $this->method  = strtoupper($method);
         $this->path    = parse_url($url, PHP_URL_PATH);
         $this->headers = new Headers();
-    }
-
-    public function __get($field)
-    {
-        if (!property_exists($this, $field)) {
-            throw new OutOfBoundsException(sprintf('Field %s does not exist.', $field));
-        }
-        return $this->$field;
-    }
-
-    public function __call($container, $args)
-    {
-        $key       = array_shift($args);
-        $container = $this->__get($container);
-        if (!is_string($key)) {
-            throw new InvalidArgumentException('You need to supply a string key.');
-        }
-        if (isset($container[$key])) {
-            return $container[$key];
-        }
-        if (count($args) > 0) {
-            return current($args);
-        }
-        return null;
     }
 
     /**
@@ -126,7 +101,60 @@ class Request
         if (!$this->headers->has('x-requested-with')) {
             return false;
         }
+
         return strtolower($this->headers->get('x-requested-with')) === 'xmlhttprequest';
+    }
+
+    public function get($key, $default = null)
+    {
+        if (!is_string($key)) {
+            throw new InvalidArgumentException('You need to supply a string key.');
+        }
+        if (isset($this->get[$key])) {
+            return $this->get[$key];
+        }
+
+        return $default;
+    }
+
+    public function post($key, $default = null)
+    {
+        if (!is_string($key)) {
+            throw new InvalidArgumentException('You need to supply a string key.');
+        }
+        if (isset($this->post[$key])) {
+            return $this->post[$key];
+        }
+
+        return $default;
+    }
+
+    public function cookie($key, $default = null)
+    {
+        if (!is_string($key)) {
+            throw new InvalidArgumentException('You need to supply a string key.');
+        }
+        if (isset($this->cookie[$key])) {
+            return $this->cookie[$key];
+        }
+
+        return $default;
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getPath()
+    {
+        return $this->path;
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getUrl()
+    {
+        return $this->url;
     }
 
     /**
@@ -135,5 +163,44 @@ class Request
     public function getHeaders()
     {
         return $this->headers;
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getIp()
+    {
+        return $this->ip;
+    }
+
+    /**
+     * @return string
+     */
+    public function getMethod()
+    {
+        return $this->method;
+    }
+
+    /**
+     * @param array $get
+     */
+    public function setGetParameters(array $get)
+    {
+        $this->get = $get;
+    }
+
+    public function hasGetParameter($key)
+    {
+        return isset($this->get[$key]);
+    }
+
+    public function hasPostParameter($key)
+    {
+        return isset($this->post[$key]);
+    }
+
+    public function hasCookie($key)
+    {
+        return isset($this->cookie[$key]);
     }
 }

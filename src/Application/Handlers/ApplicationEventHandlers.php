@@ -77,7 +77,13 @@ class ApplicationEventHandlers
 
     public function logRequest(Request $request)
     {
-        $this->log('Request', '[%s] %s Source: %s', $request->method, $request->url, $request->ip);
+        $this->log(
+            'Request',
+            '[%s] %s Source: %s',
+            $request->getMethod(),
+            $request->getUrl(),
+            $request->getIp()
+        );
         $headers = $request->getHeaders();
         if ($headers->has('referer')) {
             $this->log('Request', 'Referer: %s', $headers->get('referer'));
@@ -86,7 +92,12 @@ class ApplicationEventHandlers
 
     public function logResponse(Request $request, Response $response)
     {
-        $this->log('Response', 'Response for request [%s] %s', $request->method, $request->path);
+        $this->log(
+            'Response',
+            'Response for request [%s] %s',
+            $request->getMethod(),
+            $request->getPath()
+        );
         $this->log(
             'Response',
             'Response status: %s %s',
@@ -103,34 +114,39 @@ class ApplicationEventHandlers
         /** @var $router RouteMatcher */
         $router = $this->container->get('\\Miny\\Router\\RouteMatcher');
         if ($this->parameterContainer['router:short_urls']) {
-            $path = $request->path;
+            $path = $request->getPath();
         } else {
             $path = $request->get('path', '/');
         }
         /** @var $match Match */
-        $match = $router->match($path, $request->method);
+        $match = $router->match($path, $request->getMethod());
         if (!$match) {
-            $this->log('Routing', 'Route was not found for path [%s] %s', $request->method, $path);
+            $this->log(
+                'Routing',
+                'Route was not found for path [%s] %s',
+                $request->getMethod(),
+                $path
+            );
             $response = $this->container->get('\\Miny\\HTTP\\Response');
             $response->setCode(404);
 
             return $response;
         }
         $this->log('Routing', 'Matched route %s', $match->getRoute()->getPath());
-        parse_str(parse_url($request->url, PHP_URL_QUERY), $_GET);
-        $request->get = $match->getParameters() + $_GET;
+        parse_str(parse_url($request->getUrl(), PHP_URL_QUERY), $_GET);
+        $request->setGetParameters($match->getParameters() + $_GET);
     }
 
     public function setContentType(Request $request, Response $response)
     {
-        if (!isset($request->get['format'])) {
+        if (!$request->hasGetParameter('format')) {
             return;
         }
         $headers = $response->getHeaders();
         if ($headers->has('content-type')) {
             return;
         }
-        $format       = $request->get['format'];
+        $format       = $request->get('format');
         $content_type = $this->getResponseContentType($format);
         $headers->set('content-type', $content_type);
     }

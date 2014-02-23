@@ -49,7 +49,7 @@ class ControllerDispatcher
         $response    = $this->container->get('\\Miny\\HTTP\\Response', array(), true);
         $oldResponse = $this->container->setInstance($response);
 
-        $controller = $request->get['controller'];
+        $controller = $request->get('controller');
         $runnerExecuted = false;
         foreach ($this->runners as $runner) {
             if ($runner->canRun($controller)) {
@@ -59,7 +59,7 @@ class ControllerDispatcher
             }
         }
         if (!$runnerExecuted) {
-            $message = sprintf('Invalid controller set for path %s', $request->path);
+            $message = sprintf('Invalid controller set for path %s', $request->getPath());
             throw new InvalidControllerException($message);
         }
 
