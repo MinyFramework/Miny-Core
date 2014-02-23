@@ -76,7 +76,7 @@ class Container
         if ($abstract !== $concrete) {
             $this->aliases[$abstract] = $concrete;
         }
-        if (!empty($parameters)) {
+        if (is_string($concrete) && !empty($parameters)) {
             $this->constructorArguments[$concrete] = $parameters;
         }
     }
@@ -124,17 +124,19 @@ class Container
     /**
      * @param $abstract
      *
-     * @throws OutOfBoundsException
      * @return array
      */
     public function getConstructorArguments($abstract)
     {
-        $abstract = ltrim($abstract, '\\');
-        if (!isset($this->constructorArguments[$abstract])) {
-            throw new OutOfBoundsException(sprintf('%s is not registered.', $abstract));
+        $concrete = $this->findMostConcreteDefinition($abstract);
+        if (!is_string($concrete)) {
+            return array();
+        }
+        if (!isset($this->constructorArguments[$concrete])) {
+            $this->constructorArguments[$concrete] = array();
         }
 
-        return $this->constructorArguments[$abstract];
+        return $this->constructorArguments[$concrete];
     }
 
     /**
@@ -169,22 +171,11 @@ class Container
      */
     public function get($abstract, array $parameters = array(), $forceNew = false)
     {
-        $abstract = ltrim($abstract, '\\');
-
         // try to find the constructor arguments for the most concrete definition
-        $concrete = $this->findMostConcreteDefinition($abstract);
+        $concrete             = $this->findMostConcreteDefinition($abstract);
+        $registeredParameters = $this->getConstructorArguments($concrete);
 
-        if (!is_string($concrete)) {
-            $key                  = $abstract;
-            $registeredParameters = array();
-        } else {
-            $key = $concrete;
-            if (isset($this->constructorArguments[$concrete])) {
-                $registeredParameters = $this->constructorArguments[$concrete];
-            } else {
-                $registeredParameters = array();
-            }
-        }
+        $key = is_string($concrete) ? $concrete : $abstract;
 
         if (isset($this->objects[$key]) && !$forceNew) {
             return $this->objects[$key];
@@ -223,6 +214,10 @@ class Container
      */
     private function findMostConcreteDefinition($class)
     {
+        if (!is_string($class)) {
+            return $class;
+        }
+        $class = ltrim($class, '\\');
         if (!isset($this->aliases[$class])) {
             return $class;
         }
