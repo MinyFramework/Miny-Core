@@ -9,8 +9,6 @@
 
 namespace Miny\Log;
 
-use Miny\Shutdown\ShutdownService;
-
 class Log
 {
     const PROFILE = 0;
@@ -31,12 +29,20 @@ class Log
     private $messageNum;
     private $flushLimit;
 
-    public function __construct($flushLimit = 100)
+    public function __construct()
     {
         $this->writers    = array();
         $this->profilers  = array();
-        $this->flushLimit = $flushLimit;
+        $this->flushLimit = 100;
         $this->reset();
+    }
+
+    public function setFlushLimit($limit)
+    {
+        $this->flushLimit = (int)$limit;
+        if ($this->messageNum >= $this->flushLimit) {
+            $this->flush();
+        }
     }
 
     private function reset()
@@ -136,11 +142,6 @@ class Log
             }
         }
         $this->reset();
-    }
-
-    public function registerShutdownService(ShutdownService $shutdown, $priority = 1000)
-    {
-        $shutdown->register(array($this, 'flush'), $priority);
     }
 
     public function registerWriter(AbstractLogWriter $writer, $levels = null)

@@ -56,13 +56,10 @@ abstract class BaseApplication
             self::ENV_TEST => 'testing'
         );
         if (!isset($environmentNames[$environment])) {
-            $warning     = sprintf(
-                'Unknown environment option "%s". Assuming production environment.',
-                $environment
-            );
-            $environment = self::ENV_PROD;
+            $this->environment = self::ENV_PROD;
+        } else {
+            $this->environment = $environment;
         }
-        $this->environment = $environment;
 
         if ($autoLoader === null) {
             $autoLoader = new AutoLoader(array(
@@ -85,25 +82,25 @@ abstract class BaseApplication
         $ioc->setInstance($autoLoader);
         $ioc->setInstance($parameterContainer);
 
+        /** @var $log Log */
+        $log = $ioc->get('\\Miny\\Log\\Log');
+        if ($this->environment !== $environment) {
+            $message = 'Unknown environment option "%s". Assuming production environment.';
+            $log->write(Log::WARNING, 'Miny', $message, $environment);
+        }
+        $log->write(
+            Log::INFO,
+            'Miny',
+            'Starting Miny in %s environment',
+            $environmentNames[$this->environment]
+        );
+
         $this->parameterContainer = $parameterContainer;
         $this->container          = $ioc;
 
         $this->setDefaultParameters($parameterContainer);
         $this->loadConfigFiles();
         $this->registerDefaultServices($ioc);
-
-        /** @var $log Log */
-        $log = $ioc->get('\\Miny\\Log\\Log');
-        //Log start of execution
-        if (isset($warning)) {
-            $log->write(Log::WARNING, 'Miny', $warning);
-        }
-        $log->write(
-            Log::INFO,
-            'Miny',
-            'Starting Miny in %s environment',
-            $environmentNames[$environment]
-        );
 
         $this->loadModules();
     }
@@ -181,12 +178,13 @@ abstract class BaseApplication
         $shutdown = $container->get('\\Miny\\Shutdown\\ShutdownService');
 
         /** @var $log Log */
-        $log = $container->get('\\Miny\\Log\\Log', array('@log:flush_limit'));
+        $log = $container->get('\\Miny\\Log\\Log');
 
-        $log->registerShutdownService($shutdown, 1000);
+        $log->setFlushLimit($this->parameterContainer['log']['flush_limit']);
         if ($this->parameterContainer['log']['enable_file_writer']) {
             $log->registerWriter(new FileWriter($this->parameterContainer['log']['path']));
         }
+        $shutdown->register(array($log, 'flush'), 1000);
         $shutdown->register(
             function () use ($log) {
                 $log->write(Log::INFO, 'Miny', "End of execution.\n");
