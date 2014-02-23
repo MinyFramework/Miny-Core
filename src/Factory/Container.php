@@ -73,10 +73,12 @@ class Container
         } elseif ($concrete === null) {
             $concrete = $abstract;
         }
-        if($abstract !== $concrete) {
+        if ($abstract !== $concrete) {
             $this->aliases[$abstract] = $concrete;
         }
-        $this->constructorArguments[$abstract] = $parameters;
+        if (!empty($parameters)) {
+            $this->constructorArguments[$concrete] = $parameters;
+        }
     }
 
     /**
@@ -171,16 +173,17 @@ class Container
 
         // try to find the constructor arguments for the most concrete definition
         $concrete = $this->findMostConcreteDefinition($abstract);
-        if (isset($this->constructorArguments[$abstract])) {
-            $registeredParameters = $this->constructorArguments[$concrete];
-        } else {
-            $registeredParameters = array();
-        }
 
-        if (is_string($concrete)) {
-            $key = $concrete;
+        if (!is_string($concrete)) {
+            $key                  = $abstract;
+            $registeredParameters = array();
         } else {
-            $key = $abstract;
+            $key = $concrete;
+            if (isset($this->constructorArguments[$concrete])) {
+                $registeredParameters = $this->constructorArguments[$concrete];
+            } else {
+                $registeredParameters = array();
+            }
         }
 
         if (isset($this->objects[$key]) && !$forceNew) {
@@ -220,7 +223,7 @@ class Container
      */
     private function findMostConcreteDefinition($class)
     {
-        if(!isset($this->aliases[$class])) {
+        if (!isset($this->aliases[$class])) {
             return $class;
         }
         do {
