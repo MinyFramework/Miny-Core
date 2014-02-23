@@ -74,18 +74,20 @@ class EventDispatcher
             throw new InvalidArgumentException('The first parameter must be an Event object or a string.');
         }
         $name = $event->getName();
-        if (isset($this->handlers[$name])) {
-            $parameters = $event->getParameters();
-
-            foreach ($this->handlers[$name] as $handler) {
-                $response = call_user_func_array($handler, $parameters);
-                if ($response !== null) {
-                    $event->setResponse($response);
-                    break;
-                }
-            }
-            $event->setHandled();
+        if (!isset($this->handlers[$name])) {
+            return $event;
         }
+
+        $parameters = $event->getParameters();
+        foreach ($this->handlers[$name] as $handler) {
+            $response = call_user_func_array($handler, $parameters);
+            if ($response !== null) {
+                $event->setResponse($response);
+                break;
+            }
+        }
+        $event->setHandled();
+
         return $event;
     }
 }
