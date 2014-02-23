@@ -217,14 +217,12 @@ class Container
         if (!is_string($class)) {
             return $class;
         }
-        $class = ltrim($class, '\\');
-        if (!isset($this->aliases[$class])) {
-            return $class;
+        $classVarIsString = true;
+        $class            = ltrim($class, '\\');
+        while ($classVarIsString && isset($this->aliases[$class])) {
+            $class            = $this->aliases[$class];
+            $classVarIsString = is_string($class);
         }
-        do {
-            $abstract = $class;
-            $class    = $this->aliases[$abstract];
-        } while (is_string($class) && isset($this->aliases[$class]));
 
         return $class;
     }
