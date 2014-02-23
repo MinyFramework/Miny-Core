@@ -31,8 +31,8 @@ class FileWriter extends AbstractLogWriter
         $this->buffer .= sprintf(
             "[%s] %s: %s - %s\n",
             date('Y-m-d H:i:s', $message->getTime()),
-            $message->getCategory(),
             $this->getLevelName($message->getLevel()),
+            $message->getCategory(),
             $message->getMessage()
         );
     }
