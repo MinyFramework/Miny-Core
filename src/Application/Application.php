@@ -16,9 +16,7 @@ use Miny\Factory\Container;
 use Miny\Factory\ParameterContainer;
 use Miny\HTTP\Request;
 use Miny\HTTP\Session;
-use Miny\Router\Route;
 use Miny\Router\Router;
-use UnexpectedValueException;
 
 class Application extends BaseApplication
 {
@@ -124,97 +122,5 @@ class Application extends BaseApplication
             $router->root()->set('controller', 'index');
         }
         $dispatcher->dispatch(Request::getGlobal())->send();
-    }
-
-    /**
-     * @param mixed $controller
-     *
-     * @return Route
-     */
-    public function root($controller)
-    {
-        /** @var $router Router */
-        $router = $this->getContainer()->get('\\Miny\\Router\\Router');
-
-        return $router->root()->set('controller', $controller);
-    }
-
-    /**
-     *
-     * @param string      $path
-     * @param mixed       $controller
-     * @param string|null $method
-     * @param string|null $name
-     *
-     * @return Route
-     *
-     * @throws UnexpectedValueException
-     */
-    public function route($path, $controller, $method = null, $name = null)
-    {
-        /** @var $router Router */
-        $router = $this->getContainer()->get('\\Miny\\Router\\Router');
-
-        return $router->add($path, $method, $name)->set('controller', $controller);
-    }
-
-    /**
-     * @param string      $path
-     * @param mixed       $controller
-     * @param string|null $name
-     *
-     * @return Route
-     */
-    public function get($path, $controller, $name = null)
-    {
-        /** @var $router Router */
-        $router = $this->getContainer()->get('\\Miny\\Router\\Router');
-
-        return $router->get($path, $name)->set('controller', $controller);
-    }
-
-    /**
-     * @param string      $path
-     * @param mixed       $controller
-     * @param string|null $name
-     *
-     * @return Route
-     */
-    public function post($path, $controller, $name = null)
-    {
-        /** @var $router Router */
-        $router = $this->getContainer()->get('\\Miny\\Router\\Router');
-
-        return $router->post($path, $name)->set('controller', $controller);
-    }
-
-    /**
-     * @param string      $path
-     * @param mixed       $controller
-     * @param string|null $name
-     *
-     * @return Route
-     */
-    public function put($path, $controller, $name = null)
-    {
-        /** @var $router Router */
-        $router = $this->getContainer()->get('\\Miny\\Router\\Router');
-
-        return $router->put($path, $name)->set('controller', $controller);
-    }
-
-    /**
-     * @param string      $path
-     * @param mixed       $controller
-     * @param string|null $name
-     *
-     * @return Route
-     */
-    public function delete($path, $controller, $name = null)
-    {
-        /** @var $router Router */
-        $router = $this->getContainer()->get('\\Miny\\Router\\Router');
-
-        return $router->delete($path, $name)->set('controller', $controller);
     }
 }
