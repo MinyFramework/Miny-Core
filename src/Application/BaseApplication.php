@@ -184,29 +184,23 @@ abstract class BaseApplication
         if ($this->parameterContainer['log']['enable_file_writer']) {
             $log->registerWriter(new FileWriter($this->parameterContainer['log']['path']));
         }
-        $shutdown->register(array($log, 'flush'), 1000);
         $shutdown->register(
             function () use ($log) {
                 $log->write(Log::INFO, 'Miny', "End of execution.\n");
             },
             999
         );
+        $shutdown->register(array($log, 'flush'), 1000);
 
         if ($this->parameterContainer['profile']) {
-            $profile = $log->startProfiling('Miny', 'Application execution');
-            $shutdown->register(array($profile, 'stop'), 998);
+            $profiler = $log->startProfiling('Miny', 'Application execution');
+            $shutdown->register(array($profiler, 'stop'), 998);
         }
 
-        $container->addCallback(
-            '\\Miny\\Event\\EventDispatcher',
-            function (EventDispatcher $events, Container $container) {
-                $errorHandlers = $container->get('\\Miny\\Application\\Handlers\\ErrorHandlers');
-                $events->register(
-                    CoreEvents::UNCAUGHT_EXCEPTION,
-                    array($errorHandlers, 'logException')
-                );
-            }
-        );
+        $errorHandlers = $container->get('\\Miny\\Application\\Handlers\\ErrorHandlers');
+
+        $events = $container->get('\\Miny\\Event\\EventDispatcher');
+        $events->register(CoreEvents::UNCAUGHT_EXCEPTION, array($errorHandlers, 'logException'));
     }
 
     /**
@@ -283,7 +277,7 @@ abstract class BaseApplication
         $event->raiseEvent(CoreEvents::BEFORE_RUN);
         $shutdown->register(
             function () use ($event) {
-                $event->raiseEvent('shutdown');
+                $event->raiseEvent(CoreEvents::SHUTDOWN);
             },
             0
         );

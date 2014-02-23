@@ -11,14 +11,14 @@ namespace Miny\Application\Handlers;
 
 use Exception;
 use Miny\CoreEvents;
-use Miny\Event\Event;
+use Miny\Event\EventDispatcher;
 use Miny\Factory\Container;
 use Miny\Factory\ParameterContainer;
 use Miny\HTTP\Request;
 use Miny\HTTP\Response;
 use Miny\Log\Log;
+use Miny\Router\Match;
 use Miny\Router\RouteMatcher;
-use Miny\Routing\Match;
 
 class ApplicationEventHandlers
 {
@@ -37,20 +37,28 @@ class ApplicationEventHandlers
      */
     private $parameterContainer;
 
-    public function __construct(Container $container, Log $log, ParameterContainer $parameterContainer)
-    {
-        $this->container = $container;
-        $this->log       = $log;
+    /**
+     * @var EventDispatcher
+     */
+    private $eventDispatcher;
+
+    public function __construct(
+        Container $container,
+        Log $log,
+        ParameterContainer $parameterContainer,
+        EventDispatcher $eventDispatcher
+    ) {
+        $this->container          = $container;
+        $this->log                = $log;
         $this->parameterContainer = $parameterContainer;
+        $this->eventDispatcher    = $eventDispatcher;
 
         set_exception_handler(array($this, 'handleExceptions'));
     }
 
     public function handleExceptions(Exception $e)
     {
-        /** @var $event Event */
-        $event = $this->container->get('\\Miny\\Event\\EventDispatcher')
-            ->raiseEvent(CoreEvents::UNCAUGHT_EXCEPTION, $e);
+        $event = $this->eventDispatcher->raiseEvent(CoreEvents::UNCAUGHT_EXCEPTION, $e);
         if (!$event->isHandled()) {
             // Rethrow the exception that we did not handle.
             throw $e;

@@ -37,17 +37,27 @@ class ErrorHandlers
 
     public function logError($errNo, $errStr, $errFile, $errLine)
     {
-        if (isset(self::$internalLogCategories[$errNo])) {
-            $message = sprintf('%s in %s on line %s', $errStr, $errFile, $errLine);
-            $this->log->write(Log::WARNING, self::$internalLogCategories[$errNo], $message);
-        } else {
+        if (!isset(self::$internalLogCategories[$errNo])) {
             throw new ErrorException($errStr, $errNo, 0, $errFile, $errLine);
         }
+        $this->log->write(
+            Log::WARNING,
+            self::$internalLogCategories[$errNo],
+            '%s in %s on line %s',
+            $errStr,
+            $errFile,
+            $errLine
+        );
     }
 
     public function logException(Exception $e)
     {
-        $class = get_class($e);
-        $this->log->write(Log::ERROR, $class, "%s \n Trace: %s", $e->getMessage(), $e->getTraceAsString());
+        $this->log->write(
+            Log::ERROR,
+            get_class($e),
+            "%s \n Trace: %s",
+            $e->getMessage(),
+            $e->getTraceAsString()
+        );
     }
 }

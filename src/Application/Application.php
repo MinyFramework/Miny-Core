@@ -11,7 +11,6 @@ namespace Miny\Application;
 
 use Miny\Controller\ControllerDispatcher;
 use Miny\CoreEvents;
-use Miny\Event\EventDispatcher;
 use Miny\Factory\Container;
 use Miny\Factory\ParameterContainer;
 use Miny\HTTP\Request;
@@ -47,30 +46,13 @@ class Application extends BaseApplication
 
         parent::registerDefaultServices($container);
 
-        $container->addCallback(
-            '\\Miny\\Event\\EventDispatcher',
-            function (EventDispatcher $events, Container $container) {
-                $eventHandlers = $container->get(
-                    '\\Miny\\Application\\Handlers\\ApplicationEventHandlers'
-                );
-                $events->register(
-                    CoreEvents::FILTER_REQUEST,
-                    array($eventHandlers, 'logRequest')
-                );
-                $events->register(
-                    CoreEvents::FILTER_REQUEST,
-                    array($eventHandlers, 'filterRoutes')
-                );
-                $events->register(
-                    CoreEvents::FILTER_RESPONSE,
-                    array($eventHandlers, 'setContentType')
-                );
-                $events->register(
-                    CoreEvents::FILTER_RESPONSE,
-                    array($eventHandlers, 'logResponse')
-                );
-            }
-        );
+        $eventHandlers = $container->get('\\Miny\\Application\\Handlers\\ApplicationEventHandlers');
+
+        $events = $container->get('\\Miny\\Event\\EventDispatcher');
+        $events->register(CoreEvents::FILTER_REQUEST, array($eventHandlers, 'logRequest'));
+        $events->register(CoreEvents::FILTER_REQUEST, array($eventHandlers, 'filterRoutes'));
+        $events->register(CoreEvents::FILTER_RESPONSE, array($eventHandlers, 'setContentType'));
+        $events->register(CoreEvents::FILTER_RESPONSE, array($eventHandlers, 'logResponse'));
 
         $container->addCallback(
             '\\Miny\\Controller\\ControllerDispatcher',

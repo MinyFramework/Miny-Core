@@ -256,8 +256,7 @@ class Container
             $constructorArgs = array_diff_key($constructorArgs, $parameters);
         }
         $resolvedArgs = $this->resolveDependencies($constructorArgs);
-        $arguments    = $resolvedArgs + $parameters;
-        $arguments    = $this->linkResolver->resolveReferences($arguments);
+        $arguments    = $this->linkResolver->resolveReferences($resolvedArgs + $parameters);
 
         ksort($arguments);
 
@@ -273,9 +272,7 @@ class Container
     {
         $resolved = array();
         foreach ($dependencies as $k => $dependency) {
-            $class = $dependency->getClass();
-
-            if ($class === null) {
+            if ($dependency->getClass() === null) {
                 // primitive type
                 $resolved[$k] = $this->resolvePrimitiveParameter($dependency);
             } else {
@@ -294,20 +291,20 @@ class Container
      */
     private function resolvePrimitiveParameter(ReflectionParameter $dependency)
     {
-        if (!$dependency->isDefaultValueAvailable()) {
-            $class         = $dependency->getDeclaringClass()->getName();
-            $method        = $dependency->getDeclaringFunction()->getName();
-            $parameterName = $dependency->getName();
-            $message       = sprintf(
-                'Parameter %s is not supplied for %s::%s.',
-                $parameterName,
-                $class,
-                $method
-            );
-            throw new OutOfBoundsException($message);
+        if ($dependency->isDefaultValueAvailable()) {
+            return $dependency->getDefaultValue();
         }
 
-        return $dependency->getDefaultValue();
+        $class         = $dependency->getDeclaringClass()->getName();
+        $method        = $dependency->getDeclaringFunction()->getName();
+        $parameterName = $dependency->getName();
+        $message       = sprintf(
+            'Parameter %s is not supplied for %s::%s.',
+            $parameterName,
+            $class,
+            $method
+        );
+        throw new OutOfBoundsException($message);
     }
 
     /**
@@ -318,9 +315,8 @@ class Container
      */
     private function resolveClassParameter(ReflectionParameter $dependency)
     {
-        $class = $dependency->getClass();
         try {
-            return $this->get($class->getName());
+            return $this->get($dependency->getClass()->getName());
         } catch (InvalidArgumentException $e) {
             if (!$dependency->isDefaultValueAvailable()) {
                 throw $e;
