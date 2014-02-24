@@ -63,7 +63,7 @@ abstract class AbstractControllerRunner
 
     protected function getAction(Request $request, Controller $controller)
     {
-        return $request->get('action');
+        return $request->get()->get('action');
     }
 
     abstract protected function runController(

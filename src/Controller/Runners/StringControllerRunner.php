@@ -72,6 +72,6 @@ class StringControllerRunner extends AbstractControllerRunner
 
     protected function getAction(Request $request, Controller $controller)
     {
-        return $request->get('action', $controller->getDefaultAction());
+        return $request->get()->get('action', $controller->getDefaultAction());
     }
 }
