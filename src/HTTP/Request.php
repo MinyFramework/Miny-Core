@@ -9,7 +9,6 @@
 
 namespace Miny\HTTP;
 
-use InvalidArgumentException;
 use Miny\Utils\StringUtils;
 
 class Request
@@ -30,9 +29,9 @@ class Request
 
         $request         = new Request($method, $_SERVER['REQUEST_URI']);
         $request->type   = self::MASTER_REQUEST;
-        $request->get    = $_GET;
-        $request->post   = $_POST;
-        $request->cookie = $_COOKIE;
+        $request->get    = new ReferenceParameterContainer($_GET);
+        $request->post   = new ReferenceParameterContainer($_POST);
+        $request->cookie = new ReferenceParameterContainer($_COOKIE);
 
         foreach ($_SERVER as $key => $value) {
             if (StringUtils::startsWith($key, 'HTTP_')) {
@@ -82,12 +81,17 @@ class Request
      *
      * @return Request
      */
-    public function getSubRequest($method, $url, array $post = array())
+    public function getSubRequest($method, $url, array $post = null)
     {
         $request = clone $this;
 
         $request->__construct($method, $url);
         $request->type = self::SUB_REQUEST;
+        if ($post === null) {
+            $post = $this->post;
+        } else {
+            $post = new ParameterContainer($post);
+        }
         $request->post = $post;
 
         return $request;
@@ -107,38 +111,17 @@ class Request
 
     public function get($key, $default = null)
     {
-        if (!is_string($key)) {
-            throw new InvalidArgumentException('You need to supply a string key.');
-        }
-        if (isset($this->get[$key])) {
-            return $this->get[$key];
-        }
-
-        return $default;
+        return $this->get->get($key, $default);
     }
 
     public function post($key, $default = null)
     {
-        if (!is_string($key)) {
-            throw new InvalidArgumentException('You need to supply a string key.');
-        }
-        if (isset($this->post[$key])) {
-            return $this->post[$key];
-        }
-
-        return $default;
+        return $this->post->get($key, $default);
     }
 
     public function cookie($key, $default = null)
     {
-        if (!is_string($key)) {
-            throw new InvalidArgumentException('You need to supply a string key.');
-        }
-        if (isset($this->cookie[$key])) {
-            return $this->cookie[$key];
-        }
-
-        return $default;
+        return $this->cookie->get($key, $default);
     }
 
     /**
@@ -181,26 +164,18 @@ class Request
         return $this->method;
     }
 
-    /**
-     * @param array $get
-     */
-    public function setGetParameters(array $get)
-    {
-        $this->get = $get;
-    }
-
     public function hasGetParameter($key)
     {
-        return isset($this->get[$key]);
+        return $this->get->has($key);
     }
 
     public function hasPostParameter($key)
     {
-        return isset($this->post[$key]);
+        return $this->post->has($key);
     }
 
     public function hasCookie($key)
     {
-        return isset($this->cookie[$key]);
+        return $this->cookie->has($key);
     }
 }

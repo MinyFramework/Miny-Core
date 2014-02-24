@@ -2,6 +2,9 @@
 
 namespace Miny\HTTP;
 
+use InvalidArgumentException;
+use OutOfBoundsException;
+
 class RequestTest extends \PHPUnit_Framework_TestCase
 {
 
@@ -25,20 +28,6 @@ class RequestTest extends \PHPUnit_Framework_TestCase
         $request = Request::getGlobal();
         $this->assertInstanceOf(__NAMESPACE__ . '\Request', $request);
         return $request;
-    }
-
-    /**
-     *
-     * @depends testGetGlobal
-     */
-    public function test__get(Request $request)
-    {
-        $this->assertEquals($_GET, $request->get);
-        $this->assertEmpty($request->post);
-        $this->assertEquals($_COOKIE, $request->cookie);
-        $this->assertEquals('GET', $request->method);
-        $this->assertEquals('my_ip', $request->ip);
-        $this->assertEquals('/some_path/to', $request->path);
     }
 
     public function testIsSubRequest()
@@ -66,27 +55,27 @@ class RequestTest extends \PHPUnit_Framework_TestCase
     public function testEmulatedMethod()
     {
         $_POST = array('_method' => 'boo');
-        $this->assertEquals('BOO', Request::getGlobal()->method);
+        $this->assertEquals('BOO', Request::getGlobal()->getMethod());
     }
 
     public function testForwardedHeader()
     {
         $_SERVER['HTTP_X_FORWARDED_FOR'] = 'new_ip';
-        $this->assertEquals('new_ip', Request::getGlobal()->ip);
+        $this->assertEquals('new_ip', Request::getGlobal()->getIp());
     }
 
     /**
      * @expectedException OutOfBoundsException
-     * @expectedExceptionMessage Field foo does not exist.
+     * @expectedExceptionMessage Key foo is not set.
      */
     public function testGetInvalidKey()
     {
-        Request::getGlobal()->foo;
+        Request::getGlobal()->get('foo');
     }
 
     /**
      * @expectedException InvalidArgumentException
-     * @expectedExceptionMessage You need to supply a string key.
+     * @expectedExceptionMessage $key must be a string.
      */
     public function testCallWithInvalidMethod()
     {
@@ -97,7 +86,6 @@ class RequestTest extends \PHPUnit_Framework_TestCase
     {
         $request = Request::getGlobal();
         $this->assertEquals('value', $request->get('key'));
-        $this->assertEquals(null, $request->get('foo'));
         $this->assertEquals('bar', $request->get('foo', 'bar'));
     }
 }

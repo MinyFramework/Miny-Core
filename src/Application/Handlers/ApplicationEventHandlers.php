@@ -134,7 +134,7 @@ class ApplicationEventHandlers
         }
         $this->log('Routing', 'Matched route %s', $match->getRoute()->getPath());
         parse_str(parse_url($request->getUrl(), PHP_URL_QUERY), $_GET);
-        $request->setGetParameters($match->getParameters() + $_GET);
+        $_GET += $match->getParameters();
     }
 
     public function setContentType(Request $request, Response $response)
