@@ -27,11 +27,14 @@ class Request
             $method = $_SERVER['REQUEST_METHOD'];
         }
 
-        $request         = new Request($method, $_SERVER['REQUEST_URI']);
-        $request->type   = self::MASTER_REQUEST;
-        $request->get    = new ReferenceParameterContainer($_GET);
-        $request->post   = new ReferenceParameterContainer($_POST);
-        $request->cookie = new ReferenceParameterContainer($_COOKIE);
+        $request       = new Request(
+            $method,
+            $_SERVER['REQUEST_URI'],
+            new ReferenceParameterContainer($_GET),
+            new ReferenceParameterContainer($_POST),
+            new ReferenceParameterContainer($_COOKIE)
+        );
+        $request->type = self::MASTER_REQUEST;
 
         foreach ($_SERVER as $key => $value) {
             if (StringUtils::startsWith($key, 'HTTP_')) {
@@ -58,12 +61,20 @@ class Request
     private $ip;
     private $type;
 
-    public function __construct($method, $url)
-    {
+    public function __construct(
+        $method,
+        $url,
+        ParameterContainer $get = null,
+        ParameterContainer $post = null,
+        ParameterContainer $cookie = null
+    ) {
         $this->url     = $url;
         $this->method  = strtoupper($method);
         $this->path    = parse_url($url, PHP_URL_PATH);
         $this->headers = new Headers();
+        $this->get     = $get ? : new ParameterContainer();
+        $this->post    = $post ? : new ParameterContainer();
+        $this->cookie  = $cookie ? : new ParameterContainer();
     }
 
     /**
@@ -109,19 +120,19 @@ class Request
         return strtolower($this->headers->get('x-requested-with')) === 'xmlhttprequest';
     }
 
-    public function get($key, $default = null)
+    public function get()
     {
-        return $this->get->get($key, $default);
+        return $this->get;
     }
 
-    public function post($key, $default = null)
+    public function post()
     {
-        return $this->post->get($key, $default);
+        return $this->post;
     }
 
-    public function cookie($key, $default = null)
+    public function cookie()
     {
-        return $this->cookie->get($key, $default);
+        return $this->cookie;
     }
 
     /**
@@ -162,20 +173,5 @@ class Request
     public function getMethod()
     {
         return $this->method;
-    }
-
-    public function hasGetParameter($key)
-    {
-        return $this->get->has($key);
-    }
-
-    public function hasPostParameter($key)
-    {
-        return $this->post->has($key);
-    }
-
-    public function hasCookie($key)
-    {
-        return $this->cookie->has($key);
     }
 }

@@ -2,9 +2,6 @@
 
 namespace Miny\HTTP;
 
-use InvalidArgumentException;
-use OutOfBoundsException;
-
 class RequestTest extends \PHPUnit_Framework_TestCase
 {
 
@@ -30,16 +27,22 @@ class RequestTest extends \PHPUnit_Framework_TestCase
         return $request;
     }
 
-    public function testIsSubRequest()
+    /**
+     * @depends testGetGlobal
+     */
+    public function testIsSubRequest(Request $request)
     {
-        $this->assertFalse(Request::getGlobal()->isSubRequest());
-        $sub = Request::getGlobal()->getSubRequest('', '');
+        $this->assertFalse($request->isSubRequest());
+        $sub = $request->getSubRequest('', '');
         $this->assertTrue($sub->isSubRequest());
     }
 
-    public function testIsAjax()
+    /**
+     * @depends testGetGlobal
+     */
+    public function testIsAjax(Request $request)
     {
-        $this->assertFalse(Request::getGlobal()->isAjax());
+        $this->assertFalse($request->isAjax());
 
         $request = new Request('method', 'url');
         $request->getHeaders()->set('x-requested-with', 'xmlhttprequest');
@@ -47,9 +50,12 @@ class RequestTest extends \PHPUnit_Framework_TestCase
         $this->assertTrue($request->isAjax());
     }
 
-    public function testExtractingHeaders()
+    /**
+     * @depends testGetGlobal
+     */
+    public function testExtractingHeaders(Request $request)
     {
-        $this->assertEquals('value', Request::getGlobal()->getHeaders()->get('something'));
+        $this->assertEquals('value', $request->getHeaders()->get('something'));
     }
 
     public function testEmulatedMethod()
@@ -65,28 +71,15 @@ class RequestTest extends \PHPUnit_Framework_TestCase
     }
 
     /**
-     * @expectedException OutOfBoundsException
-     * @expectedExceptionMessage Key foo is not set.
+     * @depends testGetGlobal
      */
-    public function testGetInvalidKey()
+    public function testCall(Request $request)
     {
-        Request::getGlobal()->get('foo');
-    }
-
-    /**
-     * @expectedException InvalidArgumentException
-     * @expectedExceptionMessage $key must be a string.
-     */
-    public function testCallWithInvalidMethod()
-    {
-        Request::getGlobal()->get(5);
-    }
-
-    public function testCall()
-    {
-        $request = Request::getGlobal();
-        $this->assertEquals('value', $request->get('key'));
-        $this->assertEquals('bar', $request->get('foo', 'bar'));
+        $this->assertInstanceOf('\\Miny\\HTTP\\ParameterContainer', $request->get());
+        $this->assertInstanceOf('\\Miny\\HTTP\\ParameterContainer', $request->post());
+        $this->assertInstanceOf('\\Miny\\HTTP\\ParameterContainer', $request->cookie());
+        $this->assertEquals('value', $request->get()->get('key'));
+        $this->assertEquals('bar', $request->get()->get('foo', 'bar'));
     }
 }
 
