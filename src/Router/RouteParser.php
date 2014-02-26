@@ -20,11 +20,6 @@ class RouteParser extends AbstractRouteParser
         $this->defaultPattern = $defaultPattern;
     }
 
-    private function makePlaceholder($name)
-    {
-        return '{' . $name . '}';
-    }
-
     /**
      * @inheritdoc
      */
@@ -42,7 +37,7 @@ class RouteParser extends AbstractRouteParser
                 }
                 $route->specify($matches[1], $matches[2]);
 
-                return $parser->makePlaceholder($matches[1]);
+                return '{' . $matches[1] . '}';
             },
             $uri
         );

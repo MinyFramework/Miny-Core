@@ -33,7 +33,8 @@ class StringUtils
             return false;
         }
         $result = 0;
-        for ($i = 0; $i < strlen($known); $i++) {
+        $knownLength = strlen($known);
+        for ($i = 0; $i < $knownLength; $i++) {
             $result |= ord($known[$i]) ^ ord($user[$i]);
         }
         return $result == 0;
