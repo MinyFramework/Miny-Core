@@ -116,7 +116,7 @@ class ApplicationEventHandlers
         if ($this->parameterContainer['router:short_urls']) {
             $path = $request->getPath();
         } else {
-            $path = $request->get('path', '/');
+            $path = $request->get()->get('path', '/');
         }
         /** @var $match Match */
         $match = $router->match($path, $request->getMethod());
@@ -139,14 +139,14 @@ class ApplicationEventHandlers
 
     public function setContentType(Request $request, Response $response)
     {
-        if (!$request->hasGetParameter('format')) {
+        if (!$request->get()->has('format')) {
             return;
         }
         $headers = $response->getHeaders();
         if ($headers->has('content-type')) {
             return;
         }
-        $format       = $request->get('format');
+        $format       = $request->get()->get('format');
         $content_type = $this->getResponseContentType($format);
         $headers->set('content-type', $content_type);
     }
