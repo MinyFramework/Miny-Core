@@ -12,7 +12,6 @@ namespace Miny\Modules;
 use InvalidArgumentException;
 use Miny\Application\BaseApplication;
 use Miny\Factory\AbstractConfigurationTree;
-use Miny\Modules\Exceptions\BadModuleException;
 
 abstract class Module
 {
@@ -39,15 +38,7 @@ abstract class Module
      */
     public function __construct($name, BaseApplication $app)
     {
-        $this->application = $app;
-        foreach ($this->includes() as $file) {
-            if (!is_file($file)) {
-                $message = sprintf('Required file not found: %s', $file);
-                throw new BadModuleException($message);
-            }
-            include_once $file;
-        }
-
+        $this->application  = $app;
         $parameterContainer = $app->getParameterContainer();
         $parameterContainer->addParameters(
             array($name => $this->defaultConfiguration()),
@@ -80,11 +71,6 @@ abstract class Module
     }
 
     public function getDependencies()
-    {
-        return array();
-    }
-
-    public function includes()
     {
         return array();
     }
