@@ -175,7 +175,7 @@ class Container
         $concrete             = $this->findMostConcreteDefinition($abstract);
         $registeredParameters = $this->getConstructorArguments($concrete);
 
-        $key = is_string($concrete) ? $concrete : $abstract;
+        $key = is_string($concrete) ? $concrete : ltrim($abstract, '\\');
 
         if (isset($this->objects[$key]) && !$forceNew) {
             return $this->objects[$key];
