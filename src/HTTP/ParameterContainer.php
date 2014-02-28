@@ -60,4 +60,12 @@ class ParameterContainer
 
         unset($this->data[$key]);
     }
+
+    /**
+     * @return array
+     */
+    public function toArray()
+    {
+        return $this->data;
+    }
 }
