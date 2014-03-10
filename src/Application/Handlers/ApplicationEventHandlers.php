@@ -113,10 +113,11 @@ class ApplicationEventHandlers
     {
         /** @var $router RouteMatcher */
         $router = $this->container->get('\\Miny\\Router\\RouteMatcher');
+        $getContainer = $request->get();
         if ($this->parameterContainer['router:short_urls']) {
             $path = $request->getPath();
         } else {
-            $path = $request->get()->get('path', '/');
+            $path = $getContainer->get('path', '/');
         }
         /** @var $match Match */
         $match = $router->match($path, $request->getMethod());
@@ -133,8 +134,12 @@ class ApplicationEventHandlers
             return $response;
         }
         $this->log('Routing', 'Matched route %s', $match->getRoute()->getPath());
-        parse_str(parse_url($request->getUrl(), PHP_URL_QUERY), $_GET);
-        $_GET += $match->getParameters();
+        parse_str(parse_url($request->getUrl(), PHP_URL_QUERY), $get);
+        if (!$request->isSubRequest()) {
+            $getContainer->add($_GET);
+        }
+        $getContainer->add($get);
+        $getContainer->add($match->getParameters());
     }
 
     public function setContentType(Request $request, Response $response)

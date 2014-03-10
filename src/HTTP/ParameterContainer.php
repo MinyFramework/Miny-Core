@@ -21,6 +21,11 @@ class ParameterContainer
         $this->data = $data;
     }
 
+    public function add(array $data)
+    {
+        $this->data += $data;
+    }
+
     public function has($key)
     {
         if (!is_string($key)) {
