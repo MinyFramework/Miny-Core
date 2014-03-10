@@ -25,7 +25,7 @@ class SubTreeWrapper extends AbstractConfigurationTree
 
     public function offsetExists($offset)
     {
-        $this->parameterContainer->offsetExists($this->modifyOffset($offset));
+        return $this->parameterContainer->offsetExists($this->modifyOffset($offset));
     }
 
     public function offsetGet($offset)
