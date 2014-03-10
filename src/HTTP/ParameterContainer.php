@@ -23,7 +23,7 @@ class ParameterContainer
 
     public function add(array $data)
     {
-        $this->data += $data;
+        $this->data = $data + $this->data;
     }
 
     public function has($key)
