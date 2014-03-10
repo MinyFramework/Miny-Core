@@ -111,7 +111,7 @@ class Route
      */
     public function isMethod($method)
     {
-        return $this->method & $method !== 0;
+        return ($this->method & $method) !== 0;
     }
 
     /**

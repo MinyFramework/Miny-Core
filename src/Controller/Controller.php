@@ -12,6 +12,7 @@ namespace Miny\Controller;
 use Miny\Factory\ParameterContainer;
 use Miny\HTTP\Request;
 use Miny\HTTP\Response;
+use Miny\Router\RouteGenerator;
 use Miny\Router\Router;
 
 abstract class Controller extends BaseController
@@ -22,12 +23,22 @@ abstract class Controller extends BaseController
     private $router;
 
     /**
+     * @var
+     */
+    private $routeGenerator;
+
+    /**
      * @param Router             $router
+     * @param RouteGenerator     $routeGenerator
      * @param ParameterContainer $parameterContainer
      */
-    public function __construct(Router $router, ParameterContainer $parameterContainer)
-    {
-        $this->router = $router;
+    public function __construct(
+        Router $router,
+        RouteGenerator $routeGenerator,
+        ParameterContainer $parameterContainer
+    ) {
+        $this->router         = $router;
+        $this->routeGenerator = $routeGenerator;
         parent::__construct($parameterContainer);
     }
 
@@ -76,11 +87,11 @@ abstract class Controller extends BaseController
             )
         );
 
-        $router = $this->router;
+        $routeGenerator = $this->routeGenerator;
         $this->addMethod(
             'redirectRoute',
-            function ($route, array $params = array()) use ($response, $router) {
-                $path = $router->generate($route, $params);
+            function ($route, array $params = array()) use ($response, $routeGenerator) {
+                $path = $routeGenerator->generate($route, $params);
                 $response->redirect($path);
             }
         );

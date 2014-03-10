@@ -93,8 +93,7 @@ class Dispatcher
     protected function guardAgainstInfiniteRedirection(Request $request, Request $rsp)
     {
         if ($rsp === $request) {
-            $message = 'This redirection would lead to an infinite loop.';
-            throw new UnexpectedValueException($message);
+            throw new UnexpectedValueException('This redirection would lead to an infinite loop.');
         }
     }
 }

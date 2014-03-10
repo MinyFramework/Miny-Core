@@ -18,6 +18,7 @@ use Miny\HTTP\Request;
 use Miny\HTTP\Response;
 use Miny\Log\Log;
 use Miny\Router\Match;
+use Miny\Router\Route;
 use Miny\Router\RouteMatcher;
 
 class ApplicationEventHandlers
@@ -112,7 +113,7 @@ class ApplicationEventHandlers
     public function filterRoutes(Request $request)
     {
         /** @var $router RouteMatcher */
-        $router = $this->container->get('\\Miny\\Router\\RouteMatcher');
+        $router       = $this->container->get('\\Miny\\Router\\RouteMatcher');
         $getContainer = $request->get();
         if ($this->parameterContainer['router:short_urls']) {
             $path = $request->getPath();
@@ -120,7 +121,15 @@ class ApplicationEventHandlers
             $path = $getContainer->get('path', '/');
         }
         /** @var $match Match */
-        $match = $router->match($path, $request->getMethod());
+        $methodMap = array(
+            'GET'    => Route::METHOD_GET,
+            'POST'   => Route::METHOD_POST,
+            'PUT'    => Route::METHOD_PUT,
+            'DELETE' => Route::METHOD_DELETE
+        );
+        $method    = strtoupper($request->getMethod());
+        $method    = isset($methodMap[$method]) ? $methodMap[$method] : Route::METHOD_ALL;
+        $match     = $router->match($path, $method);
         if (!$match) {
             $this->log(
                 'Routing',
