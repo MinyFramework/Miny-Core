@@ -12,6 +12,7 @@ namespace Miny\Controller;
 use Miny\Factory\ParameterContainer;
 use Miny\HTTP\Request;
 use Miny\HTTP\Response;
+use Miny\HTTP\ResponseHeaders;
 use Miny\Router\RouteGenerator;
 use Miny\Router\Router;
 
@@ -26,6 +27,16 @@ abstract class Controller extends BaseController
      * @var
      */
     private $routeGenerator;
+
+    /**
+     * @var Response
+     */
+    private $response;
+
+    /**
+     * @var ResponseHeaders
+     */
+    private $headers;
 
     /**
      * @param Router             $router
@@ -50,6 +61,47 @@ abstract class Controller extends BaseController
         return 'index';
     }
 
+    protected function setCode($code)
+    {
+        $this->response->setCode($code);
+    }
+
+    protected function redirect($url, $code = 301)
+    {
+        $this->response->redirect($url, $code);
+    }
+
+    protected function getHeaders()
+    {
+        return $this->headers;
+    }
+
+    protected function cookie($name, $value)
+    {
+        $this->response->setCookie($name, $value);
+    }
+
+    protected function header($name, $value)
+    {
+        $this->headers->set($name, $value);
+    }
+
+    protected function hasHeader($name, $value = null)
+    {
+        return $this->headers->has($name, $value);
+    }
+
+    protected function removeHeader($name, $value = null)
+    {
+        $this->headers->remove($name, $value);
+    }
+
+    protected function redirectRoute($route, array $params = array())
+    {
+        $path = $this->routeGenerator->generate($route, $params);
+        $this->response->redirect($path);
+    }
+
     /**
      * Runs the controller.
      * This method sets several extra helper methods for the controller. These methods are:
@@ -69,32 +121,8 @@ abstract class Controller extends BaseController
      */
     public function run($action, Request $request, Response $response)
     {
-        $this->addMethods(
-            $response,
-            array(
-                'setCode',
-                'redirect',
-                'getHeaders',
-                'cookie' => 'setCookie'
-            )
-        );
-        $this->addMethods(
-            $response->getHeaders(),
-            array(
-                'header'       => 'set',
-                'hasHeader'    => 'has',
-                'removeHeader' => 'remove'
-            )
-        );
-
-        $routeGenerator = $this->routeGenerator;
-        $this->addMethod(
-            'redirectRoute',
-            function ($route, array $params = array()) use ($response, $routeGenerator) {
-                $path = $routeGenerator->generate($route, $params);
-                $response->redirect($path);
-            }
-        );
+        $this->response = $response;
+        $this->headers  = $response->getHeaders();
 
         return $this->{$action . 'Action'}($request, $response);
     }
