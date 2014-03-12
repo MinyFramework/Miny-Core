@@ -61,42 +61,42 @@ abstract class Controller extends BaseController
         return 'index';
     }
 
-    protected function setCode($code)
+    public function setCode($code)
     {
         $this->response->setCode($code);
     }
 
-    protected function redirect($url, $code = 301)
+    public function redirect($url, $code = 301)
     {
         $this->response->redirect($url, $code);
     }
 
-    protected function getHeaders()
+    public function getHeaders()
     {
         return $this->headers;
     }
 
-    protected function cookie($name, $value)
+    public function cookie($name, $value)
     {
         $this->response->setCookie($name, $value);
     }
 
-    protected function header($name, $value)
+    public function header($name, $value)
     {
         $this->headers->set($name, $value);
     }
 
-    protected function hasHeader($name, $value = null)
+    public function hasHeader($name, $value = null)
     {
         return $this->headers->has($name, $value);
     }
 
-    protected function removeHeader($name, $value = null)
+    public function removeHeader($name, $value = null)
     {
         $this->headers->remove($name, $value);
     }
 
-    protected function redirectRoute($route, array $params = array())
+    public function redirectRoute($route, array $params = array())
     {
         $path = $this->routeGenerator->generate($route, $params);
         $this->response->redirect($path);
