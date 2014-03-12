@@ -12,8 +12,10 @@ namespace Miny\Router;
 abstract class AbstractRouteParser
 {
     /**
-     * @param $route
+     * @param string $route
+     * @param null   $method
+     *
      * @return Route
      */
-    abstract public function parse($route);
+    abstract public function parse($route, $method = null);
 }

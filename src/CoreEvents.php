@@ -17,5 +17,5 @@ class CoreEvents
     const BEFORE_RUN          = 'onBeforeRun';
     const CONTROLLER_LOADED   = 'onControllerLoaded';
     const CONTROLLER_FINISHED = 'onControllerFinished';
-    const SHUTDOWN            = 'shutdown';
+    const SHUTDOWN            = 'onShutdown';
 }

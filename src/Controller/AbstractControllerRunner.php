@@ -23,6 +23,13 @@ abstract class AbstractControllerRunner
         $this->eventDispatcher = $eventDispatcher;
     }
 
+    /**
+     * Determines if $controller is acceptable by the runner.
+     *
+     * @param $controller
+     *
+     * @return bool
+     */
     abstract public function canRun($controller);
 
     /**
@@ -59,9 +66,25 @@ abstract class AbstractControllerRunner
         return $response;
     }
 
-    abstract protected function loadController($class);
+    /**
+     * Loads the controller if the runner requires it, e.g. getAction needs an object.
+     *
+     * @param $controller
+     *
+     * @return mixed
+     */
+    protected function loadController($controller)
+    {
+        return $controller;
+    }
 
-    protected function getAction(Request $request, Controller $controller)
+    /**
+     * @param Request $request
+     * @param         $controller
+     *
+     * @return string
+     */
+    protected function getAction(Request $request, $controller)
     {
         return $request->get()->get('action');
     }

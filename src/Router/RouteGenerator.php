@@ -22,7 +22,7 @@ class RouteGenerator
 
     /**
      * @param Router $routes
-     * @param bool            $short_urls
+     * @param bool   $short_urls
      */
     public function __construct(Router $routes, $short_urls = true)
     {
@@ -84,9 +84,8 @@ class RouteGenerator
     private function buildPath($path, array $parameters, array $parameterNames)
     {
         $replace = array();
-        foreach($parameterNames as $name) {
-            $token = '{' . $name . '}';
-            $replace[$token] = $parameters[$name];
+        foreach ($parameterNames as $name) {
+            $replace['{' . $name . '}'] = $parameters[$name];
             unset($parameters[$name]);
         }
         $path = strtr($path, $replace);

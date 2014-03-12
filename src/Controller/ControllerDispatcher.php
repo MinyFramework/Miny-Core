@@ -49,11 +49,11 @@ class ControllerDispatcher
         $response    = $this->container->get('\\Miny\\HTTP\\Response', array(), true);
         $oldResponse = $this->container->setInstance($response);
 
-        $controller = $request->get()->get('controller');
+        $controller     = $request->get()->get('controller');
         $runnerExecuted = false;
         foreach ($this->runners as $runner) {
             if ($runner->canRun($controller)) {
-                $response = $runner->run($controller, $request, $response);
+                $response       = $runner->run($controller, $request, $response);
                 $runnerExecuted = true;
                 break;
             }
@@ -65,8 +65,8 @@ class ControllerDispatcher
 
         if ($oldResponse) {
             return $this->container->setInstance($oldResponse);
-        } else {
-            return $response;
         }
+
+        return $response;
     }
 }

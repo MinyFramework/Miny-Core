@@ -89,8 +89,8 @@ class Container
         if (func_num_args() === 1) {
             return;
         }
-        $parameters = array_slice(func_get_args(), 1);
-        $this->addAlias($concrete, null, $parameters);
+        $concrete                              = ltrim($concrete, '\\');
+        $this->constructorArguments[$concrete] = array_slice(func_get_args(), 1);
     }
 
     public function addCallback($concrete, $callback)
@@ -100,9 +100,10 @@ class Container
         }
         $concrete = ltrim($concrete, '\\');
         if (!isset($this->callbacks[$concrete])) {
-            $this->callbacks[$concrete] = array();
+            $this->callbacks[$concrete] = array($callback);
+        } else {
+            $this->callbacks[$concrete][] = $callback;
         }
-        $this->callbacks[$concrete][] = $callback;
     }
 
     /**

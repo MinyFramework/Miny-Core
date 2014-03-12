@@ -20,7 +20,14 @@ use Miny\HTTP\Response;
 
 class StringControllerRunner extends AbstractControllerRunner
 {
+    /**
+     * @var Container
+     */
     private $container;
+
+    /**
+     * @var string
+     */
     private $controllerPattern = '\\Application\\Controllers\\%sController';
 
     public function __construct(Container $container, EventDispatcher $eventDispatcher)
@@ -37,14 +44,21 @@ class StringControllerRunner extends AbstractControllerRunner
         $this->controllerPattern = $controllerPattern;
     }
 
+    /**
+     * @inheritdoc
+     */
     public function canRun($controller)
     {
         return is_string($controller);
     }
 
+    /**
+     * @inheritdoc
+     */
     protected function loadController($class)
     {
         if (!class_exists($class)) {
+            // Try to guess the controller class if only a name is given
             $class = sprintf($this->controllerPattern, ucfirst($class));
         }
         if (!class_exists($class)) {
@@ -67,11 +81,16 @@ class StringControllerRunner extends AbstractControllerRunner
         Request $request,
         Response $response
     ) {
+        /** @var $controller Controller */
         return $controller->run($action, $request, $response);
     }
 
-    protected function getAction(Request $request, Controller $controller)
+    /**
+     * @inheritdoc
+     */
+    protected function getAction(Request $request, $controller)
     {
+        /** @var $controller Controller */
         return $request->get()->get('action', $controller->getDefaultAction());
     }
 }

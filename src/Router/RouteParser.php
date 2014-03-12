@@ -11,8 +11,6 @@ namespace Miny\Router;
 
 class RouteParser extends AbstractRouteParser
 {
-    const PARAMETER_WITH_PATTERN = '/{(\w+)(?::(.*?))?}/';
-
     private $defaultPattern;
 
     public function __construct($defaultPattern = '[^/]+')
@@ -30,7 +28,7 @@ class RouteParser extends AbstractRouteParser
 
         $parser = $this;
         $uri    = preg_replace_callback(
-            self::PARAMETER_WITH_PATTERN,
+            '/{(\w+)(?::(.*?))?}/',
             function ($matches) use ($parser, $route) {
                 if (!isset($matches[2])) {
                     $matches[2] = $this->defaultPattern;

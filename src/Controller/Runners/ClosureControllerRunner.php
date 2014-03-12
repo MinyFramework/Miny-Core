@@ -16,14 +16,13 @@ use Miny\HTTP\Response;
 
 class ClosureControllerRunner extends AbstractControllerRunner
 {
+
+    /**
+     * @inheritdoc
+     */
     public function canRun($controller)
     {
         return $controller instanceof Closure;
-    }
-
-    protected function loadController($controller)
-    {
-        return $controller;
     }
 
     protected function runController(

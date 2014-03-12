@@ -17,18 +17,20 @@ use InvalidArgumentException;
 class ShutdownService
 {
     private $callbacks;
-    private $lowest_priority;
+    private $lowestPriority;
 
     public function __construct()
     {
-        $this->callbacks       = array();
-        $this->lowest_priority = -1;
+        $this->callbacks      = array();
+        $this->lowestPriority = -1;
         register_shutdown_function(array($this, 'callShutdownFunctions'));
     }
 
     /**
+     * Registers a callback to be called on shutdown.
+     *
      * @param callable $callback
-     * @param null|int $priority
+     * @param null|int $priority The priority of the callback. Lowest number means higher priority.
      *
      * @throws InvalidArgumentException
      */
@@ -39,9 +41,10 @@ class ShutdownService
         }
         $priority = $this->getPriority($priority);
         if (!isset($this->callbacks[$priority])) {
-            $this->callbacks[$priority] = array();
+            $this->callbacks[$priority] = array($callback);
+        } else {
+            $this->callbacks[$priority][] = $callback;
         }
-        $this->callbacks[$priority][] = $callback;
         $this->setLowestPriority($priority);
     }
 
@@ -53,8 +56,9 @@ class ShutdownService
     private function getPriority($priority)
     {
         if ($priority === null || !is_int($priority)) {
-            return $this->lowest_priority + 1;
+            return $this->lowestPriority + 1;
         }
+
         return $priority;
     }
 
@@ -63,7 +67,7 @@ class ShutdownService
      */
     private function setLowestPriority($priority)
     {
-        $this->lowest_priority = max($priority, $this->lowest_priority);
+        $this->lowestPriority = max($priority, $this->lowestPriority);
     }
 
     public function callShutdownFunctions()

@@ -38,9 +38,35 @@ class Router
         $this->globalValues = array();
     }
 
-    public function root()
+    /**
+     * @param string $prefix
+     *
+     * @throws InvalidArgumentException
+     */
+    public function setPrefix($prefix)
     {
-        return $this->add($this->prefix, Route::METHOD_GET, 'root');
+        if (!is_string($prefix)) {
+            throw new InvalidArgumentException('$prefix must be a string');
+        }
+        $this->prefix = $prefix;
+    }
+
+    /**
+     * @param string $postfix
+     *
+     * @throws InvalidArgumentException
+     */
+    public function setPostfix($postfix)
+    {
+        if (!is_string($postfix)) {
+            throw new InvalidArgumentException('$postfix must be a string');
+        }
+        $this->postfix = $postfix;
+    }
+
+    public function addGlobalValues($values)
+    {
+        $this->globalValues = $values + $this->globalValues;
     }
 
     /**
@@ -67,6 +93,11 @@ class Router
         $route->set($this->globalValues);
 
         return $route;
+    }
+
+    public function root()
+    {
+        return $this->add($this->prefix, Route::METHOD_GET, 'root');
     }
 
     public function get($uri, $name = null)
@@ -97,6 +128,16 @@ class Router
         return $this->add($uri, Route::METHOD_DELETE, $name);
     }
 
+    /**
+     * @param string $name
+     *
+     * @return bool
+     */
+    public function has($name)
+    {
+        return isset($this->routes[$name]);
+    }
+
     public function getRoute($name)
     {
         if (!is_string($name)) {
@@ -107,6 +148,26 @@ class Router
         }
 
         return $this->routes[$name];
+    }
+
+    /**
+     * @return Route[]
+     */
+    public function getAll()
+    {
+        return $this->routes;
+    }
+
+    /**
+     * Determines if a static route $path exists.
+     *
+     * @param $path
+     *
+     * @return bool
+     */
+    public function hasStatic($path)
+    {
+        return isset($this->staticRoutes[$path]);
     }
 
     /**
@@ -126,59 +187,5 @@ class Router
         }
 
         return $this->staticRoutes[$uri];
-    }
-
-    /**
-     * @return Route[]
-     */
-    public function getAll()
-    {
-        return $this->routes;
-    }
-
-    /**
-     * @param string $name
-     *
-     * @return bool
-     */
-    public function has($name)
-    {
-        return isset($this->routes[$name]);
-    }
-
-    public function hasStatic($name)
-    {
-        return isset($this->staticRoutes[$name]);
-    }
-
-    /**
-     * @param string $prefix
-     *
-     * @throws InvalidArgumentException
-     */
-    public function setPrefix($prefix)
-    {
-        if (!is_string($prefix)) {
-            throw new InvalidArgumentException('$prefix must be a string');
-        }
-        $this->prefix = $prefix;
-    }
-
-    /**
-     * @param string $postfix
-     *
-     * @throws InvalidArgumentException
-     */
-    public function setPostfix($postfix)
-    {
-        if (!is_string($postfix)) {
-            throw new InvalidArgumentException('$postfix must be a string');
-        }
-        $this->postfix = $postfix;
-    }
-
-    public function addGlobalValues($values)
-    {
-        $this->globalValues = $values + $this->globalValues;
     }
 }
