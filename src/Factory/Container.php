@@ -273,11 +273,12 @@ class Container
     {
         $resolved = array();
         foreach ($dependencies as $k => $dependency) {
-            if ($dependency->getClass() === null) {
+            $class = $dependency->getClass();
+            if ($class === null) {
                 // primitive type
                 $resolved[$k] = $this->resolvePrimitiveParameter($dependency);
             } else {
-                $resolved[$k] = $this->resolveClassParameter($dependency);
+                $resolved[$k] = $this->resolveClassParameter($class, $dependency);
             }
         }
 
@@ -309,15 +310,16 @@ class Container
     }
 
     /**
+     * @param ReflectionClass $class
      * @param ReflectionParameter $dependency
      *
-     * @return mixed|object
      * @throws InvalidArgumentException
+     * @return mixed|object
      */
-    private function resolveClassParameter(ReflectionParameter $dependency)
+    private function resolveClassParameter(ReflectionClass $class, ReflectionParameter $dependency)
     {
         try {
-            return $this->get($dependency->getClass()->getName());
+            return $this->get($class->getName());
         } catch (InvalidArgumentException $e) {
             if (!$dependency->isDefaultValueAvailable()) {
                 throw $e;
