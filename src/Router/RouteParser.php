@@ -36,7 +36,7 @@ class RouteParser extends AbstractRouteParser
             '/{(\w+)(?::(.*?))?}/',
             function ($matches) use ($parser, $route) {
                 if (!isset($matches[2])) {
-                    $matches[2] = $this->getDefaultPattern();
+                    $matches[2] = $parser->getDefaultPattern();
                 }
                 $route->specify($matches[1], $matches[2]);
 
