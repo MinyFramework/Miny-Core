@@ -14,6 +14,14 @@ class RouteParserTest extends \PHPUnit_Framework_TestCase
         $this->parser = new RouteParser();
     }
 
+    public function testDefaultPatterns()
+    {
+        $this->assertEquals('[^/]+', $this->parser->getDefaultPattern());
+
+        $parser = new RouteParser('\d+');
+        $this->assertEquals('\d+', $parser->getDefaultPattern());
+    }
+
     public function testThatStaticRoutesAreParsed()
     {
         $route = $this->parser->parse('/static/route');
