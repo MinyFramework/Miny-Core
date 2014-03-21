@@ -38,7 +38,7 @@ class Route
 
     public function isStatic()
     {
-        return empty($this->parameterPatterns);
+        return !isset($this->regexp);
     }
 
     /**

@@ -9,7 +9,7 @@
 
 namespace Miny\Router\Exceptions;
 
-class BadMethodException extends \RuntimeException
+class BadMethodException extends \InvalidArgumentException
 {
 
 }

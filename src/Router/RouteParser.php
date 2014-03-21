@@ -21,7 +21,7 @@ class RouteParser extends AbstractRouteParser
     /**
      * @inheritdoc
      */
-    public function parse($uri, $method = null)
+    public function parse($uri, $method = Route::METHOD_ALL)
     {
         $route = new Route;
         $route->setMethod($method);
@@ -40,7 +40,7 @@ class RouteParser extends AbstractRouteParser
             $uri
         );
         $route->setPath($uri);
-        if ($route->isStatic()) {
+        if ($route->getParameterCount() === 0) {
             return $route;
         }
         $regexp = $this->createRegexp($uri, $route);
