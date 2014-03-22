@@ -67,6 +67,8 @@ class Application extends BaseApplication
         );
 
         $parameterContainer = $this->getParameterContainer();
+
+        $container->addAlias('\\Miny\\Router\\AbstractRouteParser', '\\Miny\\Router\\RouteParser');
         $container->addCallback(
             '\\Miny\\Router\\Router',
             function (Router $router) use ($parameterContainer) {
