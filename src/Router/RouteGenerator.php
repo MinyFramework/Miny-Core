@@ -17,17 +17,17 @@ class RouteGenerator
     /**
      * @var Router
      */
-    private $collection;
+    private $router;
     private $shortUrlsEnabled;
 
     /**
-     * @param Router $routes
-     * @param bool   $short_urls
+     * @param Router $router
+     * @param bool   $shortUrls
      */
-    public function __construct(Router $routes, $short_urls = true)
+    public function __construct(Router $router, $shortUrls = true)
     {
-        $this->collection       = $routes;
-        $this->shortUrlsEnabled = $short_urls;
+        $this->router           = $router;
+        $this->shortUrlsEnabled = $shortUrls;
     }
 
     /**
@@ -40,10 +40,7 @@ class RouteGenerator
      */
     public function generate($routeName, array $parameters = array())
     {
-        if (!$this->collection->has($routeName)) {
-            throw new OutOfBoundsException(sprintf('Route %s is not found', $routeName));
-        }
-        $route = $this->collection->getRoute($routeName);
+        $route = $this->router->getRoute($routeName);
 
         $required = $route->getParameterNames();
         $missing  = array_diff($required, array_keys($parameters));

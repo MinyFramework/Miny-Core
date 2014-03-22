@@ -37,6 +37,7 @@ class RouteParserTest extends \PHPUnit_Framework_TestCase
         $this->assertFalse($route->isStatic());
         $this->assertEquals(1, $route->getParameterCount());
         $this->assertEquals(array('id' => '[^/]+'), $route->getParameterPatterns());
+        $this->assertEquals('/static/route/([^/]+)', $route->getRegexp());
     }
 
     public function testThatPatternsAreSetCorrectly()
@@ -46,5 +47,6 @@ class RouteParserTest extends \PHPUnit_Framework_TestCase
         $this->assertFalse($route->isStatic());
         $this->assertEquals(1, $route->getParameterCount());
         $this->assertEquals(array('id' => '\d+'), $route->getParameterPatterns());
+        $this->assertEquals('/static/route/(\d+)', $route->getRegexp());
     }
 }

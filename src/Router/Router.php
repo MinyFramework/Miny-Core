@@ -22,13 +22,13 @@ class Router
     private $globalValues;
 
     /**
-     * @var RouteParser
+     * @var AbstractRouteParser
      */
     private $parser;
     private $prefix;
     private $postfix;
 
-    public function __construct(RouteParser $parser)
+    public function __construct(AbstractRouteParser $parser)
     {
         $this->parser       = $parser;
         $this->prefix       = '';
@@ -140,9 +140,6 @@ class Router
 
     public function getRoute($name)
     {
-        if (!is_string($name)) {
-            throw new InvalidArgumentException('$name must be a string.');
-        }
         if (!isset($this->routes[$name])) {
             throw new OutOfBoundsException(sprintf('Route %s is not found.', $name));
         }
@@ -179,9 +176,6 @@ class Router
      */
     public function getStaticByURI($uri)
     {
-        if (!is_string($uri)) {
-            throw new InvalidArgumentException('$uri must be a string.');
-        }
         if (!isset($this->staticRoutes[$uri])) {
             throw new OutOfBoundsException(sprintf('Static uri %s is not found.', $uri));
         }

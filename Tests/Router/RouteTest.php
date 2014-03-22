@@ -65,6 +65,7 @@ class RouteTest extends \PHPUnit_Framework_TestCase
         $route = new Route();
 
         $route->setMethod(Route::METHOD_GET | Route::METHOD_POST);
+        $this->assertTrue($route->isMethod(Route::METHOD_ALL));
         $this->assertTrue($route->isMethod(Route::METHOD_GET));
         $this->assertTrue($route->isMethod(Route::METHOD_POST));
         $this->assertFalse($route->isMethod(Route::METHOD_DELETE));
@@ -72,6 +73,7 @@ class RouteTest extends \PHPUnit_Framework_TestCase
         $route = new Route();
         $route->setMethod(Route::METHOD_ALL);
 
+        $this->assertTrue($route->isMethod(Route::METHOD_ALL));
         $this->assertTrue($route->isMethod(Route::METHOD_GET));
         $this->assertTrue($route->isMethod(Route::METHOD_POST));
         $this->assertTrue($route->isMethod(Route::METHOD_PUT));

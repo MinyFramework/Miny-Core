@@ -16,14 +16,14 @@ class RouteMatcher
     /**
      * @var Router
      */
-    private $routes;
+    private $router;
 
     /**
-     * @param Router $routes
+     * @param Router $router
      */
-    public function __construct(Router $routes)
+    public function __construct(Router $router)
     {
-        $this->routes = $routes;
+        $this->router = $router;
     }
 
     /**
@@ -34,8 +34,8 @@ class RouteMatcher
      */
     public function match($path, $method = Route::METHOD_ALL)
     {
-        if ($this->routes->hasStatic($path)) {
-            $route = $this->routes->getStaticByURI($path);
+        if ($this->router->hasStatic($path)) {
+            $route = $this->router->getStaticByURI($path);
             if ($route->isMethod($method)) {
                 return new Match($route);
             }
@@ -55,7 +55,7 @@ class RouteMatcher
     {
         $variableRoutes = array(array());
         $group          = 0;
-        foreach ($this->routes->getAll() as $route) {
+        foreach ($this->router->getAll() as $route) {
             /** @var $route Route */
             if ($route->isStatic() || !$route->isMethod($method)) {
                 continue;
