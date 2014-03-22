@@ -31,12 +31,13 @@ class RouteParser extends AbstractRouteParser
         $route = new Route;
         $route->setMethod($method);
 
-        $parser = $this;
-        $uri    = preg_replace_callback(
+        $defaultPattern = $this->defaultPattern;
+
+        $uri = preg_replace_callback(
             '/{(\w+)(?::(.*?))?}/',
-            function ($matches) use ($parser, $route) {
+            function ($matches) use ($defaultPattern, $route) {
                 if (!isset($matches[2])) {
-                    $matches[2] = $parser->getDefaultPattern();
+                    $matches[2] = $defaultPattern;
                 }
                 $route->specify($matches[1], $matches[2]);
 
@@ -48,8 +49,7 @@ class RouteParser extends AbstractRouteParser
         if ($route->getParameterCount() === 0) {
             return $route;
         }
-        $regexp = $this->createRegexp($uri, $route);
-        $route->setRegexp($regexp);
+        $route->setRegexp($this->createRegexp($uri, $route));
 
         return $route;
     }
@@ -62,15 +62,12 @@ class RouteParser extends AbstractRouteParser
      */
     private function createRegexp($uri, Route $route)
     {
-        $keys     = array();
         $patterns = array();
         foreach ($route->getParameterPatterns() as $key => $pattern) {
-            $keys[]     = '\\{' . $key . '\\}';
-            $patterns[] = '(' . $pattern . ')';
+            $patterns['\\{' . $key . '\\}'] = '(' . $pattern . ')';
         }
         $uri    = preg_quote($uri, '#');
-        $regexp = str_replace($keys, $patterns, $uri);
 
-        return $regexp;
+        return strtr($uri, $patterns);
     }
 }

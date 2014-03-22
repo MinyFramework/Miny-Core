@@ -10,7 +10,6 @@
 namespace Miny\Router;
 
 use InvalidArgumentException;
-use OutOfBoundsException;
 
 class RouteGenerator
 {
@@ -18,6 +17,10 @@ class RouteGenerator
      * @var Router
      */
     private $router;
+
+    /**
+     * @var bool
+     */
     private $shortUrlsEnabled;
 
     /**
@@ -36,7 +39,6 @@ class RouteGenerator
      *
      * @return string
      * @throws InvalidArgumentException
-     * @throws OutOfBoundsException
      */
     public function generate($routeName, array $parameters = array())
     {
@@ -87,16 +89,16 @@ class RouteGenerator
         }
         $path = strtr($path, $replace);
         if ($this->shortUrlsEnabled) {
-            if (!empty($parameters)) {
-                $path .= (strpos($path, '?') === false) ? '?' : '&';
-                $path .= http_build_query($parameters, null, '&');
+            if (empty($parameters)) {
+                return $path;
             }
+            $path .= (strpos($path, '?') === false) ? '?' : '&';
+
         } else {
             $parameters = array('path' => $path) + $parameters;
-
-            $path = '?' . http_build_query($parameters, null, '&');
+            $path       = '?';
         }
 
-        return $path;
+        return $path . http_build_query($parameters, null, '&');;
     }
 }
