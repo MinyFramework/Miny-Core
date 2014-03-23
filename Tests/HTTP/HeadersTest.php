@@ -4,7 +4,6 @@ namespace Miny\HTTP;
 
 class HeadersTest extends \PHPUnit_Framework_TestCase
 {
-
     public function sanitizeProvider()
     {
         return array(
@@ -164,5 +163,8 @@ class HeadersTest extends \PHPUnit_Framework_TestCase
 
         $headers->remove('foo', 'bar');
         $this->assertFalse($headers->has('foo'));
+
+        // should not do anything
+        $headers->remove('nonexistent');
     }
 }

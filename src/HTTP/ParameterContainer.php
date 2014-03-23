@@ -28,10 +28,6 @@ class ParameterContainer
 
     public function has($key)
     {
-        if (!is_string($key)) {
-            throw new InvalidArgumentException('$key must be a string.');
-        }
-
         return isset($this->data[$key]);
     }
 
@@ -59,10 +55,6 @@ class ParameterContainer
 
     public function remove($key)
     {
-        if (!is_string($key)) {
-            throw new InvalidArgumentException('$key must be a string.');
-        }
-
         unset($this->data[$key]);
     }
 
