@@ -7,13 +7,14 @@ class RequestTest extends \PHPUnit_Framework_TestCase
 
     public function setUp()
     {
-        $_GET                      = array(
+        $_GET    = array(
             'key' => 'value',
             'get_array'
         );
-        $_COOKIE                   = array(
+        $_COOKIE = array(
             'cookie_array'
         );
+
         $_SERVER['REQUEST_URI']    = '/some_path/to?this=foo';
         $_SERVER['REMOTE_ADDR']    = 'my_ip';
         $_SERVER['REQUEST_METHOD'] = 'GET';
@@ -24,6 +25,7 @@ class RequestTest extends \PHPUnit_Framework_TestCase
     {
         $request = Request::getGlobal();
         $this->assertInstanceOf(__NAMESPACE__ . '\Request', $request);
+
         return $request;
     }
 

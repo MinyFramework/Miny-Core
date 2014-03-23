@@ -37,7 +37,7 @@ class HeadersTest extends \PHPUnit_Framework_TestCase
     }
 
     /**
-     * @expectedException OutOfBoundsException
+     * @expectedException \OutOfBoundsException
      * @expectedExceptionMessage expect header is not set.
      */
     public function testGetNonexistentHeader()

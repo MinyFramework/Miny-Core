@@ -4,13 +4,32 @@ namespace Miny\HTTP;
 
 class ResponseTest extends \PHPUnit_Framework_TestCase
 {
+    /**
+     * @var Response
+     */
     protected $response;
+
+    /**
+     * @var \PHPUnit_Framework_MockObject_MockObject
+     */
     protected $mock;
 
     public function setUp()
     {
-        $this->mock = $this->getMock('\Miny\HTTP\ResponseHeaders',
-            array('setCookie', 'getCookies', 'removeCookie', 'send', 'set', 'setRaw', 'has'), array(), 'mockHeaders');
+        $this->mock = $this->getMock(
+            '\Miny\HTTP\ResponseHeaders',
+            array(
+                'setCookie',
+                'getCookies',
+                'removeCookie',
+                'send',
+                'set',
+                'setRaw',
+                'has'
+            ),
+            array(),
+            'mockHeaders'
+        );
 
         $this->response = new Response($this->mock);
     }
@@ -84,7 +103,7 @@ class ResponseTest extends \PHPUnit_Framework_TestCase
     }
 
     /**
-     * @expectedException InvalidArgumentException
+     * @expectedException \InvalidArgumentException
      * @expectedExceptionMessage Invalid status code: 523
      */
     public function testInvalidStatusCode()
@@ -168,9 +187,6 @@ class ResponseTest extends \PHPUnit_Framework_TestCase
         $this->assertInstanceof('\Miny\HTTP\ResponseHeaders', $response->getHeaders());
     }
 
-    /**
-     * @runInSeparateProcess
-     */
     public function testSend()
     {
         $this->mock->expects($this->exactly(2))
@@ -202,5 +218,3 @@ class ResponseTest extends \PHPUnit_Framework_TestCase
         $this->assertEquals('content', ob_get_clean());
     }
 }
-
-?>

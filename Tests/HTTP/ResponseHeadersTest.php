@@ -5,10 +5,9 @@ namespace Miny\HTTP;
 class ResponseHeadersTest extends \PHPUnit_Framework_TestCase
 {
 
-
     public function testCookies()
     {
-        $sender = $this->getMockForAbstractClass('\Miny\HTTP\AbstractHeaderSender');
+        $sender = $this->getMockForAbstractClass('\\Miny\\HTTP\\AbstractHeaderSender');
 
         $headers = new ResponseHeaders($sender);
         $headers->setCookie('name', 'value');
@@ -25,13 +24,16 @@ class ResponseHeadersTest extends \PHPUnit_Framework_TestCase
 
     public function testSend()
     {
-        $sender = $this->getMockForAbstractClass('\Miny\HTTP\AbstractHeaderSender');
+        $sender = $this->getMockForAbstractClass('\\Miny\\HTTP\\AbstractHeaderSender');
+
         $sender->expects($this->at(0))
             ->method('send')
             ->with($this->equalTo('expect: foo, bar'));
+
         $sender->expects($this->at(1))
             ->method('send')
             ->with($this->equalTo('Foobar'));
+
         $sender->expects($this->once())
             ->method('sendCookie')
             ->with($this->equalTo('name'), $this->equalTo('value'));
