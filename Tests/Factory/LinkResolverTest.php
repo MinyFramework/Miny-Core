@@ -56,6 +56,20 @@ class LinkResolverTest extends \PHPUnit_Framework_TestCase
             ->method('offsetGet');
 
         $this->assertEquals('foo', $this->resolver->resolveReferences('{@foo}'));
+        $this->assertEquals('@foo', $this->resolver->resolveReferences('\@foo'));
+    }
+
+    public function testThatLinksInArraysAreResolved()
+    {
+        $this->parameterContainerMock
+            ->expects($this->exactly(2))
+            ->method('resolveLinksInString')
+            ->will($this->onConsecutiveCalls('foo', 'bar'));
+
+        $this->assertEquals(
+            array('foo', 'bar'),
+            $this->resolver->resolveReferences(array('{@foo}', '{@bar}'))
+        );
     }
 
 }
