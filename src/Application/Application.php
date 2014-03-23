@@ -31,7 +31,8 @@ class Application extends BaseApplication
                     'default_parameters' => array(),
                     'exception_paths'    => array(),
                     'short_urls'         => false
-                )
+                ),
+                'default_content_encoding' => 'utf-8'
             )
         );
     }
