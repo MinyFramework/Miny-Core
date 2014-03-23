@@ -45,7 +45,7 @@ class ShutdownService
         } else {
             $this->callbacks[$priority][] = $callback;
         }
-        $this->setLowestPriority($priority);
+        $this->lowestPriority = max($priority, $this->lowestPriority);
     }
 
     /**
@@ -60,14 +60,6 @@ class ShutdownService
         }
 
         return $priority;
-    }
-
-    /**
-     * @param $priority
-     */
-    private function setLowestPriority($priority)
-    {
-        $this->lowestPriority = max($priority, $this->lowestPriority);
     }
 
     public function callShutdownFunctions()
