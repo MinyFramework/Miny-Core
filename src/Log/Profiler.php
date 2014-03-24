@@ -9,8 +9,7 @@
 
 namespace Miny\Log;
 
-
-use Miny\Routing\Exceptions\BadMethodException;
+use BadMethodCallException;
 
 class Profiler
 {
@@ -44,7 +43,7 @@ class Profiler
     public function stop()
     {
         if (!$this->isRunning) {
-            throw new BadMethodException('Profiler is not started.');
+            throw new BadMethodCallException('Profiler is not started.');
         }
         $this->log->write(Log::PROFILE, $this->category, $this->getMessage());
         $this->isRunning = false;

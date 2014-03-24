@@ -43,4 +43,9 @@ class FileWriter extends AbstractLogWriter
         file_put_contents($this->path . $file, $this->buffer, FILE_APPEND);
         $this->buffer = '';
     }
+
+    public function reset()
+    {
+        $this->buffer = '';
+    }
 }

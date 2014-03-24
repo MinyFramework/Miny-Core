@@ -21,17 +21,30 @@ class Log
      * @var AbstractLogWriter
      */
     private $writers;
+
+    /**
+     * @var AbstractLogWriter[]
+     */
+    private $allWriters;
+
     /**
      * @var Profiler[]
      */
     private $profilers;
-    private $messages;
+
     private $messageNum;
     private $flushLimit;
 
     public function __construct()
     {
-        $this->writers    = array();
+        $this->writers    = array(
+            Log::PROFILE => array(),
+            Log::DEBUG   => array(),
+            Log::INFO    => array(),
+            Log::WARNING => array(),
+            Log::ERROR   => array()
+        );
+        $this->allWriters = array();
         $this->profilers  = array();
         $this->flushLimit = 100;
         $this->reset();
@@ -47,8 +60,10 @@ class Log
 
     private function reset()
     {
-        $this->messages   = array();
         $this->messageNum = 0;
+        foreach ($this->allWriters as $writer) {
+            $writer->reset();
+        }
     }
 
     public function startProfiling($category, $name)
@@ -81,11 +96,20 @@ class Log
         if (isset($args[0]) && is_array($args[0])) {
             $args = $args[0];
         }
-        $message = $this->formatMessage($message, $args);
-        $this->messageNum++;
-        $this->messages[] = new LogMessage($level, microtime(true), $category, $message);
 
-        if ($this->messageNum === $this->flushLimit) {
+        $messageObject = new LogMessage(
+            $level,
+            microtime(true),
+            $category,
+            $this->formatMessage($message, $args)
+        );
+
+        foreach ($this->writers[$level] as $writer) {
+            /** @var $writer AbstractLogWriter */
+            $writer->add($messageObject);
+        }
+
+        if (++$this->messageNum === $this->flushLimit) {
             $this->flush();
         }
     }
@@ -123,23 +147,8 @@ class Log
 
     public function flush()
     {
-        if (empty($this->messages) || empty($this->writers)) {
-            return;
-        }
-        foreach ($this->messages as $message) {
-            /** @var $message LogMessage */
-            $level = $message->getLevel();
-            foreach ($this->writers[$level] as $writer) {
-                /** @var $writer AbstractLogWriter */
-                $writer->add($message);
-            }
-        }
-
-        foreach ($this->writers as $writers) {
-            foreach ($writers as $writer) {
-                /** @var $writer AbstractLogWriter */
-                $writer->commit();
-            }
+        foreach ($this->allWriters as $writer) {
+            $writer->commit();
         }
         $this->reset();
     }
@@ -156,6 +165,7 @@ class Log
                 self::ERROR
             );
         }
+        $this->allWriters[] = $writer;
         if (is_array($levels)) {
             foreach ($levels as $level) {
                 $this->addWriterWithLevel($writer, $level);
@@ -175,12 +185,9 @@ class Log
 
     public function removeWriter(AbstractLogWriter $writer)
     {
-        foreach ($this->writers as $level => &$writers) {
+        foreach ($this->writers as $level => $writers) {
             $key = array_search($writer, $writers);
-            unset($writers[$key]);
-            if (empty($writers)) {
-                unset($this->writers[$level]);
-            }
+            unset($this->writers[$level][$key]);
         }
     }
 }

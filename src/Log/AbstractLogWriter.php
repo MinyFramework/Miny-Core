@@ -20,6 +20,8 @@ abstract class AbstractLogWriter
 
     abstract public function commit();
 
+    abstract public function reset();
+
     public function attach(Log $log)
     {
         $this->log = $log;
