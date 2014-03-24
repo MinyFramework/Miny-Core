@@ -58,11 +58,24 @@ class LogTest extends \PHPUnit_Framework_TestCase
         $this->log->write(Log::WARNING, '', '');
     }
 
+    public function testThatPendingMessagesAreGivenToWriter()
+    {
+        $this->writerMock
+            ->expects($this->exactly(2))
+            ->method('add')
+            ->with($this->isInstanceOf('\\Miny\\Log\\LogMessage'));
+
+        $this->log->write(Log::INFO, '', '');
+        $this->log->write(Log::INFO, '', '');
+
+        $this->log->registerWriter($this->writerMock, Log::INFO);
+        $this->log->flush();
+    }
+
     public function testThatWriterIsRemoved()
     {
-
         $this->writerMock
-            ->expects($this->once())
+            ->expects($this->never())
             ->method('add');
 
         $this->writerMock

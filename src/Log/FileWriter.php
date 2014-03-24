@@ -41,7 +41,6 @@ class FileWriter extends AbstractLogWriter
     {
         $file = '/log_' . date('Y_m_d') . '.txt';
         file_put_contents($this->path . $file, $this->buffer, FILE_APPEND);
-        $this->buffer = '';
     }
 
     public function reset()

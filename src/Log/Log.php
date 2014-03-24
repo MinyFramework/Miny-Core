@@ -35,18 +35,24 @@ class Log
     private $messageNum;
     private $flushLimit;
 
+    /**
+     * @var LogMessage[]
+     */
+    private $messageBuffer;
+
     public function __construct()
     {
-        $this->writers    = array(
+        $this->writers       = array(
             Log::PROFILE => array(),
             Log::DEBUG   => array(),
             Log::INFO    => array(),
             Log::WARNING => array(),
             Log::ERROR   => array()
         );
-        $this->allWriters = array();
-        $this->profilers  = array();
-        $this->flushLimit = 100;
+        $this->allWriters    = array();
+        $this->messageBuffer = array();
+        $this->profilers     = array();
+        $this->flushLimit    = 100;
         $this->reset();
     }
 
@@ -61,6 +67,7 @@ class Log
     private function reset()
     {
         $this->messageNum = 0;
+        $this->messageBuffer = array();
         foreach ($this->allWriters as $writer) {
             $writer->reset();
         }
@@ -97,17 +104,12 @@ class Log
             $args = $args[0];
         }
 
-        $messageObject = new LogMessage(
+        $this->messageBuffer[] = new LogMessage(
             $level,
             microtime(true),
             $category,
             $this->formatMessage($message, $args)
         );
-
-        foreach ($this->writers[$level] as $writer) {
-            /** @var $writer AbstractLogWriter */
-            $writer->add($messageObject);
-        }
 
         if (++$this->messageNum === $this->flushLimit) {
             $this->flush();
@@ -147,6 +149,14 @@ class Log
 
     public function flush()
     {
+        foreach ($this->messageBuffer as $message) {
+            $level = $message->getLevel();
+            foreach ($this->writers[$level] as $writer) {
+                /** @var $writer AbstractLogWriter */
+                $writer->add($message);
+            }
+        }
+
         foreach ($this->allWriters as $writer) {
             $writer->commit();
         }
@@ -177,9 +187,6 @@ class Log
 
     private function addWriterWithLevel(AbstractLogWriter $writer, $level)
     {
-        if (!isset($this->writers[$level])) {
-            $this->writers[$level] = array();
-        }
         $this->writers[$level][] = $writer;
     }
 
