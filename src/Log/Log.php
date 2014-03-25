@@ -40,6 +40,22 @@ class Log
      */
     private $messageBuffer;
 
+    public static function getLevelName($level)
+    {
+        static $names = array(
+            self::PROFILE => 'Profile',
+            self::DEBUG   => 'Debug',
+            self::INFO    => 'Info',
+            self::WARNING => 'Warning',
+            self::ERROR   => 'Error'
+        );
+        if (isset($names[$level])) {
+            return $names[$level];
+        }
+
+        return 'Unknown (' . $level . ')';
+    }
+
     public function __construct()
     {
         $this->writers       = array(
@@ -129,22 +145,6 @@ class Log
         }
 
         return $message;
-    }
-
-    public function getLevelName($level)
-    {
-        static $names = array(
-            self::PROFILE => 'Profile',
-            self::DEBUG   => 'Debug',
-            self::INFO    => 'Info',
-            self::WARNING => 'Warning',
-            self::ERROR   => 'Error'
-        );
-        if (isset($names[$level])) {
-            return $names[$level];
-        }
-
-        return 'Unknown (' . $level . ')';
     }
 
     public function flush()

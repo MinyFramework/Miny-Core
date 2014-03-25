@@ -29,7 +29,7 @@ abstract class AbstractLogWriter
 
     public function getLevelName($level)
     {
-        return $this->log->getLevelName($level);
+        return Log::getLevelName($level);
     }
 
     public function __destruct()
@@ -39,6 +39,8 @@ abstract class AbstractLogWriter
 
     public function detach()
     {
-        $this->log->removeWriter($this);
+        if (isset($this->log)) {
+            $this->log->removeWriter($this);
+        }
     }
 }

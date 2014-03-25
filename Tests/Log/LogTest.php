@@ -99,6 +99,15 @@ class LogTest extends \PHPUnit_Framework_TestCase
         );
     }
 
+    public function testThatMultipleStartWithSameNameReturnsSameProfiler()
+    {
+        $profiler = $this->log->startProfiling('test', 'test');
+
+        $this->assertSame($profiler, $this->log->startProfiling('test', 'test'));
+        $this->assertSame($profiler, $this->log->startProfiling('test', 'test'));
+        $this->assertSame($profiler, $this->log->startProfiling('test', 'test'));
+    }
+
     public function testThatFlushIsNotCalledWhenLimitIsSetAndBufferIsNotFull()
     {
         $this->writerMock
@@ -134,6 +143,4 @@ class LogTest extends \PHPUnit_Framework_TestCase
 
         $this->log->setFlushLimit(5);
     }
-
-
 }
