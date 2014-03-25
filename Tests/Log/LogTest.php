@@ -90,4 +90,50 @@ class LogTest extends \PHPUnit_Framework_TestCase
 
         $this->log->write(Log::INFO, '', '');
     }
+
+    public function testThatProfilerIsReturned()
+    {
+        $this->assertInstanceOf(
+            '\\Miny\\Log\\Profiler',
+            $this->log->startProfiling('test', 'test')
+        );
+    }
+
+    public function testThatFlushIsNotCalledWhenLimitIsSetAndBufferIsNotFull()
+    {
+        $this->writerMock
+            ->expects($this->never())
+            ->method('commit');
+
+        $this->log->registerWriter($this->writerMock, Log::INFO);
+
+        $this->log->write(Log::INFO, '', '');
+        $this->log->write(Log::INFO, '', '');
+        $this->log->write(Log::INFO, '', '');
+        $this->log->write(Log::INFO, '', '');
+        $this->log->write(Log::INFO, '', '');
+        $this->log->write(Log::INFO, '', '');
+
+        $this->log->setFlushLimit(10);
+    }
+
+    public function testThatFlushIsCalledWhenLimitIsSetAndBufferIsFull()
+    {
+        $this->writerMock
+            ->expects($this->once())
+            ->method('commit');
+
+        $this->log->registerWriter($this->writerMock, Log::INFO);
+
+        $this->log->write(Log::INFO, '', '');
+        $this->log->write(Log::INFO, '', '');
+        $this->log->write(Log::INFO, '', '');
+        $this->log->write(Log::INFO, '', '');
+        $this->log->write(Log::INFO, '', '');
+        $this->log->write(Log::INFO, '', '');
+
+        $this->log->setFlushLimit(5);
+    }
+
+
 }
