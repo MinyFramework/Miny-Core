@@ -23,6 +23,7 @@ class Session implements ArrayAccess, IteratorAggregate, Countable
      * @var array
      */
     private $data;
+
     /**
      * @var bool
      */

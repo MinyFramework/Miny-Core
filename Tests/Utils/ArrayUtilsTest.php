@@ -2,10 +2,10 @@
 
 namespace Miny\Utils;
 
+use InvalidArgumentException;
 use OutOfBoundsException;
-use PHPUnit_Framework_TestCase;
 
-class ArrayUtilsTest extends PHPUnit_Framework_TestCase
+class ArrayUtilsTest extends \PHPUnit_Framework_TestCase
 {
     private $array;
 
@@ -33,7 +33,6 @@ class ArrayUtilsTest extends PHPUnit_Framework_TestCase
 
     /**
      * @expectedException InvalidArgumentException
-     * @expectedExceptionMessage ArrayUtils::existsByPath expects an array or an ArrayAccess object.
      */
     public function testExistsByPathArrayException()
     {
@@ -52,7 +51,6 @@ class ArrayUtilsTest extends PHPUnit_Framework_TestCase
 
     /**
      * @expectedException InvalidArgumentException
-     * @expectedExceptionMessage ArrayUtils::getByPath expects an array or an ArrayAccess object.
      */
     public function testGetByPathArrayException()
     {
@@ -68,7 +66,6 @@ class ArrayUtilsTest extends PHPUnit_Framework_TestCase
 
     /**
      * @expectedException OutOfBoundsException
-     * @expectedExceptionMessage Array key not found: key_a:subkey_b
      */
     public function testFindByPathNonexistent()
     {

@@ -11,7 +11,6 @@ namespace Miny\Application\Handlers;
 
 use Exception;
 use Miny\Application\Events\UncaughtExceptionEvent;
-use Miny\CoreEvents;
 use Miny\Event\EventDispatcher;
 use Miny\Factory\Container;
 use Miny\Factory\ParameterContainer;

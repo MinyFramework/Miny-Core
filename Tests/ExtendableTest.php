@@ -2,6 +2,9 @@
 
 namespace Miny;
 
+use BadMethodCallException;
+use InvalidArgumentException;
+
 class FooPlugin
 {
 
@@ -51,7 +54,6 @@ class ExtendableTest extends \PHPUnit_Framework_TestCase
 
     /**
      * @expectedException BadMethodCallException
-     * @expectedExceptionMessage Method not found: foobar
      */
     public function testCallNotFoundException()
     {
@@ -60,7 +62,6 @@ class ExtendableTest extends \PHPUnit_Framework_TestCase
 
     /**
      * @expectedException InvalidArgumentException
-     * @expectedExceptionMessage Parameter "method" must be string
      */
     public function testCallBadTypeException()
     {
@@ -69,7 +70,6 @@ class ExtendableTest extends \PHPUnit_Framework_TestCase
 
     /**
      * @expectedException InvalidArgumentException
-     * @expectedExceptionMessage Parameter "method" must be string
      */
     public function testAddMethodNameException()
     {
@@ -78,7 +78,6 @@ class ExtendableTest extends \PHPUnit_Framework_TestCase
 
     /**
      * @expectedException InvalidArgumentException
-     * @expectedExceptionMessage Callback given for method method is not callable
      */
     public function testAddMethodCallbackException()
     {
@@ -87,7 +86,6 @@ class ExtendableTest extends \PHPUnit_Framework_TestCase
 
     /**
      * @expectedException InvalidArgumentException
-     * @expectedExceptionMessage First argument must be an object
      */
     public function testAddMethodsObjectException()
     {
@@ -96,7 +94,6 @@ class ExtendableTest extends \PHPUnit_Framework_TestCase
 
     /**
      * @expectedException InvalidArgumentException
-     * @expectedExceptionMessage Method "foo" not found in class stdClass
      */
     public function testAddMethodsMethodException()
     {
@@ -120,5 +117,3 @@ class ExtendableTest extends \PHPUnit_Framework_TestCase
         $this->assertEquals('bar', $this->object->foobar);
     }
 }
-
-?>

@@ -2,8 +2,13 @@
 
 namespace Miny\Event;
 
+use InvalidArgumentException;
+
 class EventDispatcherTest extends \PHPUnit_Framework_TestCase
 {
+    /**
+     * @var EventDispatcher
+     */
     protected $object;
     protected $handler_factory;
 
@@ -19,19 +24,18 @@ class EventDispatcherTest extends \PHPUnit_Framework_TestCase
 
     public function testRetValOfRaiseEvent()
     {
-        $event  = new Event('event');
-        $retval = $this->object->raiseEvent($event);
-        $this->assertSame($event, $retval);
+        $event = new Event('event');
+        $this->assertSame($event, $this->object->raiseEvent($event));
     }
 
     public function testStringEvent()
     {
-        $retval1 = $this->object->raiseEvent('event');
-        $retval2 = $this->object->raiseEvent('event', 'p1', 'p2');
+        $event1 = $this->object->raiseEvent('event');
+        $event2 = $this->object->raiseEvent('event', 'p1', 'p2');
 
-        $this->assertInstanceOf('\Miny\Event\Event', $retval1);
-        $this->assertEquals('event', $retval1->getName());
-        $this->assertEquals(array('p1', 'p2'), $retval2->getParameters());
+        $this->assertInstanceOf('\Miny\Event\Event', $event1);
+        $this->assertEquals('event', $event1->getName());
+        $this->assertEquals(array('p1', 'p2'), $event2->getParameters());
     }
 
     public function testHandleEventWithHandler()
@@ -56,9 +60,12 @@ class EventDispatcherTest extends \PHPUnit_Framework_TestCase
     public function testShouldPassParametersToHandler()
     {
         $event = new Event('event2', 'p1', 'p2');
-        $this->object->register('event2', function () {
-            return func_get_args();
-        });
+        $this->object->register(
+            'event2',
+            function () {
+                return func_get_args();
+            }
+        );
         $this->object->raiseEvent($event);
         $this->assertEquals(array('p1', 'p2'), $event->getResponse());
     }
@@ -77,7 +84,6 @@ class EventDispatcherTest extends \PHPUnit_Framework_TestCase
 
     /**
      * @expectedException InvalidArgumentException
-     * @expectedExceptionMessage The first parameter must be an Event object or a string.
      */
     public function testRaiseEventException()
     {
@@ -86,12 +92,9 @@ class EventDispatcherTest extends \PHPUnit_Framework_TestCase
 
     /**
      * @expectedException \Miny\Event\Exceptions\EventHandlerException
-     * @expectedExceptionMessage Handler is not callable for event event
      */
     public function testRegisterException()
     {
         $this->object->register('event', new \stdClass);
     }
 }
-
-?>

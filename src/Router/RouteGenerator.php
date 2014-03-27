@@ -99,6 +99,6 @@ class RouteGenerator
             $path       = '?';
         }
 
-        return $path . http_build_query($parameters, null, '&');;
+        return $path . http_build_query($parameters, null, '&');
     }
 }
