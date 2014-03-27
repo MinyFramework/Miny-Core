@@ -15,9 +15,9 @@ use Miny\Event\Event;
 class ControllerFinishedEvent extends Event
 {
 
-    public function __construct($controller, $action)
+    public function __construct($controller, $action, $returnValue)
     {
-        parent::__construct(CoreEvents::CONTROLLER_FINISHED, $controller, $action);
+        parent::__construct(CoreEvents::CONTROLLER_FINISHED, $controller, $action, $returnValue);
     }
 
 }
