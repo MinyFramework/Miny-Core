@@ -44,14 +44,14 @@ class RouteGenerator
     {
         $route = $this->router->getRoute($routeName);
 
-        $required = $route->getParameterNames();
-        $missing  = array_diff($required, array_keys($parameters));
+        $required = $route->getParameterPatterns();
+        $missing  = array_diff_key($required, $parameters);
 
         if (!empty($missing)) {
-            $parameters = $this->insertDefaultParameterValues($route, $missing, $parameters);
+            $parameters = $this->insertDefaultParameterValues($route, array_keys($missing), $parameters);
         }
 
-        return $this->buildPath($route->getPath(), $parameters, $required);
+        return $this->buildPath($route->getPath(), $parameters, array_keys($required));
     }
 
     /**
