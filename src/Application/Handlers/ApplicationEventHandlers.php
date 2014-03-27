@@ -10,6 +10,7 @@
 namespace Miny\Application\Handlers;
 
 use Exception;
+use Miny\Application\Events\UncaughtExceptionEvent;
 use Miny\CoreEvents;
 use Miny\Event\EventDispatcher;
 use Miny\Factory\Container;
@@ -59,7 +60,8 @@ class ApplicationEventHandlers
 
     public function handleExceptions(Exception $e)
     {
-        $event = $this->eventDispatcher->raiseEvent(CoreEvents::UNCAUGHT_EXCEPTION, $e);
+        $event = new UncaughtExceptionEvent($e);
+        $this->eventDispatcher->raiseEvent($event);
         if (!$event->isHandled()) {
             // Rethrow the exception that we did not handle.
             throw $e;

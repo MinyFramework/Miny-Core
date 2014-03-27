@@ -10,6 +10,8 @@
 namespace Miny\Application;
 
 use InvalidArgumentException;
+use Miny\Application\Events\BeforeRunEvent;
+use Miny\Application\Events\ShutDownEvent;
 use Miny\AutoLoader;
 use Miny\CoreEvents;
 use Miny\Event\EventDispatcher;
@@ -274,10 +276,10 @@ abstract class BaseApplication
         /** @var $shutdown ShutdownService */
         $shutdown = $this->container->get('\\Miny\\Shutdown\\ShutdownService');
 
-        $event->raiseEvent(CoreEvents::BEFORE_RUN);
+        $event->raiseEvent(new BeforeRunEvent());
         $shutdown->register(
             function () use ($event) {
-                $event->raiseEvent(CoreEvents::SHUTDOWN);
+                $event->raiseEvent(new ShutDownEvent());
             },
             0
         );
