@@ -9,8 +9,9 @@
 
 namespace Miny\Application;
 
+use Miny\Application\Events\FilterRequestEvent;
+use Miny\Application\Events\FilterResponseEvent;
 use Miny\Controller\ControllerDispatcher;
-use Miny\CoreEvents;
 use Miny\Event\EventDispatcher;
 use Miny\Factory\Container;
 use Miny\HTTP\Request;
@@ -57,14 +58,14 @@ class Dispatcher
     public function dispatch(Request $request)
     {
         $oldRequest = $this->container->setInstance($request);
-        $event      = $this->events->raiseEvent(CoreEvents::FILTER_REQUEST, $request);
+        $event      = $this->events->raiseEvent(new FilterRequestEvent($request));
 
         ob_start();
         if ($event->hasResponse()) {
             $rsp = $event->getResponse();
             if ($rsp instanceof Response) {
                 $response = $rsp;
-                $this->events->raiseEvent(CoreEvents::FILTER_RESPONSE, $request, $response);
+                $this->events->raiseEvent(new FilterResponseEvent($request, $response));
             } elseif ($rsp instanceof Request) {
                 $this->guardAgainstInfiniteRedirection($request, $rsp);
                 $response = $this->dispatch($rsp);
@@ -73,7 +74,7 @@ class Dispatcher
 
         if (!isset($response)) {
             $response = $this->controllerDispatcher->runController($request);
-            $this->events->raiseEvent(CoreEvents::FILTER_RESPONSE, $request, $response);
+            $this->events->raiseEvent(new FilterResponseEvent($request, $response));
         }
         $response->addContent(ob_get_clean());
 
