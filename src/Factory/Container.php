@@ -50,7 +50,7 @@ class Container
         if (!$resolver) {
             $resolver = new NullResolver();
         }
-        $this->linkResolver         = $resolver;
+        $this->linkResolver = $resolver;
 
         $this->setInstance($this, __CLASS__);
         $this->setInstance($resolver);
@@ -59,32 +59,36 @@ class Container
     /**
      * @param string         $abstract
      * @param string|Closure $concrete
-     * @param array          $parameters
      */
-    public function addAlias($abstract, $concrete, array $parameters = array())
+    public function addAlias($abstract, $concrete)
     {
         $abstract = ltrim($abstract, '\\');
         if (is_string($concrete)) {
             $concrete = ltrim($concrete, '\\');
-            if (!empty($parameters)) {
-                $this->constructorArguments[$concrete] = $parameters;
+            if ($abstract === $concrete) {
+                return;
             }
-            if ($abstract !== $concrete) {
-                $this->aliases[$abstract] = $concrete;
-            }
-        } else {
-            $this->aliases[$abstract] = $concrete;
         }
+        $this->aliases[$abstract] = $concrete;
     }
 
     /**
      * @param string $concrete
+     * @param mixed  $argument
      */
-    public function addConstructorArguments($concrete /*, ...$parameters */)
+    public function addConstructorArguments($concrete, $argument /*, ...$arguments */)
     {
         $concrete = ltrim($concrete, '\\');
 
-        $this->constructorArguments[$concrete] = array_slice(func_get_args(), 1);
+        // filter the nulls
+        $arguments = array_filter(
+            array_slice(func_get_args(), 1),
+            function ($item) {
+                return $item !== null;
+            }
+        );
+
+        $this->constructorArguments[$concrete] = $arguments;
     }
 
     public function addCallback($concrete, $callback)
@@ -247,13 +251,16 @@ class Container
         }
 
         $constructorArgs = $constructor->getParameters();
+
         if (!empty($parameters)) {
             $constructorArgs = array_diff_key($constructorArgs, $parameters);
+            $resolvedArgs    = $this->resolveDependencies($constructorArgs);
+            $arguments       = $this->linkResolver->resolveReferences($resolvedArgs + $parameters);
+            ksort($arguments);
+        } else {
+            $resolvedArgs = $this->resolveDependencies($constructorArgs);
+            $arguments    = $this->linkResolver->resolveReferences($resolvedArgs);
         }
-        $resolvedArgs = $this->resolveDependencies($constructorArgs);
-        $arguments    = $this->linkResolver->resolveReferences($resolvedArgs + $parameters);
-
-        ksort($arguments);
 
         return $reflector->newInstanceArgs($arguments);
     }

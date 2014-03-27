@@ -25,7 +25,7 @@ class Application extends BaseApplication
         parent::setDefaultParameters($parameterContainer);
         $parameterContainer->addParameters(
             array(
-                'router' => array(
+                'router'                   => array(
                     'prefix'             => '/',
                     'postfix'            => '',
                     'default_parameters' => array(),
@@ -43,6 +43,10 @@ class Application extends BaseApplication
         $container->addAlias(
             '\\Miny\\HTTP\\AbstractHeaderSender',
             '\\Miny\\HTTP\\NativeHeaderSender'
+        );
+        $container->addAlias(
+            '\\Miny\\Router\\AbstractRouteParser',
+            '\\Miny\\Router\\RouteParser'
         );
 
         parent::registerDefaultServices($container);
@@ -69,7 +73,6 @@ class Application extends BaseApplication
 
         $parameterContainer = $this->getParameterContainer();
 
-        $container->addAlias('\\Miny\\Router\\AbstractRouteParser', '\\Miny\\Router\\RouteParser');
         $container->addCallback(
             '\\Miny\\Router\\Router',
             function (Router $router) use ($parameterContainer) {
@@ -79,10 +82,10 @@ class Application extends BaseApplication
             }
         );
 
-        $container->addAlias(
+        $container->addConstructorArguments(
             '\\Miny\\Router\\RouteGenerator',
             null,
-            array(1 => '@router:short_urls')
+            '@router:short_urls'
         );
 
         $container->addCallback(
