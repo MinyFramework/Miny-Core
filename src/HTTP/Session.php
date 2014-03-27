@@ -26,7 +26,7 @@ class Session implements ArrayAccess, IteratorAggregate, Countable
     /**
      * @var bool
      */
-    private $is_open = false;
+    private $isOpen = false;
 
     /**
      * @param iSessionHandler $handler
@@ -38,8 +38,12 @@ class Session implements ArrayAccess, IteratorAggregate, Countable
                 session_set_save_handler($handler, true);
             } else {
                 session_set_save_handler(
-                    array($handler, 'open'), array($handler, 'close'), array($handler, 'read'),
-                    array($handler, 'write'), array($handler, 'destroy'), array($handler, 'gc')
+                    array($handler, 'open'),
+                    array($handler, 'close'),
+                    array($handler, 'read'),
+                    array($handler, 'write'),
+                    array($handler, 'destroy'),
+                    array($handler, 'gc')
                 );
             }
         }
@@ -50,9 +54,9 @@ class Session implements ArrayAccess, IteratorAggregate, Countable
      */
     public function close()
     {
-        if ($this->is_open) {
+        if ($this->isOpen) {
             session_write_close();
-            $this->is_open = false;
+            $this->isOpen = false;
         }
     }
 
@@ -61,10 +65,10 @@ class Session implements ArrayAccess, IteratorAggregate, Countable
      */
     public function destroy($reopen = true)
     {
-        if ($this->is_open) {
+        if ($this->isOpen) {
             session_unset();
             session_destroy();
-            $this->is_open = false;
+            $this->isOpen = false;
         }
         if ($reopen) {
             $this->open();
@@ -77,7 +81,7 @@ class Session implements ArrayAccess, IteratorAggregate, Countable
      */
     public function open(array $data = null)
     {
-        $this->is_open = session_start();
+        $this->isOpen = session_start();
         session_regenerate_id(true);
         if ($data === null) {
             $this->data =& $_SESSION;
@@ -137,7 +141,7 @@ class Session implements ArrayAccess, IteratorAggregate, Countable
         if (!is_string($name)) {
             throw new InvalidArgumentException('Session name must be null or a string');
         }
-        if (!$this->is_open) {
+        if (!$this->isOpen) {
             session_name($name);
         }
     }
@@ -155,7 +159,7 @@ class Session implements ArrayAccess, IteratorAggregate, Countable
         if (!$path) {
             return session_save_path();
         }
-        if ($this->is_open) {
+        if ($this->isOpen) {
             return;
         }
         if (!is_string($path)) {
@@ -173,12 +177,17 @@ class Session implements ArrayAccess, IteratorAggregate, Countable
     public function cookieParams(array $new_params = null)
     {
         $params = session_get_cookie_params();
-        if ($new_params !== null && !$this->is_open) {
+        if ($new_params !== null && !$this->isOpen) {
             $params = $new_params + $params;
             session_set_cookie_params(
-                $params['lifetime'], $params['path'], $params['domain'], $params['secure'], $params['http_only']
+                $params['lifetime'],
+                $params['path'],
+                $params['domain'],
+                $params['secure'],
+                $params['http_only']
             );
         }
+
         return $params;
     }
 

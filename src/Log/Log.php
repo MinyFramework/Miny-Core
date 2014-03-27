@@ -11,11 +11,19 @@ namespace Miny\Log;
 
 class Log
 {
-    const PROFILE = 0;
-    const DEBUG   = 1;
-    const INFO    = 2;
-    const WARNING = 3;
-    const ERROR   = 4;
+    const PROFILE = 1;
+    const DEBUG   = 2;
+    const INFO    = 3;
+    const WARNING = 4;
+    const ERROR   = 5;
+
+    private static $names = array(
+        self::PROFILE => 'Profile',
+        self::DEBUG   => 'Debug',
+        self::INFO    => 'Info',
+        self::WARNING => 'Warning',
+        self::ERROR   => 'Error'
+    );
 
     /**
      * @var AbstractLogWriter
@@ -42,15 +50,8 @@ class Log
 
     public static function getLevelName($level)
     {
-        static $names = array(
-            self::PROFILE => 'Profile',
-            self::DEBUG   => 'Debug',
-            self::INFO    => 'Info',
-            self::WARNING => 'Warning',
-            self::ERROR   => 'Error'
-        );
-        if (isset($names[$level])) {
-            return $names[$level];
+        if (isset(self::$names[$level])) {
+            return self::$names[$level];
         }
 
         return 'Unknown (' . $level . ')';
@@ -82,7 +83,7 @@ class Log
 
     private function reset()
     {
-        $this->messageNum = 0;
+        $this->messageNum    = 0;
         $this->messageBuffer = array();
         foreach ($this->allWriters as $writer) {
             $writer->reset();
@@ -166,6 +167,8 @@ class Log
     public function registerWriter(AbstractLogWriter $writer, $levels = null)
     {
         $writer->attach($this);
+        $this->allWriters[] = $writer;
+
         if ($levels === null) {
             $levels = array(
                 self::PROFILE,
@@ -174,9 +177,12 @@ class Log
                 self::WARNING,
                 self::ERROR
             );
+            $isArray = true;
+        } else {
+            $isArray = is_array($levels);
         }
-        $this->allWriters[] = $writer;
-        if (is_array($levels)) {
+
+        if ($isArray) {
             foreach ($levels as $level) {
                 $this->addWriterWithLevel($writer, $level);
             }
@@ -192,9 +198,12 @@ class Log
 
     public function removeWriter(AbstractLogWriter $writer)
     {
+        $filter = function ($item) use ($writer) {
+            return $item !== $writer;
+        };
         foreach ($this->writers as $level => $writers) {
-            $key = array_search($writer, $writers);
-            unset($this->writers[$level][$key]);
+            $this->writers[$level] = array_filter($writers, $filter);
         }
+        $this->allWriters = array_filter($this->allWriters, $filter);
     }
 }

@@ -17,25 +17,20 @@ class Router
     /**
      * @var Route[]
      */
-    private $routes;
-    private $staticRoutes;
-    private $globalValues;
+    private $routes = array();
+    private $staticRoutes = array();
+    private $globalValues = array();
 
     /**
      * @var AbstractRouteParser
      */
     private $parser;
-    private $prefix;
-    private $postfix;
+    private $prefix = '';
+    private $postfix = '';
 
     public function __construct(AbstractRouteParser $parser)
     {
-        $this->parser       = $parser;
-        $this->prefix       = '';
-        $this->postfix      = '';
-        $this->routes       = array();
-        $this->staticRoutes = array();
-        $this->globalValues = array();
+        $this->parser = $parser;
     }
 
     /**

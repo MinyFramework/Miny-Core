@@ -18,7 +18,7 @@ use Miny\Modules\Exceptions\BadModuleException;
 
 class ModuleHandler
 {
-    private static $module_class_format = '\Modules\%s\Module';
+    private static $module_class_format = '\\Modules\\%s\\Module';
 
     /**
      * @var Module[]

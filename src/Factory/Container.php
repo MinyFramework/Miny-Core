@@ -18,19 +18,19 @@ use ReflectionParameter;
 class Container
 {
     /**
-     * @var array
+     * @var (string|Closure)[]
      */
-    private $aliases;
+    private $aliases = array();
 
     /**
      * @var array
      */
-    private $constructorArguments;
+    private $constructorArguments = array();
 
     /**
      * @var array
      */
-    private $objects;
+    private $objects = array();
 
     /**
      * @var AbstractLinkResolver
@@ -40,7 +40,7 @@ class Container
     /**
      * @var callable[]
      */
-    private $callbacks;
+    private $callbacks = array();
 
     /**
      * @param AbstractLinkResolver $resolver
@@ -51,33 +51,29 @@ class Container
             $resolver = new NullResolver();
         }
         $this->linkResolver         = $resolver;
-        $this->objects              = array();
-        $this->aliases              = array();
-        $this->constructorArguments = array();
-        $this->callbacks            = array();
 
         $this->setInstance($this, __CLASS__);
         $this->setInstance($resolver);
     }
 
     /**
-     * @param string $abstract
-     * @param string $concrete
-     * @param array  $parameters
+     * @param string         $abstract
+     * @param string|Closure $concrete
+     * @param array          $parameters
      */
-    public function addAlias($abstract, $concrete = null, array $parameters = array())
+    public function addAlias($abstract, $concrete, array $parameters = array())
     {
         $abstract = ltrim($abstract, '\\');
         if (is_string($concrete)) {
             $concrete = ltrim($concrete, '\\');
-        } elseif ($concrete === null) {
-            $concrete = $abstract;
-        }
-        if ($abstract !== $concrete) {
+            if (!empty($parameters)) {
+                $this->constructorArguments[$concrete] = $parameters;
+            }
+            if ($abstract !== $concrete) {
+                $this->aliases[$abstract] = $concrete;
+            }
+        } else {
             $this->aliases[$abstract] = $concrete;
-        }
-        if (is_string($concrete) && !empty($parameters)) {
-            $this->constructorArguments[$concrete] = $parameters;
         }
     }
 
@@ -86,10 +82,8 @@ class Container
      */
     public function addConstructorArguments($concrete /*, ...$parameters */)
     {
-        if (func_num_args() === 1) {
-            return;
-        }
-        $concrete                              = ltrim($concrete, '\\');
+        $concrete = ltrim($concrete, '\\');
+
         $this->constructorArguments[$concrete] = array_slice(func_get_args(), 1);
     }
 
@@ -109,8 +103,8 @@ class Container
     /**
      * @param $abstract
      *
+     * @return string|Closure
      * @throws OutOfBoundsException
-     * @return array
      */
     public function getAlias($abstract)
     {
@@ -310,7 +304,7 @@ class Container
     }
 
     /**
-     * @param ReflectionClass $class
+     * @param ReflectionClass     $class
      * @param ReflectionParameter $dependency
      *
      * @throws InvalidArgumentException

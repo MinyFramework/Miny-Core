@@ -47,7 +47,7 @@ class Headers implements Iterator, Serializable
         'www-authenticate'
     );
     private $headers;
-    private $raw_headers;
+    private $rawHeaders;
 
     public function __construct()
     {
@@ -76,7 +76,7 @@ class Headers implements Iterator, Serializable
         foreach ($headers->headers as $name => $value) {
             $this->set($name, $value);
         }
-        $this->raw_headers = array_merge($this->raw_headers, $headers->raw_headers);
+        $this->rawHeaders = array_merge($this->rawHeaders, $headers->rawHeaders);
     }
 
     public function set($name, $value)
@@ -156,13 +156,13 @@ class Headers implements Iterator, Serializable
 
     public function reset()
     {
-        $this->headers     = array();
-        $this->raw_headers = array();
+        $this->headers    = array();
+        $this->rawHeaders = array();
     }
 
     public function setRaw($header)
     {
-        $this->raw_headers[] = $header;
+        $this->rawHeaders[] = $header;
     }
 
     public function get($name, $join = true)
@@ -180,7 +180,7 @@ class Headers implements Iterator, Serializable
 
     public function getRawHeaders()
     {
-        return $this->raw_headers;
+        return $this->rawHeaders;
     }
 
     public function __toString()
@@ -189,7 +189,7 @@ class Headers implements Iterator, Serializable
         foreach ($this as $header => $value) {
             $return .= $header . ': ' . $value . "\n";
         }
-        foreach ($this->raw_headers as $header) {
+        foreach ($this->rawHeaders as $header) {
             $return .= $header . "\n";
         }
 
@@ -226,15 +226,13 @@ class Headers implements Iterator, Serializable
         return serialize(
             array(
                 $this->headers,
-                $this->raw_headers
+                $this->rawHeaders
             )
         );
     }
 
     public function unserialize($serialized)
     {
-        $array             = unserialize($serialized);
-        $this->headers     = array_shift($array);
-        $this->raw_headers = array_shift($array);
+        list($this->headers, $this->rawHeaders) = unserialize($serialized);
     }
 }

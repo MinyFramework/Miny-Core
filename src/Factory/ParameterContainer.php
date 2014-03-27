@@ -44,7 +44,7 @@ class ParameterContainer extends AbstractConfigurationTree
      *
      * @return array
      */
-    public function &toArray()
+    public function toArray()
     {
         return $this->parameters;
     }

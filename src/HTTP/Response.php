@@ -14,7 +14,7 @@ use Serializable;
 
 class Response implements Serializable
 {
-    public static $status_codes = array(
+    public static $statusCodes = array(
         100 => 'Continue',
         101 => 'Switching Protocols',
         200 => 'OK',
@@ -60,14 +60,14 @@ class Response implements Serializable
      * @var ResponseHeaders
      */
     private $headers;
-    private $status_code;
+    private $statusCode;
     private $content;
 
     public function __construct(ResponseHeaders $headers = null)
     {
-        $this->headers     = $headers ? : new ResponseHeaders();
-        $this->content     = '';
-        $this->status_code = 200;
+        $this->headers    = $headers ? : new ResponseHeaders();
+        $this->content    = '';
+        $this->statusCode = 200;
     }
 
     public function redirect($url, $code = 301)
@@ -88,10 +88,10 @@ class Response implements Serializable
 
     public function setCode($code)
     {
-        if (!isset(self::$status_codes[$code])) {
+        if (!isset(self::$statusCodes[$code])) {
             throw new InvalidArgumentException('Invalid status code: ' . $code);
         }
-        $this->status_code = $code;
+        $this->statusCode = $code;
     }
 
     /**
@@ -129,17 +129,17 @@ class Response implements Serializable
 
     public function isCode($code)
     {
-        return $this->status_code === $code;
+        return $this->statusCode === $code;
     }
 
     public function getCode()
     {
-        return $this->status_code;
+        return $this->statusCode;
     }
 
     public function getStatus()
     {
-        return self::$status_codes[$this->status_code];
+        return self::$statusCodes[$this->statusCode];
     }
 
     public function __toString()
@@ -149,7 +149,7 @@ class Response implements Serializable
 
     public function send()
     {
-        $this->headers->setRaw(sprintf('HTTP/1.1 %d: %s', $this->status_code, $this->getStatus()));
+        $this->headers->setRaw(sprintf('HTTP/1.1 %d: %s', $this->statusCode, $this->getStatus()));
         $this->headers->send();
         if (!$this->headers->has('location')) {
             echo $this;
@@ -158,18 +158,17 @@ class Response implements Serializable
 
     public function serialize()
     {
-        return serialize(array(
-            $this->headers,
-            $this->content,
-            $this->status_code
-        ));
+        return serialize(
+            array(
+                $this->headers,
+                $this->content,
+                $this->statusCode
+            )
+        );
     }
 
     public function unserialize($serialized)
     {
-        $data              = unserialize($serialized);
-        $this->headers     = array_shift($data);
-        $this->content     = array_shift($data);
-        $this->status_code = array_shift($data);
+        list($this->headers, $this->content, $this->statusCode) = unserialize($serialized);
     }
 }

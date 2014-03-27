@@ -16,7 +16,7 @@ use Miny\Event\Exceptions\EventHandlerException;
 class EventDispatcher
 {
     /**
-     * @var (callable|object)[] The registered event handlers in the form of event => handler(s)
+     * @var array The registered event handlers in the form of event => array of handlers
      */
     private $handlers = array();
 

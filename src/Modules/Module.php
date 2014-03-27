@@ -40,10 +40,7 @@ abstract class Module
     {
         $this->application  = $app;
         $parameterContainer = $app->getParameterContainer();
-        $parameterContainer->addParameters(
-            array($name => $this->defaultConfiguration()),
-            false
-        );
+        $parameterContainer->addParameters(array($name => $this->defaultConfiguration()), false);
         $this->configuration = $parameterContainer->getSubTree($name);
     }
 

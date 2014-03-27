@@ -89,6 +89,8 @@ class LogTest extends \PHPUnit_Framework_TestCase
         $this->log->removeWriter($this->writerMock);
 
         $this->log->write(Log::INFO, '', '');
+
+        $this->log->flush();
     }
 
     public function testThatProfilerIsReturned()
