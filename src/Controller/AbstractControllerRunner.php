@@ -9,7 +9,8 @@
 
 namespace Miny\Controller;
 
-use Miny\CoreEvents;
+use Miny\Controller\Events\ControllerFinishedEvent;
+use Miny\Controller\Events\ControllerLoadedEvent;
 use Miny\Event\EventDispatcher;
 use Miny\HTTP\Request;
 use Miny\HTTP\Response;
@@ -44,11 +45,8 @@ abstract class AbstractControllerRunner
         $controller = $this->loadController($controller);
         $action     = $this->getAction($request, $controller);
 
-        $event = $this->eventDispatcher->raiseEvent(
-            CoreEvents::CONTROLLER_LOADED,
-            $controller,
-            $action
-        );
+        $event = new ControllerLoadedEvent($controller, $action);
+        $this->eventDispatcher->raiseEvent($event);
 
         if ($event->isHandled() && $event->getResponse() instanceof Response) {
             return $event->getResponse();
@@ -57,10 +55,7 @@ abstract class AbstractControllerRunner
         $retVal = $this->runController($controller, $action, $request, $response);
 
         $this->eventDispatcher->raiseEvent(
-            CoreEvents::CONTROLLER_FINISHED,
-            $controller,
-            $action,
-            $retVal
+            new ControllerFinishedEvent($controller, $action, $retVal)
         );
 
         return $response;
