@@ -27,17 +27,18 @@ class Request
             $method = $_SERVER['REQUEST_METHOD'];
         }
 
-        $request       = new Request(
+        $request = new Request(
             $method,
             $_SERVER['REQUEST_URI'],
             new ReferenceParameterContainer($_GET),
             new ReferenceParameterContainer($_POST),
             new ReferenceParameterContainer($_COOKIE)
         );
+
         $request->type = self::MASTER_REQUEST;
 
         foreach ($_SERVER as $key => $value) {
-            if (StringUtils::startsWith($key, 'HTTP_')) {
+            if (strpos($key, 'HTTP_') === 0) {
                 $request->headers->set(substr($key, 5), $value);
             }
         }

@@ -13,20 +13,6 @@ class StringUtilsTest extends PHPUnit_Framework_TestCase
         $this->assertTrue(StringUtils::compare('string', 'string'));
     }
 
-    public function testStartsWith()
-    {
-        $this->assertTrue(StringUtils::startsWith('string', 'str'));
-        $this->assertFalse(StringUtils::startsWith('foo', 'bar'));
-        $this->assertFalse(StringUtils::startsWith('bar', 'baz'));
-    }
-
-    public function testEndsWith()
-    {
-        $this->assertTrue(StringUtils::endsWith('string', 'ing'));
-        $this->assertFalse(StringUtils::endsWith('foo', 'bar'));
-        $this->assertFalse(StringUtils::endsWith('foo', 'boo'));
-    }
-
     public function testCamelize()
     {
         $this->assertEquals('camelizedString', StringUtils::camelize('camelized string'));
@@ -41,5 +27,3 @@ class StringUtilsTest extends PHPUnit_Framework_TestCase
         $this->assertEquals('decamelized_string', StringUtils::decamelize('decamelizedString', '_'));
     }
 }
-
-?>
