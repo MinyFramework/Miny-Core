@@ -48,7 +48,7 @@ class RouteGenerator
         $missing  = array_diff_key($required, $parameters);
 
         if (!empty($missing)) {
-            $parameters = $this->insertDefaultParameterValues($route, array_keys($missing), $parameters);
+            $parameters = $this->insertDefaultParameterValues($route, $missing, $parameters);
         }
 
         return $this->buildPath($route->getPath(), $parameters, array_keys($required));
@@ -66,10 +66,10 @@ class RouteGenerator
     private function insertDefaultParameterValues(Route $route, array $missing, array $parameters)
     {
         $values = $route->getDefaultValues();
-        foreach ($missing as $i => $key) {
+        foreach ($missing as $key => $pattern) {
             if (isset($values[$key])) {
                 $parameters[$key] = $values[$key];
-                unset($missing[$i]);
+                unset($missing[$key]);
             }
         }
         if (!empty($missing)) {
