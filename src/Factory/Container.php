@@ -257,6 +257,10 @@ class Container
 
         $constructorArgs = $constructor->getParameters();
 
+        if (empty($constructorArgs)) {
+            return new $concrete;
+        }
+
         if (!empty($parameters)) {
             $constructorArgs = array_diff_key($constructorArgs, $parameters);
             $resolvedArgs    = $this->resolveDependencies($constructorArgs);
