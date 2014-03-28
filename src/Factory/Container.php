@@ -261,14 +261,10 @@ class Container
             return new $concrete;
         }
 
+        $resolvedArgs = $this->resolveDependencies($constructorArgs, $parameters);
+        $arguments    = $this->linkResolver->resolveReferences($resolvedArgs);
         if (!empty($parameters)) {
-            $constructorArgs = array_diff_key($constructorArgs, $parameters);
-            $resolvedArgs    = $this->resolveDependencies($constructorArgs);
-            $arguments       = $this->linkResolver->resolveReferences($resolvedArgs + $parameters);
             ksort($arguments);
-        } else {
-            $resolvedArgs = $this->resolveDependencies($constructorArgs);
-            $arguments    = $this->linkResolver->resolveReferences($resolvedArgs);
         }
 
         return $reflector->newInstanceArgs($arguments);
@@ -276,23 +272,26 @@ class Container
 
     /**
      * @param ReflectionParameter[] $dependencies
+     * @param array                 $skipResolving
      *
      * @return array
      */
-    private function resolveDependencies(array $dependencies)
+    private function resolveDependencies(array $dependencies, array $skipResolving)
     {
-        $resolved = array();
+        foreach ($skipResolving as $k => $value) {
+            unset($dependencies[$k]);
+        }
         foreach ($dependencies as $k => $dependency) {
             $class = $dependency->getClass();
             if ($class === null) {
                 // primitive type
-                $resolved[$k] = $this->resolvePrimitiveParameter($dependency);
+                $dependencies[$k] = $this->resolvePrimitiveParameter($dependency);
             } else {
-                $resolved[$k] = $this->resolveClassParameter($class, $dependency);
+                $dependencies[$k] = $this->resolveClassParameter($class, $dependency);
             }
         }
 
-        return $resolved;
+        return $dependencies + $skipResolving;
     }
 
     /**
