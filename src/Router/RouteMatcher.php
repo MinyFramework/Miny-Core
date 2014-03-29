@@ -66,7 +66,7 @@ class RouteMatcher
             $routes = array();
         }
 
-        return false;
+        return $this->matchVariableRouteChunk($path, $routes);
     }
 
     /**
@@ -80,21 +80,24 @@ class RouteMatcher
         $numGroups = 0;
         $indexes   = array();
         $pattern   = '#^(?';
-        foreach ($variableRoutes as $i => $route) {
+        foreach ($variableRoutes as $route) {
             /** @var $route Route */
             $numVariables = $route->getParameterCount();
-            $numGroups    = max($numGroups, $numVariables);
-
-            $pattern .= '|' . $route->getRegexp() . str_repeat('()', $numGroups - $numVariables);
-
-            $indexes[$numGroups++] = $i;
+            $pattern .= '|' . $route->getRegexp();
+            if ($numVariables < $numGroups && !isset($indexes[$numVariables])) {
+                $indexes[$numVariables] = $route;
+            } else {
+                $numGroups = max($numGroups, $numVariables);
+                $pattern .= str_repeat('()', $numGroups - $numVariables);
+                $indexes[$numGroups++] = $route;
+            }
         }
         $pattern .= ')$#';
         if (!preg_match($pattern, $path, $matched)) {
             return false;
         }
 
-        $route = $variableRoutes[$indexes[count($matched) - 1]];
+        $route = $indexes[count($matched) - 1];
 
         return $this->createMatch($route, $matched);
     }

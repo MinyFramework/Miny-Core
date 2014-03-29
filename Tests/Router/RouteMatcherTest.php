@@ -66,6 +66,21 @@ class RouteMatcherTest extends \PHPUnit_Framework_TestCase
         $this->assertFalse($this->matcher->match('static path', Route::METHOD_POST));
     }
 
+
+    public function testThatMatcherMatchesAFewDynamicRoutes()
+    {
+        $this->createDynamicRoutes(5);
+
+        $this->assertFalse($this->matcher->match('path 3', Route::METHOD_POST));
+
+        $match = $this->matcher->match('path 2 6', Route::METHOD_GET);
+        $this->assertInstanceOf(
+            '\\Miny\\Router\\Match',
+            $match
+        );
+        $this->assertEquals(array('id' => 6), $match->getParameters());
+    }
+
     public function testThatMatcherMatchesDynamicRoutes()
     {
         $this->createDynamicRoutes();
@@ -90,11 +105,11 @@ class RouteMatcherTest extends \PHPUnit_Framework_TestCase
     /**
      * @return array
      */
-    private function createDynamicRoutes()
+    private function createDynamicRoutes($num = 100)
     {
         $routes = array();
 
-        for ($i = 0; $i < 100; $i++) {
+        for ($i = 0; $i < $num; $i++) {
             $route = new Route();
 
             $route->setPath('path ' . $i . ' {id}');

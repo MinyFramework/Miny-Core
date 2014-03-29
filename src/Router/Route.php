@@ -46,7 +46,7 @@ class Route
      */
     public function getParameterCount()
     {
-        return count($this->getParameterPatterns());
+        return count($this->parameterPatterns);
     }
 
     /**
