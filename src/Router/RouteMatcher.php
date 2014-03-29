@@ -49,7 +49,6 @@ class RouteMatcher
         $count  = 0;
         $routes = array();
         foreach ($this->router->getAll() as $route) {
-            /** @var $route Route */
             if ($route->isStatic() || !$route->isMethod($method)) {
                 continue;
             }
@@ -70,8 +69,8 @@ class RouteMatcher
     }
 
     /**
-     * @param $path
-     * @param $variableRoutes
+     * @param string  $path
+     * @param Route[] $variableRoutes
      *
      * @return bool|Match
      */
@@ -81,7 +80,6 @@ class RouteMatcher
         $indexes   = array();
         $pattern   = '#^(?';
         foreach ($variableRoutes as $route) {
-            /** @var $route Route */
             $numVariables = $route->getParameterCount();
             $pattern .= '|' . $route->getRegexp();
             if ($numVariables < $numGroups && !isset($indexes[$numVariables])) {

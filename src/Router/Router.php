@@ -59,7 +59,10 @@ class Router
         $this->postfix = $postfix;
     }
 
-    public function addGlobalValues($values)
+    /**
+     * @param array $values
+     */
+    public function addGlobalValues(array $values)
     {
         $this->globalValues = $values + $this->globalValues;
     }
@@ -133,6 +136,12 @@ class Router
         return isset($this->routes[$name]);
     }
 
+    /**
+     * @param $name
+     *
+     * @return Route
+     * @throws OutOfBoundsException
+     */
     public function getRoute($name)
     {
         if (!isset($this->routes[$name])) {
