@@ -14,7 +14,7 @@ class Event
     private $parameters;
     private $name;
     private $response;
-    private $is_handled = false;
+    private $isHandled = false;
 
     /**
      * @param string $name The event name.
@@ -37,7 +37,7 @@ class Event
      */
     public function isHandled()
     {
-        return $this->is_handled;
+        return $this->isHandled;
     }
 
     /**
@@ -45,7 +45,7 @@ class Event
      */
     public function setHandled()
     {
-        $this->is_handled = true;
+        $this->isHandled = true;
     }
 
     /**

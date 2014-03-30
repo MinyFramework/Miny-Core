@@ -53,7 +53,7 @@ class Application extends BaseApplication
 
         $eventHandlers = $container->get('\\Miny\\Application\\Handlers\\ApplicationEventHandlers');
 
-        $events = $container->get('\\Miny\\Event\\EventDispatcher');
+        $events = $this->eventDispatcher;
         $events->register(CoreEvents::FILTER_REQUEST, array($eventHandlers, 'logRequest'));
         $events->register(CoreEvents::FILTER_REQUEST, array($eventHandlers, 'filterRoutes'));
         $events->register(CoreEvents::FILTER_RESPONSE, array($eventHandlers, 'setContentType'));
@@ -71,8 +71,7 @@ class Application extends BaseApplication
             }
         );
 
-        $parameterContainer = $this->getParameterContainer();
-
+        $parameterContainer = $this->parameterContainer;
         $container->addCallback(
             '\\Miny\\Router\\Router',
             function (Router $router) use ($parameterContainer) {
@@ -98,13 +97,11 @@ class Application extends BaseApplication
 
     protected function onRun()
     {
-        $container = $this->getContainer();
-
         /** @var $router Router */
-        $router = $container->get('\\Miny\\Router\\Router');
+        $router = $this->container->get('\\Miny\\Router\\Router');
 
         /** @var $dispatcher Dispatcher */
-        $dispatcher = $container->get('\\Miny\\Application\\Dispatcher');
+        $dispatcher = $this->container->get('\\Miny\\Application\\Dispatcher');
 
         if (!$router->has('root')) {
             $router->root()->set('controller', 'index');

@@ -11,7 +11,6 @@ namespace Miny\Factory;
 
 class LinkResolver extends AbstractLinkResolver
 {
-
     /**
      * @var ParameterContainer
      */
@@ -54,6 +53,7 @@ class LinkResolver extends AbstractLinkResolver
                 $value    = $this->parameterContainer->offsetGet(substr($argument, 1));
                 $argument = $this->resolveReferences($value);
                 break;
+
             case '\\':
                 $argument = substr($argument, 1);
                 break;

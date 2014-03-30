@@ -31,24 +31,38 @@ abstract class BaseApplication
     const ENV_COMMON = 7;
 
     /**
-     * @var ParameterContainer
-     */
-    private $parameterContainer;
-
-    /**
      * @var int
      */
-    private $environment;
+    protected $environment;
+
+    /**
+     * @var ParameterContainer
+     */
+    protected $parameterContainer;
 
     /**
      * @var Container
      */
-    private $container;
+    protected $container;
 
     /**
-     *
-     * @param int             $environment
-     * @param AutoLoader|null $autoLoader
+     * @var EventDispatcher
+     */
+    protected $eventDispatcher;
+
+    /**
+     * @var ShutdownService
+     */
+    protected $shutdownService;
+
+    /**
+     * @var Log
+     */
+    protected $log;
+
+    /**
+     * @param int        $environment
+     * @param AutoLoader $autoLoader
      */
     public function __construct($environment = self::ENV_PROD, AutoLoader $autoLoader = null)
     {
@@ -85,12 +99,11 @@ abstract class BaseApplication
         $ioc->setInstance($parameterContainer);
 
         /** @var $log Log */
-        $log = $ioc->get('\\Miny\\Log\\Log');
         if ($this->environment !== $environment) {
             $message = 'Unknown environment option "%s". Assuming production environment.';
-            $log->write(Log::WARNING, 'Miny', $message, $environment);
+            $this->log->write(Log::WARNING, 'Miny', $message, $environment);
         }
-        $log->write(
+        $this->log->write(
             Log::INFO,
             'Miny',
             'Starting Miny in %s environment',
@@ -202,6 +215,10 @@ abstract class BaseApplication
 
         $events = $container->get('\\Miny\\Event\\EventDispatcher');
         $events->register(CoreEvents::UNCAUGHT_EXCEPTION, array($errorHandlers, 'logException'));
+
+        $this->log             = $log;
+        $this->eventDispatcher = $events;
+        $this->shutdownService = $shutdown;
     }
 
     /**
@@ -269,14 +286,10 @@ abstract class BaseApplication
      */
     public function run()
     {
-        /** @var $event EventDispatcher */
-        $event = $this->container->get('\\Miny\\Event\\EventDispatcher');
-
-        /** @var $shutdown ShutdownService */
-        $shutdown = $this->container->get('\\Miny\\Shutdown\\ShutdownService');
-
+        $event = $this->eventDispatcher;
         $event->raiseEvent(new BeforeRunEvent());
-        $shutdown->register(
+
+        $this->shutdownService->register(
             function () use ($event) {
                 $event->raiseEvent(new ShutDownEvent());
             },
