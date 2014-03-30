@@ -12,23 +12,16 @@ namespace Miny\Modules;
 use Miny\Application\BaseApplication;
 use Miny\CoreEvents;
 use Miny\Event\EventDispatcher;
-use Miny\Factory\Container;
 use Miny\Log\Log;
 use Miny\Modules\Exceptions\BadModuleException;
 
 class ModuleHandler
 {
-    private static $module_class_format = '\\Modules\\%s\\Module';
 
     /**
      * @var Module[]
      */
-    private $modules;
-
-    /**
-     * @var string[]
-     */
-    private $loaded;
+    private $modules = array();
 
     /**
      * @var BaseApplication
@@ -41,34 +34,23 @@ class ModuleHandler
     private $log;
 
     /**
-     * @var Container
-     */
-    private $container;
-
-    /**
      * @var EventDispatcher
      */
     private $events;
 
     /**
      * @param BaseApplication $app
-     * @param Container       $container
      * @param EventDispatcher $events
      * @param Log             $log
      */
     public function __construct(
         BaseApplication $app,
-        Container $container,
         EventDispatcher $events,
         Log $log
     ) {
         $this->application = $app;
         $this->log         = $log;
-        $this->container   = $container;
         $this->events      = $events;
-
-        $this->loaded  = array();
-        $this->modules = array();
 
         $events->register(CoreEvents::BEFORE_RUN, array($this, 'processConditionalCallbacks'));
         $events->register(CoreEvents::BEFORE_RUN, array($this, 'registerEventHandlers'));
@@ -102,22 +84,29 @@ class ModuleHandler
      */
     public function module($module)
     {
-        if (in_array($module, $this->loaded)) {
+        if (isset($this->modules[$module])) {
             return;
         }
-        $this->loaded[] = $module;
 
-        $this->log->write(Log::DEBUG, 'ModuleHandler', 'Loading module: %s', $module);
-        $class        = sprintf(self::$module_class_format, $module);
-        $moduleObject = $this->container->get($class, array($module));
+        $this->log->write(
+            Log::DEBUG,
+            'ModuleHandler',
+            'Loading module: %s',
+            $module
+        );
+
+        $class        = sprintf('\\Modules\\%s\\Module', $module);
+        $moduleObject = new $class($module, $this->application);
+
         if (!$moduleObject instanceof Module) {
-            $message = sprintf('Module descriptor %s does not extend Module class.', $class);
+            $message = sprintf('Class %s does not extend Module class.', $class);
             throw new BadModuleException($message);
         }
+
+        $this->modules[$module] = $moduleObject;
         foreach ($moduleObject->getDependencies() as $name) {
             $this->module($name);
         }
-        $this->modules[$module] = $moduleObject;
     }
 
     public function processConditionalCallbacks()

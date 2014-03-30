@@ -104,12 +104,11 @@ abstract class BaseApplication
         $this->loadConfigFiles();
         $this->registerDefaultServices($ioc);
 
-        $this->loadModules();
+        $this->loadModules($parameterContainer);
     }
 
-    private function loadModules()
+    private function loadModules(ParameterContainer $parameterContainer)
     {
-        $parameterContainer = $this->parameterContainer;
         if (!isset($parameterContainer['modules']) || !is_array($parameterContainer['modules'])) {
             return;
         }
