@@ -54,10 +54,6 @@ class SubTreeWrapper extends AbstractConfigurationTree
 
     public function getSubTree($root)
     {
-        if (!is_array($root)) {
-            $root = array($root);
-        }
-
-        return new SubTreeWrapper($this->parameterContainer, $this->root + $root);
+        return new SubTreeWrapper($this->parameterContainer, $this->root + (array) $root);
     }
 }
