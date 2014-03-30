@@ -93,7 +93,7 @@ class Extendable
     public function addSetters(array $setters)
     {
         foreach ($setters as $property => $setter) {
-            if (is_numeric($property)) {
+            if (is_int($property)) {
                 $property = $setter;
                 $setter   = 'set' . ucfirst($setter);
             }
