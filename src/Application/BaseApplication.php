@@ -99,11 +99,13 @@ abstract class BaseApplication
         $ioc->setInstance($parameterContainer);
 
         /** @var $log Log */
+        $this->log = $log = $ioc->get('\\Miny\\Log\\Log');
+
         if ($this->environment !== $environment) {
             $message = 'Unknown environment option "%s". Assuming production environment.';
-            $this->log->write(Log::WARNING, 'Miny', $message, $environment);
+            $log->write(Log::WARNING, 'Miny', $message, $environment);
         }
-        $this->log->write(
+        $log->write(
             Log::INFO,
             'Miny',
             'Starting Miny in %s environment',
@@ -191,9 +193,7 @@ abstract class BaseApplication
         /** @var $shutdown ShutdownService */
         $shutdown = $container->get('\\Miny\\Shutdown\\ShutdownService');
 
-        /** @var $log Log */
-        $log = $container->get('\\Miny\\Log\\Log');
-
+        $log = $this->log;
         $log->setFlushLimit($this->parameterContainer['log']['flush_limit']);
         if ($this->parameterContainer['log']['enable_file_writer']) {
             $log->registerWriter(new FileWriter($this->parameterContainer['log']['path']));
