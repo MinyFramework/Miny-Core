@@ -14,6 +14,9 @@ use OutOfBoundsException;
 
 class ParameterContainer
 {
+    /**
+     * @var array
+     */
     protected $data;
 
     public function __construct(array $data = array())

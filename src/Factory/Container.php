@@ -206,10 +206,11 @@ class Container
      */
     private function callCallbacks($concrete, $object)
     {
-        if (isset($this->callbacks[$concrete])) {
-            foreach ($this->callbacks[$concrete] as $callback) {
-                $callback($object, $this);
-            }
+        if (!isset($this->callbacks[$concrete])) {
+            return;
+        }
+        foreach ($this->callbacks[$concrete] as $callback) {
+            $callback($object, $this);
         }
     }
 
@@ -220,12 +221,13 @@ class Container
      */
     private function findMostConcreteDefinition($class)
     {
-        if (is_string($class)) {
-            $classVarIsString = true;
-            while ($classVarIsString && isset($this->aliases[$class])) {
-                $class            = $this->aliases[$class];
-                $classVarIsString = is_string($class);
-            }
+        if (!is_string($class)) {
+            return $class;
+        }
+        $classVarIsString = true;
+        while ($classVarIsString && isset($this->aliases[$class])) {
+            $class            = $this->aliases[$class];
+            $classVarIsString = is_string($class);
         }
 
         return $class;

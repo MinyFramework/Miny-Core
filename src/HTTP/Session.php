@@ -34,19 +34,20 @@ class Session implements ArrayAccess, IteratorAggregate, Countable
      */
     public function __construct(iSessionHandler $handler = null)
     {
-        if ($handler) {
-            if (PHP_MINOR_VERSION >= 4) {
-                session_set_save_handler($handler, true);
-            } else {
-                session_set_save_handler(
-                    array($handler, 'open'),
-                    array($handler, 'close'),
-                    array($handler, 'read'),
-                    array($handler, 'write'),
-                    array($handler, 'destroy'),
-                    array($handler, 'gc')
-                );
-            }
+        if ($handler === null) {
+            return;
+        }
+        if (PHP_MINOR_VERSION >= 4) {
+            session_set_save_handler($handler, true);
+        } else {
+            session_set_save_handler(
+                array($handler, 'open'),
+                array($handler, 'close'),
+                array($handler, 'read'),
+                array($handler, 'write'),
+                array($handler, 'destroy'),
+                array($handler, 'gc')
+            );
         }
     }
 
@@ -136,7 +137,7 @@ class Session implements ArrayAccess, IteratorAggregate, Countable
      */
     public function sessionName($name = null)
     {
-        if (!$name) {
+        if ($name === null) {
             return session_name();
         }
         if (!is_string($name)) {
@@ -157,7 +158,7 @@ class Session implements ArrayAccess, IteratorAggregate, Countable
      */
     public function savePath($path = null)
     {
-        if (!$path) {
+        if ($path === null) {
             return session_save_path();
         }
         if ($this->isOpen) {
@@ -206,10 +207,7 @@ class Session implements ArrayAccess, IteratorAggregate, Countable
 
     public function flash($key, $data, $ttl)
     {
-        if (!is_int($ttl)) {
-            throw new InvalidArgumentException('Time-to-live must be a number.');
-        }
-        $this->data['flash'][$key] = array('data' => $data, 'ttl' => $ttl);
+        $this->data['flash'][$key] = array('data' => $data, 'ttl' => (int) $ttl);
     }
 
     public function __isset($key)
