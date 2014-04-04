@@ -62,7 +62,22 @@ class ResourceTest extends \PHPUnit_Framework_TestCase
 
         $this->routerMock
             ->expects($this->exactly(7))
-            ->method('add');
+            ->method('add')
+            ->with($this->stringStartsWith('parent/resource'));
+
+        $resource->register($this->routerMock);
+    }
+
+    public function testThatResourcePluralParentModifiesRoutes()
+    {
+        $resource = new Resource('resource', 'resources');
+        $resource->setParent(new Resource('parent', 'parents'));
+
+        $this->routerMock
+            ->expects($this->exactly(7))
+            ->method('add')
+            ->with($this->stringStartsWith('parent/{parent_id:\d+}'))
+            ->will($this->returnValue(new Route));
 
         $resource->register($this->routerMock);
     }

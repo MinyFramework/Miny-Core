@@ -23,7 +23,7 @@ class Resource
     private $collectionRoutes;
     private $memberRoutes;
     private $unnamedRoutes;
-    private $idPattern;
+    private $idPattern = '\d+';
     private $isParent = false;
 
     public function __construct($singularName, $pluralName = null)
@@ -134,35 +134,52 @@ class Resource
         $idPatterns = array();
         $parent     = $this->parent;
         while ($parent) {
+            $pathBase .= $parent->singularName . '/';
             if ($parent->isPlural) {
-                $pathBase .= $parent->pluralName . '/' . $parent->getIdToken();
+                $pathBase .= $parent->getIdToken() . '/';
                 $idPatterns[$parent->singularName . '_id'] = $parent->idPattern;
-            } else {
-                $pathBase .= $parent->singularName;
             }
             $parent = $parent->parent;
         }
 
-        $firstUnnamedRouteName = $this->pluralName ? : $this->singularName;
-        foreach ($this->collectionRoutes as $name => $method) {
-            if (in_array($name, $this->unnamedRoutes)) {
-                $path = $pathBase;
-                $name = $firstUnnamedRouteName;
-
-                $firstUnnamedRouteName = null;
-            } else {
-                $path = $pathBase . '/' . $name;
-            }
-
-            $route = $router->add($path, $method, $name, true);
-            foreach ($idPatterns as $id => $pattern) {
-                $route->specify($id, $pattern);
-            }
+        if ($this->pluralName) {
+            $this->addRoutes(
+                $this->memberRoutes,
+                $router,
+                $pathBase . $this->singularName . '/' . $this->getIdToken(),
+                $this->singularName,
+                $idPatterns
+            );
+            $firstUnnamedRouteName = $this->pluralName;
+        } else {
+            $firstUnnamedRouteName = $this->singularName;
         }
 
-        $firstUnnamedRouteName = $this->singularName;
-        foreach ($this->memberRoutes as $name => $method) {
-            $path = $pathBase;
+        $this->addRoutes(
+            $this->collectionRoutes,
+            $router,
+            $pathBase . $firstUnnamedRouteName,
+            $firstUnnamedRouteName,
+            $idPatterns
+        );
+    }
+
+    /**
+     * @param array  $routes
+     * @param Router $router
+     * @param        $basePath
+     * @param        $firstUnnamedRouteName
+     * @param        $idPatterns
+     */
+    private function addRoutes(
+        array $routes,
+        Router $router,
+        $basePath,
+        $firstUnnamedRouteName,
+        $idPatterns
+    ) {
+        foreach ($routes as $name => $method) {
+            $path = $basePath;
 
             if (in_array($name, $this->unnamedRoutes)) {
                 $name = $firstUnnamedRouteName;
@@ -171,8 +188,6 @@ class Resource
             } else {
                 $path .= '/' . $name;
             }
-
-            $path .= '/' . $this->getIdToken();
 
             $route = $router->add($path, $method, $name, true);
             foreach ($idPatterns as $id => $pattern) {
