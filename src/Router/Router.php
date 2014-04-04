@@ -68,16 +68,20 @@ class Router
     }
 
     /**
-     * @param $uri
-     * @param $method
-     * @param $name
+     * @param      $uri
+     * @param int  $method
+     * @param      $name
+     * @param bool $prefix
      *
      * @throws InvalidArgumentException
-     *
      * @return Route
      */
-    public function add($uri, $method = Route::METHOD_ALL, $name = null)
+    public function add($uri, $method = Route::METHOD_ALL, $name = null, $prefix = false)
     {
+        if($prefix) {
+            $uri = $this->prefix . $uri . $this->postfix;
+        }
+
         $route = $this->parser->parse($uri, $method);
         if ($name === null || is_int($name)) {
             $name = count($this->routes);
@@ -100,30 +104,22 @@ class Router
 
     public function get($uri, $name = null)
     {
-        $uri = $this->prefix . $uri . $this->postfix;
-
-        return $this->add($uri, Route::METHOD_GET, $name);
+        return $this->add($uri, Route::METHOD_GET, $name, true);
     }
 
     public function post($uri, $name = null)
     {
-        $uri = $this->prefix . $uri . $this->postfix;
-
-        return $this->add($uri, Route::METHOD_POST, $name);
+        return $this->add($uri, Route::METHOD_POST, $name, true);
     }
 
     public function put($uri, $name = null)
     {
-        $uri = $this->prefix . $uri . $this->postfix;
-
-        return $this->add($uri, Route::METHOD_PUT, $name);
+        return $this->add($uri, Route::METHOD_PUT, $name, true);
     }
 
     public function delete($uri, $name = null)
     {
-        $uri = $this->prefix . $uri . $this->postfix;
-
-        return $this->add($uri, Route::METHOD_DELETE, $name);
+        return $this->add($uri, Route::METHOD_DELETE, $name, true);
     }
 
     /**
