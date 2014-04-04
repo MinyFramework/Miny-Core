@@ -28,6 +28,22 @@ class ResourceTest extends \PHPUnit_Framework_TestCase
         $resource->register($this->routerMock);
     }
 
+    public function testThatSingularResourceShouldNotHaveMemberRoutes()
+    {
+        $resource = new Resource('resource');
+        $resource
+            ->member('foo', 0)
+            ->member('bar', 0)
+            ->member('baz', 0)
+            ->member('foobar', 0);
+
+        $this->routerMock
+            ->expects($this->exactly(6))
+            ->method('add');
+
+        $resource->register($this->routerMock);
+    }
+
     public function testThatPluralResourceRoutesAreGenerated()
     {
         $resource = new Resource('resource', 'resources');

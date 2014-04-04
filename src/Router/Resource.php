@@ -73,17 +73,14 @@ class Resource
     public function idPattern($pattern)
     {
         $this->idPattern = $pattern;
+
+        return $this;
     }
 
     public function setParent(Resource $parent)
     {
-        $this->parent = $parent;
-        $parent->setIsParent(true);
-    }
-
-    private function setIsParent($bool)
-    {
-        $this->isParent = $bool;
+        $this->parent     = $parent;
+        $parent->isParent = true;
     }
 
     public function except($name)
@@ -91,6 +88,8 @@ class Resource
         $only                   = array_flip(func_get_args());
         $this->collectionRoutes = array_diff_key($this->collectionRoutes, $only);
         $this->memberRoutes     = array_diff_key($this->memberRoutes, $only);
+
+        return $this;
     }
 
     public function only($name)
@@ -105,14 +104,17 @@ class Resource
     public function member($name, $method)
     {
         if ($this->isPlural) {
-            return;
+            $this->memberRoutes[$name] = $method;
         }
-        $this->memberRoutes[$name] = $method;
+
+        return $this;
     }
 
     public function collection($name, $method)
     {
         $this->collectionRoutes[$name] = $method;
+
+        return $this;
     }
 
     public function getIdToken()
