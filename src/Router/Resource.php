@@ -25,6 +25,7 @@ class Resource
     private $unnamedRoutes;
     private $idPattern = '\d+';
     private $isParent = false;
+    private $parameters = array();
 
     public function __construct($singularName, $pluralName = null)
     {
@@ -51,6 +52,8 @@ class Resource
                 'update',
                 'destroy'
             );
+
+            $this->parameters['controller'] = $this->camelize($pluralName);
         } else {
             $this->collectionRoutes = array(
                 'new'     => Route::METHOD_GET,
@@ -67,7 +70,17 @@ class Resource
                 'update',
                 'destroy'
             );
+
+            $this->parameters['controller'] = $this->camelize($singularName);
         }
+    }
+
+    private function camelize($str)
+    {
+        $str = strtolower($str);
+        $str = ucwords($str);
+
+        return strtr($str, '_', '');
     }
 
     public function idPattern($pattern)
@@ -133,6 +146,7 @@ class Resource
     public function register(Router $router)
     {
         $pathBase   = '';
+        $nameBase   = '';
         $idPatterns = array();
         $parent     = $this->parent;
         while ($parent) {
@@ -141,7 +155,8 @@ class Resource
                 $pathBase .= $parent->getIdToken() . '/';
                 $idPatterns[$parent->singularName . '_id'] = $parent->idPattern;
             }
-            $parent = $parent->parent;
+            $nameBase = $parent->singularName . '_' . $nameBase;
+            $parent   = $parent->parent;
         }
 
         if ($this->pluralName) {
@@ -149,6 +164,7 @@ class Resource
                 $this->memberRoutes,
                 $router,
                 $pathBase . $this->singularName . '/' . $this->getIdToken(),
+                $nameBase,
                 $this->singularName,
                 $idPatterns
             );
@@ -161,6 +177,7 @@ class Resource
             $this->collectionRoutes,
             $router,
             $pathBase . $firstUnnamedRouteName,
+            $nameBase,
             $firstUnnamedRouteName,
             $idPatterns
         );
@@ -172,6 +189,7 @@ class Resource
      * @param array  $routes
      * @param Router $router
      * @param        $basePath
+     * @param        $namePrefix
      * @param        $firstUnnamedRouteName
      * @param        $idPatterns
      */
@@ -179,24 +197,46 @@ class Resource
         array $routes,
         Router $router,
         $basePath,
+        $namePrefix,
         $firstUnnamedRouteName,
         $idPatterns
     ) {
+        $firstUnnamedRouteName = $namePrefix . $firstUnnamedRouteName;
         foreach ($routes as $name => $method) {
             $path = $basePath;
 
             if (in_array($name, $this->unnamedRoutes)) {
-                $name = $firstUnnamedRouteName;
+                $routeName = $firstUnnamedRouteName;
 
                 $firstUnnamedRouteName = null;
             } else {
                 $path .= '/' . $name;
+                $routeName = $name . '_' . $namePrefix . $this->singularName;
             }
 
-            $route = $router->add($path, $method, $name, true);
+            $route = $router->add($path, $method, $routeName, true);
             foreach ($idPatterns as $id => $pattern) {
                 $route->specify($id, $pattern);
             }
+            $route->set($this->parameters);
+            $route->set('action', $name);
         }
+    }
+
+    /**
+     * @param $key
+     * @param $value
+     *
+     * @return Route $this
+     */
+    public function set($key, $value = null)
+    {
+        if (is_array($key)) {
+            $this->parameters = $key + $this->parameters;
+        } else {
+            $this->parameters[$key] = $value;
+        }
+
+        return $this;
     }
 }

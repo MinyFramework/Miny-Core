@@ -5,16 +5,25 @@ namespace Miny\Router;
 class ResourceTest extends \PHPUnit_Framework_TestCase
 {
     /**
+     * @var Router
+     */
+    private $router;
+
+    /**
      * @var \PHPUnit_Framework_MockObject_MockObject
      */
-    private $routerMock;
+    private $parserMock;
 
     public function setUp()
     {
-        $this->routerMock = $this->getMockBuilder('\\Miny\\Router\\Router')
-            ->disableOriginalConstructor()
-            ->setMethods(array('add'))
-            ->getMock();
+        $this->parserMock = $this->getMockForAbstractClass('\\Miny\\Router\\AbstractRouteParser');
+
+        $this->parserMock
+            ->expects($this->any())
+            ->method('parse')
+            ->will($this->returnValue(new Route()));
+
+        $this->router = new Router($this->parserMock);
     }
 
     public function testFluentInterface()
@@ -27,18 +36,22 @@ class ResourceTest extends \PHPUnit_Framework_TestCase
         $this->assertSame($resource, $resource->only('edit'));
         $this->assertSame($resource, $resource->member('foo', Route::METHOD_GET));
         $this->assertSame($resource, $resource->collection('bar', Route::METHOD_GET));
-        $this->assertSame($resource, $resource->register($this->routerMock));
+        $this->assertSame($resource, $resource->register($this->router));
     }
 
     public function testThatSingularResourceRoutesAreGenerated()
     {
         $resource = new Resource('resource');
 
-        $this->routerMock
+        $this->parserMock
             ->expects($this->exactly(6))
-            ->method('add');
+            ->method('parse');
 
-        $resource->register($this->routerMock);
+        $resource->register($this->router);
+
+        $this->assertTrue($this->router->has('resource'));
+        $this->assertTrue($this->router->has('new_resource'));
+        $this->assertTrue($this->router->has('edit_resource'));
     }
 
     public function testThatSingularResourceShouldNotHaveMemberRoutes()
@@ -50,22 +63,28 @@ class ResourceTest extends \PHPUnit_Framework_TestCase
             ->member('baz', 0)
             ->member('foobar', 0);
 
-        $this->routerMock
+        $this->parserMock
             ->expects($this->exactly(6))
-            ->method('add');
+            ->method('parse');
 
-        $resource->register($this->routerMock);
+        $resource->register($this->router);
     }
 
     public function testThatPluralResourceRoutesAreGenerated()
     {
         $resource = new Resource('resource', 'resources');
 
-        $this->routerMock
+        $this->parserMock
             ->expects($this->exactly(7))
-            ->method('add');
+            ->method('parse');
 
-        $resource->register($this->routerMock);
+        $resource->register($this->router);
+
+        $this->assertTrue($this->router->has('resource'));
+        $this->assertTrue($this->router->has('resources'));
+        // This assertion tests that named collection routes also have singular names.
+        $this->assertTrue($this->router->has('new_resource'));
+        $this->assertTrue($this->router->has('edit_resource'));
     }
 
     public function testThatResourceParentModifiesRoutes()
@@ -73,12 +92,12 @@ class ResourceTest extends \PHPUnit_Framework_TestCase
         $resource = new Resource('resource', 'resources');
         $resource->setParent(new Resource('parent'));
 
-        $this->routerMock
+        $this->parserMock
             ->expects($this->exactly(7))
-            ->method('add')
+            ->method('parse')
             ->with($this->stringStartsWith('parent/resource'));
 
-        $resource->register($this->routerMock);
+        $resource->register($this->router);
     }
 
     public function testThatResourcePluralParentModifiesRoutes()
@@ -86,13 +105,12 @@ class ResourceTest extends \PHPUnit_Framework_TestCase
         $resource = new Resource('resource', 'resources');
         $resource->setParent(new Resource('parent', 'parents'));
 
-        $this->routerMock
+        $this->parserMock
             ->expects($this->exactly(7))
-            ->method('add')
-            ->with($this->stringStartsWith('parent/{parent_id:\d+}'))
-            ->will($this->returnValue(new Route));
+            ->method('parse')
+            ->with($this->stringStartsWith('parent/{parent_id:\d+}'));
 
-        $resource->register($this->routerMock);
+        $resource->register($this->router);
     }
 
     public function testThatResourceParentCanHaveDifferentIdPattern()
@@ -103,13 +121,19 @@ class ResourceTest extends \PHPUnit_Framework_TestCase
         $resource = new Resource('resource', 'resources');
         $resource->setParent($parent);
 
-        $this->routerMock
+        $this->parserMock
             ->expects($this->exactly(7))
-            ->method('add')
-            ->with($this->stringStartsWith('parent/{parent_id:[^/]+}'))
-            ->will($this->returnValue(new Route));
+            ->method('parse')
+            ->with($this->stringStartsWith('parent/{parent_id:[^/]+}'));
 
-        $resource->register($this->routerMock);
+        $resource->register($this->router);
+
+        $routes = $this->router->getAll();
+
+        $this->assertArrayHasKey('parent_resources', $routes);
+        $this->assertArrayHasKey('parent_resource', $routes);
+        $this->assertArrayHasKey('new_parent_resource', $routes);
+        $this->assertArrayHasKey('edit_parent_resource', $routes);
     }
 
     public function testThatOnlyReturnsRoutesForOnlySelectMethods()
@@ -117,26 +141,25 @@ class ResourceTest extends \PHPUnit_Framework_TestCase
         $resource = new Resource('resource', 'resources');
         $resource->only('index', 'new', 'edit');
 
-        $this->routerMock
+        $this->parserMock
             ->expects($this->exactly(3))
-            ->method('add');
+            ->method('parse')
+            ->with(
+                $this->logicalOr(
+                    $this->equalTo('resource/{id:\d+}/edit'),
+                    $this->equalTo('resources'),
+                    $this->equalTo('resources/new')
+                )
+            );
 
-        $this->routerMock
-            ->expects($this->at(0))
-            ->method('add')
-            ->with($this->equalTo('resource/{id:\d+}/edit'));
+        $resource->register($this->router);
 
-        $this->routerMock
-            ->expects($this->at(1))
-            ->method('add')
-            ->with($this->equalTo('resources'));
+        $routes = $this->router->getAll();
 
-        $this->routerMock
-            ->expects($this->at(2))
-            ->method('add')
-            ->with($this->equalTo('resources/new'));
-
-        $resource->register($this->routerMock);
+        $this->assertCount(3, $routes);
+        $this->assertArrayHasKey('resources', $routes);
+        $this->assertArrayHasKey('new_resource', $routes);
+        $this->assertArrayHasKey('edit_resource', $routes);
     }
 
     public function testThatNewMethodsCanBeAdded()
@@ -146,9 +169,9 @@ class ResourceTest extends \PHPUnit_Framework_TestCase
         $resource->member('member', Route::METHOD_GET);
         $resource->collection('collection', Route::METHOD_GET);
 
-        $this->routerMock
+        $this->parserMock
             ->expects($this->exactly(9))
-            ->method('add')
+            ->method('parse')
             ->with(
                 $this->logicalOr(
                     $this->equalTo('resources/collection'),
@@ -160,7 +183,11 @@ class ResourceTest extends \PHPUnit_Framework_TestCase
                 )
             );
 
-        $resource->register($this->routerMock);
+        $resource->register($this->router);
+
+        $routes = $this->router->getAll();
+        $this->assertArrayHasKey('member_resource', $routes);
+        $this->assertArrayHasKey('collection_resource', $routes);
     }
 
     public function testThatExceptExcludesRoutes()
@@ -169,9 +196,9 @@ class ResourceTest extends \PHPUnit_Framework_TestCase
 
         $resource->except('new', 'edit');
 
-        $this->routerMock
+        $this->parserMock
             ->expects($this->exactly(5))
-            ->method('add')
+            ->method('parse')
             ->with(
                 $this->logicalNot(
                     $this->logicalOr(
@@ -181,6 +208,37 @@ class ResourceTest extends \PHPUnit_Framework_TestCase
                 )
             );
 
-        $resource->register($this->routerMock);
+        $resource->register($this->router);
+        $routes = $this->router->getAll();
+
+        $this->assertCount(5, $routes);
+        $this->assertArrayNotHasKey('new_resource', $routes);
+        $this->assertArrayNotHasKey('edit_resource', $routes);
+    }
+
+    public function testResourceNameAndMethodShouldBeSetToControllerAndAction()
+    {
+        $resource = new Resource('resource', 'resources');
+        $resource->only('index');
+        $resource->register($this->router);
+
+        $array = $this->router->get('resource')->getDefaultValues();
+        $this->assertEquals('Resources', $array['controller']);
+        $this->assertEquals('index', $array['action']);
+    }
+
+    public function testThatParametersAreSet()
+    {
+        $resource = new Resource('resource', 'resources');
+        $resource->only('index');
+        $resource->set(array(
+                'controller' => 'Foo',
+                'foo' => 'bar'
+            ));
+        $resource->register($this->router);
+
+        $array = $this->router->get('resource')->getDefaultValues();
+        $this->assertEquals('Foo', $array['controller']);
+        $this->assertEquals('bar', $array['foo']);
     }
 }
