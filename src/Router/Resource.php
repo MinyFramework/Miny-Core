@@ -81,6 +81,8 @@ class Resource
     {
         $this->parent     = $parent;
         $parent->isParent = true;
+
+        return $this;
     }
 
     public function except($name)
@@ -162,6 +164,8 @@ class Resource
             $firstUnnamedRouteName,
             $idPatterns
         );
+
+        return $this;
     }
 
     /**
