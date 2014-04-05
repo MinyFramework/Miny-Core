@@ -158,10 +158,11 @@ class Resource
         $idPatterns = array();
         $parent     = $this->parent;
         while ($parent) {
-            $pathBase .= $parent->singularName . '/';
             if ($parent->isPlural) {
-                $pathBase .= $parent->getIdToken() . '/';
+                $pathBase .= $parent->pluralName . '/' . $parent->getIdToken() . '/';
                 $idPatterns[$parent->singularName . '_id'] = $parent->idPattern;
+            } else {
+                $pathBase .= $parent->singularName . '/';
             }
             $nameBase = $parent->singularName . '_' . $nameBase;
             $parent   = $parent->parent;
@@ -178,7 +179,7 @@ class Resource
             $this->addRoutes(
                 $this->memberRoutes,
                 $router,
-                $pluralPathBase . $this->singularName . '/' . $this->getIdToken(),
+                $pluralPathBase . $this->pluralName . '/' . $this->getIdToken(),
                 $pluralNameBase,
                 $this->singularName,
                 $idPatterns

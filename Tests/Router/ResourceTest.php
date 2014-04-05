@@ -96,7 +96,16 @@ class ResourceTest extends \PHPUnit_Framework_TestCase
         $this->parserMock
             ->expects($this->exactly(7))
             ->method('parse')
-            ->with($this->stringStartsWith('parent/resource'));
+            ->with(
+                $this->logicalOr(
+                    $this->equalTo('parent/resources/collection'),
+                    $this->equalTo('parent/resources/{id:\d+}/member'),
+                    $this->equalTo('parent/resources/{id:\d+}'),
+                    $this->equalTo('parent/resources/{id:\d+}/edit'),
+                    $this->equalTo('parent/resources/new'),
+                    $this->equalTo('parent/resources')
+                )
+            );
 
         $resource->register($this->router);
     }
@@ -109,7 +118,16 @@ class ResourceTest extends \PHPUnit_Framework_TestCase
         $this->parserMock
             ->expects($this->exactly(7))
             ->method('parse')
-            ->with($this->stringStartsWith('parent/{parent_id:\d+}'));
+            ->with(
+                $this->logicalOr(
+                    $this->equalTo('parents/{parent_id:\d+}/resources/collection'),
+                    $this->equalTo('parents/{parent_id:\d+}/resources/{id:\d+}/member'),
+                    $this->equalTo('parents/{parent_id:\d+}/resources/{id:\d+}'),
+                    $this->equalTo('parents/{parent_id:\d+}/resources/{id:\d+}/edit'),
+                    $this->equalTo('parents/{parent_id:\d+}/resources/new'),
+                    $this->equalTo('parents/{parent_id:\d+}/resources')
+                )
+            );
 
         $resource->register($this->router);
     }
@@ -125,7 +143,16 @@ class ResourceTest extends \PHPUnit_Framework_TestCase
         $this->parserMock
             ->expects($this->exactly(7))
             ->method('parse')
-            ->with($this->stringStartsWith('parent/{parent_id:[^/]+}'));
+            ->with(
+                $this->logicalOr(
+                    $this->equalTo('parents/{parent_id:[^/]+}/resources/collection'),
+                    $this->equalTo('parents/{parent_id:[^/]+}/resources/{id:\d+}/member'),
+                    $this->equalTo('parents/{parent_id:[^/]+}/resources/{id:\d+}'),
+                    $this->equalTo('parents/{parent_id:[^/]+}/resources/{id:\d+}/edit'),
+                    $this->equalTo('parents/{parent_id:[^/]+}/resources/new'),
+                    $this->equalTo('parents/{parent_id:[^/]+}/resources')
+                )
+            );
 
         $resource->register($this->router);
 
@@ -147,7 +174,7 @@ class ResourceTest extends \PHPUnit_Framework_TestCase
             ->method('parse')
             ->with(
                 $this->logicalOr(
-                    $this->equalTo('resource/{id:\d+}/edit'),
+                    $this->equalTo('resources/{id:\d+}/edit'),
                     $this->equalTo('resources'),
                     $this->equalTo('resources/new')
                 )
@@ -176,9 +203,9 @@ class ResourceTest extends \PHPUnit_Framework_TestCase
             ->with(
                 $this->logicalOr(
                     $this->equalTo('resources/collection'),
-                    $this->equalTo('resource/{id:\d+}/member'),
-                    $this->equalTo('resource/{id:\d+}'),
-                    $this->equalTo('resource/{id:\d+}/edit'),
+                    $this->equalTo('resources/{id:\d+}/member'),
+                    $this->equalTo('resources/{id:\d+}'),
+                    $this->equalTo('resources/{id:\d+}/edit'),
                     $this->equalTo('resources/new'),
                     $this->equalTo('resources')
                 )
@@ -203,7 +230,7 @@ class ResourceTest extends \PHPUnit_Framework_TestCase
             ->with(
                 $this->logicalNot(
                     $this->logicalOr(
-                        $this->equalTo('resource/{id:\d+}/edit'),
+                        $this->equalTo('resources/{id:\d+}/edit'),
                         $this->equalTo('resources/new')
                     )
                 )
@@ -256,10 +283,10 @@ class ResourceTest extends \PHPUnit_Framework_TestCase
             ->method('parse')
             ->with(
                 $this->logicalOr(
-                    $this->equalTo('parent/{parent_id:\d+}/resources'),
-                    $this->equalTo('parent/{parent_id:\d+}/resources/new'),
-                    $this->equalTo('resource/{id:\d+}'),
-                    $this->equalTo('resource/{id:\d+}/edit')
+                    $this->equalTo('parents/{parent_id:\d+}/resources'),
+                    $this->equalTo('parents/{parent_id:\d+}/resources/new'),
+                    $this->equalTo('resources/{id:\d+}'),
+                    $this->equalTo('resources/{id:\d+}/edit')
                 )
             );
 
