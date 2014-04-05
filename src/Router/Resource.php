@@ -26,6 +26,7 @@ class Resource
     private $idPattern = '\d+';
     private $isParent = false;
     private $parameters = array();
+    private $shallow = false;
 
     public function __construct($singularName, $pluralName = null)
     {
@@ -81,6 +82,13 @@ class Resource
         $str = ucwords($str);
 
         return strtr($str, '_', '');
+    }
+
+    public function shallow($shallow = true)
+    {
+        $this->shallow = $shallow;
+
+        return $this;
     }
 
     public function idPattern($pattern)
@@ -160,11 +168,18 @@ class Resource
         }
 
         if ($this->pluralName) {
+            if ($this->shallow) {
+                $pluralNameBase = '';
+                $pluralPathBase = '';
+            } else {
+                $pluralPathBase = $pathBase;
+                $pluralNameBase = $nameBase;
+            }
             $this->addRoutes(
                 $this->memberRoutes,
                 $router,
-                $pathBase . $this->singularName . '/' . $this->getIdToken(),
-                $nameBase,
+                $pluralPathBase . $this->singularName . '/' . $this->getIdToken(),
+                $pluralNameBase,
                 $this->singularName,
                 $idPatterns
             );

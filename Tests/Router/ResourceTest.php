@@ -37,6 +37,7 @@ class ResourceTest extends \PHPUnit_Framework_TestCase
         $this->assertSame($resource, $resource->member('foo', Route::METHOD_GET));
         $this->assertSame($resource, $resource->collection('bar', Route::METHOD_GET));
         $this->assertSame($resource, $resource->register($this->router));
+        $this->assertSame($resource, $resource->shallow());
     }
 
     public function testThatSingularResourceRoutesAreGenerated()
@@ -231,14 +232,43 @@ class ResourceTest extends \PHPUnit_Framework_TestCase
     {
         $resource = new Resource('resource', 'resources');
         $resource->only('index');
-        $resource->set(array(
+        $resource->set(
+            array(
                 'controller' => 'Foo',
-                'foo' => 'bar'
-            ));
+                'foo'        => 'bar'
+            )
+        );
         $resource->register($this->router);
 
         $array = $this->router->get('resource')->getDefaultValues();
         $this->assertEquals('Foo', $array['controller']);
         $this->assertEquals('bar', $array['foo']);
+    }
+
+    public function testMemberMethodsOfShallowNestedResourcesShouldNotBePrefixedWithParent()
+    {
+        $resource = new Resource('resource', 'resources');
+        $resource->setParent(new Resource('parent', 'parents'));
+        $resource->shallow();
+
+        $this->parserMock
+            ->expects($this->exactly(7))
+            ->method('parse')
+            ->with(
+                $this->logicalOr(
+                    $this->equalTo('parent/{parent_id:\d+}/resources'),
+                    $this->equalTo('parent/{parent_id:\d+}/resources/new'),
+                    $this->equalTo('resource/{id:\d+}'),
+                    $this->equalTo('resource/{id:\d+}/edit')
+                )
+            );
+
+        $resource->register($this->router);
+        $routes = $this->router->getAll();
+
+        $this->assertArrayHasKey('parent_resources', $routes);
+        $this->assertArrayHasKey('new_parent_resource', $routes);
+        $this->assertArrayHasKey('resource', $routes);
+        $this->assertArrayHasKey('edit_resource', $routes);
     }
 }
