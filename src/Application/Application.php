@@ -74,10 +74,12 @@ class Application extends BaseApplication
         $parameterContainer = $this->parameterContainer;
         $container->addCallback(
             '\\Miny\\Router\\Router',
-            function (Router $router) use ($parameterContainer) {
+            function (Router $router) use ($parameterContainer, $events) {
                 $router->addGlobalValues($parameterContainer['router:default_parameters']);
                 $router->setPrefix($parameterContainer['router:prefix']);
                 $router->setPostfix($parameterContainer['router:postfix']);
+
+                $events->register(CoreEvents::BEFORE_RUN, array($router, 'registerResources'));
             }
         );
 

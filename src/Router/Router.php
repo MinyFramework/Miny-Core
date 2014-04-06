@@ -28,6 +28,11 @@ class Router
     private $prefix = '';
     private $postfix = '';
 
+    /**
+     * @var \Miny\Router\Resource[]
+     */
+    private $resources = array();
+
     public function __construct(AbstractRouteParser $parser)
     {
         $this->parser = $parser;
@@ -78,7 +83,7 @@ class Router
      */
     public function add($uri, $method = Route::METHOD_ALL, $name = null, $prefix = false)
     {
-        if($prefix) {
+        if ($prefix) {
             $uri = $this->prefix . $uri . $this->postfix;
         }
 
@@ -181,5 +186,20 @@ class Router
         }
 
         return $this->staticRoutes[$uri];
+    }
+
+    public function resource($singularName, $pluralName = null)
+    {
+        $resource          = new Resource($singularName, $pluralName);
+        $this->resources[] = $resource;
+
+        return $resource;
+    }
+
+    public function registerResources()
+    {
+        foreach ($this->resources as $resource) {
+            $resource->register($this);
+        }
     }
 }
