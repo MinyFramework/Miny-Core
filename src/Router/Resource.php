@@ -98,6 +98,11 @@ class Resource
         return $this;
     }
 
+    public function resource(Resource $resource)
+    {
+        $resource->setParent($this);
+    }
+
     public function setParent(Resource $parent)
     {
         $this->parent     = $parent;

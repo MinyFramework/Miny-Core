@@ -298,4 +298,16 @@ class ResourceTest extends \PHPUnit_Framework_TestCase
         $this->assertArrayHasKey('resource', $routes);
         $this->assertArrayHasKey('edit_resource', $routes);
     }
+
+    public function testResourceMethodShouldSetTheCorrectParentChildRelationship()
+    {
+        $child = new Resource('child', 'children');
+        $resource = new Resource('resource', 'resources');
+        $resource->resource($child);
+
+        $child->register($this->router);
+        $routes = $this->router->getAll();
+
+        $this->assertArrayHasKey('resource_children', $routes);
+    }
 }
