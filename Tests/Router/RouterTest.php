@@ -40,6 +40,17 @@ class RouterTest extends \PHPUnit_Framework_TestCase
         $this->assertEmpty($this->router->getAll());
     }
 
+    public function testRouterShouldReturnRouteAndResourceObjects()
+    {
+        $this->assertInstanceOf('\\Miny\\Router\\Route', $this->router->root());
+        $this->assertInstanceOf('\\Miny\\Router\\Route', $this->router->add(''));
+        $this->assertInstanceOf('\\Miny\\Router\\Route', $this->router->get(''));
+        $this->assertInstanceOf('\\Miny\\Router\\Route', $this->router->post(''));
+        $this->assertInstanceOf('\\Miny\\Router\\Route', $this->router->put(''));
+        $this->assertInstanceOf('\\Miny\\Router\\Route', $this->router->delete(''));
+        $this->assertInstanceOf('\\Miny\\Router\\Resource', $this->router->resource(''));
+    }
+
     public function testThatRootCreatesAnEmptyRouteWithMethodGet()
     {
         $route = $this->router->root();
