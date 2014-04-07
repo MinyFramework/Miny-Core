@@ -301,7 +301,7 @@ class ResourceTest extends \PHPUnit_Framework_TestCase
 
     public function testResourceMethodShouldSetTheCorrectParentChildRelationship()
     {
-        $child = new Resource('child', 'children');
+        $child    = new Resource('child', 'children');
         $resource = new Resource('resource', 'resources');
         $resource->resource($child);
 
@@ -309,5 +309,18 @@ class ResourceTest extends \PHPUnit_Framework_TestCase
         $routes = $this->router->getAll();
 
         $this->assertArrayHasKey('resource_children', $routes);
+    }
+
+    public function testDefaultRoutesCanBeOverridden()
+    {
+        $resource = new Resource('resource', 'resources');
+        $resource->collection('index', Route::METHOD_GET);
+        $resource->member('show', Route::METHOD_GET);
+
+        $resource->register($this->router);
+        $routes = $this->router->getAll();
+
+        $this->assertArrayHasKey('index_resource', $routes);
+        $this->assertArrayHasKey('show_resource', $routes);
     }
 }

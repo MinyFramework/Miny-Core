@@ -47,11 +47,11 @@ class Resource
                 'destroy' => Route::METHOD_DELETE
             );
             $this->unnamedRoutes    = array(
-                'index',
-                'create',
-                'show',
-                'update',
-                'destroy'
+                'index'   => true,
+                'create'  => true,
+                'show'    => true,
+                'update'  => true,
+                'destroy' => true
             );
 
             $this->parameters['controller'] = $this->camelize($pluralName);
@@ -66,10 +66,10 @@ class Resource
             );
             $this->memberRoutes     = array();
             $this->unnamedRoutes    = array(
-                'create',
-                'show',
-                'update',
-                'destroy'
+                'create'  => true,
+                'show'    => true,
+                'update'  => true,
+                'destroy' => true
             );
 
             $this->parameters['controller'] = $this->camelize($singularName);
@@ -132,6 +132,7 @@ class Resource
     public function member($name, $method)
     {
         if ($this->isPlural) {
+            unset($this->unnamedRoutes[$name]);
             $this->memberRoutes[$name] = $method;
         }
 
@@ -140,6 +141,7 @@ class Resource
 
     public function collection($name, $method)
     {
+        unset($this->unnamedRoutes[$name]);
         $this->collectionRoutes[$name] = $method;
 
         return $this;
@@ -226,7 +228,7 @@ class Resource
         foreach ($routes as $name => $method) {
             $path = $basePath;
 
-            if (in_array($name, $this->unnamedRoutes)) {
+            if (isset($this->unnamedRoutes[$name])) {
                 $routeName = $firstUnnamedRouteName;
 
                 $firstUnnamedRouteName = null;
