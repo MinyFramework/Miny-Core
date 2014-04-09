@@ -52,8 +52,16 @@ abstract class Module
         return $this->configuration;
     }
 
-    public function getConfiguration($key)
+    public function getConfiguration($key, $default = null)
     {
+        if (!isset($this->configuration)) {
+            if ($default === null) {
+                throw new \OutOfBoundsException(sprintf('Key %s is not set', $key));
+            }
+
+            return $default;
+        }
+
         return $this->configuration[$key];
     }
 
