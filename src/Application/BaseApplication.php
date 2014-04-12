@@ -189,6 +189,7 @@ abstract class BaseApplication
     {
         date_default_timezone_set($this->parameterContainer['default_timezone']);
         $container->setInstance($this);
+        $container->addAlias('\\Miny\\Log\\AbstractLog', $this->log);
 
         /** @var $shutdown ShutdownService */
         $shutdown = $container->get('\\Miny\\Shutdown\\ShutdownService');
