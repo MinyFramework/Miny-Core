@@ -172,7 +172,7 @@ abstract class BaseApplication
         if (!is_file($file)) {
             throw new InvalidArgumentException('Configuration file not found: ' . $file);
         }
-        $this->container->get('\\Miny\\Log\\Log')->write(
+        $this->log->write(
             Log::DEBUG,
             'Configuration',
             'Loading configuration file: %s',
@@ -189,7 +189,7 @@ abstract class BaseApplication
     {
         date_default_timezone_set($this->parameterContainer['default_timezone']);
         $container->setInstance($this);
-        $container->addAlias('\\Miny\\Log\\AbstractLog', $this->log);
+        $container->addAlias('\\Miny\\Log\\AbstractLog', '\\Miny\\Log\\Log');
 
         /** @var $shutdown ShutdownService */
         $shutdown = $container->get('\\Miny\\Shutdown\\ShutdownService');
