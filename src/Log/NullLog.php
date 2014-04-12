@@ -9,7 +9,7 @@
 
 namespace Miny\Log;
 
-class NullLog
+class NullLog extends AbstractLog
 {
     public function write($level, $category, $message)
     {
