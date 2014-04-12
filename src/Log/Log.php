@@ -9,7 +9,7 @@
 
 namespace Miny\Log;
 
-class Log
+class Log extends AbstractLog
 {
     const PROFILE = 1;
     const DEBUG   = 2;

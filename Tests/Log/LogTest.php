@@ -8,6 +8,7 @@ class LogTest extends \PHPUnit_Framework_TestCase
      * @var \PHPUnit_Framework_MockObject_MockObject
      */
     private $writerMock;
+
     /**
      * @var Log
      */
@@ -17,6 +18,11 @@ class LogTest extends \PHPUnit_Framework_TestCase
     {
         $this->writerMock = $this->getMockForAbstractClass('\\Miny\\Log\\AbstractLogWriter');
         $this->log        = new Log();
+    }
+
+    public function testLogExtendsAbstractLog()
+    {
+        $this->assertInstanceOf('\\Miny\\Log\\AbstractLog', $this->log);
     }
 
     public function testThatFlushIsCalledWhenLimitIsReached()
