@@ -54,10 +54,20 @@ class Application extends BaseApplication
         $eventHandlers = $container->get('\\Miny\\Application\\Handlers\\ApplicationEventHandlers');
 
         $events = $this->eventDispatcher;
-        $events->register(CoreEvents::FILTER_REQUEST, array($eventHandlers, 'logRequest'));
-        $events->register(CoreEvents::FILTER_REQUEST, array($eventHandlers, 'filterRoutes'));
-        $events->register(CoreEvents::FILTER_RESPONSE, array($eventHandlers, 'setContentType'));
-        $events->register(CoreEvents::FILTER_RESPONSE, array($eventHandlers, 'logResponse'));
+        $events->registerEvents(
+            array(
+                CoreEvents::FILTER_REQUEST  => array(
+                    array($eventHandlers, 'logRequest'),
+                    array($eventHandlers, 'filterRoutes')
+                ),
+                CoreEvents::FILTER_RESPONSE => array(
+                    array($eventHandlers, 'setContentType'),
+                    array($eventHandlers, 'logResponse')
+                )
+            )
+        );
+
+        $parameterContainer = $this->parameterContainer;
 
         $container->addCallback(
             '\\Miny\\Controller\\ControllerDispatcher',
@@ -70,8 +80,6 @@ class Application extends BaseApplication
                 );
             }
         );
-
-        $parameterContainer = $this->parameterContainer;
         $container->addCallback(
             '\\Miny\\Router\\Router',
             function (Router $router) use ($parameterContainer, $events) {
@@ -82,13 +90,11 @@ class Application extends BaseApplication
                 $events->register(CoreEvents::BEFORE_RUN, array($router, 'registerResources'));
             }
         );
-
-        $container->addConstructorArguments(
+        $container->setConstructorArgument(
             '\\Miny\\Router\\RouteGenerator',
-            null,
+            1,
             '@router:short_urls'
         );
-
         $container->addCallback(
             '\\Miny\\HTTP\\Session',
             function (Session $session) {

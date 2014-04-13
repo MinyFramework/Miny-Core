@@ -50,6 +50,22 @@ class EventDispatcherTest extends \PHPUnit_Framework_TestCase
         $this->assertTrue($event->isHandled());
     }
 
+    public function testBatchEventRegistration()
+    {
+        $handler_factory = $this->handler_factory;
+
+        $this->expectOutputString('012');
+        $this->object->registerEvents(
+            array(
+                'event'  => array($handler_factory(0), $handler_factory(1)),
+                'event2' => $handler_factory(2)
+            )
+        );
+
+        $this->object->raiseEvent('event');
+        $this->object->raiseEvent('event2');
+    }
+
     public function testEventWithoutHandlerIsNotHandled()
     {
         $event = new Event('event');

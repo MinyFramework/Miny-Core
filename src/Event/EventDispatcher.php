@@ -21,6 +21,27 @@ class EventDispatcher
     private $handlers = array();
 
     /**
+     * @param $handler
+     * @param $event
+     *
+     * @return array
+     * @throws Exceptions\EventHandlerException
+     */
+    private function ensureCallback($handler, $event)
+    {
+        if (is_object($handler)) {
+            if (!$handler instanceof Closure) {
+                $handler = array($handler, $event);
+            }
+        }
+        if (!is_callable($handler)) {
+            throw new EventHandlerException('Handler is not callable for event ' . $event);
+        }
+
+        return $handler;
+    }
+
+    /**
      * Register an event handler for $event.
      * The event handler can be a callback or an object.
      * When the handler is an object, the event handler will look for a method with the name of the event.
@@ -35,14 +56,8 @@ class EventDispatcher
      */
     public function register($event, $handler, $place = null)
     {
-        if (is_object($handler)) {
-            if (!$handler instanceof Closure) {
-                $handler = array($handler, $event);
-            }
-        }
-        if (!is_callable($handler)) {
-            throw new EventHandlerException('Handler is not callable for event ' . $event);
-        }
+        $handler = $this->ensureCallback($handler, $event);
+
         if (!isset($this->handlers[$event])) {
             $this->handlers[$event] = array($handler);
         } elseif ($place === null) {
@@ -50,6 +65,22 @@ class EventDispatcher
         } else {
             //insert handler to the given place
             array_splice($this->handlers[$event], $place, 0, array($handler));
+        }
+    }
+
+    public function registerEvents(array $events)
+    {
+        foreach ($events as $event => $handlers) {
+            if (!isset($this->handlers[$event])) {
+                $this->handlers[$event] = array();
+            }
+            if (!is_array($handlers) || is_callable($handlers)) {
+                $this->handlers[$event][] = $this->ensureCallback($handlers, $event);
+            } else {
+                foreach ($handlers as $handler) {
+                    $this->handlers[$event][] = $this->ensureCallback($handler, $event);
+                }
+            }
         }
     }
 

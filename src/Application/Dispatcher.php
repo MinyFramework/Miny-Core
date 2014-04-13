@@ -38,16 +38,16 @@ class Dispatcher
     /**
      * @param Container            $container
      * @param EventDispatcher      $events
-     * @param ControllerDispatcher $controllerRunner
+     * @param ControllerDispatcher $controllerDispatcher
      */
     public function __construct(
         Container $container,
         EventDispatcher $events,
-        ControllerDispatcher $controllerRunner
+        ControllerDispatcher $controllerDispatcher
     ) {
         $this->container            = $container;
         $this->events               = $events;
-        $this->controllerDispatcher = $controllerRunner;
+        $this->controllerDispatcher = $controllerDispatcher;
     }
 
     /**

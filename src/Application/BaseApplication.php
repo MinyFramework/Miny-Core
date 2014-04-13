@@ -12,6 +12,7 @@ namespace Miny\Application;
 use InvalidArgumentException;
 use Miny\Application\Events\BeforeRunEvent;
 use Miny\Application\Events\ShutDownEvent;
+use Miny\Application\Handlers\ErrorHandlers;
 use Miny\AutoLoader;
 use Miny\CoreEvents;
 use Miny\Event\EventDispatcher;
@@ -191,33 +192,42 @@ abstract class BaseApplication
         $container->setInstance($this);
         $container->addAlias('\\Miny\\Log\\AbstractLog', '\\Miny\\Log\\Log');
 
-        /** @var $shutdown ShutdownService */
-        $shutdown = $container->get('\\Miny\\Shutdown\\ShutdownService');
+        /**
+         * @var $shutdown      ShutdownService
+         * @var $events        EventDispatcher
+         * @var $errorHandlers ErrorHandlers
+         */
+        $shutdown      = $container->get('\\Miny\\Shutdown\\ShutdownService');
+        $events        = $container->get('\\Miny\\Event\\EventDispatcher');
+        $errorHandlers = $container->get('\\Miny\\Application\\Handlers\\ErrorHandlers');
+
+        $events->register(CoreEvents::UNCAUGHT_EXCEPTION, array($errorHandlers, 'logException'));
 
         $log = $this->log;
         $log->setFlushLimit($this->parameterContainer['log']['flush_limit']);
         if ($this->parameterContainer['log']['enable_file_writer']) {
             $log->registerWriter(new FileWriter($this->parameterContainer['log']['path']));
         }
+
+        $shutdown->register(
+            function () use ($events) {
+                $events->raiseEvent(new ShutDownEvent());
+            },
+            0
+        );
         $shutdown->register(
             function () use ($log) {
                 $log->write(Log::INFO, 'Miny', "End of execution.\n");
+                $log->flush();
             },
-            999
+            1000
         );
-        $shutdown->register(array($log, 'flush'), 1000);
 
         if ($this->parameterContainer['profile']) {
             $profiler = $log->startProfiling('Miny', 'Application execution');
             $shutdown->register(array($profiler, 'stop'), 998);
         }
 
-        $errorHandlers = $container->get('\\Miny\\Application\\Handlers\\ErrorHandlers');
-
-        $events = $container->get('\\Miny\\Event\\EventDispatcher');
-        $events->register(CoreEvents::UNCAUGHT_EXCEPTION, array($errorHandlers, 'logException'));
-
-        $this->log             = $log;
         $this->eventDispatcher = $events;
         $this->shutdownService = $shutdown;
     }
@@ -287,15 +297,7 @@ abstract class BaseApplication
      */
     public function run()
     {
-        $event = $this->eventDispatcher;
-        $event->raiseEvent(new BeforeRunEvent());
-
-        $this->shutdownService->register(
-            function () use ($event) {
-                $event->raiseEvent(new ShutDownEvent());
-            },
-            0
-        );
+        $this->eventDispatcher->raiseEvent(new BeforeRunEvent());
         $this->onRun();
     }
 

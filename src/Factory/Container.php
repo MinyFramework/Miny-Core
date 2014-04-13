@@ -78,15 +78,28 @@ class Container
     {
         $concrete = ltrim($concrete, '\\');
 
-        // filter the nulls
-        $arguments = array_filter(
+        // filter the nulls and set the arguments
+        $this->constructorArguments[$concrete] = array_filter(
             array_slice(func_get_args(), 1),
             function ($item) {
                 return $item !== null;
             }
         );
+    }
 
-        $this->constructorArguments[$concrete] = $arguments;
+    /**
+     * @param $concrete
+     * @param $position
+     * @param $argument
+     */
+    public function setConstructorArgument($concrete, $position, $argument)
+    {
+        $concrete = ltrim($concrete, '\\');
+        if (!isset($this->constructorArguments[$concrete])) {
+            $this->constructorArguments[$concrete] = array($position => $argument);
+        } else {
+            $this->constructorArguments[$concrete][$position] = $argument;
+        }
     }
 
     public function addCallback($concrete, $callback)

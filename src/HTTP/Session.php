@@ -109,11 +109,12 @@ class Session implements ArrayAccess, IteratorAggregate, Countable
      */
     private function updateFlash()
     {
-        foreach ($this->data['flash'] as $key => &$data) {
-            if ($data['ttl']-- == 0) {
-                unset($this->data['flash'][$key]);
-            }
-        }
+        $callback = function (&$flash) {
+            // decrease flash ttl and remove if expired
+            return $flash['ttl']-- > 0;
+        };
+
+        $this->data['flash'] = array_filter($this->data['flash'], $callback);
     }
 
     //Session option methods
@@ -207,7 +208,7 @@ class Session implements ArrayAccess, IteratorAggregate, Countable
 
     public function flash($key, $data, $ttl)
     {
-        $this->data['flash'][$key] = array('data' => $data, 'ttl' => (int) $ttl);
+        $this->data['flash'][$key] = array('data' => $data, 'ttl' => (int)$ttl);
     }
 
     public function __isset($key)
