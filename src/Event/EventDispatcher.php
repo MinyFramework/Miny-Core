@@ -10,7 +10,6 @@
 namespace Miny\Event;
 
 use Closure;
-use InvalidArgumentException;
 use Miny\Event\Exceptions\EventHandlerException;
 
 class EventDispatcher
@@ -85,25 +84,12 @@ class EventDispatcher
     }
 
     /**
-     * Raises $event.
-     * If $event is a string, raiseEvent will create an Event instance with $event as the event name and the optional
-     * arguments as event parameters.
+     * @param Event $event
      *
-     * @param string|Event $event
-     * @param              mixed ... Event parameters if $event is string.
-     *
-     * @return Event The raised event.
-     *
-     * @throws InvalidArgumentException
+     * @return Event
      */
-    public function raiseEvent($event)
+    public function raiseEvent(Event $event)
     {
-        if (is_string($event)) {
-            $args  = array_slice(func_get_args(), 1);
-            $event = new Event($event, $args);
-        } elseif (!$event instanceof Event) {
-            throw new InvalidArgumentException('The first parameter must be an Event object or a string.');
-        }
         $name = $event->getName();
         if (!isset($this->handlers[$name])) {
             return $event;

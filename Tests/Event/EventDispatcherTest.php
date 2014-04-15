@@ -2,8 +2,6 @@
 
 namespace Miny\Event;
 
-use InvalidArgumentException;
-
 class EventDispatcherTest extends \PHPUnit_Framework_TestCase
 {
     /**
@@ -28,16 +26,6 @@ class EventDispatcherTest extends \PHPUnit_Framework_TestCase
         $this->assertSame($event, $this->object->raiseEvent($event));
     }
 
-    public function testRaiseEventInstantiatesStringEventAndReturnsIt()
-    {
-        $event1 = $this->object->raiseEvent('event');
-        $event2 = $this->object->raiseEvent('event', 'p1', 'p2');
-
-        $this->assertInstanceOf('\Miny\Event\Event', $event1);
-        $this->assertEquals('event', $event1->getName());
-        $this->assertEquals(array('p1', 'p2'), $event2->getParameters());
-    }
-
     public function testEventThatHaveHandlerRegisteredIsHandled()
     {
         $handler_factory = $this->handler_factory;
@@ -45,8 +33,7 @@ class EventDispatcherTest extends \PHPUnit_Framework_TestCase
         $this->object->register('event', $handler_factory(0));
         $this->object->register('event', $handler_factory(1));
 
-        $event = new Event('event');
-        $this->object->raiseEvent($event);
+        $event = $this->object->raiseEvent(new Event('event'));
         $this->assertTrue($event->isHandled());
     }
 
@@ -62,8 +49,8 @@ class EventDispatcherTest extends \PHPUnit_Framework_TestCase
             )
         );
 
-        $this->object->raiseEvent('event');
-        $this->object->raiseEvent('event2');
+        $this->object->raiseEvent(new Event('event'));
+        $this->object->raiseEvent(new Event('event2'));
     }
 
     public function testEventWithoutHandlerIsNotHandled()
@@ -96,14 +83,6 @@ class EventDispatcherTest extends \PHPUnit_Framework_TestCase
         $this->object->register('event', $handler_factory(1), 1);
 
         $this->object->raiseEvent(new Event('event'));
-    }
-
-    /**
-     * @expectedException InvalidArgumentException
-     */
-    public function testRaiseEventShouldThrowExceptionWhenEventNameIsNotStringOrEvent()
-    {
-        $this->object->raiseEvent(5);
     }
 
     /**
