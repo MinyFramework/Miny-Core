@@ -47,7 +47,7 @@ class RequestTest extends \PHPUnit_Framework_TestCase
         $this->assertFalse($request->isAjax());
 
         $request = new Request('method', 'url');
-        $request->getHeaders()->set('x-requested-with', 'xmlhttprequest');
+        $request->getHeaders()->set('x-requested-with', 'XMLHttpRequest');
 
         $this->assertTrue($request->isAjax());
     }

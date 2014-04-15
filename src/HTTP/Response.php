@@ -89,7 +89,7 @@ class Response implements Serializable
     public function setCode($code)
     {
         if (!isset(self::$statusCodes[$code])) {
-            throw new InvalidArgumentException('Invalid status code: ' . $code);
+            throw new InvalidArgumentException("Invalid status code: {$code}");
         }
         $this->statusCode = $code;
     }
@@ -149,7 +149,7 @@ class Response implements Serializable
 
     public function send()
     {
-        $this->headers->setRaw(sprintf('HTTP/1.1 %d: %s', $this->statusCode, $this->getStatus()));
+        $this->headers->setRaw("HTTP/1.1 {$this->statusCode}: {$this->getStatus()}");
         $this->headers->send();
         if (!$this->headers->has('location')) {
             echo $this;

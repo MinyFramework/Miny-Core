@@ -41,7 +41,7 @@ class ParameterContainer
         }
 
         if ($default === null) {
-            throw new OutOfBoundsException(sprintf('Key %s is not set.', $key));
+            throw new OutOfBoundsException("Key {$key} is not set.");
         }
 
         return $default;

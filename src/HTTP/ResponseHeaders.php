@@ -46,7 +46,7 @@ class ResponseHeaders extends Headers
     public function send()
     {
         foreach ($this as $header => $value) {
-            $this->sender->send($header . ': ' . $value);
+            $this->sender->send("{$header}: {$value}");
         }
         foreach ($this->getRawHeaders() as $header) {
             $this->sender->send($header);
@@ -63,6 +63,7 @@ class ResponseHeaders extends Headers
             'cookies' => $this->cookies,
             'sender'  => $this->sender
         );
+
         return serialize($array);
     }
 

@@ -34,13 +34,20 @@ class ExtendableTest extends \PHPUnit_Framework_TestCase
     protected function setUp()
     {
         $object = new Extendable;
-        $object->addMethod('foo', function () {
-            return 'foo';
-        });
+        $object->addMethod(
+            'foo',
+            function () {
+                return 'foo';
+            }
+        );
 
-        $object->addMethods(new FooPlugin, array(
-            'bar', 'baz'
-        ));
+        $object->addMethods(
+            new FooPlugin,
+            array(
+                'bar',
+                'baz'
+            )
+        );
 
         $this->object = $object;
     }

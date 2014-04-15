@@ -52,11 +52,6 @@ abstract class BaseApplication
     protected $eventDispatcher;
 
     /**
-     * @var ShutdownService
-     */
-    protected $shutdownService;
-
-    /**
      * @var Log
      */
     protected $log;
@@ -229,7 +224,6 @@ abstract class BaseApplication
         }
 
         $this->eventDispatcher = $events;
-        $this->shutdownService = $shutdown;
     }
 
     /**

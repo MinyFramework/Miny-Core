@@ -54,7 +54,7 @@ class Log extends AbstractLog
             return self::$names[$level];
         }
 
-        return 'Unknown (' . $level . ')';
+        return "Unknown ({$level})";
     }
 
     public function __construct()
@@ -75,7 +75,7 @@ class Log extends AbstractLog
 
     public function setFlushLimit($limit)
     {
-        $this->flushLimit = (int)$limit;
+        $this->flushLimit = (int) $limit;
         if ($this->messageNum >= $this->flushLimit) {
             $this->flush();
         }
@@ -116,36 +116,24 @@ class Log extends AbstractLog
 
     public function write($level, $category, $message)
     {
-        $args = array_slice(func_get_args(), 3);
-        if (isset($args[0]) && is_array($args[0])) {
-            $args = $args[0];
+        if (func_num_args() > 3) {
+            $args = array_slice(func_get_args(), 3);
+            if (is_array($args[0])) {
+                $args = $args[0];
+            }
+            $message = vsprintf($message, $args);
         }
 
         $this->messageBuffer[] = new LogMessage(
             $level,
             microtime(true),
             $category,
-            $this->formatMessage($message, $args)
+            $message
         );
 
         if (++$this->messageNum === $this->flushLimit) {
             $this->flush();
         }
-    }
-
-    /**
-     * @param string $message
-     * @param array  $args
-     *
-     * @return string
-     */
-    private function formatMessage($message, array $args)
-    {
-        if (!empty($args)) {
-            $message = vsprintf($message, $args);
-        }
-
-        return $message;
     }
 
     public function flush()
@@ -170,7 +158,7 @@ class Log extends AbstractLog
         $this->allWriters[] = $writer;
 
         if ($levels === null) {
-            $levels = array(
+            $levels  = array(
                 self::PROFILE,
                 self::DEBUG,
                 self::INFO,

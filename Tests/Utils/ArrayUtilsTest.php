@@ -44,9 +44,15 @@ class ArrayUtilsTest extends \PHPUnit_Framework_TestCase
         $this->assertEquals('six', ArrayUtils::getByPath($this->array, 6));
         $this->assertEquals('value', ArrayUtils::getByPath($this->array, 'key_b'));
         $this->assertEquals('value_a', ArrayUtils::getByPath($this->array, 'key_a:subkey_a'));
-        $this->assertEquals('value_a', ArrayUtils::getByPath($this->array, array('key_a', 'subkey_a')));
+        $this->assertEquals(
+            'value_a',
+            ArrayUtils::getByPath($this->array, array('key_a', 'subkey_a'))
+        );
         $this->assertEquals(null, ArrayUtils::getByPath($this->array, array('key_a', 'subkey_b')));
-        $this->assertEquals('default', ArrayUtils::getByPath($this->array, array('key_a', 'subkey_b'), 'default'));
+        $this->assertEquals(
+            'default',
+            ArrayUtils::getByPath($this->array, array('key_a', 'subkey_b'), 'default')
+        );
     }
 
     /**
@@ -60,7 +66,10 @@ class ArrayUtilsTest extends \PHPUnit_Framework_TestCase
     public function testFindByPath()
     {
         $this->assertEquals('value_a', ArrayUtils::findByPath($this->array, 'key_a:subkey_a'));
-        $this->assertEquals('value_a', ArrayUtils::findByPath($this->array, array('key_a', 'subkey_a')));
+        $this->assertEquals(
+            'value_a',
+            ArrayUtils::findByPath($this->array, array('key_a', 'subkey_a'))
+        );
         $this->assertEquals(array(), ArrayUtils::findByPath($this->array, array('foo_path'), true));
     }
 

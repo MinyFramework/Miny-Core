@@ -108,7 +108,7 @@ class HeadersTest extends \PHPUnit_Framework_TestCase
 
         $expected = "expect: something\nRaw foo\n";
 
-        $this->assertEquals($expected, (string)$headers);
+        $this->assertEquals($expected, (string) $headers);
     }
 
     public function testSerialize()
@@ -122,7 +122,7 @@ class HeadersTest extends \PHPUnit_Framework_TestCase
 
         $expected = "expect: something, something else\nRaw foo\n";
 
-        $this->assertEquals($expected, (string)$new_headers);
+        $this->assertEquals($expected, (string) $new_headers);
     }
 
     public function testAddHeaders()

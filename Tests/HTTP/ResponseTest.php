@@ -153,15 +153,15 @@ class ResponseTest extends \PHPUnit_Framework_TestCase
 
     public function testContent()
     {
-        $this->assertEmpty((string)$this->response);
+        $this->assertEmpty((string) $this->response);
 
         $this->response->addContent('string');
 
-        $this->assertEquals('string', (string)$this->response);
+        $this->assertEquals('string', (string) $this->response);
 
         $this->response->clearContent();
 
-        $this->assertEmpty((string)$this->response);
+        $this->assertEmpty((string) $this->response);
     }
 
     public function testAddResponse()
@@ -172,7 +172,7 @@ class ResponseTest extends \PHPUnit_Framework_TestCase
         $response->addContent(' and another');
         $this->response->addResponse($response);
 
-        $this->assertEquals('string and another', (string)$this->response);
+        $this->assertEquals('string and another', (string) $this->response);
     }
 
     public function testSerialize()
@@ -182,7 +182,7 @@ class ResponseTest extends \PHPUnit_Framework_TestCase
 
         $response = unserialize(serialize($this->response));
 
-        $this->assertEquals('content', (string)$response);
+        $this->assertEquals('content', (string) $response);
         $this->assertTrue($response->isCode(301));
         $this->assertInstanceof('\Miny\HTTP\ResponseHeaders', $response->getHeaders());
     }

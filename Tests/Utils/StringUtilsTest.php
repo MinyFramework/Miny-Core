@@ -24,6 +24,9 @@ class StringUtilsTest extends PHPUnit_Framework_TestCase
     public function testDecamelize()
     {
         $this->assertEquals('decamelized string', StringUtils::decamelize('decamelizedString'));
-        $this->assertEquals('decamelized_string', StringUtils::decamelize('decamelizedString', '_'));
+        $this->assertEquals(
+            'decamelized_string',
+            StringUtils::decamelize('decamelizedString', '_')
+        );
     }
 }

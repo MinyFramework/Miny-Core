@@ -21,7 +21,7 @@ use Serializable;
  */
 class Headers implements Iterator, Serializable
 {
-    private static $multiple_values_allowed = array(
+    private static $multipleValuesAllowed = array(
         'accept',
         'accept-charset',
         'accept-encoding',
@@ -61,14 +61,12 @@ class Headers implements Iterator, Serializable
 
     private function isHeaderSimple($name)
     {
-        if (!isset($this->headers[$name])) {
-            return true;
-        }
-        if (!in_array($name, self::$multiple_values_allowed)) {
-            return true;
-        }
+        return !(isset($this->headers[$name]) && in_array($name, self::$multipleValuesAllowed));
+    }
 
-        return false;
+    private function canHeaderBeUnset($name, $value)
+    {
+        return $value === null || $this->headers[$name] === $value;
     }
 
     public function addHeaders(Headers $headers)
@@ -81,42 +79,15 @@ class Headers implements Iterator, Serializable
 
     public function set($name, $value)
     {
-        if (is_array($value)) {
-            foreach ($value as $item) {
-                $this->setHeader($name, $item);
-            }
-        } else {
-            $this->setHeader($name, $value);
-        }
-    }
-
-    /**
-     * @param $name
-     * @param $value
-     */
-    protected function setHeader($name, $value)
-    {
         $name = self::sanitize($name);
         if ($this->isHeaderSimple($name)) {
             $this->headers[$name] = $value;
         } else {
             if (!is_array($this->headers[$name])) {
-                $this->headers[$name] = array($this->headers[$name]);
+                $this->headers[$name] = (array) $this->headers[$name];
             }
-            $this->headers[$name][] = $value;
+            $this->headers[$name] = array_merge($this->headers[$name], (array) $value);
         }
-    }
-
-    private function headerCanBeUnset($name, $value)
-    {
-        if ($value === null) {
-            return true;
-        }
-        if ($this->headers[$name] === $value) {
-            return true;
-        }
-
-        return false;
     }
 
     public function remove($name, $value = null)
@@ -125,7 +96,7 @@ class Headers implements Iterator, Serializable
         if (!isset($this->headers[$name])) {
             return;
         }
-        if ($this->headerCanBeUnset($name, $value)) {
+        if ($this->canHeaderBeUnset($name, $value)) {
             unset($this->headers[$name]);
 
             return;

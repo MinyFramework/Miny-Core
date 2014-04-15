@@ -32,11 +32,12 @@ class StringUtils
         if (strlen($known) !== strlen($user)) {
             return false;
         }
-        $result = 0;
+        $result      = 0;
         $knownLength = strlen($known);
         for ($i = 0; $i < $knownLength; $i++) {
             $result |= ord($known[$i]) ^ ord($user[$i]);
         }
+
         return $result == 0;
     }
 
@@ -50,6 +51,7 @@ class StringUtils
         $str = strtolower($str);
         $str = strtr($str, '_', ' ');
         $str = preg_replace('/\s+/', '', ucwords($str));
+
         return lcfirst($str);
     }
 
@@ -62,6 +64,7 @@ class StringUtils
     public static function decamelize($str, $separator = ' ')
     {
         $str = preg_replace('/(?<=[a-z])([A-Z])/', $separator . '$1', $str);
+
         return strtolower($str);
     }
 }

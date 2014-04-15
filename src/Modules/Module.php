@@ -12,6 +12,7 @@ namespace Miny\Modules;
 use InvalidArgumentException;
 use Miny\Application\BaseApplication;
 use Miny\Factory\AbstractConfigurationTree;
+use OutOfBoundsException;
 
 abstract class Module
 {
@@ -56,7 +57,7 @@ abstract class Module
     {
         if (!isset($this->configuration)) {
             if ($default === null) {
-                throw new \OutOfBoundsException(sprintf('Key %s is not set', $key));
+                throw new OutOfBoundsException("Key {$key} is not set");
             }
 
             return $default;
@@ -98,7 +99,7 @@ abstract class Module
     public function ifModule($module, $runnable)
     {
         if (!is_callable($runnable)) {
-            throw new InvalidArgumentException('Runnable must be a callable variable.');
+            throw new InvalidArgumentException('$runnable must be callable.');
         }
         $this->conditionalCallbacks[$module] = $runnable;
     }

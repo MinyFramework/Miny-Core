@@ -169,7 +169,7 @@ class Session implements ArrayAccess, IteratorAggregate, Countable
             throw new InvalidArgumentException('Session path must be null or a string');
         }
         if (!is_dir($path)) {
-            throw new InvalidArgumentException('Path not found: ' . $path);
+            throw new InvalidArgumentException("Path not found: {$path}");
         }
         session_save_path($path);
     }
@@ -208,7 +208,7 @@ class Session implements ArrayAccess, IteratorAggregate, Countable
 
     public function flash($key, $data, $ttl)
     {
-        $this->data['flash'][$key] = array('data' => $data, 'ttl' => (int)$ttl);
+        $this->data['flash'][$key] = array('data' => $data, 'ttl' => (int) $ttl);
     }
 
     public function __isset($key)
@@ -226,6 +226,7 @@ class Session implements ArrayAccess, IteratorAggregate, Countable
         switch (count($arguments)) {
             case 0:
                 throw new BadMethodCallException('Flash calls must have at least one argument.');
+
             case 1:
                 $arguments[1] = 1;
                 break;

@@ -56,18 +56,22 @@ class Utils
 
             case 2:
                 list($arg1, $arg2) = $arguments;
+
                 return new $class($arg1, $arg2);
 
             case 3:
                 list($arg1, $arg2, $arg3) = $arguments;
+
                 return new $class($arg1, $arg2, $arg3);
 
             case 4:
                 list($arg1, $arg2, $arg3, $arg4) = $arguments;
+
                 return new $class($arg1, $arg2, $arg3, $arg4);
 
             default:
                 $ref = new ReflectionClass($class);
+
                 return $ref->newInstanceArgs($arguments);
         }
     }

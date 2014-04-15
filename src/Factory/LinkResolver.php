@@ -48,7 +48,7 @@ class LinkResolver extends AbstractLinkResolver
         }
 
         //see if $argument is a reference to something
-        switch($argument[0]) {
+        switch ($argument[0]) {
             case '@':
                 $value    = $this->parameterContainer->offsetGet(substr($argument, 1));
                 $argument = $this->resolveReferences($value);

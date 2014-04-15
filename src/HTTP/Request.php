@@ -9,8 +9,6 @@
 
 namespace Miny\HTTP;
 
-use Miny\Utils\StringUtils;
-
 class Request
 {
     const MASTER_REQUEST = 0;
@@ -114,11 +112,7 @@ class Request
      */
     public function isAjax()
     {
-        if (!$this->headers->has('x-requested-with')) {
-            return false;
-        }
-
-        return strtolower($this->headers->get('x-requested-with')) === 'xmlhttprequest';
+        return $this->headers->has('x-requested-with', 'XMLHttpRequest');
     }
 
     public function get()

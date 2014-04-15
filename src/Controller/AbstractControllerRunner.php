@@ -45,8 +45,9 @@ abstract class AbstractControllerRunner
         $controller = $this->loadController($controller);
         $action     = $this->getAction($request, $controller);
 
-        $event = new ControllerLoadedEvent($controller, $action);
-        $this->eventDispatcher->raiseEvent($event);
+        $event = $this->eventDispatcher->raiseEvent(
+            new ControllerLoadedEvent($controller, $action)
+        );
 
         if ($event->isHandled() && $event->getResponse() instanceof Response) {
             return $event->getResponse();

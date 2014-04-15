@@ -125,7 +125,7 @@ class Container
     {
         $abstract = ltrim($abstract, '\\');
         if (!isset($this->aliases[$abstract])) {
-            throw new OutOfBoundsException(sprintf('%s is not registered.', $abstract));
+            throw new OutOfBoundsException("{$abstract} is not registered.");
         }
 
         return $this->aliases[$abstract];
@@ -219,11 +219,10 @@ class Container
      */
     private function callCallbacks($concrete, $object)
     {
-        if (!isset($this->callbacks[$concrete])) {
-            return;
-        }
-        foreach ($this->callbacks[$concrete] as $callback) {
-            $callback($object, $this);
+        if (isset($this->callbacks[$concrete])) {
+            foreach ($this->callbacks[$concrete] as $callback) {
+                $callback($object, $this);
+            }
         }
     }
 
@@ -261,7 +260,7 @@ class Container
         $reflector = new ReflectionClass($concrete);
 
         if (!$reflector->isInstantiable()) {
-            throw new InvalidArgumentException(sprintf('Class %s is not instantiable.', $concrete));
+            throw new InvalidArgumentException("Class {$concrete} is not instantiable.");
         }
 
         $constructor = $reflector->getConstructor();
@@ -276,8 +275,7 @@ class Container
             return new $concrete;
         }
 
-        $resolvedArgs = $this->resolveDependencies($constructorArgs, $parameters);
-        $arguments    = $this->linkResolver->resolveReferences($resolvedArgs);
+        $arguments = $this->resolveDependencies($constructorArgs, $parameters);
         if (!empty($parameters)) {
             ksort($arguments);
         }
@@ -287,26 +285,26 @@ class Container
 
     /**
      * @param ReflectionParameter[] $dependencies
-     * @param array                 $skipResolving
+     * @param array                 $resolved
      *
      * @return array
      */
-    private function resolveDependencies(array $dependencies, array $skipResolving)
+    private function resolveDependencies(array $dependencies, array $resolved)
     {
-        foreach ($skipResolving as $k => $value) {
+        foreach ($resolved as $k => $value) {
             unset($dependencies[$k]);
         }
         foreach ($dependencies as $k => $dependency) {
             $class = $dependency->getClass();
             if ($class === null) {
                 // primitive type
-                $dependencies[$k] = $this->resolvePrimitiveParameter($dependency);
+                $resolved[$k] = $this->resolvePrimitiveParameter($dependency);
             } else {
-                $dependencies[$k] = $this->resolveClassParameter($class, $dependency);
+                $resolved[$k] = $this->resolveClassParameter($class, $dependency);
             }
         }
 
-        return $dependencies + $skipResolving;
+        return $this->linkResolver->resolveReferences($resolved);
     }
 
     /**
@@ -324,13 +322,8 @@ class Container
         $class         = $dependency->getDeclaringClass()->getName();
         $method        = $dependency->getDeclaringFunction()->getName();
         $parameterName = $dependency->getName();
-        $message       = sprintf(
-            'Parameter %s is not supplied for %s::%s.',
-            $parameterName,
-            $class,
-            $method
-        );
-        throw new OutOfBoundsException($message);
+
+        throw new OutOfBoundsException("Parameter {$parameterName} is not supplied for {$class}::{$method}.");
     }
 
     /**
