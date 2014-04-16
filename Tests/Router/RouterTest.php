@@ -70,22 +70,6 @@ class RouterTest extends \PHPUnit_Framework_TestCase
     /**
      * @expectedException \InvalidArgumentException
      */
-    public function testThatSetPrefixThrowsExceptionWhenParameterIsNotString()
-    {
-        $this->router->setPrefix(5);
-    }
-
-    /**
-     * @expectedException \InvalidArgumentException
-     */
-    public function testThatSetPostfixThrowsExceptionWhenParameterIsNotString()
-    {
-        $this->router->setPostfix(5);
-    }
-
-    /**
-     * @expectedException \InvalidArgumentException
-     */
     public function testThatAddThrowsExceptionWhenParameterIsNotStringOrIntOrNull()
     {
         $this->router->add('', Route::METHOD_ALL, 5.2);

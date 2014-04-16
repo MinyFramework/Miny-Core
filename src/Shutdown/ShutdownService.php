@@ -16,13 +16,11 @@ use InvalidArgumentException;
  */
 class ShutdownService
 {
-    private $callbacks;
-    private $lowestPriority;
+    private $callbacks = array();
+    private $lowestPriority = -1;
 
     public function __construct()
     {
-        $this->callbacks      = array();
-        $this->lowestPriority = -1;
         register_shutdown_function(array($this, 'callShutdownFunctions'));
     }
 
@@ -37,7 +35,7 @@ class ShutdownService
     public function register($callback, $priority = null)
     {
         if (!is_callable($callback)) {
-            throw new InvalidArgumentException('Callback needs to be callable.');
+            throw new InvalidArgumentException('$callback needs to be callable.');
         }
         $priority = $this->getPriority($priority);
         if (!isset($this->callbacks[$priority])) {

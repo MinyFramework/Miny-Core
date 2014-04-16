@@ -73,8 +73,8 @@ class RouteGenerator
             }
         }
         if (!empty($missing)) {
-            $message = sprintf('Parameters not set: %s', join(', ', array_keys($missing)));
-            throw new InvalidArgumentException($message);
+            $params = join(', ', array_keys($missing));
+            throw new InvalidArgumentException("Parameters not set: {$params}");
         }
 
         return $parameters;

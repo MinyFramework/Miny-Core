@@ -88,12 +88,7 @@ class ModuleHandler
             return;
         }
 
-        $this->log->write(
-            Log::DEBUG,
-            'ModuleHandler',
-            'Loading module: %s',
-            $module
-        );
+        $this->log->write(Log::DEBUG, 'ModuleHandler', 'Loading module: %s', $module);
 
         $class        = sprintf('\\Modules\\%s\\Module', $module);
         $moduleObject = new $class($module, $this->application);

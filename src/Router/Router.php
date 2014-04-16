@@ -45,9 +45,6 @@ class Router
      */
     public function setPrefix($prefix)
     {
-        if (!is_string($prefix)) {
-            throw new InvalidArgumentException('$prefix must be a string');
-        }
         $this->prefix = $prefix;
     }
 
@@ -58,9 +55,6 @@ class Router
      */
     public function setPostfix($postfix)
     {
-        if (!is_string($postfix)) {
-            throw new InvalidArgumentException('$postfix must be a string');
-        }
         $this->postfix = $postfix;
     }
 
@@ -146,7 +140,7 @@ class Router
     public function getRoute($name)
     {
         if (!isset($this->routes[$name])) {
-            throw new OutOfBoundsException(sprintf('Route %s is not found.', $name));
+            throw new OutOfBoundsException("Route {$name} is not found.");
         }
 
         return $this->routes[$name];
@@ -182,7 +176,7 @@ class Router
     public function getStaticByURI($uri)
     {
         if (!isset($this->staticRoutes[$uri])) {
-            throw new OutOfBoundsException(sprintf('Static uri %s is not found.', $uri));
+            throw new OutOfBoundsException("Static uri {$uri} is not found.");
         }
 
         return $this->staticRoutes[$uri];

@@ -22,7 +22,12 @@ class Resource
 
     private $collectionRoutes;
     private $memberRoutes;
-    private $unnamedRoutes;
+    private $unnamedRoutes = array(
+        'create'  => true,
+        'show'    => true,
+        'update'  => true,
+        'destroy' => true
+    );
     private $idPattern = '\d+';
     private $isParent = false;
     private $parameters = array();
@@ -35,24 +40,18 @@ class Resource
         $this->isPlural     = $pluralName !== null;
 
         if ($this->isPlural) {
-            $this->collectionRoutes = array(
+            $this->collectionRoutes       = array(
                 'index'  => Route::METHOD_GET,
                 'new'    => Route::METHOD_GET,
                 'create' => Route::METHOD_POST
             );
-            $this->memberRoutes     = array(
+            $this->memberRoutes           = array(
                 'show'    => Route::METHOD_GET,
                 'edit'    => Route::METHOD_GET,
                 'update'  => Route::METHOD_PUT,
                 'destroy' => Route::METHOD_DELETE
             );
-            $this->unnamedRoutes    = array(
-                'index'   => true,
-                'create'  => true,
-                'show'    => true,
-                'update'  => true,
-                'destroy' => true
-            );
+            $this->unnamedRoutes['index'] = true;
 
             $this->parameters['controller'] = $this->camelize($pluralName);
         } else {
@@ -65,12 +64,6 @@ class Resource
                 'destroy' => Route::METHOD_DELETE
             );
             $this->memberRoutes     = array();
-            $this->unnamedRoutes    = array(
-                'create'  => true,
-                'show'    => true,
-                'update'  => true,
-                'destroy' => true
-            );
 
             $this->parameters['controller'] = $this->camelize($singularName);
         }
@@ -101,6 +94,8 @@ class Resource
     public function resource(Resource $resource)
     {
         $resource->setParent($this);
+
+        return $this;
     }
 
     public function setParent(Resource $parent)
@@ -188,7 +183,7 @@ class Resource
                 $router,
                 $pluralPathBase . $this->pluralName . '/' . $this->getIdToken(),
                 $pluralNameBase,
-                $this->singularName,
+                $pluralNameBase . $this->singularName,
                 $idPatterns
             );
             $firstUnnamedRouteName = $this->pluralName;
@@ -201,7 +196,7 @@ class Resource
             $router,
             $pathBase . $firstUnnamedRouteName,
             $nameBase,
-            $firstUnnamedRouteName,
+            $nameBase . $firstUnnamedRouteName,
             $idPatterns
         );
 
@@ -224,7 +219,6 @@ class Resource
         $firstUnnamedRouteName,
         $idPatterns
     ) {
-        $firstUnnamedRouteName = $namePrefix . $firstUnnamedRouteName;
         foreach ($routes as $name => $method) {
             $path = $basePath;
 
