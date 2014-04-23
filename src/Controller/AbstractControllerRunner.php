@@ -17,6 +17,9 @@ use Miny\HTTP\Response;
 
 abstract class AbstractControllerRunner
 {
+    /**
+     * @var EventDispatcher
+     */
     private $eventDispatcher;
 
     public function __construct(EventDispatcher $eventDispatcher)

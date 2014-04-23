@@ -62,14 +62,12 @@ class StringControllerRunner extends AbstractControllerRunner
             $class = sprintf($this->controllerPattern, ucfirst($class));
         }
         if (!class_exists($class)) {
-            $message = sprintf('Controller %s is not found', $class);
-            throw new MissingControllerException($message);
+            throw new MissingControllerException("Controller {$class} is not found");
         }
 
         $controller = $this->container->get($class);
         if (!$controller instanceof Controller) {
-            $message = sprintf('Class %s is not a valid controller', $class);
-            throw new InvalidControllerException($message);
+            throw new InvalidControllerException("Class {$class} is not a valid controller");
         }
 
         return $controller;

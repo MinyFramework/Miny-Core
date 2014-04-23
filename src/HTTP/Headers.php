@@ -46,13 +46,8 @@ class Headers implements Iterator, Serializable
         'warning',
         'www-authenticate'
     );
-    private $headers;
-    private $rawHeaders;
-
-    public function __construct()
-    {
-        $this->reset();
-    }
+    private $headers = array();
+    private $rawHeaders = array();
 
     public static function sanitize($name)
     {
@@ -140,7 +135,7 @@ class Headers implements Iterator, Serializable
     {
         $name = self::sanitize($name);
         if (!isset($this->headers[$name])) {
-            throw new OutOfBoundsException(sprintf('%s header is not set.', $name));
+            throw new OutOfBoundsException("{$name} header is not set.");
         }
         if (is_array($this->headers[$name]) && $join) {
             return implode(', ', $this->headers[$name]);

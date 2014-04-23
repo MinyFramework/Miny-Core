@@ -28,25 +28,31 @@ class Log extends AbstractLog
     /**
      * @var AbstractLogWriter
      */
-    private $writers;
+    private $writers = array(
+        Log::PROFILE => array(),
+        Log::DEBUG   => array(),
+        Log::INFO    => array(),
+        Log::WARNING => array(),
+        Log::ERROR   => array()
+    );
 
     /**
      * @var AbstractLogWriter[]
      */
-    private $allWriters;
+    private $allWriters = array();
 
     /**
      * @var Profiler[]
      */
-    private $profilers;
+    private $profilers = array();
 
-    private $messageNum;
-    private $flushLimit;
+    private $messageNum = 0;
+    private $flushLimit = 100;
 
     /**
      * @var LogMessage[]
      */
-    private $messageBuffer;
+    private $messageBuffer = array();
 
     public static function getLevelName($level)
     {
@@ -55,22 +61,6 @@ class Log extends AbstractLog
         }
 
         return "Unknown ({$level})";
-    }
-
-    public function __construct()
-    {
-        $this->writers       = array(
-            Log::PROFILE => array(),
-            Log::DEBUG   => array(),
-            Log::INFO    => array(),
-            Log::WARNING => array(),
-            Log::ERROR   => array()
-        );
-        $this->allWriters    = array();
-        $this->messageBuffer = array();
-        $this->profilers     = array();
-        $this->flushLimit    = 100;
-        $this->reset();
     }
 
     public function setFlushLimit($limit)

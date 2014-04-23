@@ -19,13 +19,11 @@ class ResponseHeaders extends Headers
     /**
      * @var array
      */
-    private $cookies;
+    private $cookies = array();
 
     public function __construct(AbstractHeaderSender $sender = null)
     {
         $this->sender  = $sender ? : new NativeHeaderSender;
-        $this->cookies = array();
-        parent::__construct();
     }
 
     public function setCookie($name, $value)

@@ -33,8 +33,6 @@ class Request
             new ReferenceParameterContainer($_COOKIE)
         );
 
-        $request->type = self::MASTER_REQUEST;
-
         foreach ($_SERVER as $key => $value) {
             if (strpos($key, 'HTTP_') === 0) {
                 $request->headers->set(substr($key, 5), $value);
@@ -58,7 +56,7 @@ class Request
     private $headers;
     private $method;
     private $ip;
-    private $type;
+    private $type = self::MASTER_REQUEST;
 
     public function __construct(
         $method,
@@ -115,16 +113,25 @@ class Request
         return $this->headers->has('x-requested-with', 'XMLHttpRequest');
     }
 
+    /**
+     * @return ParameterContainer
+     */
     public function get()
     {
         return $this->get;
     }
 
+    /**
+     * @return ParameterContainer
+     */
     public function post()
     {
         return $this->post;
     }
 
+    /**
+     * @return ParameterContainer
+     */
     public function cookie()
     {
         return $this->cookie;

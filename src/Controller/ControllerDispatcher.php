@@ -24,7 +24,7 @@ class ControllerDispatcher
     /**
      * @var AbstractControllerRunner[]
      */
-    private $runners;
+    private $runners = array();
 
     public function __construct(Container $container)
     {
@@ -59,8 +59,8 @@ class ControllerDispatcher
             }
         }
         if (!$runnerExecuted) {
-            $message = sprintf('Invalid controller set for path %s', $request->getPath());
-            throw new InvalidControllerException($message);
+            $path = $request->getPath();
+            throw new InvalidControllerException("Invalid controller set for path {$path}");
         }
 
         if ($oldResponse) {
