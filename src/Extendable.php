@@ -35,10 +35,10 @@ class Extendable
     public function addMethod($method, $callback)
     {
         if (!is_string($method)) {
-            throw new InvalidArgumentException('Parameter "method" must be string');
+            throw new InvalidArgumentException('$method must be string');
         }
         if (!is_callable($callback)) {
-            throw new InvalidArgumentException('Callback given for method ' . $method . ' is not callable');
+            throw new InvalidArgumentException("Callback given for method {$method} is not callable");
         }
         $this->plugins[$method] = $callback;
     }

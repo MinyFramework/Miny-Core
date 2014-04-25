@@ -70,6 +70,16 @@ class StringControllerRunner extends AbstractControllerRunner
             throw new InvalidControllerException("Class {$class} is not a valid controller");
         }
 
+        $controller->setRouter(
+            $this->container->get('\\Miny\\Router\\Router')
+        );
+        $controller->setRouteGenerator(
+            $this->container->get('\\Miny\\Router\\RouteGenerator')
+        );
+        $controller->setParameterContainer(
+            $this->container->get('\\Miny\\Factory\\ParameterContainer')
+        );
+
         return $controller;
     }
 

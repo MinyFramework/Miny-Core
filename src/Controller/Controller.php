@@ -9,6 +9,7 @@
 
 namespace Miny\Controller;
 
+use Miny\Extendable;
 use Miny\Factory\ParameterContainer;
 use Miny\HTTP\Request;
 use Miny\HTTP\Response;
@@ -16,15 +17,20 @@ use Miny\HTTP\ResponseHeaders;
 use Miny\Router\RouteGenerator;
 use Miny\Router\Router;
 
-abstract class Controller extends BaseController
+abstract class Controller extends Extendable
 {
+    /**
+     * @var ParameterContainer
+     */
+    protected $parameterContainer;
+
     /**
      * @var Router
      */
     private $router;
 
     /**
-     * @var
+     * @var RouteGenerator
      */
     private $routeGenerator;
 
@@ -38,19 +44,19 @@ abstract class Controller extends BaseController
      */
     private $headers;
 
-    /**
-     * @param Router             $router
-     * @param RouteGenerator     $routeGenerator
-     * @param ParameterContainer $parameterContainer
-     */
-    public function __construct(
-        Router $router,
-        RouteGenerator $routeGenerator,
-        ParameterContainer $parameterContainer
-    ) {
-        $this->router         = $router;
+    public function setRouter(Router $router)
+    {
+        $this->router = $router;
+    }
+
+    public function setRouteGenerator(RouteGenerator $routeGenerator)
+    {
         $this->routeGenerator = $routeGenerator;
-        parent::__construct($parameterContainer);
+    }
+
+    public function setParameterContainer(ParameterContainer $parameterContainer)
+    {
+        $this->parameterContainer = $parameterContainer;
     }
 
     /**
@@ -59,6 +65,16 @@ abstract class Controller extends BaseController
     public function getDefaultAction()
     {
         return 'index';
+    }
+
+    /**
+     * Shortcut to fetch a configuration value.
+     *
+     * @return mixed
+     */
+    public function getConfig()
+    {
+        return $this->parameterContainer->offsetGet(func_get_args());
     }
 
     public function setCode($code)

@@ -99,7 +99,7 @@ class Route
     public function setMethod($method)
     {
         if ($method < 1 || $method > self::METHOD_ALL) {
-            throw new BadMethodException('Invalid method mask ' . $method);
+            throw new BadMethodException("Invalid method mask {$method}");
         }
         $this->method = $method;
     }
