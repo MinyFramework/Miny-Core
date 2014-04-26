@@ -28,7 +28,7 @@ class Dispatcher
     /**
      * @var EventDispatcher
      */
-    private $events;
+    private $eventDispatcher;
 
     /**
      * @var ControllerDispatcher
@@ -46,7 +46,7 @@ class Dispatcher
         ControllerDispatcher $controllerDispatcher
     ) {
         $this->container            = $container;
-        $this->events               = $events;
+        $this->eventDispatcher      = $events;
         $this->controllerDispatcher = $controllerDispatcher;
     }
 
@@ -58,23 +58,12 @@ class Dispatcher
     public function dispatch(Request $request)
     {
         $oldRequest = $this->container->setInstance($request);
-        $event      = $this->events->raiseEvent(new FilterRequestEvent($request));
 
         ob_start();
-        if ($event->hasResponse()) {
-            $rsp = $event->getResponse();
-            if ($rsp instanceof Response) {
-                $response = $rsp;
-                $this->events->raiseEvent(new FilterResponseEvent($request, $response));
-            } elseif ($rsp instanceof Request) {
-                $this->guardAgainstInfiniteRedirection($request, $rsp);
-                $response = $this->dispatch($rsp);
-            }
-        }
-
-        if (!isset($response)) {
+        $response = $this->filterRequest($request);
+        if (!$response) {
             $response = $this->controllerDispatcher->runController($request);
-            $this->events->raiseEvent(new FilterResponseEvent($request, $response));
+            $this->eventDispatcher->raiseEvent(new FilterResponseEvent($request, $response));
         }
         $response->addContent(ob_get_clean());
 
@@ -96,5 +85,29 @@ class Dispatcher
         if ($rsp === $request) {
             throw new UnexpectedValueException('This redirection would lead to an infinite loop.');
         }
+    }
+
+    /**
+     * @param Request $request
+     *
+     * @return Response|bool
+     */
+    private function filterRequest(Request $request)
+    {
+        $event = $this->eventDispatcher->raiseEvent(new FilterRequestEvent($request));
+        if ($event->hasResponse()) {
+            $rsp = $event->getResponse();
+            if ($rsp instanceof Response) {
+                $this->eventDispatcher->raiseEvent(new FilterResponseEvent($request, $rsp));
+
+                return $rsp;
+            } elseif ($rsp instanceof Request) {
+                $this->guardAgainstInfiniteRedirection($request, $rsp);
+
+                return $this->dispatch($rsp);
+            }
+        }
+
+        return false;
     }
 }
