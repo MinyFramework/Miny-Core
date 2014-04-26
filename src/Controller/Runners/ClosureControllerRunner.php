@@ -11,26 +11,58 @@ namespace Miny\Controller\Runners;
 
 use Closure;
 use Miny\Controller\AbstractControllerRunner;
+use Miny\Controller\Events\ControllerFinishedEvent;
+use Miny\Controller\Events\ControllerLoadedEvent;
 use Miny\HTTP\Request;
 use Miny\HTTP\Response;
 
 class ClosureControllerRunner extends AbstractControllerRunner
 {
+    /**
+     * @var Closure
+     */
+    private $controller;
+
+    /**
+     * @var string
+     */
+    private $action;
 
     /**
      * @inheritdoc
      */
     public function canRun($controller)
     {
-        return $controller instanceof Closure;
+        if (!$controller instanceof Closure) {
+            return false;
+        }
+        $this->controller = $controller;
+
+        return true;
     }
 
-    protected function runController(
-        $controller,
-        $action,
-        Request $request,
-        Response $response
-    ) {
-        return $controller($request, $action, $response);
+    /**
+     * @inheritdoc
+     */
+    protected function initController(Request $request, Response $response)
+    {
+        $this->action = $request->get()->get('action', '');
+    }
+
+    protected function runController(Request $request, Response $response)
+    {
+        $controller = $this->controller;
+
+        return $controller($this->action, $request, $response);
+    }
+
+    protected function createLoadedEvent()
+    {
+        return new ControllerLoadedEvent($this->controller, $this->action);
+    }
+
+    protected function createFinishedEvent($retVal)
+    {
+        return new ControllerFinishedEvent($this->controller, $this->action, $retVal);
     }
 }

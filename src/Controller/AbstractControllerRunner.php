@@ -9,8 +9,6 @@
 
 namespace Miny\Controller;
 
-use Miny\Controller\Events\ControllerFinishedEvent;
-use Miny\Controller\Events\ControllerLoadedEvent;
 use Miny\Event\EventDispatcher;
 use Miny\HTTP\Request;
 use Miny\HTTP\Response;
@@ -22,6 +20,9 @@ abstract class AbstractControllerRunner
      */
     private $eventDispatcher;
 
+    /**
+     * @param EventDispatcher $eventDispatcher
+     */
     public function __construct(EventDispatcher $eventDispatcher)
     {
         $this->eventDispatcher = $eventDispatcher;
@@ -37,61 +38,38 @@ abstract class AbstractControllerRunner
     abstract public function canRun($controller);
 
     /**
-     * @param          $controller
      * @param Request  $request
      * @param Response $response
      *
      * @return Response
      */
-    public function run($controller, Request $request, Response $response)
+    public function run(Request $request, Response $response)
     {
-        $controller = $this->loadController($controller);
-        $action     = $this->getAction($request, $controller);
-
+        $this->initController($request, $response);
         $event = $this->eventDispatcher->raiseEvent(
-            new ControllerLoadedEvent($controller, $action)
+            $this->createLoadedEvent()
         );
 
         if ($event->isHandled() && $event->getResponse() instanceof Response) {
             return $event->getResponse();
         }
 
-        $retVal = $this->runController($controller, $action, $request, $response);
-
         $this->eventDispatcher->raiseEvent(
-            new ControllerFinishedEvent($controller, $action, $retVal)
+            $this->createFinishedEvent(
+                $this->runController($request, $response)
+            )
         );
 
         return $response;
     }
 
-    /**
-     * Loads the controller if the runner requires it, e.g. getAction needs an object.
-     *
-     * @param $controller
-     *
-     * @return mixed
-     */
-    protected function loadController($controller)
-    {
-        return $controller;
-    }
+    abstract protected function runController(Request $request, Response $response);
 
-    /**
-     * @param Request $request
-     * @param         $controller
-     *
-     * @return string
-     */
-    protected function getAction(Request $request, $controller)
-    {
-        return $request->get()->get('action', '');
-    }
+    protected abstract function createLoadedEvent();
 
-    abstract protected function runController(
-        $controller,
-        $action,
-        Request $request,
-        Response $response
-    );
+    protected abstract function createFinishedEvent($retVal);
+
+    protected function initController(Request $request, Response $response)
+    {
+    }
 }

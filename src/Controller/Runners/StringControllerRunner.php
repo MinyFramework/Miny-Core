@@ -11,8 +11,8 @@ namespace Miny\Controller\Runners;
 
 use Miny\Controller\AbstractControllerRunner;
 use Miny\Controller\Controller;
-use Miny\Controller\Exceptions\InvalidControllerException;
-use Miny\Controller\Exceptions\MissingControllerException;
+use Miny\Controller\Events\ControllerFinishedEvent;
+use Miny\Controller\Events\ControllerLoadedEvent;
 use Miny\Event\EventDispatcher;
 use Miny\Factory\Container;
 use Miny\HTTP\Request;
@@ -29,6 +29,16 @@ class StringControllerRunner extends AbstractControllerRunner
      * @var string
      */
     private $controllerPattern = '\\Application\\Controllers\\%sController';
+
+    /**
+     * @var Controller
+     */
+    private $controller;
+
+    /**
+     * @var string
+     */
+    private $action;
 
     public function __construct(Container $container, EventDispatcher $eventDispatcher)
     {
@@ -47,58 +57,59 @@ class StringControllerRunner extends AbstractControllerRunner
     /**
      * @inheritdoc
      */
-    public function canRun($controller)
+    public function canRun($class)
     {
-        return is_string($controller);
-    }
-
-    /**
-     * @inheritdoc
-     */
-    protected function loadController($class)
-    {
+        if (!is_string($class)) {
+            return false;
+        }
         if (!class_exists($class)) {
             // Try to guess the controller class if only a name is given
             $class = sprintf($this->controllerPattern, ucfirst($class));
-        }
-        if (!class_exists($class)) {
-            throw new MissingControllerException("Controller {$class} is not found");
-        }
 
+            if (!class_exists($class)) {
+                return false;
+            }
+        }
         $controller = $this->container->get($class);
         if (!$controller instanceof Controller) {
-            throw new InvalidControllerException("Class {$class} is not a valid controller");
+            return false;
         }
+        $this->controller = $controller;
 
-        $controller->setRouter(
-            $this->container->get('\\Miny\\Router\\Router')
-        );
-        $controller->setRouteGenerator(
-            $this->container->get('\\Miny\\Router\\RouteGenerator')
-        );
-        $controller->setParameterContainer(
-            $this->container->get('\\Miny\\Factory\\ParameterContainer')
-        );
-
-        return $controller;
-    }
-
-    protected function runController(
-        $controller,
-        $action,
-        Request $request,
-        Response $response
-    ) {
-        /** @var $controller Controller */
-        return $controller->run($action, $request, $response);
+        return true;
     }
 
     /**
      * @inheritdoc
      */
-    protected function getAction(Request $request, $controller)
+    protected function initController(Request $request, Response $response)
+    {
+        $this->controller->setRouter(
+            $this->container->get('\\Miny\\Router\\Router')
+        );
+        $this->controller->setRouteGenerator(
+            $this->container->get('\\Miny\\Router\\RouteGenerator')
+        );
+        $this->controller->setParameterContainer(
+            $this->container->get('\\Miny\\Factory\\ParameterContainer')
+        );
+
+        $this->action = $request->get()->get('action', $this->controller->getDefaultAction());
+    }
+
+    protected function runController(Request $request, Response $response)
     {
         /** @var $controller Controller */
-        return $request->get()->get('action', $controller->getDefaultAction());
+        return $this->controller->run($this->action, $request, $response);
+    }
+
+    protected function createLoadedEvent()
+    {
+        return new ControllerLoadedEvent($this->controller, $this->action);
+    }
+
+    protected function createFinishedEvent($retVal)
+    {
+        return new ControllerFinishedEvent($this->controller, $this->action, $retVal);
     }
 }
