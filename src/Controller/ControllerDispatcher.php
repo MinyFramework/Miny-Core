@@ -53,7 +53,7 @@ class ControllerDispatcher
         $runnerExecuted = false;
         foreach ($this->runners as $runner) {
             if ($runner->canRun($controller)) {
-                $response       = $runner->run($controller, $request, $response);
+                $response       = $runner->run($request, $response);
                 $runnerExecuted = true;
                 break;
             }
