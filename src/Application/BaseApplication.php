@@ -166,7 +166,7 @@ abstract class BaseApplication
             return;
         }
         if (!is_file($file)) {
-            throw new InvalidArgumentException('Configuration file not found: ' . $file);
+            throw new InvalidArgumentException("Configuration file not found: {$file}");
         }
         $this->log->write(
             Log::DEBUG,
@@ -176,7 +176,7 @@ abstract class BaseApplication
         );
         $config = include $file;
         if (!is_array($config)) {
-            throw new UnexpectedValueException('Invalid configuration file: ' . $file);
+            throw new UnexpectedValueException("Invalid configuration file: {$file}");
         }
         $this->parameterContainer->addParameters($config);
     }

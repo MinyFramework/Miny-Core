@@ -17,7 +17,6 @@ use Miny\Modules\Exceptions\BadModuleException;
 
 class ModuleHandler
 {
-
     /**
      * @var Module[]
      */
@@ -52,8 +51,13 @@ class ModuleHandler
         $this->log         = $log;
         $this->events      = $events;
 
-        $events->register(CoreEvents::BEFORE_RUN, array($this, 'processConditionalCallbacks'));
-        $events->register(CoreEvents::BEFORE_RUN, array($this, 'registerEventHandlers'));
+        $events->registerHandlers(
+            CoreEvents::BEFORE_RUN,
+            array(
+                array($this, 'processConditionalCallbacks'),
+                array($this, 'registerEventHandlers')
+            )
+        );
     }
 
     public function initialize()
@@ -90,12 +94,11 @@ class ModuleHandler
 
         $this->log->write(Log::DEBUG, 'ModuleHandler', 'Loading module: %s', $module);
 
-        $class        = sprintf('\\Modules\\%s\\Module', $module);
+        $class        = "\\Modules\\{$module}\\Module";
         $moduleObject = new $class($module, $this->application);
 
         if (!$moduleObject instanceof Module) {
-            $message = sprintf('Class %s does not extend Module class.', $class);
-            throw new BadModuleException($message);
+            throw new BadModuleException("Class {$class} does not extend Module class.");
         }
 
         $this->modules[$module] = $moduleObject;

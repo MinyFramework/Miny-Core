@@ -67,18 +67,16 @@ class EventDispatcher
         }
     }
 
-    public function registerEvents(array $events)
+    public function registerHandlers($event, array $handlers)
     {
-        foreach ($events as $event => $handlers) {
-            if (!isset($this->handlers[$event])) {
-                $this->handlers[$event] = array();
-            }
-            if (!is_array($handlers) || is_callable($handlers)) {
-                $this->handlers[$event][] = $this->ensureCallback($handlers, $event);
-            } else {
-                foreach ($handlers as $handler) {
-                    $this->handlers[$event][] = $this->ensureCallback($handler, $event);
-                }
+        if (!isset($this->handlers[$event])) {
+            $this->handlers[$event] = array();
+        }
+        if (!is_array($handlers) || is_callable($handlers)) {
+            $this->handlers[$event][] = $this->ensureCallback($handlers, $event);
+        } else {
+            foreach ($handlers as $handler) {
+                $this->handlers[$event][] = $this->ensureCallback($handler, $event);
             }
         }
     }

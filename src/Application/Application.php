@@ -54,16 +54,19 @@ class Application extends BaseApplication
         $eventHandlers = $container->get('\\Miny\\Application\\Handlers\\ApplicationEventHandlers');
 
         $events = $this->eventDispatcher;
-        $events->registerEvents(
+        $events->registerHandlers(
+            CoreEvents::FILTER_REQUEST,
             array(
-                CoreEvents::FILTER_REQUEST  => array(
-                    array($eventHandlers, 'logRequest'),
-                    array($eventHandlers, 'filterRoutes')
-                ),
-                CoreEvents::FILTER_RESPONSE => array(
-                    array($eventHandlers, 'setContentType'),
-                    array($eventHandlers, 'logResponse')
-                )
+                array($eventHandlers, 'logRequest'),
+                array($eventHandlers, 'filterRoutes')
+            )
+        );
+
+        $events->registerHandlers(
+            CoreEvents::FILTER_RESPONSE,
+            array(
+                array($eventHandlers, 'setContentType'),
+                array($eventHandlers, 'logResponse')
             )
         );
 
@@ -90,11 +93,10 @@ class Application extends BaseApplication
                 $events->register(CoreEvents::BEFORE_RUN, array($router, 'registerResources'));
             }
         );
-        $container->setConstructorArgument(
-            '\\Miny\\Router\\RouteGenerator',
-            1,
-            '@router:short_urls'
-        );
+
+        $routeGeneratorClass = '\\Miny\\Router\\RouteGenerator';
+        $container->setConstructorArgument($routeGeneratorClass, 1, '@router:short_urls');
+
         $container->addCallback(
             '\\Miny\\HTTP\\Session',
             function (Session $session) {

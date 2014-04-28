@@ -20,7 +20,7 @@ class AutoLoader
      * @var array[]
      */
     private $map = array();
-    private $maxNameSpaceLength;
+    private $maxNameSpaceLength = 0;
 
     /**
      * @param array $map
@@ -28,7 +28,6 @@ class AutoLoader
     public function __construct(array $map = array())
     {
         spl_autoload_register(array($this, 'load'));
-        $this->maxNameSpaceLength = 0;
         $this->register($map);
     }
 
