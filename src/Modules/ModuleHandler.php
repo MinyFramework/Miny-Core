@@ -12,6 +12,7 @@ namespace Miny\Modules;
 use Miny\Application\BaseApplication;
 use Miny\CoreEvents;
 use Miny\Event\EventDispatcher;
+use Miny\Log\AbstractLog;
 use Miny\Log\Log;
 use Miny\Modules\Exceptions\BadModuleException;
 
@@ -28,7 +29,7 @@ class ModuleHandler
     private $application;
 
     /**
-     * @var Log
+     * @var AbstractLog
      */
     private $log;
 
@@ -40,13 +41,10 @@ class ModuleHandler
     /**
      * @param BaseApplication $app
      * @param EventDispatcher $events
-     * @param Log             $log
+     * @param AbstractLog     $log
      */
-    public function __construct(
-        BaseApplication $app,
-        EventDispatcher $events,
-        Log $log
-    ) {
+    public function __construct(BaseApplication $app, EventDispatcher $events, AbstractLog $log)
+    {
         $this->application = $app;
         $this->log         = $log;
         $this->events      = $events;
@@ -110,8 +108,8 @@ class ModuleHandler
     public function processConditionalCallbacks()
     {
         foreach ($this->modules as $module) {
-            foreach ($module->getConditionalCallbacks() as $module_name => $runnable) {
-                if (isset($this->modules[$module_name])) {
+            foreach ($module->getConditionalCallbacks() as $moduleName => $runnable) {
+                if (isset($this->modules[$moduleName])) {
                     $runnable($this->application);
                 }
             }
@@ -121,14 +119,8 @@ class ModuleHandler
     public function registerEventHandlers()
     {
         foreach ($this->modules as $module) {
-            foreach ($module->eventHandlers() as $event_name => $handler) {
-                if (is_array($handler) && !is_callable($handler)) {
-                    foreach ($handler as $callback) {
-                        $this->events->register($event_name, $callback);
-                    }
-                } else {
-                    $this->events->register($event_name, $handler);
-                }
+            foreach ($module->eventHandlers() as $eventName => $handlers) {
+                $this->events->registerHandlers($eventName, $handlers);
             }
         }
     }
