@@ -67,7 +67,7 @@ class EventDispatcher
         }
     }
 
-    public function registerHandlers($event, array $handlers)
+    public function registerHandlers($event, $handlers)
     {
         if (!isset($this->handlers[$event])) {
             $this->handlers[$event] = array();
