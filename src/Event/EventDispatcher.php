@@ -34,7 +34,7 @@ class EventDispatcher
             }
         }
         if (!is_callable($handler)) {
-            throw new EventHandlerException('Handler is not callable for event ' . $event);
+            throw new EventHandlerException("Handler is not callable for event {$event}");
         }
 
         return $handler;
@@ -89,19 +89,17 @@ class EventDispatcher
     public function raiseEvent(Event $event)
     {
         $name = $event->getName();
-        if (!isset($this->handlers[$name])) {
-            return $event;
-        }
-
-        $parameters = $event->getParameters();
-        foreach ($this->handlers[$name] as $handler) {
-            $response = call_user_func_array($handler, $parameters);
-            if ($response !== null) {
-                $event->setResponse($response);
-                break;
+        if (isset($this->handlers[$name])) {
+            $parameters = $event->getParameters();
+            foreach ($this->handlers[$name] as $handler) {
+                $response = call_user_func_array($handler, $parameters);
+                if ($response !== null) {
+                    $event->setResponse($response);
+                    break;
+                }
             }
+            $event->setHandled();
         }
-        $event->setHandled();
 
         return $event;
     }
