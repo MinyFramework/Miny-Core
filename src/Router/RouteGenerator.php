@@ -95,6 +95,7 @@ class RouteGenerator
             $path .= (strpos($path, '?') === false) ? '?' : '&';
 
         } else {
+            // this forces path to be the first key
             $parameters = array('path' => $path) + $parameters;
             $path       = '?';
         }

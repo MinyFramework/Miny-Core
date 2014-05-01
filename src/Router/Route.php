@@ -21,15 +21,9 @@ class Route
 
     private $path;
     private $regexp;
-    private $parameterPatterns;
-    private $defaultValues;
+    private $parameterPatterns = array();
+    private $defaultValues = array();
     private $method;
-
-    public function __construct()
-    {
-        $this->parameterPatterns = array();
-        $this->defaultValues     = array();
-    }
 
     public function specify($placeholder, $pattern)
     {

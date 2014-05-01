@@ -96,12 +96,12 @@ abstract class Module
         return array();
     }
 
-    public function ifModule($module, $runnable)
+    public function ifModule($module, $callback)
     {
-        if (!is_callable($runnable)) {
-            throw new InvalidArgumentException('$runnable must be callable.');
+        if (!is_callable($callback)) {
+            throw new InvalidArgumentException('$callback must be callable.');
         }
-        $this->conditionalCallbacks[$module] = $runnable;
+        $this->conditionalCallbacks[$module] = $callback;
     }
 
     abstract public function init(BaseApplication $app);
