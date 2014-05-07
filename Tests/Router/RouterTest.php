@@ -169,4 +169,13 @@ class RouterTest extends \PHPUnit_Framework_TestCase
     {
         $this->router->getStaticByURI('route');
     }
+
+    public function testRegisterResourcesShouldAddResourceRoutes()
+    {
+        $this->router->resource('test', 'tests');
+        $this->router->resource('test2', 'tests2');
+        $this->assertCount(0, $this->router->getAll());
+        $this->router->registerResources();
+        $this->assertCount(14, $this->router->getAll());
+    }
 }
