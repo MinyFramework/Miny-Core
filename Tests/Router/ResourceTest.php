@@ -265,11 +265,13 @@ class ResourceTest extends \PHPUnit_Framework_TestCase
                 'foo'        => 'bar'
             )
         );
+        $resource->set('foobar', 'baz');
         $resource->register($this->router);
 
         $array = $this->router->get('resource')->getDefaultValues();
         $this->assertEquals('Foo', $array['controller']);
         $this->assertEquals('bar', $array['foo']);
+        $this->assertEquals('baz', $array['foobar']);
     }
 
     public function testMemberMethodsOfShallowNestedResourcesShouldNotBePrefixedWithParent()

@@ -8,6 +8,10 @@ class RouteMatcherTest extends \PHPUnit_Framework_TestCase
      * @var RouteMatcher
      */
     private $matcher;
+
+    /**
+     * @var \PHPUnit_Framework_MockObject_MockObject
+     */
     private $routerMock;
 
     public function setUp()
@@ -102,14 +106,21 @@ class RouteMatcherTest extends \PHPUnit_Framework_TestCase
         $this->assertFalse($this->matcher->match('path 50 name', Route::METHOD_GET));
     }
 
-    /**
-     * @return array
-     */
     private function createDynamicRoutes($num = 100)
     {
         $routes = array();
 
-        for ($i = 0; $i < $num; $i++) {
+        $route = new Route();
+
+        $route->setPath('path 0 {id} {other}');
+        $route->specify('id', '\d+');
+        $route->specify('other', '\d+');
+        $route->setRegexp('path 0 (\d+) (\d+)');
+
+        $route->setMethod(Route::METHOD_GET);
+
+        $routes[] = $route;
+        for ($i = 1; $i < $num; $i++) {
             $route = new Route();
 
             $route->setPath('path ' . $i . ' {id}');
