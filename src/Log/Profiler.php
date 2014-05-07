@@ -22,7 +22,7 @@ class Profiler
     private $log;
     private $category;
     private $name;
-    private $isRunning;
+    private $isRunning = false;
     private $time;
     private $memory;
     private $runs = 0;
