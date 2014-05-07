@@ -248,7 +248,7 @@ class Resource
      */
     public function set($key, $value = null)
     {
-        if (is_array($key)) {
+        if ($value === null) {
             $this->parameters = $key + $this->parameters;
         } else {
             $this->parameters[$key] = $value;
