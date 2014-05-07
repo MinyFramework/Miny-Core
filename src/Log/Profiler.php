@@ -14,7 +14,7 @@ use BadMethodCallException;
 class Profiler
 {
     /**
-     * @var Log
+     * @var AbstractLog
      */
     private $log;
     private $category;
@@ -24,7 +24,7 @@ class Profiler
     private $memory;
     private $runs;
 
-    public function __construct(Log $log, $category, $name)
+    public function __construct(AbstractLog $log, $category, $name)
     {
         $this->log      = $log;
         $this->category = $category;

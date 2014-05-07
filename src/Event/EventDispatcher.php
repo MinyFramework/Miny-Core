@@ -57,13 +57,20 @@ class EventDispatcher
     {
         $handler = $this->ensureCallback($handler, $event);
 
-        if (!isset($this->handlers[$event])) {
-            $this->handlers[$event] = array($handler);
-        } elseif ($place === null) {
-            $this->handlers[$event][] = $handler;
+        if ($place === null) {
+            if (!isset($this->handlers[$event])) {
+                $this->handlers[$event] = array($handler);
+            } else {
+                $this->handlers[$event][] = $handler;
+            }
         } else {
-            //insert handler to the given place
-            array_splice($this->handlers[$event], $place, 0, array($handler));
+            if (!isset($this->handlers[$event])) {
+                $this->handlers[$event] = array($place => $handler);
+            } elseif (!isset($this->handlers[$event][$place])) {
+                $this->handlers[$event][$place] = $handler;
+            } else {
+                array_splice($this->handlers[$event], $place, 0, array($handler));
+            }
         }
     }
 
@@ -91,6 +98,7 @@ class EventDispatcher
         $name = $event->getName();
         if (isset($this->handlers[$name])) {
             $parameters = $event->getParameters();
+            ksort($this->handlers[$name]);
             foreach ($this->handlers[$name] as $handler) {
                 $response = call_user_func_array($handler, $parameters);
                 if ($response !== null) {

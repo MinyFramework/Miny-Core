@@ -81,6 +81,29 @@ class EventDispatcherTest extends \PHPUnit_Framework_TestCase
         $this->object->raiseEvent(new Event('event'));
     }
 
+    public function testRegisterHandlersShouldBeAbleToRegisterASingleHandler()
+    {
+        $handler_factory = $this->handler_factory;
+        $this->expectOutputString('01');
+
+        $this->object->registerHandlers('event', $handler_factory(0));
+        $this->object->register('event', $handler_factory(1));
+
+        $this->object->raiseEvent(new Event('event'));
+    }
+
+    public function testRegisterShouldInsertHandlersToTheAppropriatePlaces()
+    {
+        $handler_factory = $this->handler_factory;
+        $this->expectOutputString('012');
+
+        $this->object->register('event', $handler_factory(2), 5);
+        $this->object->register('event', $handler_factory(1), 4);
+        $this->object->register('event', $handler_factory(0), 1);
+
+        $this->object->raiseEvent(new Event('event'));
+    }
+
     /**
      * @expectedException \Miny\Event\Exceptions\EventHandlerException
      */
