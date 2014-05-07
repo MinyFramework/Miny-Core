@@ -13,6 +13,9 @@ use BadMethodCallException;
 
 class Profiler
 {
+    private static $pattern = 'Profiling %s: Run #: %d, Time: %s ms, Memory: %s';
+    private static $units = array(' B', ' kiB', ' MiB', ' GiB', ' TiB', ' PiB');
+
     /**
      * @var AbstractLog
      */
@@ -22,14 +25,13 @@ class Profiler
     private $isRunning;
     private $time;
     private $memory;
-    private $runs;
+    private $runs = 0;
 
     public function __construct(AbstractLog $log, $category, $name)
     {
         $this->log      = $log;
         $this->category = $category;
         $this->name     = $name;
-        $this->runs     = 0;
     }
 
     public function start()
@@ -51,17 +53,14 @@ class Profiler
 
     private function getMessage()
     {
-        $time    = number_format((microtime(true) - $this->time) * 1000, 3);
-        $memory  = $this->normalizeMemory(memory_get_usage(true) - $this->memory);
-        $pattern = 'Profiling %s: Run #: %d, Time: %s ms, Memory: %s';
+        $time   = number_format((microtime(true) - $this->time) * 1000, 3);
+        $memory = $this->normalizeMemory(memory_get_usage(true) - $this->memory);
 
-        return sprintf($pattern, $this->name, $this->runs, $time, $memory);
+        return sprintf(self::$pattern, $this->name, $this->runs, $time, $memory);
     }
 
     private function normalizeMemory($memory)
     {
-        static $units = array(' B', ' kiB', ' MiB', ' GiB', ' TiB', ' PiB');
-
         if ($memory === 0) {
             $value = 0;
             $power = 0;
@@ -70,6 +69,6 @@ class Profiler
             $value = round($memory / pow(1024, $power), 2);
         }
 
-        return $value . $units[$power];
+        return $value . self::$units[$power];
     }
 }
