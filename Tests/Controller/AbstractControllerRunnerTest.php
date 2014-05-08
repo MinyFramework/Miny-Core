@@ -19,6 +19,10 @@ class AbstractControllerRunnerTest extends \PHPUnit_Framework_TestCase
      * @var \PHPUnit_Framework_MockObject_MockObject
      */
     private $eventDispatcher;
+
+    /**
+     * @var \PHPUnit_Framework_MockObject_MockObject|AbstractControllerRunner
+     */
     private $runner;
 
     public function setUp()
@@ -31,7 +35,12 @@ class AbstractControllerRunnerTest extends \PHPUnit_Framework_TestCase
 
         $this->runner = $this->getMockForAbstractClass(
             '\\Miny\\Controller\\AbstractControllerRunner',
-            array($this->eventDispatcher)
+            array($this->eventDispatcher),
+            'ControllerRunnerStub',
+            true,
+            true,
+            true,
+            array('initController')
         );
         $this->runner->expects($this->any())
             ->method('createLoadedEvent')
@@ -46,6 +55,29 @@ class AbstractControllerRunnerTest extends \PHPUnit_Framework_TestCase
                     }
                 )
             );
+    }
+
+    public function testInitControllerIsCalled()
+    {
+        $request  = new Request('GET', '');
+        $response = new Response;
+
+        $this->runner->expects($this->once())
+            ->method('initController')
+            ->with(
+                $this->callback(
+                    function ($requestArg) use ($request) {
+                        return $requestArg === $request;
+                    }
+                ),
+                $this->callback(
+                    function ($responseArg) use ($response) {
+                        return $responseArg === $response;
+                    }
+                )
+            );
+
+        $this->runner->run($request, $response);
     }
 
     public function testEventsAreFired()
