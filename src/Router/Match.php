@@ -15,6 +15,10 @@ class Match
      * @var Route
      */
     private $route;
+
+    /**
+     * @var array
+     */
     private $parameters;
 
     /**

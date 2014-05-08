@@ -124,7 +124,7 @@ class Route
      */
     public function set($key, $value = null)
     {
-        if (is_array($key)) {
+        if ($value === null) {
             $this->defaultValues = $key + $this->defaultValues;
         } else {
             $this->defaultValues[$key] = $value;

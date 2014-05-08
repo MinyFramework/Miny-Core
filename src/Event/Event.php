@@ -25,7 +25,7 @@ class Event
         $this->name = $name;
         $parameters = array_slice(func_get_args(), 1);
 
-        if (count($parameters) == 1 && is_array($parameters[0])) {
+        if (func_num_args() === 2 && is_array($parameters[0])) {
             $this->parameters = $parameters[0];
         } else {
             $this->parameters = $parameters;

@@ -75,8 +75,8 @@ abstract class BaseApplication
 
         if ($autoLoader === null) {
             $autoLoader = new AutoLoader(array(
-                '\Application' => '.',
-                '\Modules'     => './vendor/miny/Modules'
+                '\\Application' => '.',
+                '\\Modules'     => './vendor/miny/Modules'
             ));
         }
         $parameterContainer = new ParameterContainer(array(

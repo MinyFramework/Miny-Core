@@ -10,36 +10,61 @@ class Resource
     private $parent;
 
     /**
-     * @var bool
+     * @var string
      */
-    private $isPlural;
+    private $singularName;
 
     /**
      * @var string
      */
-    private $singularName;
     private $pluralName;
 
+    /**
+     * @var array
+     */
     private $collectionRoutes;
+
+    /**
+     * @var array
+     */
     private $memberRoutes;
+
+    /**
+     * @var array
+     */
     private $unnamedRoutes = array(
         'create'  => true,
         'show'    => true,
         'update'  => true,
         'destroy' => true
     );
+
+    /**
+     * @var string
+     */
     private $idPattern = '\d+';
+
+    /**
+     * @var bool
+     */
     private $isParent = false;
+
+    /**
+     * @var array
+     */
     private $parameters = array();
+
+    /**
+     * @var bool
+     */
     private $shallow = false;
 
     public function __construct($singularName, $pluralName = null)
     {
         $this->singularName = $singularName;
         $this->pluralName   = $pluralName;
-        $this->isPlural     = $pluralName !== null;
 
-        if ($this->isPlural) {
+        if ($pluralName !== null) {
             $this->collectionRoutes       = array(
                 'index'  => Route::METHOD_GET,
                 'new'    => Route::METHOD_GET,
@@ -52,8 +77,7 @@ class Resource
                 'destroy' => Route::METHOD_DELETE
             );
             $this->unnamedRoutes['index'] = true;
-
-            $this->parameters['controller'] = $this->camelize($pluralName);
+            $controllerName               = $pluralName;
         } else {
             $this->collectionRoutes = array(
                 'new'     => Route::METHOD_GET,
@@ -64,9 +88,10 @@ class Resource
                 'destroy' => Route::METHOD_DELETE
             );
             $this->memberRoutes     = array();
-
-            $this->parameters['controller'] = $this->camelize($singularName);
+            $controllerName         = $singularName;
         }
+
+        $this->parameters['controller'] = $this->camelize($controllerName);
     }
 
     private function camelize($str)
@@ -126,7 +151,7 @@ class Resource
 
     public function member($name, $method)
     {
-        if ($this->isPlural) {
+        if ($this->pluralName !== null) {
             unset($this->unnamedRoutes[$name]);
             $this->memberRoutes[$name] = $method;
         }
@@ -160,7 +185,7 @@ class Resource
         $idPatterns = array();
         $parent     = $this->parent;
         while ($parent) {
-            if ($parent->isPlural) {
+            if ($parent->pluralName !== null) {
                 $pathBase .= $parent->pluralName . '/' . $parent->getIdToken() . '/';
                 $idPatterns[$parent->singularName . '_id'] = $parent->idPattern;
             } else {
