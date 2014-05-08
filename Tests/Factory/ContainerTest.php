@@ -49,7 +49,18 @@ class ContainerTest extends \PHPUnit_Framework_TestCase
 
     public function setUp()
     {
-        $this->container = new Container;
+        $mock = $this->getMock(
+            '\\Miny\\Factory\\LinkResolver',
+            array('resolveReferences'),
+            array(),
+            'MockLinkResolver',
+            false
+        );
+        $mock->expects($this->any())
+            ->method('resolveReferences')
+            ->will($this->returnArgument(0));
+
+        $this->container = new Container($mock);
     }
 
     public function testThatAliasIsSet()

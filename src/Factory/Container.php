@@ -34,7 +34,7 @@ class Container
     private $objects;
 
     /**
-     * @var AbstractLinkResolver
+     * @var LinkResolver
      */
     private $linkResolver;
 
@@ -44,11 +44,10 @@ class Container
     private $callbacks = array();
 
     /**
-     * @param AbstractLinkResolver $resolver
+     * @param LinkResolver $resolver
      */
-    public function __construct(AbstractLinkResolver $resolver = null)
+    public function __construct(LinkResolver $resolver)
     {
-        $resolver           = $resolver ? : new NullResolver();
         $this->linkResolver = $resolver;
 
         $this->objects = array(

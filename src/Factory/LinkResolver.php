@@ -9,7 +9,7 @@
 
 namespace Miny\Factory;
 
-class LinkResolver extends AbstractLinkResolver
+class LinkResolver
 {
     /**
      * @var ParameterContainer
