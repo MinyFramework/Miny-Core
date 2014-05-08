@@ -245,33 +245,33 @@ class Container
     }
 
     /**
-     * @param string $concrete
+     * @param string $class
      * @param array  $parameters
      *
      * @return object
      * @throws InvalidArgumentException
      */
-    private function instantiate($concrete, array $parameters = array())
+    private function instantiate($class, array $parameters = array())
     {
-        if ($concrete instanceof Closure) {
-            return $concrete($this, $parameters);
+        if ($class instanceof Closure) {
+            return $class($this, $parameters);
         }
-        $reflector = new ReflectionClass($concrete);
+        $reflector = new ReflectionClass($class);
 
         if (!$reflector->isInstantiable()) {
-            throw new InvalidArgumentException("Class {$concrete} is not instantiable.");
+            throw new InvalidArgumentException("Class {$class} can not be instantiated.");
         }
 
         $constructor = $reflector->getConstructor();
 
         if ($constructor === null) {
-            return new $concrete;
+            return new $class;
         }
 
         $constructorArgs = $constructor->getParameters();
 
         if (empty($constructorArgs)) {
-            return new $concrete;
+            return new $class;
         }
 
         $arguments = $this->resolveDependencies($constructorArgs, $parameters);
