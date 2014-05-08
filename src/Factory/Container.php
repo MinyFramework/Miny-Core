@@ -14,6 +14,7 @@ use InvalidArgumentException;
 use OutOfBoundsException;
 use ReflectionClass;
 use ReflectionParameter;
+use RuntimeException;
 
 class Container
 {
@@ -63,9 +64,6 @@ class Container
         $abstract = ltrim($abstract, '\\');
         if (is_string($concrete)) {
             $concrete = ltrim($concrete, '\\');
-            if ($abstract === $concrete) {
-                return;
-            }
         }
         $this->aliases[$abstract] = $concrete;
     }
@@ -140,9 +138,6 @@ class Container
     {
         $abstract = ltrim($abstract, '\\');
         $concrete = $this->findMostConcreteDefinition($abstract);
-        if (!is_string($concrete)) {
-            return array();
-        }
         if (!isset($this->constructorArguments[$concrete])) {
             $this->constructorArguments[$concrete] = array();
         }
@@ -190,19 +185,20 @@ class Container
         $abstract = ltrim($abstract, '\\');
         // try to find the constructor arguments for the most concrete definition
         $concrete = $this->findMostConcreteDefinition($abstract);
-        if (is_string($concrete)) {
-            if (isset($this->constructorArguments[$concrete])) {
-                $parameters = $parameters + $this->constructorArguments[$concrete];
-            }
-            $key = $concrete;
-        } else {
-            $key = $abstract;
+
+        if (isset($this->constructorArguments[$concrete])) {
+            $parameters = $parameters + $this->constructorArguments[$concrete];
         }
 
-        if (isset($this->objects[$key]) && !$forceNew) {
-            return $this->objects[$key];
+        if (isset($this->objects[$concrete]) && !$forceNew) {
+            return $this->objects[$concrete];
         }
 
+        $key = $concrete;
+        if (isset($this->aliases[$concrete])) {
+            // $concrete is not a string here
+            $concrete = $this->aliases[$concrete];
+        }
         $object = $this->instantiate($concrete, $parameters);
         $this->callCallbacks($key, $object);
 
@@ -229,17 +225,17 @@ class Container
     /**
      * @param $class
      *
+     * @throws RuntimeException
      * @return string
      */
     private function findMostConcreteDefinition($class)
     {
-        if (!is_string($class)) {
-            return $class;
-        }
-        $classVarIsString = true;
-        while ($classVarIsString && isset($this->aliases[$class])) {
-            $class            = $this->aliases[$class];
-            $classVarIsString = is_string($class);
+        $visited = array();
+        while (isset($this->aliases[$class]) && is_string($this->aliases[$class])) {
+            if(isset($visited[$class])) {
+                throw new RuntimeException("Circular aliases detected for class {$class}.");
+            }
+            $visited[$class] = true;
         }
 
         return $class;
