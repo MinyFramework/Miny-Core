@@ -106,16 +106,16 @@ class Resource
         return $this;
     }
 
-    public function except($name)
+    public function except($except)
     {
-        $only                   = array_flip(func_get_args());
-        $this->collectionRoutes = array_diff_key($this->collectionRoutes, $only);
-        $this->memberRoutes     = array_diff_key($this->memberRoutes, $only);
+        $except                 = array_flip(func_get_args());
+        $this->collectionRoutes = array_diff_key($this->collectionRoutes, $except);
+        $this->memberRoutes     = array_diff_key($this->memberRoutes, $except);
 
         return $this;
     }
 
-    public function only($name)
+    public function only($only)
     {
         $only                   = array_flip(func_get_args());
         $this->collectionRoutes = array_intersect_key($this->collectionRoutes, $only);

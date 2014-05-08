@@ -17,13 +17,16 @@ class ParameterContainer extends AbstractConfigurationTree
     /**
      * @var array
      */
-    protected $parameters = array();
-    private $links;
+    protected $parameters;
+
+    /**
+     * @var array
+     */
+    private $links = array();
 
     public function __construct(array $params = array())
     {
         $this->parameters = $params;
-        $this->links      = array();
     }
 
     /**

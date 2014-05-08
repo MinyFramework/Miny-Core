@@ -71,9 +71,9 @@ class Container
 
     /**
      * @param string $concrete
-     * @param mixed  $argument
+     * @param        mixed ...  $arguments
      */
-    public function addConstructorArguments($concrete, $argument /*, ...$arguments */)
+    public function addConstructorArguments($concrete /*, ...$arguments */)
     {
         $concrete = ltrim($concrete, '\\');
 
