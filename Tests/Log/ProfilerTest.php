@@ -102,9 +102,7 @@ class ProfilerTest extends \PHPUnit_Framework_TestCase
 
         $this->profiler->start();
         //this takes a considerable amount of memory
-        $str = str_repeat('Hello', 42000);
+        $this->str = str_repeat('Hello Miny', 420000);
         $this->profiler->stop();
-
-        unset($str);
     }
 }

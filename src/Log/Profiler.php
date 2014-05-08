@@ -37,7 +37,7 @@ class Profiler
     public function start()
     {
         $this->time      = microtime(true);
-        $this->memory    = memory_get_usage();
+        $this->memory    = memory_get_usage(true);
         $this->isRunning = true;
         $this->runs++;
     }
@@ -54,7 +54,7 @@ class Profiler
     private function getMessage()
     {
         $time   = number_format((microtime(true) - $this->time) * 1000, 3);
-        $memory = $this->normalizeMemory(memory_get_usage() - $this->memory);
+        $memory = $this->normalizeMemory(memory_get_usage(true) - $this->memory);
 
         return sprintf(self::$pattern, $this->name, $this->runs, $time, $memory);
     }
