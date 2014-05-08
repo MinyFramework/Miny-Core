@@ -58,6 +58,12 @@ class ContainerTest extends \PHPUnit_Framework_TestCase
         $this->assertEquals('FooClass', $this->container->getAlias('foobar'));
     }
 
+    public function testThatAliasIsInstantiated()
+    {
+        $this->container->addAlias('foobar', '\\stdClass');
+        $this->assertInstanceOf('\\stdClass', $this->container->get('foobar'));
+    }
+
     public function testThatConstructorArgumentsAreSet()
     {
         $this->container->addConstructorArguments('fooBar', 'a', 'b');

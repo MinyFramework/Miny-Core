@@ -232,7 +232,8 @@ class Container
     {
         $visited = array();
         while (isset($this->aliases[$class]) && is_string($this->aliases[$class])) {
-            if(isset($visited[$class])) {
+            $class = $this->aliases[$class];
+            if (isset($visited[$class])) {
                 throw new RuntimeException("Circular aliases detected for class {$class}.");
             }
             $visited[$class] = true;
