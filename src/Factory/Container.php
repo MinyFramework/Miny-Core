@@ -31,7 +31,7 @@ class Container
     /**
      * @var array
      */
-    private $objects = array();
+    private $objects;
 
     /**
      * @var AbstractLinkResolver
@@ -51,8 +51,10 @@ class Container
         $resolver           = $resolver ? : new NullResolver();
         $this->linkResolver = $resolver;
 
-        $this->setInstance($this, __CLASS__);
-        $this->setInstance($resolver);
+        $this->objects = array(
+            __CLASS__            => $this,
+            get_class($resolver) => $resolver
+        );
     }
 
     /**
