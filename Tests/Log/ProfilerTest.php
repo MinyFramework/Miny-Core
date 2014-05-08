@@ -79,4 +79,32 @@ class ProfilerTest extends \PHPUnit_Framework_TestCase
         $this->profiler->start();
         $this->profiler->stop();
     }
+
+    public function testProfilerLogsMemoryUsage()
+    {
+        $this->log
+            ->expects($this->at(0))
+            ->method('write')
+            ->with(
+                $this->equalTo(Log::PROFILE),
+                $this->equalTo('test'),
+                $this->logicalAnd(
+                    $this->matches(
+                        'Profiling test name: Run #: 1, Time: %f ms, Memory: %s'
+                    ),
+                    $this->logicalNot(
+                        $this->matches(
+                            'Profiling test name: Run #: 1, Time: %f ms, Memory: 0 B'
+                        )
+                    )
+                )
+            );
+
+        $this->profiler->start();
+        //this takes a considerable amount of memory
+        $str = str_repeat('Hello', 42000);
+        $this->profiler->stop();
+
+        unset($str);
+    }
 }

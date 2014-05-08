@@ -15,7 +15,11 @@ class FileWriter extends AbstractLogWriter
      * @var string
      */
     private $path;
-    private $buffer;
+
+    /**
+     * @var string
+     */
+    private $buffer = '';
 
     public function __construct($path)
     {
@@ -23,18 +27,15 @@ class FileWriter extends AbstractLogWriter
         if (!is_dir($path)) {
             mkdir($path, 0777, true);
         }
-        $this->buffer = '';
     }
 
     public function add(LogMessage $message)
     {
-        $this->buffer .= sprintf(
-            "[%s] %s: %s - %s\n",
-            date('Y-m-d H:i:s', $message->getTime()),
-            $this->getLevelName($message->getLevel()),
-            $message->getCategory(),
-            $message->getMessage()
-        );
+        $date      = date('Y-m-d H:i:s', $message->getTime());
+        $levelName = $this->getLevelName($message->getLevel());
+        $category  = $message->getCategory();
+        $text      = $message->getMessage();
+        $this->buffer .= "[{$date}] {$levelName}: {$category} - {$text}\n";
     }
 
     public function commit()
