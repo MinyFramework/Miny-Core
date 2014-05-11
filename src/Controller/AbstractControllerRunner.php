@@ -43,7 +43,7 @@ abstract class AbstractControllerRunner
      *
      * @return Response
      */
-    public final function run(Request $request, Response $response)
+    public function run(Request $request, Response $response)
     {
         $this->initController($request, $response);
         $event = $this->eventDispatcher->raiseEvent(
