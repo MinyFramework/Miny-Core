@@ -30,6 +30,7 @@ class LinkResolver
     public function resolveReferences($argument)
     {
         if (is_array($argument)) {
+            //If $argument is an array, resolve all values recursively
             $return = array();
             foreach ($argument as $k => $arg) {
                 $return[$k] = $this->resolveReferences($arg);

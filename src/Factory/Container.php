@@ -62,8 +62,10 @@ class Container
      */
     public function addAlias($abstract, $concrete)
     {
+        //Strip all leading backslashes
         $abstract = ltrim($abstract, '\\');
         if (is_string($concrete)) {
+            //Strip all leading backslashes if $concrete is a class name
             $concrete = ltrim($concrete, '\\');
         }
         $this->aliases[$abstract] = $concrete;
@@ -75,6 +77,7 @@ class Container
      */
     public function addConstructorArguments($concrete /*, ...$arguments */)
     {
+        //Strip all leading backslashes
         $concrete = ltrim($concrete, '\\');
 
         // filter the nulls and set the arguments
@@ -93,6 +96,7 @@ class Container
      */
     public function setConstructorArgument($concrete, $position, $argument)
     {
+        //Strip all leading backslashes
         $concrete = ltrim($concrete, '\\');
         if (!isset($this->constructorArguments[$concrete])) {
             $this->constructorArguments[$concrete] = array($position => $argument);
@@ -106,6 +110,7 @@ class Container
         if (!is_callable($callback)) {
             throw new InvalidArgumentException('$callback is not callable.');
         }
+        //Strip all leading backslashes
         $concrete = ltrim($concrete, '\\');
         if (!isset($this->callbacks[$concrete])) {
             $this->callbacks[$concrete] = array($callback);
@@ -122,6 +127,7 @@ class Container
      */
     public function getAlias($abstract)
     {
+        //Strip all leading backslashes
         $abstract = ltrim($abstract, '\\');
         if (!isset($this->aliases[$abstract])) {
             throw new OutOfBoundsException("{$abstract} is not registered.");
@@ -137,6 +143,7 @@ class Container
      */
     public function getConstructorArguments($abstract)
     {
+        //Strip all leading backslashes
         $abstract = ltrim($abstract, '\\');
         $concrete = $this->findMostConcreteDefinition($abstract);
         if (!isset($this->constructorArguments[$concrete])) {
@@ -159,16 +166,20 @@ class Container
             throw new InvalidArgumentException('$object must be an object');
         }
         if ($abstract === null) {
+            //If $abstract is not specified, use $objects class
             $abstract = get_class($object);
         } else {
+            //Strip all leading backslashes
             $abstract = ltrim($abstract, '\\');
         }
         $concrete = $this->findMostConcreteDefinition($abstract);
         if (isset($this->objects[$concrete])) {
+            //If this class already has an instance, we'll return the old object
             $old = $this->objects[$concrete];
         } else {
             $old = false;
         }
+        //Store the object
         $this->objects[$concrete] = $object;
 
         return $old;
@@ -183,15 +194,19 @@ class Container
      */
     public function get($abstract, array $parameters = array(), $forceNew = false)
     {
+        //Strip all leading backslashes
         $abstract = ltrim($abstract, '\\');
-        // try to find the constructor arguments for the most concrete definition
+
+        //Try to find the constructor arguments for the most concrete definition
         $concrete = $this->findMostConcreteDefinition($abstract);
 
+        //If there are predefined constructor arguments, merge them with out parameter array
         if (isset($this->constructorArguments[$concrete])) {
             $parameters = $parameters + $this->constructorArguments[$concrete];
         }
 
         if (isset($this->objects[$concrete]) && !$forceNew) {
+            //Return the stored instance if a new one is not forced
             return $this->objects[$concrete];
         }
 
@@ -204,6 +219,7 @@ class Container
         $this->callCallbacks($key, $object);
 
         if (!$forceNew) {
+            //If the object is forced to be new, it will not be stored
             $this->objects[$key] = $object;
         }
 
@@ -231,15 +247,22 @@ class Container
      */
     private function findMostConcreteDefinition($class)
     {
+        //This array holds the classes that were processed
         $visited = array();
+
+        //One can specify an alias of an alias (or rather, override a class definition by an other)
+        //so we have to traverse this structure
         while (isset($this->aliases[$class]) && is_string($this->aliases[$class])) {
             $class = $this->aliases[$class];
             if (isset($visited[$class])) {
+                //If $class was already visited, we have a circular alias situation that can't be resolved
                 throw new RuntimeException("Circular aliases detected for class {$class}.");
             }
             $visited[$class] = true;
         }
 
+        //At this point, $class is either the last alias (it is the most concrete class name registered)
+        //or it is not a string. This can happen when a class has a Closure initializer.
         return $class;
     }
 
@@ -258,23 +281,35 @@ class Container
         $reflector = new ReflectionClass($class);
 
         if (!$reflector->isInstantiable()) {
-            throw new InvalidArgumentException("Class {$class} can not be instantiated.");
+            //Try to give a descriptive exception message
+            if ($reflector->isAbstract()) {
+                throw new InvalidArgumentException("Class {$class} is abstract and can not be instantiated.");
+            } elseif ($reflector->isInterface()) {
+                throw new InvalidArgumentException("{$class} is an interface can not be instantiated.");
+            } else {
+                throw new InvalidArgumentException("Class {$class} can not be instantiated.");
+            }
         }
 
         $constructor = $reflector->getConstructor();
 
         if ($constructor === null) {
+            //Since the class has no constructor, it can not be instantiated with ReflectionClass
             return new $class;
         }
 
         $constructorArgs = $constructor->getParameters();
 
         if (empty($constructorArgs)) {
+            //If the class has no constructor arguments, it is cheaper to instantiate it directly
+            //Although this has the downside of disallowing variable sized argument lists if
+            //no arguments are required by the constructor signature.
             return new $class;
         }
 
         $arguments = $this->resolveDependencies($constructorArgs, $parameters);
         if (!empty($parameters)) {
+            //We need to sort the arguments because ReflectionClass passes them by order, not by index
             ksort($arguments);
         }
 
