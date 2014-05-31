@@ -7,18 +7,22 @@ Miny is licensed under the MIT License.
 
 Requires
 ----------
-Any supported version of PHP (5.3.3 or newer)
-Composer
+
+ * Any supported version of PHP (5.3.3 or newer)
+ * Composer
 
 Installation, basic usage
 ----------
 An empty application template is available [here](http://github.com/MinyFramework/AppSkeleton)
+
+If you wish to use the default logging options, create a writable directory called `/logs`.
 
 Environments
 ---------
 There are three separate environments available: development and production. The current environment
 can be set via the Application class' constructor and determines which configuration files should be
 used. By default the environment setting also determines if debug-level logging is enabled.
+
 The default environment is the production environment.
 
 ### Defining the environment to be used ###
@@ -37,7 +41,7 @@ The available constants are:
 Configuration
 ---------
 Configuration files are pure PHP files containing an array of configuration options.
-Configuration files are located in the `config` directory of your application.
+Configuration files are located in the `/config` directory of your application.
 
 Four different configuration files can be defined:
 
