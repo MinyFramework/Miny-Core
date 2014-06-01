@@ -56,12 +56,7 @@ class Headers implements Iterator, Serializable
 
     private function isHeaderSimple($name)
     {
-        return !(isset($this->headers[$name]) && in_array($name, self::$multipleValuesAllowed));
-    }
-
-    private function canHeaderBeUnset($name, $value)
-    {
-        return $value === null || $this->headers[$name] === $value;
+        return !isset($this->headers[$name]) || !in_array($name, self::$multipleValuesAllowed);
     }
 
     public function addHeaders(Headers $headers)
@@ -91,7 +86,7 @@ class Headers implements Iterator, Serializable
         if (!isset($this->headers[$name])) {
             return;
         }
-        if ($this->canHeaderBeUnset($name, $value)) {
+        if ($value === null || $this->headers[$name] === $value) {
             unset($this->headers[$name]);
 
             return;
@@ -153,7 +148,7 @@ class Headers implements Iterator, Serializable
     {
         $return = '';
         foreach ($this as $header => $value) {
-            $return .= $header . ': ' . $value . "\n";
+            $return .= "{$header}: {$value}\n";
         }
         foreach ($this->rawHeaders as $header) {
             $return .= $header . "\n";
