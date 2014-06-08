@@ -62,6 +62,10 @@ Using the Inversion of Control container
 Miny comes with a powerful Inversion of Control (IoC) container called `Container`. It can be used to
 create object instances with their dependencies automatically injected.
 
+### Obtaining the Container ###
+The Container instance can be obtained by calling `$app->getContainer()`.
+
+### Basic usage ###
 Instantiating a class is as easy as calling the `get` method and passing the class name.
 
 ```php
