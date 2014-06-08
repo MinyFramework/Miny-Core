@@ -11,6 +11,8 @@ namespace Miny\Application\Handlers;
 
 use ErrorException;
 use Exception;
+use Miny\Application\Events\UncaughtExceptionEvent;
+use Miny\Event\EventDispatcher;
 use Miny\Log\Log;
 
 class ErrorHandlers
@@ -27,15 +29,38 @@ class ErrorHandlers
     /**
      * @var Log
      */
-    protected $log;
+    private $log;
 
-    public function __construct(Log $log)
+    /**
+     * @var EventDispatcher
+     */
+    private $eventDispatcher;
+
+    public function __construct(Log $log, EventDispatcher $eventDispatcher)
     {
-        $this->log = $log;
-        set_error_handler(array($this, 'logError'));
+        $this->log             = $log;
+        $this->eventDispatcher = $eventDispatcher;
     }
 
-    public function logError($errNo, $errStr, $errFile, $errLine)
+    public function handleExceptions(Exception $e)
+    {
+        $this->log->write(
+            Log::ERROR,
+            get_class($e),
+            "%s \n Trace: %s",
+            $e->getMessage(),
+            $e->getTraceAsString()
+        );
+        $event = $this->eventDispatcher->raiseEvent(
+            new UncaughtExceptionEvent($e)
+        );
+        if (!$event->isHandled()) {
+            // Rethrow the exception that we did not handle.
+            throw $e;
+        }
+    }
+
+    public function handleErrors($errNo, $errStr, $errFile, $errLine)
     {
         if (!isset(self::$internalLogCategories[$errNo])) {
             throw new ErrorException($errStr, $errNo, 0, $errFile, $errLine);
@@ -47,17 +72,6 @@ class ErrorHandlers
             $errStr,
             $errFile,
             $errLine
-        );
-    }
-
-    public function logException(Exception $e)
-    {
-        $this->log->write(
-            Log::ERROR,
-            get_class($e),
-            "%s \n Trace: %s",
-            $e->getMessage(),
-            $e->getTraceAsString()
         );
     }
 }

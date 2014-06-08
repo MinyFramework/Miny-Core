@@ -9,9 +9,6 @@
 
 namespace Miny\Application\Handlers;
 
-use Exception;
-use Miny\Application\Events\UncaughtExceptionEvent;
-use Miny\Event\EventDispatcher;
 use Miny\Factory\Container;
 use Miny\Factory\ParameterContainer;
 use Miny\HTTP\Request;
@@ -26,7 +23,7 @@ class ApplicationEventHandlers
     /**
      * @var Log
      */
-    protected $log;
+    private $log;
 
     /**
      * @var Container
@@ -38,37 +35,11 @@ class ApplicationEventHandlers
      */
     private $parameterContainer;
 
-    /**
-     * @var EventDispatcher
-     */
-    private $eventDispatcher;
-
-    public function __construct(
-        Container $container,
-        Log $log,
-        ParameterContainer $parameterContainer,
-        EventDispatcher $eventDispatcher
-    ) {
+    public function __construct(Container $container, Log $log, ParameterContainer $parameters)
+    {
         $this->container          = $container;
         $this->log                = $log;
-        $this->parameterContainer = $parameterContainer;
-        $this->eventDispatcher    = $eventDispatcher;
-
-        set_exception_handler(array($this, 'handleExceptions'));
-    }
-
-    public function handleExceptions(Exception $e)
-    {
-        $event = new UncaughtExceptionEvent($e);
-        $this->eventDispatcher->raiseEvent($event);
-        if (!$event->isHandled()) {
-            // Rethrow the exception that we did not handle.
-            throw $e;
-        }
-        $response = $this->container->get('\\Miny\\HTTP\\Response');
-        $response->addContent($event->getResponse());
-        $response->setCode(500);
-        $response->send();
+        $this->parameterContainer = $parameters;
     }
 
     private function log($category, $message)

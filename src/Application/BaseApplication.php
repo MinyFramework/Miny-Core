@@ -196,7 +196,8 @@ abstract class BaseApplication
         $events        = $container->get('\\Miny\\Event\\EventDispatcher');
         $errorHandlers = $container->get('\\Miny\\Application\\Handlers\\ErrorHandlers');
 
-        $events->register(CoreEvents::UNCAUGHT_EXCEPTION, array($errorHandlers, 'logException'));
+        set_error_handler(array($errorHandlers, 'handleErrors'));
+        set_exception_handler(array($errorHandlers, 'handleExceptions'));
 
         $log = $this->log;
         $log->setFlushLimit($this->parameterContainer['log']['flush_limit']);
