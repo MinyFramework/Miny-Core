@@ -63,10 +63,12 @@ class Container
     public function addAlias($abstract, $concrete)
     {
         //Strip all leading backslashes
-        $abstract = ltrim($abstract, '\\');
-        if (is_string($concrete)) {
+        if ($abstract[0] === '\\') {
+            $abstract = substr($abstract, 1);
+        }
+        if (is_string($concrete) && $concrete[0] === '\\') {
             //Strip all leading backslashes if $concrete is a class name
-            $concrete = ltrim($concrete, '\\');
+            $concrete = substr($concrete, 1);
         }
         $this->aliases[$abstract] = $concrete;
     }
@@ -78,7 +80,9 @@ class Container
     public function addConstructorArguments($concrete /*, ...$arguments */)
     {
         //Strip all leading backslashes
-        $concrete = ltrim($concrete, '\\');
+        if ($concrete[0] === '\\') {
+            $concrete = substr($concrete, 1);
+        }
 
         // filter the nulls and set the arguments
         $this->constructorArguments[$concrete] = array_filter(
@@ -97,7 +101,10 @@ class Container
     public function setConstructorArgument($concrete, $position, $argument)
     {
         //Strip all leading backslashes
-        $concrete = ltrim($concrete, '\\');
+        if ($concrete[0] === '\\') {
+            $concrete = substr($concrete, 1);
+        }
+
         if (!isset($this->constructorArguments[$concrete])) {
             $this->constructorArguments[$concrete] = array($position => $argument);
         } else {
@@ -111,7 +118,10 @@ class Container
             throw new InvalidArgumentException('$callback is not callable.');
         }
         //Strip all leading backslashes
-        $concrete = ltrim($concrete, '\\');
+        if ($concrete[0] === '\\') {
+            $concrete = substr($concrete, 1);
+        }
+
         if (!isset($this->callbacks[$concrete])) {
             $this->callbacks[$concrete] = array($callback);
         } else {
@@ -128,7 +138,10 @@ class Container
     public function getAlias($abstract)
     {
         //Strip all leading backslashes
-        $abstract = ltrim($abstract, '\\');
+        if ($abstract[0] === '\\') {
+            $abstract = substr($abstract, 1);
+        }
+
         if (!isset($this->aliases[$abstract])) {
             throw new OutOfBoundsException("{$abstract} is not registered.");
         }
@@ -144,7 +157,10 @@ class Container
     public function getConstructorArguments($abstract)
     {
         //Strip all leading backslashes
-        $abstract = ltrim($abstract, '\\');
+        if ($abstract[0] === '\\') {
+            $abstract = substr($abstract, 1);
+        }
+
         $concrete = $this->findMostConcreteDefinition($abstract);
         if (!isset($this->constructorArguments[$concrete])) {
             $this->constructorArguments[$concrete] = array();
@@ -168,9 +184,10 @@ class Container
         if ($abstract === null) {
             //If $abstract is not specified, use $objects class
             $abstract = get_class($object);
-        } else {
-            //Strip all leading backslashes
-            $abstract = ltrim($abstract, '\\');
+        }
+        //Strip all leading backslashes
+        if ($abstract[0] === '\\') {
+            $abstract = substr($abstract, 1);
         }
         $concrete = $this->findMostConcreteDefinition($abstract);
         if (isset($this->objects[$concrete])) {
@@ -195,7 +212,9 @@ class Container
     public function get($abstract, array $parameters = array(), $forceNew = false)
     {
         //Strip all leading backslashes
-        $abstract = ltrim($abstract, '\\');
+        if ($abstract[0] === '\\') {
+            $abstract = substr($abstract, 1);
+        }
 
         //Try to find the constructor arguments for the most concrete definition
         $concrete = $this->findMostConcreteDefinition($abstract);

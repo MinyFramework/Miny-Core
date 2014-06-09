@@ -39,19 +39,13 @@ class Application extends BaseApplication
 
     protected function registerDefaultServices(Container $container)
     {
-        $container->addAlias('\\Miny\\Application\\BaseApplication', __CLASS__);
-        $container->addAlias(
-            '\\Miny\\HTTP\\AbstractHeaderSender',
-            '\\Miny\\HTTP\\NativeHeaderSender'
-        );
-        $container->addAlias(
-            '\\Miny\\Router\\AbstractRouteParser',
-            '\\Miny\\Router\\RouteParser'
-        );
+        $container->addAlias('Miny\\Application\\BaseApplication', __CLASS__);
+        $container->addAlias('Miny\\HTTP\\AbstractHeaderSender', 'Miny\\HTTP\\NativeHeaderSender');
+        $container->addAlias('Miny\\Router\\AbstractRouteParser', 'Miny\\Router\\RouteParser');
 
         parent::registerDefaultServices($container);
 
-        $eventHandlers = $container->get('\\Miny\\Application\\Handlers\\ApplicationEventHandlers');
+        $eventHandlers = $container->get('Miny\\Application\\Handlers\\ApplicationEventHandlers');
 
         $events = $this->eventDispatcher;
         $events->registerHandlers(
@@ -73,18 +67,18 @@ class Application extends BaseApplication
         $parameterContainer = $this->parameterContainer;
 
         $container->addCallback(
-            '\\Miny\\Controller\\ControllerDispatcher',
+            'Miny\\Controller\\ControllerDispatcher',
             function (ControllerDispatcher $dispatcher, Container $container) {
                 $dispatcher->addRunner(
-                    $container->get('\\Miny\\Controller\\Runners\\StringControllerRunner')
+                    $container->get('Miny\\Controller\\Runners\\StringControllerRunner')
                 );
                 $dispatcher->addRunner(
-                    $container->get('\\Miny\\Controller\\Runners\\ClosureControllerRunner')
+                    $container->get('Miny\\Controller\\Runners\\ClosureControllerRunner')
                 );
             }
         );
         $container->addCallback(
-            '\\Miny\\Router\\Router',
+            'Miny\\Router\\Router',
             function (Router $router) use ($parameterContainer, $events) {
                 $router->addGlobalValues($parameterContainer['router:default_parameters']);
                 $router->setPrefix($parameterContainer['router:prefix']);
@@ -94,11 +88,11 @@ class Application extends BaseApplication
             }
         );
 
-        $routeGeneratorClass = '\\Miny\\Router\\RouteGenerator';
+        $routeGeneratorClass = 'Miny\\Router\\RouteGenerator';
         $container->setConstructorArgument($routeGeneratorClass, 1, '@router:short_urls');
 
         $container->addCallback(
-            '\\Miny\\HTTP\\Session',
+            'Miny\\HTTP\\Session',
             function (Session $session) {
                 $session->open();
             }
@@ -108,13 +102,13 @@ class Application extends BaseApplication
     protected function onRun()
     {
         /** @var $router Router */
-        $router = $this->container->get('\\Miny\\Router\\Router');
+        $router = $this->container->get('Miny\\Router\\Router');
         if (!$router->has('root')) {
             $router->root()->set('controller', 'index');
         }
 
         /** @var $dispatcher Dispatcher */
-        $dispatcher = $this->container->get('\\Miny\\Application\\Dispatcher');
+        $dispatcher = $this->container->get('Miny\\Application\\Dispatcher');
         $dispatcher->dispatch(Request::getGlobal())->send();
     }
 }

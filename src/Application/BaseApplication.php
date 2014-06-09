@@ -95,7 +95,7 @@ abstract class BaseApplication
         $ioc->setInstance($parameterContainer);
 
         /** @var $log Log */
-        $this->log = $log = $ioc->get('\\Miny\\Log\\Log');
+        $this->log = $log = $ioc->get('Miny\\Log\\Log');
 
         if ($this->environment !== $environment) {
             $message = 'Unknown environment option "%s". Assuming production environment.';
@@ -123,7 +123,7 @@ abstract class BaseApplication
         if (!isset($parameterContainer['modules']) || !is_array($parameterContainer['modules'])) {
             return;
         }
-        $this->container->get('\\Miny\\Modules\\ModuleHandler')
+        $this->container->get('Miny\\Modules\\ModuleHandler')
             ->loadModules($parameterContainer['modules'])
             ->initialize();
     }
@@ -185,16 +185,16 @@ abstract class BaseApplication
     {
         date_default_timezone_set($this->parameterContainer['default_timezone']);
         $container->setInstance($this);
-        $container->addAlias('\\Miny\\Log\\AbstractLog', '\\Miny\\Log\\Log');
+        $container->addAlias('Miny\\Log\\AbstractLog', 'Miny\\Log\\Log');
 
         /**
          * @var $shutdown      ShutdownService
          * @var $events        EventDispatcher
          * @var $errorHandlers ErrorHandlers
          */
-        $shutdown      = $container->get('\\Miny\\Shutdown\\ShutdownService');
-        $events        = $container->get('\\Miny\\Event\\EventDispatcher');
-        $errorHandlers = $container->get('\\Miny\\Application\\Handlers\\ErrorHandlers');
+        $shutdown      = $container->get('Miny\\Shutdown\\ShutdownService');
+        $events        = $container->get('Miny\\Event\\EventDispatcher');
+        $errorHandlers = $container->get('Miny\\Application\\Handlers\\ErrorHandlers');
 
         set_error_handler(array($errorHandlers, 'handleErrors'));
         set_exception_handler(array($errorHandlers, 'handleExceptions'));
