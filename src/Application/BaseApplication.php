@@ -14,7 +14,6 @@ use Miny\Application\Events\BeforeRunEvent;
 use Miny\Application\Events\ShutDownEvent;
 use Miny\Application\Handlers\ErrorHandlers;
 use Miny\AutoLoader;
-use Miny\CoreEvents;
 use Miny\Event\EventDispatcher;
 use Miny\Factory\Container;
 use Miny\Factory\LinkResolver;
