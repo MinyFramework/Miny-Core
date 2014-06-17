@@ -79,18 +79,7 @@ class Container
      */
     public function addConstructorArguments($concrete /*, ...$arguments */)
     {
-        //Strip all leading backslashes
-        if ($concrete[0] === '\\') {
-            $concrete = substr($concrete, 1);
-        }
-
-        // filter the nulls and set the arguments
-        $this->constructorArguments[$concrete] = array_filter(
-            array_slice(func_get_args(), 1),
-            function ($item) {
-                return $item !== null;
-            }
-        );
+        $this->setConstructorArguments($concrete, array_slice(func_get_args(), 1));
     }
 
     /**
@@ -110,6 +99,26 @@ class Container
         } else {
             $this->constructorArguments[$concrete][$position] = $argument;
         }
+    }
+
+    /**
+     * @param       $concrete
+     * @param array $arguments
+     */
+    public function setConstructorArguments($concrete, array $arguments)
+    {
+        //Strip all leading backslashes
+        if ($concrete[0] === '\\') {
+            $concrete = substr($concrete, 1);
+        }
+
+        // filter the nulls and set the arguments
+        $this->constructorArguments[$concrete] = array_filter(
+            $arguments,
+            function ($item) {
+                return $item !== null;
+            }
+        );
     }
 
     public function addCallback($concrete, $callback)

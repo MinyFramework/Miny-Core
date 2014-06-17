@@ -260,6 +260,21 @@ class ContainerTest extends \PHPUnit_Framework_TestCase
         $this->assertEquals('asd', $params[2]);
     }
 
+    public function testDefaultArgumentsAreOverridden2()
+    {
+        $class    = new \stdClass;
+        $this->container->setInstance($class);
+
+        $this->container->setConstructorArguments(__NAMESPACE__ . '\\TestClass', array(null, 55, 'asd'));
+
+        $obj = $this->container->get(__NAMESPACE__ . '\\TestClass');
+
+        $params = $obj->getParameters();
+        $this->assertSame($class, $params[0]);
+        $this->assertEquals(55, $params[1]);
+        $this->assertEquals('asd', $params[2]);
+    }
+
     /**
      * @expectedException \RuntimeException
      */
