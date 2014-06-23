@@ -10,7 +10,7 @@
 namespace Miny;
 
 /**
- * AutoLoader is a simple class loader class to be used with the Miny framework.
+ * AutoLoader is a simple PSR-4 class loader class to be used with the Miny Framework.
  *
  * @author Dániel Buga
  */
@@ -19,8 +19,9 @@ class AutoLoader
     /**
      * @var array[]
      */
-    private $map = array();
+    private $namespaceMap = array();
     private $maxNameSpaceLength = 0;
+    private $classMap = array();
 
     /**
      * @param array $map
@@ -29,6 +30,11 @@ class AutoLoader
     {
         spl_autoload_register(array($this, 'load'));
         $this->register($map);
+    }
+
+    public function addClass($class, $path)
+    {
+        $this->classMap[$class] = $path;
     }
 
     /**
@@ -49,31 +55,31 @@ class AutoLoader
             if ($this->maxNameSpaceLength < $length) {
                 $this->maxNameSpaceLength = $length;
             }
-            if (!isset($this->map[$namespace])) {
-                $this->map[$namespace] = array();
+            if (!isset($this->namespaceMap[$namespace])) {
+                $this->namespaceMap[$namespace] = array();
             }
             if (is_array($path)) {
                 foreach ($path as $new_path) {
-                    $this->map[$namespace][] = realpath($new_path);
+                    $this->namespaceMap[$namespace][] = $new_path;
                 }
             } else {
-                $this->map[$namespace][] = realpath($path);
+                $this->namespaceMap[$namespace][] = $path;
             }
         }
     }
 
-    /**
-     * @param string $class
-     */
-    public function load($class)
+    private function findFile($class)
     {
-        $temp = substr('\\' . $class, 0, $this->maxNameSpaceLength + 1);
+        if (isset($this->classMap[$class])) {
+            return $this->classMap[$class];
+        }
 
+        $temp = substr('\\' . $class, 0, $this->maxNameSpaceLength + 1);
         // We look for the longest matching namespace so we are trimming from the right.
-        while (!isset($this->map[$temp])) {
+        while (!isset($this->namespaceMap[$temp])) {
             if (($pos = strrpos($temp, '\\')) === false) {
                 // The class/namespace was not registered.
-                return;
+                return false;
             }
             $temp = substr($temp, 0, $pos);
         }
@@ -83,13 +89,30 @@ class AutoLoader
         } else {
             $subPath = '';
         }
-        foreach ($this->map[$temp] as $path) {
+        foreach ($this->namespaceMap[$temp] as $path) {
             $path .= $subPath;
             if (is_file($path)) {
-                include_once $path;
-
-                return;
+                return $path;
             }
         }
+
+        $this->classMap[$class] = false;
+
+        return false;
     }
+
+    /**
+     * @param string $class
+     */
+    public function load($class)
+    {
+        if ($file = $this->findFile($class)) {
+            includeFile($file);
+        }
+    }
+}
+
+function includeFile($path)
+{
+    include $path;
 }
