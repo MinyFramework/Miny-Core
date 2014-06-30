@@ -14,7 +14,6 @@ use Miny\CoreEvents;
 use Miny\Factory\Container;
 use Miny\Factory\ParameterContainer;
 use Miny\HTTP\Request;
-use Miny\HTTP\Session;
 use Miny\Router\Router;
 
 class Application extends BaseApplication
@@ -88,6 +87,13 @@ class Application extends BaseApplication
             }
         );
 
+        $container->addAlias(
+            'Miny\\HTTP\\Request',
+            function (Container $container) {
+                $container->setInstance(Request::getGlobal());
+            }
+        );
+
         $routeGeneratorClass = 'Miny\\Router\\RouteGenerator';
         $container->setConstructorArgument($routeGeneratorClass, 1, '@router:short_urls');
     }
@@ -102,6 +108,8 @@ class Application extends BaseApplication
 
         /** @var $dispatcher Dispatcher */
         $dispatcher = $this->container->get('Miny\\Application\\Dispatcher');
-        $dispatcher->dispatch(Request::getGlobal())->send();
+        /** @var $request Request */
+        $request = $this->container->get('Miny\\HTTP\\Request');
+        $dispatcher->dispatch($request)->send();
     }
 }
