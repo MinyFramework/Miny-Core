@@ -111,9 +111,7 @@ class AbstractControllerRunnerTest extends \PHPUnit_Framework_TestCase
             ->with(
                 $this->callback(
                     function (ControllerFinishedEvent $argument) {
-                        $parameters = $argument->getParameters();
-
-                        return $parameters[2] === 'retVal';
+                        return $argument->getReturnValue() === 'retVal';
                     }
                 )
             );

@@ -14,10 +14,31 @@ use Miny\Event\Event;
 
 class ControllerFinishedEvent extends Event
 {
+    private $controller;
+    private $action;
+    private $returnValue;
 
     public function __construct($controller, $action, $returnValue)
     {
-        parent::__construct(CoreEvents::CONTROLLER_FINISHED, $controller, $action, $returnValue);
+        parent::__construct(CoreEvents::CONTROLLER_FINISHED);
+        $this->controller  = $controller;
+        $this->action      = $action;
+        $this->returnValue = $returnValue;
+    }
+
+    public function getController()
+    {
+        return $this->controller;
+    }
+
+    public function getAction()
+    {
+        return $this->action;
+    }
+
+    public function getReturnValue()
+    {
+        return $this->returnValue;
     }
 
 }
