@@ -89,8 +89,8 @@ class Application extends BaseApplication
 
         $container->addAlias(
             'Miny\\HTTP\\Request',
-            function (Container $container) {
-                $container->setInstance(Request::getGlobal());
+            function () {
+                return Request::getGlobal();
             }
         );
 
