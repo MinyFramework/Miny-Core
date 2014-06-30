@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
 
 <phpunit
-        bootstrap="Tests/bootstrap.php"
+        bootstrap="test/bootstrap.php"
         backupGlobals="false"
         backupStaticAttributes="false"
         colors="true"
@@ -14,7 +14,7 @@
         >
     <testsuites>
         <testsuite name="Miny Core Test Suite">
-            <directory>./Tests/</directory>
+            <directory>./test/</directory>
         </testsuite>
     </testsuites>
 </phpunit>

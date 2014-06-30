@@ -15,4 +15,4 @@ matrix:
 before_script:
   - composer --prefer-source --dev install
 
-script: phpunit --coverage-text Tests
+script: phpunit --coverage-text
