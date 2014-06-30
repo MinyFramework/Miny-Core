@@ -9,8 +9,6 @@
 
 namespace Miny\Application\Handlers;
 
-use ErrorException;
-use Exception;
 use Miny\Application\Events\UncaughtExceptionEvent;
 use Miny\Event\EventDispatcher;
 use Miny\Log\Log;
@@ -42,7 +40,7 @@ class ErrorHandlers
         $this->eventDispatcher = $eventDispatcher;
     }
 
-    public function handleExceptions(Exception $e)
+    public function handleExceptions(\Exception $e)
     {
         $this->log->write(
             Log::ERROR,
@@ -63,7 +61,7 @@ class ErrorHandlers
     public function handleErrors($errNo, $errStr, $errFile, $errLine)
     {
         if (!isset(self::$internalLogCategories[$errNo])) {
-            throw new ErrorException($errStr, $errNo, 0, $errFile, $errLine);
+            throw new \ErrorException($errStr, $errNo, 0, $errFile, $errLine);
         }
         $this->log->write(
             Log::WARNING,

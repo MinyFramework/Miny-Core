@@ -9,7 +9,6 @@
 
 namespace Miny\Controller\Runners;
 
-use Closure;
 use Miny\Controller\AbstractControllerRunner;
 use Miny\Controller\Events\ControllerFinishedEvent;
 use Miny\Controller\Events\ControllerLoadedEvent;
@@ -19,7 +18,7 @@ use Miny\HTTP\Response;
 class ClosureControllerRunner extends AbstractControllerRunner
 {
     /**
-     * @var Closure
+     * @var \Closure
      */
     private $controller;
 
@@ -33,7 +32,7 @@ class ClosureControllerRunner extends AbstractControllerRunner
      */
     public function canRun($controller)
     {
-        if (!$controller instanceof Closure) {
+        if (!$controller instanceof \Closure) {
             return false;
         }
         $this->controller = $controller;

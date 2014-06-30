@@ -9,9 +9,7 @@
 
 namespace Miny\Factory;
 
-use ArrayAccess;
-
-abstract class AbstractConfigurationTree implements ArrayAccess
+abstract class AbstractConfigurationTree implements \ArrayAccess
 {
     abstract public function getSubTree($root);
 }

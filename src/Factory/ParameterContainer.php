@@ -10,7 +10,6 @@
 namespace Miny\Factory;
 
 use Miny\Utils\ArrayUtils;
-use OutOfBoundsException;
 
 class ParameterContainer extends AbstractConfigurationTree
 {
@@ -89,7 +88,7 @@ class ParameterContainer extends AbstractConfigurationTree
             function ($matches) use ($container) {
                 try {
                     return $container->offsetGet($matches[1]);
-                } catch (OutOfBoundsException $e) {
+                } catch (\OutOfBoundsException $e) {
                     return $matches[0];
                 }
             },
@@ -110,7 +109,7 @@ class ParameterContainer extends AbstractConfigurationTree
      *
      * @return mixed The parameter value
      *
-     * @throws OutOfBoundsException
+     * @throws \OutOfBoundsException
      */
     public function offsetGet($key)
     {

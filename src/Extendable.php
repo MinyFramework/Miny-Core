@@ -9,9 +9,6 @@
 
 namespace Miny;
 
-use BadMethodCallException;
-use InvalidArgumentException;
-
 class Extendable
 {
     /**
@@ -30,15 +27,15 @@ class Extendable
      * @param string   $method
      * @param callable $callback
      *
-     * @throws InvalidArgumentException
+     * @throws \InvalidArgumentException
      */
     public function addMethod($method, $callback)
     {
         if (!is_string($method)) {
-            throw new InvalidArgumentException('$method must be string');
+            throw new \InvalidArgumentException('$method must be string');
         }
         if (!is_callable($callback)) {
-            throw new InvalidArgumentException("Callback given for method {$method} is not callable");
+            throw new \InvalidArgumentException("Callback given for method {$method} is not callable");
         }
         $this->plugins[$method] = $callback;
     }
@@ -50,18 +47,18 @@ class Extendable
      * @param object $object
      * @param array  $method_aliases
      *
-     * @throws InvalidArgumentException
+     * @throws \InvalidArgumentException
      */
     public function addMethods($object, array $method_aliases = array())
     {
         if (!is_object($object)) {
-            throw new InvalidArgumentException('$object must be an object');
+            throw new \InvalidArgumentException('$object must be an object');
         }
         foreach ($method_aliases as $alias => $method) {
             $callable = array($object, $method);
             if (!is_callable($callable)) {
                 $class = get_class($object);
-                throw new InvalidArgumentException("Method {$method} not found in class {$class}");
+                throw new \InvalidArgumentException("Method {$method} not found in class {$class}");
             }
             if (is_int($alias)) {
                 $alias = $method;
@@ -105,20 +102,20 @@ class Extendable
      * @param string $method
      * @param array  $args
      *
-     * @throws InvalidArgumentException
-     * @throws BadMethodCallException
+     * @throws \InvalidArgumentException
+     * @throws \BadMethodCallException
      * @return mixed
      */
     public function __call($method, $args)
     {
         if (!is_string($method)) {
-            throw new InvalidArgumentException('$method must be string');
+            throw new \InvalidArgumentException('$method must be string');
         }
         if (isset($this->setters[$method])) {
             $this->{$this->setters[$method]} = current($args);
         } else {
             if (!isset($this->plugins[$method])) {
-                throw new BadMethodCallException("Method not found: {$method}");
+                throw new \BadMethodCallException("Method not found: {$method}");
             }
 
             return call_user_func_array($this->plugins[$method], $args);

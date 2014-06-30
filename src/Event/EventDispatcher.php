@@ -9,7 +9,6 @@
 
 namespace Miny\Event;
 
-use Closure;
 use Miny\Event\Exceptions\EventHandlerException;
 
 class EventDispatcher
@@ -29,7 +28,7 @@ class EventDispatcher
     private function ensureCallback($handler, $event)
     {
         if (is_object($handler)) {
-            if (!$handler instanceof Closure) {
+            if (!$handler instanceof \Closure) {
                 $handler = array($handler, $event);
             }
         }

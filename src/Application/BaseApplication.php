@@ -9,7 +9,6 @@
 
 namespace Miny\Application;
 
-use InvalidArgumentException;
 use Miny\Application\Events\BeforeRunEvent;
 use Miny\Application\Events\ShutDownEvent;
 use Miny\Application\Handlers\ErrorHandlers;
@@ -21,7 +20,6 @@ use Miny\Factory\ParameterContainer;
 use Miny\Log\FileWriter;
 use Miny\Log\Log;
 use Miny\Shutdown\ShutdownService;
-use UnexpectedValueException;
 
 abstract class BaseApplication
 {
@@ -146,7 +144,7 @@ abstract class BaseApplication
         foreach ($config_files as $file => $env) {
             try {
                 $this->loadConfig($file, $env);
-            } catch (InvalidArgumentException $e) {
+            } catch (\InvalidArgumentException $e) {
 
             }
         }
@@ -156,8 +154,8 @@ abstract class BaseApplication
      * @param string $file
      * @param int    $env
      *
-     * @throws InvalidArgumentException
-     * @throws UnexpectedValueException
+     * @throws \InvalidArgumentException
+     * @throws \UnexpectedValueException
      */
     public function loadConfig($file, $env = self::ENV_COMMON)
     {
@@ -165,7 +163,7 @@ abstract class BaseApplication
             return;
         }
         if (!is_file($file)) {
-            throw new InvalidArgumentException("Configuration file not found: {$file}");
+            throw new \InvalidArgumentException("Configuration file not found: {$file}");
         }
         $this->log->write(
             Log::DEBUG,
@@ -175,7 +173,7 @@ abstract class BaseApplication
         );
         $config = include $file;
         if (!is_array($config)) {
-            throw new UnexpectedValueException("Invalid configuration file: {$file}");
+            throw new \UnexpectedValueException("Invalid configuration file: {$file}");
         }
         $this->parameterContainer->addParameters($config);
     }

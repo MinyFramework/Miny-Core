@@ -9,8 +9,6 @@
 
 namespace Miny\Shutdown;
 
-use InvalidArgumentException;
-
 /**
  * ShutdownService provides an easy to use interface to register shutdown functions ordered by priorities.
  */
@@ -30,12 +28,12 @@ class ShutdownService
      * @param callable $callback
      * @param null|int $priority The priority of the callback. Lowest number means higher priority.
      *
-     * @throws InvalidArgumentException
+     * @throws \InvalidArgumentException
      */
     public function register($callback, $priority = null)
     {
         if (!is_callable($callback)) {
-            throw new InvalidArgumentException('$callback needs to be callable.');
+            throw new \InvalidArgumentException('$callback needs to be callable.');
         }
         $priority = $this->getPriority($priority);
         if (!isset($this->callbacks[$priority])) {

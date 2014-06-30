@@ -63,8 +63,8 @@ class StringUtils
      */
     public static function decamelize($str, $separator = ' ')
     {
-        $str = preg_replace('/(?<=[a-z])([A-Z])/', $separator . '$1', $str);
-
-        return strtolower($str);
+        return strtolower(
+            preg_replace('/(?<=[a-z])([A-Z])/', $separator . '$1', $str)
+        );
     }
 }

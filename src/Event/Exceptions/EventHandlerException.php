@@ -9,9 +9,7 @@
 
 namespace Miny\Event\Exceptions;
 
-use InvalidArgumentException;
-
-class EventHandlerException extends InvalidArgumentException
+class EventHandlerException extends \InvalidArgumentException
 {
 
 }

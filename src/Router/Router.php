@@ -9,9 +9,6 @@
 
 namespace Miny\Router;
 
-use InvalidArgumentException;
-use OutOfBoundsException;
-
 class Router
 {
     /**
@@ -40,8 +37,6 @@ class Router
 
     /**
      * @param string $prefix
-     *
-     * @throws InvalidArgumentException
      */
     public function setPrefix($prefix)
     {
@@ -50,8 +45,6 @@ class Router
 
     /**
      * @param string $postfix
-     *
-     * @throws InvalidArgumentException
      */
     public function setPostfix($postfix)
     {
@@ -72,7 +65,7 @@ class Router
      * @param      $name
      * @param bool $prefix
      *
-     * @throws InvalidArgumentException
+     * @throws \InvalidArgumentException
      * @return Route
      */
     public function add($uri, $method = Route::METHOD_ALL, $name = null, $prefix = false)
@@ -85,7 +78,7 @@ class Router
         if ($name === null || is_int($name)) {
             $name = count($this->routes);
         } elseif (!is_string($name)) {
-            throw new InvalidArgumentException('$name must be a string, integer or null.');
+            throw new \InvalidArgumentException('$name must be a string, integer or null.');
         }
         $this->routes[$name] = $route;
         if ($route->isStatic()) {
@@ -135,12 +128,12 @@ class Router
      * @param $name
      *
      * @return Route
-     * @throws OutOfBoundsException
+     * @throws \OutOfBoundsException
      */
     public function getRoute($name)
     {
         if (!isset($this->routes[$name])) {
-            throw new OutOfBoundsException("Route {$name} is not found.");
+            throw new \OutOfBoundsException("Route {$name} is not found.");
         }
 
         return $this->routes[$name];
@@ -170,13 +163,12 @@ class Router
      * @param $uri
      *
      * @return Route
-     * @throws OutOfBoundsException
-     * @throws InvalidArgumentException
+     * @throws \OutOfBoundsException
      */
     public function getStaticByURI($uri)
     {
         if (!isset($this->staticRoutes[$uri])) {
-            throw new OutOfBoundsException("Static uri {$uri} is not found.");
+            throw new \OutOfBoundsException("Static uri {$uri} is not found.");
         }
 
         return $this->staticRoutes[$uri];

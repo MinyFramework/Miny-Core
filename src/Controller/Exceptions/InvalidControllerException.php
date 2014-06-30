@@ -9,9 +9,7 @@
 
 namespace Miny\Controller\Exceptions;
 
-use UnexpectedValueException;
-
-class InvalidControllerException extends UnexpectedValueException
+class InvalidControllerException extends \UnexpectedValueException
 {
 
 }

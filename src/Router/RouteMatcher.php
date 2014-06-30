@@ -78,7 +78,7 @@ class RouteMatcher
     {
         $numGroups = 0;
         $indexes   = array();
-        $pattern   = '#^(?';
+        $pattern   = '';
         foreach ($variableRoutes as $route) {
             $numVariables = $route->getParameterCount();
             $pattern .= '|' . $route->getRegexp();
@@ -90,8 +90,7 @@ class RouteMatcher
                 $indexes[$numGroups++] = $route;
             }
         }
-        $pattern .= ')$#';
-        if (!preg_match($pattern, $path, $matched)) {
+        if (!preg_match('#^(?' . $pattern . ')$#', $path, $matched)) {
             return false;
         }
 

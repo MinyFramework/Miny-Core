@@ -9,10 +9,6 @@
 
 namespace Miny\Utils;
 
-use ArrayAccess;
-use InvalidArgumentException;
-use OutOfBoundsException;
-
 /**
  * ArrayUtils provides useful tools to work with arrays.
  *
@@ -22,14 +18,14 @@ class ArrayUtils
 {
     public static function isArrayType($array)
     {
-        return is_array($array) || $array instanceof ArrayAccess;
+        return is_array($array) || $array instanceof \ArrayAccess;
     }
 
     private static function arrayHasKey($array, $key)
     {
         if (is_array($array)) {
             return array_key_exists($key, $array);
-        } elseif ($array instanceof ArrayAccess) {
+        } elseif ($array instanceof \ArrayAccess) {
             return isset($array[$key]);
         } else {
             return false;
@@ -39,16 +35,16 @@ class ArrayUtils
     /**
      * Determines whether the value represented by $path exists in $array.
      *
-     * @param array|ArrayAccess $array
-     * @param array|string      $parts An array containing the keys or a string delimited by :
+     * @param array|\ArrayAccess $array
+     * @param array|string       $parts An array containing the keys or a string delimited by :
      *
-     * @throws InvalidArgumentException
+     * @throws \InvalidArgumentException
      * @return bool
      */
     public static function existsByPath($array, $parts)
     {
-        if (!is_array($array) && !$array instanceof ArrayAccess) {
-            throw new InvalidArgumentException('ArrayUtils::existsByPath expects an array or an ArrayAccess object.');
+        if (!is_array($array) && !$array instanceof \ArrayAccess) {
+            throw new \InvalidArgumentException('ArrayUtils::existsByPath expects an array or an ArrayAccess object.');
         }
         if (!is_array($parts)) {
             $parts = explode(':', $parts);
@@ -67,17 +63,17 @@ class ArrayUtils
      * Walks through the given $array and returns the value represented by $path. Returns $default if the requested
      * element does not exist.
      *
-     * @param array|ArrayAccess $array
-     * @param array|string      $parts An array containing the keys or a string delimited by :
-     * @param mixed             $default
+     * @param array|\ArrayAccess $array
+     * @param array|string       $parts An array containing the keys or a string delimited by :
+     * @param mixed              $default
      *
-     * @throws InvalidArgumentException
+     * @throws \InvalidArgumentException
      * @return mixed
      */
     public static function getByPath($array, $parts, $default = null)
     {
-        if (!is_array($array) && !$array instanceof ArrayAccess) {
-            throw new InvalidArgumentException('ArrayUtils::getByPath expects an array or an ArrayAccess object.');
+        if (!is_array($array) && !$array instanceof \ArrayAccess) {
+            throw new \InvalidArgumentException('ArrayUtils::getByPath expects an array or an ArrayAccess object.');
         }
         if (!is_array($parts)) {
             $parts = explode(':', $parts);
@@ -95,13 +91,13 @@ class ArrayUtils
     /**
      * Walks through the given $array and returns a reference to the value represented by $path.
      *
-     * @param array|ArrayAccess $array
-     * @param array|string      $parts An array containing the keys or a string delimited by :
-     * @param bool              $create
+     * @param array        $array
+     * @param array|string $parts An array containing the keys or a string delimited by :
+     * @param bool         $create
      *
      * @return mixed
      *
-     * @throws OutOfBoundsException
+     * @throws \OutOfBoundsException
      */
     public static function &findByPath(array &$array, $parts, $create = false)
     {
@@ -111,7 +107,8 @@ class ArrayUtils
         foreach ($parts as $k) {
             if (!static::arrayHasKey($array, $k)) {
                 if (!$create) {
-                    throw new OutOfBoundsException('Array key not found: ' . implode(':', $parts));
+                    $key = implode(':', $parts);
+                    throw new \OutOfBoundsException("Array key not found: {$key}");
                 }
                 $array[$k] = array();
             }

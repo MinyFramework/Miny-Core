@@ -16,7 +16,6 @@ use Miny\Event\EventDispatcher;
 use Miny\Factory\Container;
 use Miny\HTTP\Request;
 use Miny\HTTP\Response;
-use UnexpectedValueException;
 
 class Dispatcher
 {
@@ -78,12 +77,12 @@ class Dispatcher
      * @param Request $request
      * @param Request $rsp
      *
-     * @throws UnexpectedValueException
+     * @throws \UnexpectedValueException
      */
     protected function guardAgainstInfiniteRedirection(Request $request, Request $rsp)
     {
         if ($rsp === $request) {
-            throw new UnexpectedValueException('This redirection would lead to an infinite loop.');
+            throw new \UnexpectedValueException('This redirection would lead to an infinite loop.');
         }
     }
 

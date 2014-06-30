@@ -9,8 +9,6 @@
 
 namespace Miny\Router;
 
-use InvalidArgumentException;
-
 class RouteGenerator
 {
     /**
@@ -38,7 +36,7 @@ class RouteGenerator
      * @param array  $parameters
      *
      * @return string
-     * @throws InvalidArgumentException
+     * @throws \InvalidArgumentException
      */
     public function generate($routeName, array $parameters = array())
     {
@@ -60,7 +58,7 @@ class RouteGenerator
      *
      * @param array $parameters
      *
-     * @throws InvalidArgumentException
+     * @throws \InvalidArgumentException
      * @return array
      */
     private function insertDefaultParameterValues(Route $route, array $missing, array $parameters)
@@ -74,7 +72,7 @@ class RouteGenerator
         }
         if (!empty($missing)) {
             $params = join(', ', array_keys($missing));
-            throw new InvalidArgumentException("Parameters not set: {$params}");
+            throw new \InvalidArgumentException("Parameters not set: {$params}");
         }
 
         return $parameters;

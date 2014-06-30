@@ -9,17 +9,10 @@
 
 namespace Miny\Factory;
 
-use Closure;
-use InvalidArgumentException;
-use OutOfBoundsException;
-use ReflectionClass;
-use ReflectionParameter;
-use RuntimeException;
-
 class Container
 {
     /**
-     * @var (string|Closure)[]
+     * @var (string|\Closure)[]
      */
     private $aliases = array();
 
@@ -58,7 +51,7 @@ class Container
 
     /**
      * @param string         $abstract
-     * @param string|Closure $concrete
+     * @param string|\Closure $concrete
      */
     public function addAlias($abstract, $concrete)
     {
@@ -121,10 +114,15 @@ class Container
         );
     }
 
+    /**
+     * @param $concrete
+     * @param $callback
+     * @throws \InvalidArgumentException
+     */
     public function addCallback($concrete, $callback)
     {
         if (!is_callable($callback)) {
-            throw new InvalidArgumentException('$callback is not callable.');
+            throw new \InvalidArgumentException('$callback is not callable.');
         }
         //Strip all leading backslashes
         if ($concrete[0] === '\\') {
@@ -141,8 +139,8 @@ class Container
     /**
      * @param $abstract
      *
-     * @return string|Closure
-     * @throws OutOfBoundsException
+     * @return string|\Closure
+     * @throws \OutOfBoundsException
      */
     public function getAlias($abstract)
     {
@@ -152,7 +150,7 @@ class Container
         }
 
         if (!isset($this->aliases[$abstract])) {
-            throw new OutOfBoundsException("{$abstract} is not registered.");
+            throw new \OutOfBoundsException("{$abstract} is not registered.");
         }
 
         return $this->aliases[$abstract];
@@ -183,12 +181,12 @@ class Container
      * @param string $abstract
      *
      * @return object|false
-     * @throws InvalidArgumentException
+     * @throws \InvalidArgumentException
      */
     public function setInstance($object, $abstract = null)
     {
         if (!is_object($object)) {
-            throw new InvalidArgumentException('$object must be an object');
+            throw new \InvalidArgumentException('$object must be an object');
         }
         if ($abstract === null) {
             //If $abstract is not specified, use $objects class
@@ -270,7 +268,7 @@ class Container
     /**
      * @param $class
      *
-     * @throws RuntimeException
+     * @throws \RuntimeException
      * @return string
      */
     private function findMostConcreteDefinition($class)
@@ -284,7 +282,7 @@ class Container
             $class = $this->aliases[$class];
             if (isset($visited[$class])) {
                 //If $class was already visited, we have a circular alias situation that can't be resolved
-                throw new RuntimeException("Circular aliases detected for class {$class}.");
+                throw new \RuntimeException("Circular aliases detected for class {$class}.");
             }
             $visited[$class] = true;
         }
@@ -299,23 +297,23 @@ class Container
      * @param array  $parameters
      *
      * @return object
-     * @throws InvalidArgumentException
+     * @throws \InvalidArgumentException
      */
     private function instantiate($class, array $parameters = array())
     {
-        if ($class instanceof Closure) {
+        if ($class instanceof \Closure) {
             return $class($this, $parameters);
         }
-        $reflector = new ReflectionClass($class);
+        $reflector = new \ReflectionClass($class);
 
         if (!$reflector->isInstantiable()) {
             //Try to give a descriptive exception message
             if ($reflector->isAbstract()) {
-                throw new InvalidArgumentException("Class {$class} is abstract and can not be instantiated.");
+                throw new \InvalidArgumentException("Class {$class} is abstract and can not be instantiated.");
             } elseif ($reflector->isInterface()) {
-                throw new InvalidArgumentException("{$class} is an interface can not be instantiated.");
+                throw new \InvalidArgumentException("{$class} is an interface can not be instantiated.");
             } else {
-                throw new InvalidArgumentException("Class {$class} can not be instantiated.");
+                throw new \InvalidArgumentException("Class {$class} can not be instantiated.");
             }
         }
 
@@ -345,7 +343,7 @@ class Container
     }
 
     /**
-     * @param ReflectionParameter[] $dependencies
+     * @param \ReflectionParameter[] $dependencies
      * @param array                 $resolved
      *
      * @return array
@@ -369,12 +367,12 @@ class Container
     }
 
     /**
-     * @param ReflectionParameter $dependency
+     * @param \ReflectionParameter $dependency
      *
      * @return mixed
-     * @throws OutOfBoundsException
+     * @throws \OutOfBoundsException
      */
-    private function resolvePrimitiveParameter(ReflectionParameter $dependency)
+    private function resolvePrimitiveParameter(\ReflectionParameter $dependency)
     {
         if ($dependency->isDefaultValueAvailable()) {
             return $dependency->getDefaultValue();
@@ -384,21 +382,21 @@ class Container
         $method        = $dependency->getDeclaringFunction()->getName();
         $parameterName = $dependency->getName();
 
-        throw new OutOfBoundsException("Parameter {$parameterName} is not supplied for {$class}::{$method}.");
+        throw new \OutOfBoundsException("Parameter {$parameterName} is not supplied for {$class}::{$method}.");
     }
 
     /**
-     * @param ReflectionClass     $class
-     * @param ReflectionParameter $dependency
+     * @param \ReflectionClass     $class
+     * @param \ReflectionParameter $dependency
      *
-     * @throws InvalidArgumentException
+     * @throws \InvalidArgumentException
      * @return mixed|object
      */
-    private function resolveClassParameter(ReflectionClass $class, ReflectionParameter $dependency)
+    private function resolveClassParameter(\ReflectionClass $class, \ReflectionParameter $dependency)
     {
         try {
             return $this->get($class->getName());
-        } catch (InvalidArgumentException $e) {
+        } catch (\InvalidArgumentException $e) {
             if (!$dependency->isDefaultValueAvailable()) {
                 throw $e;
             }
