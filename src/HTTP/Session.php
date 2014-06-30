@@ -9,6 +9,8 @@
 
 namespace Miny\HTTP;
 
+use Miny\ArrayReferenceWrapper;
+
 class Session implements \ArrayAccess, \IteratorAggregate, \Countable
 {
     /**
@@ -22,9 +24,10 @@ class Session implements \ArrayAccess, \IteratorAggregate, \Countable
     private $isOpen = false;
 
     /**
+     * @param bool            $open
      * @param iSessionHandler $handler
      */
-    public function __construct(iSessionHandler $handler = null)
+    public function __construct($open = true, iSessionHandler $handler = null)
     {
         if ($handler !== null) {
             if (PHP_MINOR_VERSION >= 4) {
@@ -39,6 +42,9 @@ class Session implements \ArrayAccess, \IteratorAggregate, \Countable
                     array($handler, 'gc')
                 );
             }
+        }
+        if ($open) {
+            $this->open(new ArrayReferenceWrapper($_SESSION));
         }
     }
 
@@ -73,21 +79,26 @@ class Session implements \ArrayAccess, \IteratorAggregate, \Countable
             $this->isOpen = false;
         }
         if ($reopen) {
-            $this->open();
+            $this->open(null);
         }
     }
 
     /**
      * Starts the session. Regenerates the session ID each request
      * for security reasons and updates flash variables.
+     *
+     * @param mixed $data The data to use as session data. Pass null to use the previous data, if any.
+     * @throws \RuntimeException When the session can not be opened.
      */
-    public function open()
+    public function open($data)
     {
         if (!session_start()) {
             throw new \RuntimeException('Could not open session.');
         }
         session_regenerate_id(true);
-        $this->data =& $_SESSION;
+        if ($data !== null) {
+            $this->data = $data;
+        }
         $this->initializeContainer('data');
         if (!$this->initializeContainer('flash')) {
             $this->updateFlash();
@@ -187,7 +198,7 @@ class Session implements \ArrayAccess, \IteratorAggregate, \Countable
     {
         $params = session_get_cookie_params();
         if ($newParameters !== null) {
-            if($this->isOpen) {
+            if ($this->isOpen) {
                 throw new \InvalidArgumentException('The session has already been opened.');
             }
             $params = $newParameters + $params;

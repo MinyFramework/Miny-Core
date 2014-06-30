@@ -90,13 +90,6 @@ class Application extends BaseApplication
 
         $routeGeneratorClass = 'Miny\\Router\\RouteGenerator';
         $container->setConstructorArgument($routeGeneratorClass, 1, '@router:short_urls');
-
-        $container->addCallback(
-            'Miny\\HTTP\\Session',
-            function (Session $session) {
-                $session->open();
-            }
-        );
     }
 
     protected function onRun()
