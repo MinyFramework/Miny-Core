@@ -12,13 +12,13 @@ namespace Miny\HTTP;
 class ParameterContainer
 {
     /**
-     * @var array
+     * @var array|\ArrayAccess
      */
     protected $data;
 
     public function __construct($data = array())
     {
-        if(!is_array($data) && !$data instanceof \ArrayAccess) {
+        if (!is_array($data) && !$data instanceof \ArrayAccess) {
             throw new \InvalidArgumentException('ParameterContainer::__construct() requires an array or array-like object.');
         }
         $this->data = $data;
@@ -26,7 +26,15 @@ class ParameterContainer
 
     public function add(array $data)
     {
-        $this->data = $data + $this->data;
+        if (is_array($this->data)) {
+            $this->data = $data + $this->data;
+        } elseif (method_exists($this->data, 'add')) {
+            $this->data->add($data);
+        } else {
+            foreach ($data as $key => $value) {
+                $this->data[$key] = $value;
+            }
+        }
     }
 
     public function has($key)

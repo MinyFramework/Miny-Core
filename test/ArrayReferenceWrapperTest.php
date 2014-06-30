@@ -30,4 +30,13 @@ class ArrayReferenceWrapperTest extends \PHPUnit_Framework_TestCase
         $this->assertEquals(3, $this->array[3][2]);
         $this->assertFalse(isset($this->array[2]));
     }
+
+    public function testAddReservesReferenceProperty()
+    {
+        $this->object->add(array('baz' => 'foobar'));
+
+        $this->assertTrue(isset($this->array['baz']));
+        $this->object['baz'] = 'value';
+        $this->assertEquals('value', $this->array['baz']);
+    }
 }

@@ -13,7 +13,7 @@ namespace Miny;
  * Class ArrayReferenceWrapper acts as a thin wrapper around arrays to simulate pass-by-reference
  * behaviour.
  *
- * @author Dániel Buga <bugadani@gmail.com>
+ * @author  Dániel Buga <bugadani@gmail.com>
  * @package Miny
  */
 class ArrayReferenceWrapper implements \ArrayAccess
@@ -23,6 +23,11 @@ class ArrayReferenceWrapper implements \ArrayAccess
     public function __construct(array &$data)
     {
         $this->data = & $data;
+    }
+
+    public function add(array $data)
+    {
+        $this->data = $data + $this->data;
     }
 
     /**
