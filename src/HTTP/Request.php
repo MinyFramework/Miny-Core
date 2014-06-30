@@ -13,9 +13,6 @@ use Miny\ArrayReferenceWrapper;
 
 class Request
 {
-    const MASTER_REQUEST = 0;
-    const SUB_REQUEST    = 1;
-
     /**
      * @return Request
      */
@@ -58,15 +55,10 @@ class Request
     private $headers;
     private $method;
     private $ip;
-    private $type = self::MASTER_REQUEST;
+    private $isSubRequest = false;
 
-    public function __construct(
-        $method,
-        $url,
-        $get = array(),
-        $post = array(),
-        $cookie = array()
-    ) {
+    public function __construct($method, $url, $get = array(), $post = array(), $cookie = array())
+    {
         $this->url     = $url;
         $this->method  = strtoupper($method);
         $this->path    = parse_url($url, PHP_URL_PATH);
@@ -81,7 +73,7 @@ class Request
      */
     public function isSubRequest()
     {
-        return $this->type == self::SUB_REQUEST;
+        return $this->isSubRequest;
     }
 
     /**
@@ -93,16 +85,12 @@ class Request
      */
     public function getSubRequest($method, $url, array $post = null)
     {
-        $request = clone $this;
-
-        $request->__construct($method, $url);
-        $request->type = self::SUB_REQUEST;
-        if ($post === null) {
-            $post = $this->post;
-        } else {
-            $post = new ParameterContainer($post);
-        }
-        $request->post = $post;
+        $request       = new Request($method, $url,
+            $this->get->toArray(),
+            $post ? : $this->post->toArray(),
+            $this->cookie->toArray()
+        );
+        $request->isSubRequest = true;
 
         return $request;
     }

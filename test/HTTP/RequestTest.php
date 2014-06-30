@@ -92,11 +92,11 @@ class RequestTest extends \PHPUnit_Framework_TestCase
 
         $subRequest = $request->getSubRequest('GET', 'subrequest uri');
 
-        $this->assertSame($request->post(), $subRequest->post());
+        $this->assertSame($request->post()->toArray(), $subRequest->post()->toArray());
 
         $subRequestWithPost = $request->getSubRequest('GET', '', array('key' => 'other data'));
 
-        $this->assertNotSame($request->post(), $subRequestWithPost->post());
+        $this->assertNotSame($request->post()->toArray(), $subRequestWithPost->post()->toArray());
         $this->assertInstanceOf('\\Miny\\HTTP\\ParameterContainer', $subRequestWithPost->post());
         $this->assertTrue($subRequestWithPost->post()->has('key'));
         $this->assertEquals('other data', $subRequestWithPost->post()->get('key'));
