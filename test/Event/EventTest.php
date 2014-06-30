@@ -26,11 +26,9 @@ class EventTest extends \PHPUnit_Framework_TestCase
             'p2',
             'p3'
         );
-        $event1     = new Event('name', 'p1', 'p2', 'p3');
-        $event2     = new Event('name', $parameters);
+        $event      = new Event('name', 'p1', 'p2', 'p3');
 
-        $this->assertEquals($parameters, $event1->getParameters());
-        $this->assertEquals($parameters, $event2->getParameters());
+        $this->assertEquals($parameters, $event->getParameters());
     }
 
     public function testResponse()

@@ -98,13 +98,11 @@ class EventDispatcher
         if (isset($this->handlers[$name])) {
             $parameters = $event->getParameters();
             ksort($this->handlers[$name]);
+            $response = null;
             foreach ($this->handlers[$name] as $handler) {
                 $response = call_user_func_array($handler, $parameters);
-                if ($response !== null) {
-                    $event->setResponse($response);
-                    break;
-                }
             }
+            $event->setResponse($response);
             $event->setHandled();
         }
 
