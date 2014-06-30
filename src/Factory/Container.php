@@ -311,7 +311,7 @@ class Container
             if ($reflector->isAbstract()) {
                 throw new \InvalidArgumentException("Class {$class} is abstract and can not be instantiated.");
             } elseif ($reflector->isInterface()) {
-                throw new \InvalidArgumentException("{$class} is an interface can not be instantiated.");
+                throw new \InvalidArgumentException("{$class} is an interface and can not be instantiated.");
             } else {
                 throw new \InvalidArgumentException("Class {$class} can not be instantiated.");
             }
