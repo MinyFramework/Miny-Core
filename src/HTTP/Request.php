@@ -9,6 +9,8 @@
 
 namespace Miny\HTTP;
 
+use Miny\ArrayReferenceWrapper;
+
 class Request
 {
     const MASTER_REQUEST = 0;
@@ -28,9 +30,9 @@ class Request
         $request = new Request(
             $method,
             $_SERVER['REQUEST_URI'],
-            new ReferenceParameterContainer($_GET),
-            new ReferenceParameterContainer($_POST),
-            new ReferenceParameterContainer($_COOKIE)
+            new ArrayReferenceWrapper($_GET),
+            new ArrayReferenceWrapper($_POST),
+            new ArrayReferenceWrapper($_COOKIE)
         );
 
         foreach ($_SERVER as $key => $value) {
@@ -61,17 +63,17 @@ class Request
     public function __construct(
         $method,
         $url,
-        ParameterContainer $get = null,
-        ParameterContainer $post = null,
-        ParameterContainer $cookie = null
+        $get = array(),
+        $post = array(),
+        $cookie = array()
     ) {
         $this->url     = $url;
         $this->method  = strtoupper($method);
         $this->path    = parse_url($url, PHP_URL_PATH);
         $this->headers = new Headers();
-        $this->get     = $get ? : new ParameterContainer();
-        $this->post    = $post ? : new ParameterContainer();
-        $this->cookie  = $cookie ? : new ParameterContainer();
+        $this->get     = new ParameterContainer($get);
+        $this->post    = new ParameterContainer($post);
+        $this->cookie  = new ParameterContainer($cookie);
     }
 
     /**

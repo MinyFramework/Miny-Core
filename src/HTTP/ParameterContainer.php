@@ -9,9 +9,6 @@
 
 namespace Miny\HTTP;
 
-use InvalidArgumentException;
-use OutOfBoundsException;
-
 class ParameterContainer
 {
     /**
@@ -19,8 +16,11 @@ class ParameterContainer
      */
     protected $data;
 
-    public function __construct(array $data = array())
+    public function __construct($data = array())
     {
+        if(!is_array($data) && !$data instanceof \ArrayAccess) {
+            throw new \InvalidArgumentException('ParameterContainer::__construct() requires an array or array-like object.');
+        }
         $this->data = $data;
     }
 
@@ -41,7 +41,7 @@ class ParameterContainer
         }
 
         if ($default === null) {
-            throw new OutOfBoundsException("Key {$key} is not set.");
+            throw new \OutOfBoundsException("Key {$key} is not set.");
         }
 
         return $default;
@@ -50,7 +50,7 @@ class ParameterContainer
     public function set($key, $value)
     {
         if (!is_string($key)) {
-            throw new InvalidArgumentException('$key must be a string.');
+            throw new \InvalidArgumentException('$key must be a string.');
         }
 
         $this->data[$key] = $value;

@@ -112,4 +112,12 @@ class RequestTest extends \PHPUnit_Framework_TestCase
         $this->assertEquals('/some_path/to?this=foo', $request->getUrl());
         $this->assertEquals('/some_path/to', $request->getPath());
     }
+
+    public function testGlobalsAreReferences()
+    {
+        $request = Request::getGlobal();
+
+        $request->get()->set('key', 'not_value');
+        $this->assertEquals('not_value', $_GET['key']);
+    }
 }
