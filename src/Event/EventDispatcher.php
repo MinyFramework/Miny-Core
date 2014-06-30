@@ -100,7 +100,7 @@ class EventDispatcher
             ksort($this->handlers[$name]);
             $response = null;
             foreach ($this->handlers[$name] as $handler) {
-                $response = call_user_func_array($handler, $parameters);
+                $response = call_user_func($handler, $event);
             }
             $event->setResponse($response);
             $event->setHandled();

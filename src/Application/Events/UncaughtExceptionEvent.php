@@ -15,10 +15,22 @@ use Miny\Event\Event;
 
 class UncaughtExceptionEvent extends Event
 {
+    /**
+     * @var \Exception
+     */
+    private $exception;
 
     public function __construct(Exception $exception)
     {
-        parent::__construct(CoreEvents::UNCAUGHT_EXCEPTION, $exception);
+        parent::__construct(CoreEvents::UNCAUGHT_EXCEPTION);
+        $this->exception = $exception;
     }
 
+    /**
+     * @return \Exception
+     */
+    public function getException()
+    {
+        return $this->exception;
+    }
 }

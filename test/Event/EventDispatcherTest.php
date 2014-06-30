@@ -56,17 +56,17 @@ class EventDispatcherTest extends \PHPUnit_Framework_TestCase
         $this->assertFalse($event->isHandled());
     }
 
-    public function testParametersArePassedToHandler()
+    public function testEventIsPassedToHandler()
     {
         $event = new Event('event2', 'p1', 'p2');
         $this->object->register(
             'event2',
-            function () {
-                return func_get_args();
+            function (Event $event) {
+                return $event;
             }
         );
         $this->object->raiseEvent($event);
-        $this->assertEquals(array('p1', 'p2'), $event->getResponse());
+        $this->assertSame($event, $event->getResponse());
     }
 
     public function testHandlerCanBeInsertedIntoASequenceOfHandlers()

@@ -9,10 +9,10 @@
 
 namespace Miny\Application\Handlers;
 
+use Miny\Application\Events\FilterRequestEvent;
+use Miny\Application\Events\FilterResponseEvent;
 use Miny\Factory\Container;
 use Miny\Factory\ParameterContainer;
-use Miny\HTTP\Request;
-use Miny\HTTP\Response;
 use Miny\Log\Log;
 use Miny\Router\Match;
 use Miny\Router\Route;
@@ -48,8 +48,9 @@ class ApplicationEventHandlers
         $this->log->write(Log::INFO, $category, $message, $args);
     }
 
-    public function logRequest(Request $request)
+    public function logRequest(FilterRequestEvent $event)
     {
+        $request = $event->getRequest();
         $this->log(
             'Request',
             '[%s] %s Source: %s',
@@ -63,8 +64,10 @@ class ApplicationEventHandlers
         }
     }
 
-    public function logResponse(Request $request, Response $response)
+    public function logResponse(FilterResponseEvent $event)
     {
+        $request  = $event->getRequest();
+        $response = $event->getHttpResponse();
         $this->log(
             'Response',
             'Response for request [%s] %s',
@@ -82,8 +85,9 @@ class ApplicationEventHandlers
         }
     }
 
-    public function filterRoutes(Request $request)
+    public function filterRoutes(FilterRequestEvent $event)
     {
+        $request = $event->getRequest();
         /** @var $router RouteMatcher */
         $router       = $this->container->get('\\Miny\\Router\\RouteMatcher');
         $getContainer = $request->get();
@@ -123,12 +127,13 @@ class ApplicationEventHandlers
         $getContainer->add($match->getParameters());
     }
 
-    public function setContentType(Request $request, Response $response)
+    public function setContentType(FilterResponseEvent $event)
     {
+        $request = $event->getRequest();
         if (!$request->get()->has('format')) {
             return;
         }
-        $headers = $response->getHeaders();
+        $headers = $event->getHttpResponse()->getHeaders();
         if ($headers->has('content-type')) {
             return;
         }
