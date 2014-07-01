@@ -85,11 +85,12 @@ class Request
      */
     public function getSubRequest($method, $url, array $post = null)
     {
-        $request       = new Request($method, $url,
+        $request = new Request($method, $url,
             $this->get->toArray(),
             $post ? : $this->post->toArray(),
             $this->cookie->toArray()
         );
+
         $request->isSubRequest = true;
 
         return $request;

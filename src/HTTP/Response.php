@@ -65,7 +65,7 @@ class Response implements Serializable
 
     public function __construct(ResponseHeaders $headers = null)
     {
-        $this->headers    = $headers ? : new ResponseHeaders();
+        $this->headers    = $headers ? : new ResponseHeaders(new NativeHeaderSender());
         $this->content    = '';
         $this->statusCode = 200;
     }

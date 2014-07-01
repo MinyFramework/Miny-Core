@@ -27,7 +27,9 @@ class ResponseTest extends \PHPUnit_Framework_TestCase
                 'setRaw',
                 'has'
             ),
-            array(),
+            array(
+                $this->getMockForAbstractClass('Miny\\HTTP\\AbstractHeaderSender')
+            ),
             'mockHeaders'
         );
 
