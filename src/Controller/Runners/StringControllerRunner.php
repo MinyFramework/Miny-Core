@@ -57,8 +57,9 @@ class StringControllerRunner extends AbstractControllerRunner
     /**
      * @inheritdoc
      */
-    public function canRun($class)
+    public function canRun(Request $request)
     {
+        $class = $request->get()->get('controller');
         if (!is_string($class)) {
             return false;
         }

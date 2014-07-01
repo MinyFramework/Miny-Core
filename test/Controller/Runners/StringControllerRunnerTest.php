@@ -83,27 +83,37 @@ class StringControllerRunnerTest extends \PHPUnit_Framework_TestCase
         $this->runner = new StringControllerRunner($this->container, $this->eventDispatcher);
     }
 
-    public function testItCanNotRunANonStringController()
+    public function testItCanRunAClosureController()
     {
+        $request = new Request('', '');
+        $request->get()->set(
+            'controller',
+            function () {
+            }
+        );
         $this->assertFalse(
-            $this->runner->canRun(
-                function () {
-                }
-            )
+            $this->runner->canRun($request)
         );
     }
 
     public function testItCanNotRunANonexistentClass()
     {
+        $request = new Request('', '');
+        $request->get()->set('controller', 'foo');
         $this->assertFalse(
-            $this->runner->canRun('foo')
+            $this->runner->canRun($request)
         );
     }
 
     public function testItCanNotRunAClassThatIsNotASubclassOfController()
     {
+        $request = new Request('', '');
+        $request->get()->set(
+            'controller',
+            '\\stdClass'
+        );
         $this->assertFalse(
-            $this->runner->canRun('\\stdClass')
+            $this->runner->canRun($request)
         );
     }
 
@@ -114,7 +124,13 @@ class StringControllerRunnerTest extends \PHPUnit_Framework_TestCase
             ->with($this->equalTo('TestController'))
             ->will($this->returnValue($this->controller));
 
-        $this->assertTrue($this->runner->canRun('TestController'));
+        $request = new Request('', '');
+        $request->get()->set(
+            'controller',
+            'TestController'
+        );
+
+        $this->assertTrue($this->runner->canRun($request));
     }
 
     public function testItCanRunAControllerByShortName()
@@ -125,7 +141,14 @@ class StringControllerRunnerTest extends \PHPUnit_Framework_TestCase
             ->will($this->returnValue($this->controller));
 
         $this->runner->setControllerPattern('%sController');
-        $this->assertTrue($this->runner->canRun('Test'));
+
+        $request = new Request('', '');
+        $request->get()->set(
+            'controller',
+            'Test'
+        );
+
+        $this->assertTrue($this->runner->canRun($request));
     }
 
     public function testControllerIsInitialisedOnRun()
@@ -146,9 +169,12 @@ class StringControllerRunnerTest extends \PHPUnit_Framework_TestCase
         $this->controller->expects($this->once())
             ->method('indexAction');
 
-        $this->assertTrue($this->runner->canRun('TestController'));
+        $request = new Request('', '');
+        $request->get()->set('controller', 'TestController');
 
-        $this->runner->run(new Request('', ''), new Response);
+        $this->assertTrue($this->runner->canRun($request));
+
+        $this->runner->run($request, new Response);
     }
 
     public function testActionIsReadFromRequest()
@@ -160,10 +186,12 @@ class StringControllerRunnerTest extends \PHPUnit_Framework_TestCase
         $this->controller->expects($this->once())
             ->method('testAction');
 
-        $this->assertTrue($this->runner->canRun('TestController'));
-
         $request = new Request('', '');
+        $request->get()->set('controller', 'TestController');
         $request->get()->set('action', 'test');
+
+        $this->assertTrue($this->runner->canRun($request));
+
         $this->runner->run($request, new Response);
     }
 }

@@ -30,8 +30,9 @@ class ClosureControllerRunner extends AbstractControllerRunner
     /**
      * @inheritdoc
      */
-    public function canRun($controller)
+    public function canRun(Request $request)
     {
+        $controller = $request->get()->get('controller');
         if (!$controller instanceof \Closure) {
             return false;
         }

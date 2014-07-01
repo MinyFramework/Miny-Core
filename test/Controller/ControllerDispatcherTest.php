@@ -47,6 +47,9 @@ class ControllerDispatcherTest extends \PHPUnit_Framework_TestCase
 
     public function testDispatcherStopsAtTheFirstMatchingRunner()
     {
+        $request = new Request('', '');
+        $request->get()->set('controller', 'controllerParam');
+
         $dummyRunner = $this->getMockBuilder('\\Miny\\Controller\\AbstractControllerRunner')
             ->disableOriginalConstructor()
             ->setMethods(array('run', 'canRun'))
@@ -59,12 +62,12 @@ class ControllerDispatcherTest extends \PHPUnit_Framework_TestCase
 
         $dummyRunner->expects($this->exactly(3))
             ->method('canRun')
-            ->with($this->equalTo('controllerParam'))
+            ->with($this->equalTo($request))
             ->will($this->returnValue(false));
 
         $mockRunner->expects($this->once())
             ->method('canRun')
-            ->with($this->equalTo('controllerParam'))
+            ->with($this->equalTo($request))
             ->will($this->returnValue(true));
 
         $dummyRunner->expects($this->never())
@@ -80,9 +83,6 @@ class ControllerDispatcherTest extends \PHPUnit_Framework_TestCase
         $this->dispatcher->addRunner($mockRunner);
         $this->dispatcher->addRunner($dummyRunner);
 
-        $request = new Request('', '');
-        $request->get()->set('controller', 'controllerParam');
-
         $this->container->expects($this->once())
             ->method('get')
             ->will($this->returnValue(new Response()));
@@ -92,6 +92,9 @@ class ControllerDispatcherTest extends \PHPUnit_Framework_TestCase
 
     public function testTheOldRequestIsRestored()
     {
+        $request = new Request('', '');
+        $request->get()->set('controller', 'controllerParam');
+
         $mockRunner = $this->getMockBuilder('\\Miny\\Controller\\AbstractControllerRunner')
             ->disableOriginalConstructor()
             ->setMethods(array('run', 'canRun'))
@@ -99,7 +102,7 @@ class ControllerDispatcherTest extends \PHPUnit_Framework_TestCase
 
         $mockRunner->expects($this->once())
             ->method('canRun')
-            ->with($this->equalTo('controllerParam'))
+            ->with($this->equalTo($request))
             ->will($this->returnValue(true));
 
         $mockRunner->expects($this->once())
@@ -107,9 +110,6 @@ class ControllerDispatcherTest extends \PHPUnit_Framework_TestCase
             ->will($this->returnArgument(1));
 
         $this->dispatcher->addRunner($mockRunner);
-
-        $request = new Request('', '');
-        $request->get()->set('controller', 'controllerParam');
 
         $oldResponse = new Response;
         $response    = new Response;

@@ -33,25 +33,35 @@ class ClosureControllerRunnerTest extends \PHPUnit_Framework_TestCase
 
     public function testItCanRunAClosureController()
     {
+        $request = new Request('', '');
+        $request->get()->set(
+            'controller',
+            function () {
+            }
+        );
         $this->assertTrue(
-            $this->runner->canRun(
-                function () {
-                }
-            )
+            $this->runner->canRun($request)
         );
     }
 
     public function testItCanNotRunANonexistentClass()
     {
+        $request = new Request('', '');
+        $request->get()->set('controller', 'foo');
         $this->assertFalse(
-            $this->runner->canRun('foo')
+            $this->runner->canRun($request)
         );
     }
 
     public function testItCanNotRunAClassThatIsNotASubclassOfController()
     {
+        $request = new Request('', '');
+        $request->get()->set(
+            'controller',
+            '\\stdClass'
+        );
         $this->assertFalse(
-            $this->runner->canRun('\\stdClass')
+            $this->runner->canRun($request)
         );
     }
 
@@ -63,14 +73,16 @@ class ClosureControllerRunnerTest extends \PHPUnit_Framework_TestCase
 
         $test = $this;
 
+        $request->get()->set(
+            'controller',
+            function ($actionArg, $requestArg, $responseArg) use ($request, $response, $test) {
+                $test->assertEquals('test', $actionArg);
+                $test->assertSame($request, $requestArg);
+                $test->assertSame($response, $responseArg);
+            }
+        );
         $this->assertTrue(
-            $this->runner->canRun(
-                function ($actionArg, $requestArg, $responseArg) use ($request, $response, $test) {
-                    $test->assertEquals('test', $actionArg);
-                    $test->assertSame($request, $requestArg);
-                    $test->assertSame($response, $responseArg);
-                }
-            )
+            $this->runner->canRun($request)
         );
         $this->runner->run($request, $response);
     }

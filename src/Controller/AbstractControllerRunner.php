@@ -31,11 +31,11 @@ abstract class AbstractControllerRunner
     /**
      * Determines if $controller is acceptable by the runner.
      *
-     * @param $controller
+     * @param Request $request
      *
      * @return bool
      */
-    abstract public function canRun($controller);
+    abstract public function canRun(Request $request);
 
     /**
      * @param Request  $request

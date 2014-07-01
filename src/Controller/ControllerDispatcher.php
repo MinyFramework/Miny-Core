@@ -49,24 +49,29 @@ class ControllerDispatcher
         $response    = $this->container->get('\\Miny\\HTTP\\Response', array(), true);
         $oldResponse = $this->container->setInstance($response);
 
-        $controller     = $request->get()->get('controller');
-        $runnerExecuted = false;
-        foreach ($this->runners as $runner) {
-            if ($runner->canRun($controller)) {
-                $response       = $runner->run($request, $response);
-                $runnerExecuted = true;
-                break;
-            }
-        }
-        if (!$runnerExecuted) {
-            $path = $request->getPath();
-            throw new InvalidControllerException("Invalid controller set for path {$path}");
-        }
+        $response = $this->doRun($request, $response);
 
         if ($oldResponse) {
             return $this->container->setInstance($oldResponse);
         }
 
         return $response;
+    }
+
+    /**
+     * @param Request  $request
+     * @param Response $response
+     * @return Response
+     * @throws Exceptions\InvalidControllerException
+     */
+    private function doRun(Request $request, Response $response)
+    {
+        foreach ($this->runners as $runner) {
+            if ($runner->canRun($request)) {
+                return $runner->run($request, $response);
+            }
+        }
+        $path = $request->getPath();
+        throw new InvalidControllerException("Invalid controller set for path {$path}");
     }
 }
