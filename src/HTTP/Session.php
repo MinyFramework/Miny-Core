@@ -44,7 +44,7 @@ class Session implements \ArrayAccess, \IteratorAggregate, \Countable
             }
         }
         if ($open) {
-            $this->open(new ArrayReferenceWrapper($_SESSION));
+            $this->open(null);
         }
     }
 
@@ -98,6 +98,8 @@ class Session implements \ArrayAccess, \IteratorAggregate, \Countable
         session_regenerate_id(true);
         if ($data !== null) {
             $this->data = $data;
+        } elseif($this->data === null) {
+            $this->data = new ArrayReferenceWrapper($_SESSION);
         }
         $this->initializeContainer('data');
         if (!$this->initializeContainer('flash')) {
