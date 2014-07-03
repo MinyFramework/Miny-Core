@@ -2,7 +2,7 @@
 
 namespace Miny\HTTP;
 
-use Miny\ArrayReferenceWrapper;
+use Miny\Utils\ArrayReferenceWrapper;
 
 /**
  * @runTestsInSeparateProcesses

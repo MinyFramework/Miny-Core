@@ -1,6 +1,6 @@
 <?php
 
-namespace Miny;
+namespace Miny\Utils;
 
 class ArrayReferenceWrapperTest extends \PHPUnit_Framework_TestCase
 {

@@ -7,14 +7,13 @@
  * For licensing information see the LICENSE file.
  */
 
-namespace Miny;
+namespace Miny\Utils;
 
 /**
  * Class ArrayReferenceWrapper acts as a thin wrapper around arrays to simulate pass-by-reference
  * behaviour.
  *
  * @author  Dániel Buga <bugadani@gmail.com>
- * @package Miny
  */
 class ArrayReferenceWrapper implements \ArrayAccess
 {
@@ -51,7 +50,11 @@ class ArrayReferenceWrapper implements \ArrayAccess
      */
     public function offsetSet($offset, $value)
     {
-        $this->data[$offset] = $value;
+        if ($offset === null) {
+            $this->data[] = $value;
+        } else {
+            $this->data[$offset] = $value;
+        }
     }
 
     /**

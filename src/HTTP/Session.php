@@ -9,7 +9,7 @@
 
 namespace Miny\HTTP;
 
-use Miny\ArrayReferenceWrapper;
+use Miny\Utils\ArrayReferenceWrapper;
 
 class Session implements \ArrayAccess, \IteratorAggregate, \Countable
 {
