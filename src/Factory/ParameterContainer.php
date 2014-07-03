@@ -115,7 +115,7 @@ class ParameterContainer extends AbstractConfigurationTree
     {
         $arr_key = ArrayUtils::implodeIfArray($key, ':');
         if (!isset($this->links[$arr_key])) {
-            $val                   = ArrayUtils::findByPath($this->parameters, $key);
+            $val                   = ArrayUtils::find($this->parameters, $key);
             $this->links[$arr_key] = $this->resolveLinks($val);
         }
 
@@ -130,7 +130,7 @@ class ParameterContainer extends AbstractConfigurationTree
      */
     public function offsetSet($key, $value)
     {
-        ArrayUtils::setByPath($this->parameters, $key, $value);
+        ArrayUtils::set($this->parameters, $key, $value);
         $key = ArrayUtils::implodeIfArray($key, ':');
         if (isset($this->links[$key])) {
             $this->links[$key] = $value;
@@ -144,7 +144,7 @@ class ParameterContainer extends AbstractConfigurationTree
      */
     public function offsetUnset($key)
     {
-        ArrayUtils::unsetByPath($this->parameters, $key);
+        ArrayUtils::remove($this->parameters, $key);
         $key = ArrayUtils::implodeIfArray($key, ':');
         if (isset($this->links[$key])) {
             unset($this->links[$key]);
@@ -160,6 +160,6 @@ class ParameterContainer extends AbstractConfigurationTree
      */
     public function offsetExists($key)
     {
-        return ArrayUtils::existsByPath($this->parameters, $key);
+        return ArrayUtils::exists($this->parameters, $key);
     }
 }

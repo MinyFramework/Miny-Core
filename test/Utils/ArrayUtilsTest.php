@@ -22,13 +22,13 @@ class ArrayUtilsTest extends \PHPUnit_Framework_TestCase
 
     public function testExistsByPath()
     {
-        $this->assertFalse(ArrayUtils::existsByPath($this->array, 5));
-        $this->assertTrue(ArrayUtils::existsByPath($this->array, 6));
+        $this->assertFalse(ArrayUtils::exists($this->array, 5));
+        $this->assertTrue(ArrayUtils::exists($this->array, 6));
 
-        $this->assertTrue(ArrayUtils::existsByPath($this->array, 'key_a:subkey_a'));
-        $this->assertTrue(ArrayUtils::existsByPath($this->array, array('key_a', 'subkey_a')));
-        $this->assertFalse(ArrayUtils::existsByPath($this->array, array('key_b:subkey_a')));
-        $this->assertFalse(ArrayUtils::existsByPath($this->array, array('key_b', 'subkey_a')));
+        $this->assertTrue(ArrayUtils::exists($this->array, 'key_a:subkey_a'));
+        $this->assertTrue(ArrayUtils::exists($this->array, array('key_a', 'subkey_a')));
+        $this->assertFalse(ArrayUtils::exists($this->array, array('key_b:subkey_a')));
+        $this->assertFalse(ArrayUtils::exists($this->array, array('key_b', 'subkey_a')));
     }
 
     /**
@@ -36,22 +36,22 @@ class ArrayUtilsTest extends \PHPUnit_Framework_TestCase
      */
     public function testExistsByPathArrayException()
     {
-        ArrayUtils::existsByPath('something', 'path:to:something');
+        ArrayUtils::exists('something', 'path:to:something');
     }
 
     public function testGetByPath()
     {
-        $this->assertEquals('six', ArrayUtils::getByPath($this->array, 6));
-        $this->assertEquals('value', ArrayUtils::getByPath($this->array, 'key_b'));
-        $this->assertEquals('value_a', ArrayUtils::getByPath($this->array, 'key_a:subkey_a'));
+        $this->assertEquals('six', ArrayUtils::get($this->array, 6));
+        $this->assertEquals('value', ArrayUtils::get($this->array, 'key_b'));
+        $this->assertEquals('value_a', ArrayUtils::get($this->array, 'key_a:subkey_a'));
         $this->assertEquals(
             'value_a',
-            ArrayUtils::getByPath($this->array, array('key_a', 'subkey_a'))
+            ArrayUtils::get($this->array, array('key_a', 'subkey_a'))
         );
-        $this->assertEquals(null, ArrayUtils::getByPath($this->array, array('key_a', 'subkey_b')));
+        $this->assertEquals(null, ArrayUtils::get($this->array, array('key_a', 'subkey_b')));
         $this->assertEquals(
             'default',
-            ArrayUtils::getByPath($this->array, array('key_a', 'subkey_b'), 'default')
+            ArrayUtils::get($this->array, array('key_a', 'subkey_b'), 'default')
         );
     }
 
@@ -60,17 +60,17 @@ class ArrayUtilsTest extends \PHPUnit_Framework_TestCase
      */
     public function testGetByPathArrayException()
     {
-        ArrayUtils::getByPath('something', 'path:to:something');
+        ArrayUtils::get('something', 'path:to:something');
     }
 
     public function testFindByPath()
     {
-        $this->assertEquals('value_a', ArrayUtils::findByPath($this->array, 'key_a:subkey_a'));
+        $this->assertEquals('value_a', ArrayUtils::find($this->array, 'key_a:subkey_a'));
         $this->assertEquals(
             'value_a',
-            ArrayUtils::findByPath($this->array, array('key_a', 'subkey_a'))
+            ArrayUtils::find($this->array, array('key_a', 'subkey_a'))
         );
-        $this->assertEquals(array(), ArrayUtils::findByPath($this->array, array('foo_path'), true));
+        $this->assertEquals(array(), ArrayUtils::find($this->array, array('foo_path'), true));
     }
 
     /**
@@ -78,25 +78,25 @@ class ArrayUtilsTest extends \PHPUnit_Framework_TestCase
      */
     public function testFindByPathNonexistent()
     {
-        ArrayUtils::findByPath($this->array, array('key_a', 'subkey_b'));
+        ArrayUtils::find($this->array, array('key_a', 'subkey_b'));
     }
 
     public function testSetByPath()
     {
-        ArrayUtils::setByPath($this->array, 'key_a:subkey_a', 'new_value');
-        ArrayUtils::setByPath($this->array, 'key_a:nonexistent:sub', 'value');
-        ArrayUtils::setByPath($this->array, array('key', 'another', null), 'value');
-        $this->assertEquals('new_value', ArrayUtils::getByPath($this->array, 'key_a:subkey_a'));
-        $this->assertEquals('value', ArrayUtils::getByPath($this->array, 'key_a:nonexistent:sub'));
-        $this->assertEquals('value', ArrayUtils::getByPath($this->array, 'key:another:0'));
+        ArrayUtils::set($this->array, 'key_a:subkey_a', 'new_value');
+        ArrayUtils::set($this->array, 'key_a:nonexistent:sub', 'value');
+        ArrayUtils::set($this->array, array('key', 'another', null), 'value');
+        $this->assertEquals('new_value', ArrayUtils::get($this->array, 'key_a:subkey_a'));
+        $this->assertEquals('value', ArrayUtils::get($this->array, 'key_a:nonexistent:sub'));
+        $this->assertEquals('value', ArrayUtils::get($this->array, 'key:another:0'));
     }
 
     public function testUnsetByPath()
     {
-        ArrayUtils::unsetByPath($this->array, 'key_a:subkey_a');
+        ArrayUtils::remove($this->array, 'key_a:subkey_a');
         $this->assertFalse(isset($this->array['key_a']['subkey_a']));
         // Should not throw an exception.
-        ArrayUtils::unsetByPath($this->array, 'key_a:subkey_a:foo');
+        ArrayUtils::remove($this->array, 'key_a:subkey_a:foo');
     }
 
     public function testMergeNoOverwrite()
