@@ -16,7 +16,9 @@ namespace Miny\Utils;
  */
 class ArrayUtils
 {
-    public static function isArrayType($array)
+    public static $delimiter = ':';
+
+    public static function isArray($array)
     {
         return is_array($array) || $array instanceof \ArrayAccess;
     }
@@ -41,15 +43,12 @@ class ArrayUtils
      * @throws \InvalidArgumentException
      * @return bool
      */
-    public static function existsByPath($array, $parts)
+    public static function exists($array, $parts)
     {
         if (!is_array($array) && !$array instanceof \ArrayAccess) {
             throw new \InvalidArgumentException('ArrayUtils::existsByPath expects an array or an ArrayAccess object.');
         }
-        if (!is_array($parts)) {
-            $parts = explode(':', $parts);
-        }
-        foreach ($parts as $k) {
+        foreach (self::explodePath($parts) as $k) {
             if (!static::arrayHasKey($array, $k)) {
                 return false;
             }
@@ -70,15 +69,12 @@ class ArrayUtils
      * @throws \InvalidArgumentException
      * @return mixed
      */
-    public static function getByPath($array, $parts, $default = null)
+    public static function get($array, $parts, $default = null)
     {
-        if (!is_array($array) && !$array instanceof \ArrayAccess) {
+        if (!self::isArray($array)) {
             throw new \InvalidArgumentException('ArrayUtils::getByPath expects an array or an ArrayAccess object.');
         }
-        if (!is_array($parts)) {
-            $parts = explode(':', $parts);
-        }
-        foreach ($parts as $k) {
+        foreach (self::explodePath($parts) as $k) {
             if (!static::arrayHasKey($array, $k)) {
                 return $default;
             }
@@ -91,23 +87,24 @@ class ArrayUtils
     /**
      * Walks through the given $array and returns a reference to the value represented by $path.
      *
-     * @param array        $array
-     * @param array|string $parts An array containing the keys or a string delimited by :
-     * @param bool         $create
-     *
-     * @return mixed
+     * @param array|\ArrayAccess $array
+     * @param array|string       $parts An array containing the keys or a string delimited by :
+     * @param bool               $create
      *
      * @throws \OutOfBoundsException
+     * @throws \InvalidArgumentException
+     *
+     * @return mixed
      */
-    public static function &findByPath(array &$array, $parts, $create = false)
+    public static function &find(&$array, $parts, $create = false)
     {
-        if (!is_array($parts)) {
-            $parts = explode(':', $parts);
+        if (!self::isArray($array)) {
+            throw new \InvalidArgumentException('ArrayUtils::getByPath expects an array or an ArrayAccess object.');
         }
-        foreach ($parts as $k) {
+        foreach (self::explodePath($parts) as $k) {
             if (!static::arrayHasKey($array, $k)) {
                 if (!$create) {
-                    $key = implode(':', $parts);
+                    $key = self::implodeIfArray($parts, self::$delimiter);
                     throw new \OutOfBoundsException("Array key not found: {$key}");
                 }
                 $array[$k] = array();
@@ -124,13 +121,15 @@ class ArrayUtils
      * @param array        $array
      * @param array|string $parts An array containing the keys or a string delimited by :
      * @param mixed        $item
+     *
+     * @throws \InvalidArgumentException
      */
-    public static function setByPath(array &$array, $parts, $item)
+    public static function set(array &$array, $parts, $item)
     {
-        if (!is_array($parts)) {
-            $parts = explode(':', $parts);
+        if (!self::isArray($array)) {
+            throw new \InvalidArgumentException('ArrayUtils::getByPath expects an array or an ArrayAccess object.');
         }
-        foreach ($parts as $k) {
+        foreach (self::explodePath($parts) as $k) {
             if ($k === null || $k === '') {
                 $k = count($array);
             }
@@ -147,12 +146,15 @@ class ArrayUtils
      *
      * @param array        $array
      * @param array|string $parts An array containing the keys or a string delimited by ":"
+     *
+     * @throws \InvalidArgumentException
      */
-    public static function unsetByPath(array &$array, $parts)
+    public static function remove(array &$array, $parts)
     {
-        if (!is_array($parts)) {
-            $parts = explode(':', $parts);
+        if (!self::isArray($array)) {
+            throw new \InvalidArgumentException('ArrayUtils::getByPath expects an array or an ArrayAccess object.');
         }
+        $parts = self::explodePath($parts);
         $last_key = array_pop($parts);
         foreach ($parts as $k) {
             if (!static::arrayHasKey($array, $k)) {
@@ -176,7 +178,7 @@ class ArrayUtils
     {
         foreach ($array2 as $key => $value) {
             if (isset($array1[$key])) {
-                if (static::isArrayType($array1[$key]) && static::isArrayType($value)) {
+                if (self::isArray($array1[$key]) && self::isArray($value)) {
                     $array1[$key] = self::merge($array1[$key], $value, $overwrite);
                 } elseif ($overwrite) {
                     $array1[$key] = $value;
@@ -196,5 +198,18 @@ class ArrayUtils
         }
 
         return $data;
+    }
+
+    /**
+     * @param $parts
+     * @return array
+     */
+    private static function explodePath($parts)
+    {
+        if (!is_array($parts)) {
+            $parts = explode(self::$delimiter, $parts);
+        }
+
+        return $parts;
     }
 }
