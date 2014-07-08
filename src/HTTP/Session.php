@@ -232,7 +232,7 @@ class Session implements \ArrayAccess, \IteratorAggregate, \Countable
         $this->flash($key, $data, 1);
     }
 
-    public function flash($key, $data, $ttl)
+    public function flash($key, $data, $ttl = 1)
     {
         $this->data['flash'][$key] = array('data' => $data, 'ttl' => (int)$ttl);
     }
