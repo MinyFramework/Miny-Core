@@ -82,9 +82,20 @@ abstract class Controller extends Extendable
         $this->response->setCode($code);
     }
 
+    public function route($route, array $params = array())
+    {
+        return $this->routeGenerator->generate($route, $params);
+    }
+
     public function redirect($url, $code = 301)
     {
         $this->response->redirect($url, $code);
+    }
+
+    public function redirectRoute($route, array $params = array())
+    {
+        $path = $this->routeGenerator->generate($route, $params);
+        $this->response->redirect($path);
     }
 
     public function getHeaders()
@@ -110,12 +121,6 @@ abstract class Controller extends Extendable
     public function removeHeader($name, $value = null)
     {
         $this->headers->remove($name, $value);
-    }
-
-    public function redirectRoute($route, array $params = array())
-    {
-        $path = $this->routeGenerator->generate($route, $params);
-        $this->response->redirect($path);
     }
 
     /**
