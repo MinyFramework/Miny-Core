@@ -96,7 +96,6 @@ class EventDispatcher
     {
         $name = $event->getName();
         if (isset($this->handlers[$name])) {
-            $parameters = $event->getParameters();
             ksort($this->handlers[$name]);
             $response = null;
             foreach ($this->handlers[$name] as $handler) {
