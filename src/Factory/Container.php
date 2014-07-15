@@ -226,14 +226,14 @@ class Container
         //Try to find the constructor arguments for the most concrete definition
         $concrete = $this->findMostConcreteDefinition($abstract);
 
-        //If there are predefined constructor arguments, merge them with out parameter array
-        if (isset($this->constructorArguments[$concrete])) {
-            $parameters = $parameters + $this->constructorArguments[$concrete];
-        }
-
         if (isset($this->objects[$concrete]) && !$forceNew) {
             //Return the stored instance if a new one is not forced
             return $this->objects[$concrete];
+        }
+
+        //If there are predefined constructor arguments, merge them with out parameter array
+        if (isset($this->constructorArguments[$concrete])) {
+            $parameters = $parameters + $this->constructorArguments[$concrete];
         }
 
         $key = $concrete;
