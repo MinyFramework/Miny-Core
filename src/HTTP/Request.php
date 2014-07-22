@@ -24,6 +24,8 @@ class Request
             $method = $_SERVER['REQUEST_METHOD'];
         }
 
+        self::getUploadedFileInfo();
+
         $request = new Request(
             $method,
             $_SERVER['REQUEST_URI'],
@@ -45,6 +47,33 @@ class Request
         }
 
         return $request;
+    }
+
+    private static function getUploadedFileInfo()
+    {
+        foreach ($_FILES as $field => $data) {
+            if (is_array($data['error'])) {
+                $files = array();
+                foreach ($data['error'] as $fileKey => $error) {
+                    $files[$fileKey] = new UploadedFileInfo(
+                        $data['tmp_name'][$fileKey],
+                        $data['name'][$fileKey],
+                        $data['type'][$fileKey],
+                        $data['size'][$fileKey],
+                        $error
+                    );
+                }
+                $_POST[$field] = $files;
+            } else {
+                $_POST[$field] = new UploadedFileInfo(
+                    $data['tmp_name'],
+                    $data['name'],
+                    $data['type'],
+                    $data['size'],
+                    $data['error']
+                );
+            }
+        }
     }
 
     private $url;

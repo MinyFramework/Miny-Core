@@ -120,4 +120,57 @@ class RequestTest extends \PHPUnit_Framework_TestCase
         $request->get()->set('key', 'not_value');
         $this->assertEquals('not_value', $_GET['key']);
     }
+
+    public function testSingleFileUpload()
+    {
+        $_FILES  = array(
+            'file' => array(
+                'tmp_name' => 'foo.bar.baz',
+                'name'     => 'Test File',
+                'size'     => 5,
+                'error'    => UPLOAD_ERR_OK,
+                'type'     => 'image/jpeg'
+            )
+        );
+        $request = Request::getGlobal();
+
+        $file = $request->post()->get('file');
+        $this->assertInstanceOf('Miny\\HTTP\\UploadedFileInfo', $file);
+
+        $this->assertEquals('foo.bar.baz', $file->getTempName());
+        $this->assertEquals('Test File', $file->getFileName());
+        $this->assertEquals(5, $file->getSize());
+        $this->assertEquals('image/jpeg', $file->getType());
+        $this->assertEquals(UPLOAD_ERR_OK, $file->getError());
+    }
+
+    public function testArrayFileUpload()
+    {
+        $_FILES  = array(
+            'file' => array(
+                'tmp_name' => array('foo.bar.baz', 'foobar'),
+                'name'     => array('Test File', 'Other File'),
+                'size'     => array(5, 6),
+                'error'    => array(UPLOAD_ERR_OK, UPLOAD_ERR_EXTENSION),
+                'type'     => array('image/jpeg', 'image/png')
+            )
+        );
+        $request = Request::getGlobal();
+
+        $file = $request->post()->get('file');
+        $this->assertInstanceOf('Miny\\HTTP\\UploadedFileInfo', $file[0]);
+        $this->assertInstanceOf('Miny\\HTTP\\UploadedFileInfo', $file[1]);
+
+        $this->assertEquals('foo.bar.baz', $file[0]->getTempName());
+        $this->assertEquals('Test File', $file[0]->getFileName());
+        $this->assertEquals(5, $file[0]->getSize());
+        $this->assertEquals('image/jpeg', $file[0]->getType());
+        $this->assertEquals(UPLOAD_ERR_OK, $file[0]->getError());
+
+        $this->assertEquals('foobar', $file[1]->getTempName());
+        $this->assertEquals('Other File', $file[1]->getFileName());
+        $this->assertEquals(6, $file[1]->getSize());
+        $this->assertEquals('image/png', $file[1]->getType());
+        $this->assertEquals(UPLOAD_ERR_EXTENSION, $file[1]->getError());
+    }
 }
