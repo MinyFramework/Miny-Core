@@ -48,41 +48,28 @@ class EventDispatcher
      *
      * @param string          $event
      * @param callable|object $handler
-     * @param int             $place
+     * @param int             $priority
      *
      * @throws EventHandlerException if the handler is not callable.
      */
-    public function register($event, $handler, $place = null)
-    {
-        $handler = $this->ensureCallback($handler, $event);
-
-        if ($place === null) {
-            if (!isset($this->handlers[$event])) {
-                $this->handlers[$event] = array($handler);
-            } else {
-                $this->handlers[$event][] = $handler;
-            }
-        } else {
-            if (!isset($this->handlers[$event])) {
-                $this->handlers[$event] = array($place => $handler);
-            } elseif (!isset($this->handlers[$event][$place])) {
-                $this->handlers[$event][$place] = $handler;
-            } else {
-                array_splice($this->handlers[$event], $place, 0, array($handler));
-            }
-        }
-    }
-
-    public function registerHandlers($event, $handlers)
+    public function register($event, $handler, $priority = 0)
     {
         if (!isset($this->handlers[$event])) {
             $this->handlers[$event] = array();
         }
+        if (!isset($this->handlers[$event][$priority])) {
+            $this->handlers[$event][$priority] = array();
+        }
+        $this->handlers[$event][$priority][] = $this->ensureCallback($handler, $event);
+    }
+
+    public function registerHandlers($event, $handlers)
+    {
         if (!is_array($handlers) || is_callable($handlers)) {
-            $this->handlers[$event][] = $this->ensureCallback($handlers, $event);
+            $this->register($event, $handlers);
         } else {
             foreach ($handlers as $handler) {
-                $this->handlers[$event][] = $this->ensureCallback($handler, $event);
+                $this->register($event, $handler);
             }
         }
     }
@@ -98,8 +85,10 @@ class EventDispatcher
         if (isset($this->handlers[$name])) {
             ksort($this->handlers[$name]);
             $response = null;
-            foreach ($this->handlers[$name] as $handler) {
-                $response = call_user_func($handler, $event);
+            foreach ($this->handlers[$name] as $handlers) {
+                foreach ($handlers as $handler) {
+                    $response = call_user_func($handler, $event);
+                }
             }
             $event->setResponse($response);
             $event->setHandled();
