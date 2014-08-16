@@ -46,8 +46,7 @@ class Application extends BaseApplication
 
         $eventHandlers = $container->get('Miny\\Application\\Handlers\\ApplicationEventHandlers');
 
-        $events = $this->eventDispatcher;
-        $events->registerHandlers(
+        $this->eventDispatcher->registerHandlers(
             CoreEvents::FILTER_REQUEST,
             [
                 [$eventHandlers, 'logRequest'],
@@ -55,7 +54,7 @@ class Application extends BaseApplication
             ]
         );
 
-        $events->registerHandlers(
+        $this->eventDispatcher->registerHandlers(
             CoreEvents::FILTER_RESPONSE,
             [
                 [$eventHandlers, 'setContentType'],
@@ -76,14 +75,17 @@ class Application extends BaseApplication
         );
         $container->addCallback(
             'Miny\\Router\\Router',
-            function (Router $router) use ($events) {
+            function (Router $router) {
                 $parameterContainer = $this->parameterContainer;
 
                 $router->addGlobalValues($parameterContainer['router:default_parameters']);
                 $router->setPrefix($parameterContainer['router:prefix']);
                 $router->setPostfix($parameterContainer['router:postfix']);
 
-                $events->register(CoreEvents::BEFORE_RUN, [$router, 'registerResources']);
+                $this->eventDispatcher->register(
+                    CoreEvents::BEFORE_RUN,
+                    [$router, 'registerResources']
+                );
             }
         );
 
@@ -100,16 +102,21 @@ class Application extends BaseApplication
 
     protected function onRun()
     {
+        $this->ensureRootRoute();
+
+        /** @var $request Request */
+        $request = $this->container->get('Miny\\HTTP\\Request');
+        /** @var $dispatcher Dispatcher */
+        $dispatcher = $this->container->get('Miny\\Application\\Dispatcher');
+        $dispatcher->dispatch($request)->send();
+    }
+
+    private function ensureRootRoute()
+    {
         /** @var $router Router */
         $router = $this->container->get('Miny\\Router\\Router');
         if (!$router->has('root')) {
             $router->root()->set('controller', 'index');
         }
-
-        /** @var $dispatcher Dispatcher */
-        $dispatcher = $this->container->get('Miny\\Application\\Dispatcher');
-        /** @var $request Request */
-        $request = $this->container->get('Miny\\HTTP\\Request');
-        $dispatcher->dispatch($request)->send();
     }
 }

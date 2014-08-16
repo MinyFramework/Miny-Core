@@ -44,11 +44,9 @@ class RouteParser extends AbstractRouteParser
             $uri
         );
         $route->setPath($uri);
-        if ($route->getParameterCount() === 0) {
-            return $route;
+        if ($route->getParameterCount() !== 0) {
+            $route->setRegexp($this->createRegexp($uri, $route));
         }
-        $route->setRegexp($this->createRegexp($uri, $route));
-
         return $route;
     }
 

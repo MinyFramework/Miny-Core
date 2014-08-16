@@ -92,13 +92,13 @@ abstract class BaseApplication
         $ioc->setInstance($parameterContainer);
 
         /** @var $log Log */
-        $this->log = $log = $ioc->get('Miny\\Log\\Log');
+        $this->log = $ioc->get('Miny\\Log\\Log');
 
         if ($this->environment !== $environment) {
             $message = 'Unknown environment option "%s". Assuming production environment.';
-            $log->write(Log::WARNING, 'Miny', $message, $environment);
+            $this->log->write(Log::WARNING, 'Miny', $message, $environment);
         }
-        $log->write(
+        $this->log->write(
             Log::INFO,
             'Miny',
             'Starting Miny in %s environment',
@@ -142,11 +142,7 @@ abstract class BaseApplication
             './config/config.php'        => self::ENV_PROD
         ];
         foreach ($config_files as $file => $env) {
-            try {
-                $this->loadConfig($file, $env);
-            } catch (\InvalidArgumentException $e) {
-
-            }
+            $this->loadConfig($file, $env);
         }
     }
 
@@ -159,10 +155,18 @@ abstract class BaseApplication
      */
     public function loadConfig($file, $env = self::ENV_COMMON)
     {
+        $this->loadConfigFile($file, $env, false);
+    }
+
+    private function loadConfigFile($file, $env, $ignoreMissing = true)
+    {
         if (!$this->isEnvironment($env)) {
             return;
         }
         if (!is_file($file)) {
+            if ($ignoreMissing) {
+                return;
+            }
             throw new \InvalidArgumentException("Configuration file not found: {$file}");
         }
         $this->log->write(
@@ -171,11 +175,9 @@ abstract class BaseApplication
             'Loading configuration file: %s',
             $file
         );
-        $config = include $file;
-        if (!is_array($config)) {
-            throw new \UnexpectedValueException("Invalid configuration file: {$file}");
-        }
-        $this->parameterContainer->addParameters($config);
+        $this->parameterContainer->addParameters(
+            include $file
+        );
     }
 
     protected function registerDefaultServices(Container $container)
@@ -196,10 +198,9 @@ abstract class BaseApplication
         set_error_handler([$errorHandlers, 'handleErrors']);
         set_exception_handler([$errorHandlers, 'handleExceptions']);
 
-        $log = $this->log;
-        $log->setFlushLimit($this->parameterContainer['log']['flush_limit']);
+        $this->log->setFlushLimit($this->parameterContainer['log']['flush_limit']);
         if ($this->parameterContainer['log']['enable_file_writer']) {
-            $log->registerWriter(new FileWriter($this->parameterContainer['log']['path']));
+            $this->log->registerWriter(new FileWriter($this->parameterContainer['log']['path']));
         }
 
         $shutdown->register(
@@ -209,15 +210,15 @@ abstract class BaseApplication
             0
         );
         $shutdown->register(
-            function () use ($log) {
-                $log->write(Log::INFO, 'Miny', "End of execution.\n");
-                $log->flush();
+            function () {
+                $this->log->write(Log::INFO, 'Miny', "End of execution.\n");
+                $this->log->flush();
             },
             1000
         );
 
         if ($this->parameterContainer['profile']) {
-            $profiler = $log->startProfiling('Miny', 'Application execution');
+            $profiler = $this->log->startProfiling('Miny', 'Application execution');
             $shutdown->register([$profiler, 'stop'], 998);
         }
 

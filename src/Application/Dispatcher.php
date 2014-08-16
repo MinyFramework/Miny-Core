@@ -60,10 +60,6 @@ class Dispatcher
 
         ob_start();
         $response = $this->filterRequest($request);
-        if (!$response) {
-            $response = $this->controllerDispatcher->runController($request);
-            $this->eventDispatcher->raiseEvent(new FilterResponseEvent($request, $response));
-        }
         $response->addContent(ob_get_clean());
 
         if ($oldRequest) {
@@ -107,6 +103,10 @@ class Dispatcher
             }
         }
 
-        return false;
+        //The event handlers did not return a Request or a Response so invoke the controller
+        $response = $this->controllerDispatcher->runController($request);
+        $this->eventDispatcher->raiseEvent(new FilterResponseEvent($request, $response));
+
+        return $response;
     }
 }
