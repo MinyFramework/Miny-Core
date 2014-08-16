@@ -81,13 +81,11 @@ class ParameterContainer extends AbstractConfigurationTree
      */
     public function resolveLinksInString($string)
     {
-        $container = $this;
-
         return preg_replace_callback(
             '/(?<!\\\){@(.*?)}/',
-            function ($matches) use ($container) {
+            function ($matches) {
                 try {
-                    return $container->offsetGet($matches[1]);
+                    return $this->offsetGet($matches[1]);
                 } catch (\OutOfBoundsException $e) {
                     return $matches[0];
                 }
@@ -115,8 +113,9 @@ class ParameterContainer extends AbstractConfigurationTree
     {
         $arr_key = ArrayUtils::implodeIfArray($key, ':');
         if (!isset($this->links[$arr_key])) {
-            $val                   = ArrayUtils::find($this->parameters, $key);
-            $this->links[$arr_key] = $this->resolveLinks($val);
+            $this->links[$arr_key] = $this->resolveLinks(
+                ArrayUtils::find($this->parameters, $key)
+            );
         }
 
         return $this->links[$arr_key];

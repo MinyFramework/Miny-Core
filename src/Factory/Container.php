@@ -119,21 +119,17 @@ class Container
      * @param $callback
      * @throws \InvalidArgumentException
      */
-    public function addCallback($concrete, $callback)
+    public function addCallback($concrete, callable $callback)
     {
-        if (!is_callable($callback)) {
-            throw new \InvalidArgumentException('$callback is not callable.');
-        }
         //Strip all leading backslashes
         if ($concrete[0] === '\\') {
             $concrete = substr($concrete, 1);
         }
 
         if (!isset($this->callbacks[$concrete])) {
-            $this->callbacks[$concrete] = [$callback];
-        } else {
-            $this->callbacks[$concrete][] = $callback;
+            $this->callbacks[$concrete] = [];
         }
+        $this->callbacks[$concrete][] = $callback;
     }
 
     /**

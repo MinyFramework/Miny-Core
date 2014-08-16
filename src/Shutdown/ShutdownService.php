@@ -30,17 +30,13 @@ class ShutdownService
      *
      * @throws \InvalidArgumentException
      */
-    public function register($callback, $priority = null)
+    public function register(callable $callback, $priority = null)
     {
-        if (!is_callable($callback)) {
-            throw new \InvalidArgumentException('$callback needs to be callable.');
-        }
         $priority = $this->getPriority($priority);
         if (!isset($this->callbacks[$priority])) {
-            $this->callbacks[$priority] = [$callback];
-        } else {
-            $this->callbacks[$priority][] = $callback;
+            $this->callbacks[$priority] = [];
         }
+        $this->callbacks[$priority][] = $callback;
         $this->lowestPriority = max($priority, $this->lowestPriority);
     }
 

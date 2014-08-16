@@ -23,14 +23,6 @@ class ShutdownServiceTest extends PHPUnit_Framework_TestCase
         $this->shutdown = new MockShutdownService();
     }
 
-    /**
-     * @expectedException \InvalidArgumentException
-     */
-    public function testThatExceptionIsThrownWhenACallbackIsNotCallable()
-    {
-        $this->shutdown->register('not a callback');
-    }
-
     public function testCallbacksWithoutPriorityAreCalledInOrder()
     {
         $out = '';

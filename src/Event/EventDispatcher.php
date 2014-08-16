@@ -87,7 +87,7 @@ class EventDispatcher
             $response = null;
             foreach ($this->handlers[$name] as $handlers) {
                 foreach ($handlers as $handler) {
-                    $response = call_user_func($handler, $event);
+                    $response = $handler($event);
                 }
             }
             $event->setResponse($response);

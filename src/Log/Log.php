@@ -65,7 +65,7 @@ class Log extends AbstractLog
 
     public function setFlushLimit($limit)
     {
-        $this->flushLimit = (int) $limit;
+        $this->flushLimit = (int)$limit;
         if ($this->messageNum >= $this->flushLimit) {
             $this->flush();
         }

@@ -31,13 +31,11 @@ class RouteParser extends AbstractRouteParser
         $route = new Route;
         $route->setMethod($method);
 
-        $defaultPattern = $this->defaultPattern;
-
         $uri = preg_replace_callback(
             '/{(\w+)(?::(.*?))?}/',
-            function ($matches) use ($defaultPattern, $route) {
+            function ($matches) use ($route) {
                 if (!isset($matches[2])) {
-                    $matches[2] = $defaultPattern;
+                    $matches[2] = $this->defaultPattern;
                 }
                 $route->specify($matches[1], $matches[2]);
 

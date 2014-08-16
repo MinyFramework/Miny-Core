@@ -109,14 +109,6 @@ class ContainerTest extends \PHPUnit_Framework_TestCase
         $this->container->setInstance(42);
     }
 
-    /**
-     * @expectedException \InvalidArgumentException
-     */
-    public function testThatAddCallbackThrowsException()
-    {
-        $this->container->addCallback('foo', 42);
-    }
-
     public function testContainerCanInstantiateClassesThatAreNotRegistered()
     {
         $this->assertInstanceOf('\\stdClass', $this->container->get('\\stdClass'));

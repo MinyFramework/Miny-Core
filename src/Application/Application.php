@@ -63,8 +63,6 @@ class Application extends BaseApplication
             ]
         );
 
-        $parameterContainer = $this->parameterContainer;
-
         $container->addCallback(
             'Miny\\Controller\\ControllerDispatcher',
             function (ControllerDispatcher $dispatcher, Container $container) {
@@ -78,7 +76,9 @@ class Application extends BaseApplication
         );
         $container->addCallback(
             'Miny\\Router\\Router',
-            function (Router $router) use ($parameterContainer, $events) {
+            function (Router $router) use ($events) {
+                $parameterContainer = $this->parameterContainer;
+
                 $router->addGlobalValues($parameterContainer['router:default_parameters']);
                 $router->setPrefix($parameterContainer['router:prefix']);
                 $router->setPostfix($parameterContainer['router:postfix']);
