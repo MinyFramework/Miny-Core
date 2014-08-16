@@ -25,7 +25,7 @@ class Match
      * @param Route $route
      * @param array $parameters
      */
-    public function __construct(Route $route, array $parameters = array())
+    public function __construct(Route $route, array $parameters = [])
     {
         $this->route      = $route;
         $this->parameters = $parameters + $route->getDefaultValues();

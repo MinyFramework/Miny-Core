@@ -59,11 +59,11 @@ abstract class BaseApplication
      */
     public function __construct($environment = self::ENV_PROD, AutoLoader $autoLoader = null)
     {
-        $environmentNames = array(
+        $environmentNames = [
             self::ENV_PROD => 'production',
             self::ENV_DEV  => 'development',
             self::ENV_TEST => 'testing'
-        );
+        ];
         if (!isset($environmentNames[$environment])) {
             $this->environment = self::ENV_PROD;
         } else {
@@ -71,21 +71,21 @@ abstract class BaseApplication
         }
 
         if ($autoLoader === null) {
-            $autoLoader = new AutoLoader(array(
+            $autoLoader = new AutoLoader([
                 '\\Application' => '.',
                 '\\Modules'     => './vendor/miny/Modules'
-            ));
+            ]);
         }
-        $parameterContainer = new ParameterContainer(array(
+        $parameterContainer = new ParameterContainer([
             'default_timezone' => 'UTC',
             'root'             => realpath('.'),
             'profile'          => $this->isDeveloperEnvironment(),
-            'log'              => array(
+            'log'              => [
                 'enable_file_writer' => true,
                 'path'               => realpath('./logs'),
                 'flush_limit'        => 100
-            ),
-        ));
+            ],
+        ]);
 
         $ioc = new Container(new LinkResolver($parameterContainer));
         $ioc->setInstance($autoLoader);
@@ -135,12 +135,12 @@ abstract class BaseApplication
 
     private function loadConfigFiles()
     {
-        $config_files = array(
+        $config_files = [
             './config/config.common.php' => self::ENV_COMMON,
             './config/config.dev.php'    => self::ENV_DEV,
             './config/config.test.php'   => self::ENV_TEST,
             './config/config.php'        => self::ENV_PROD
-        );
+        ];
         foreach ($config_files as $file => $env) {
             try {
                 $this->loadConfig($file, $env);
@@ -193,8 +193,8 @@ abstract class BaseApplication
         $events        = $container->get('Miny\\Event\\EventDispatcher');
         $errorHandlers = $container->get('Miny\\Application\\Handlers\\ErrorHandlers');
 
-        set_error_handler(array($errorHandlers, 'handleErrors'));
-        set_exception_handler(array($errorHandlers, 'handleExceptions'));
+        set_error_handler([$errorHandlers, 'handleErrors']);
+        set_exception_handler([$errorHandlers, 'handleExceptions']);
 
         $log = $this->log;
         $log->setFlushLimit($this->parameterContainer['log']['flush_limit']);
@@ -218,7 +218,7 @@ abstract class BaseApplication
 
         if ($this->parameterContainer['profile']) {
             $profiler = $log->startProfiling('Miny', 'Application execution');
-            $shutdown->register(array($profiler, 'stop'), 998);
+            $shutdown->register([$profiler, 'stop'], 998);
         }
 
         $this->eventDispatcher = $events;

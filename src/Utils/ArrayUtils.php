@@ -107,7 +107,7 @@ class ArrayUtils
                     $key = self::implodeIfArray($parts, self::$delimiter);
                     throw new \OutOfBoundsException("Array key not found: {$key}");
                 }
-                $array[$k] = array();
+                $array[$k] = [];
             }
             $array = & $array[$k];
         }
@@ -134,7 +134,7 @@ class ArrayUtils
                 $k = count($array);
             }
             if (!static::arrayHasKey($array, $k)) {
-                $array[$k] = array();
+                $array[$k] = [];
             }
             $array = & $array[$k];
         }

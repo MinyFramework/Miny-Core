@@ -14,7 +14,7 @@ use Serializable;
 
 class Response implements Serializable
 {
-    public static $statusCodes = array(
+    public static $statusCodes = [
         100 => 'Continue',
         101 => 'Switching Protocols',
         200 => 'OK',
@@ -55,7 +55,7 @@ class Response implements Serializable
         503 => 'Service Unavailable',
         504 => 'Gateway Timeout',
         505 => 'HTTP Version Not Supported'
-    );
+    ];
     /**
      * @var ResponseHeaders
      */
@@ -159,11 +159,11 @@ class Response implements Serializable
     public function serialize()
     {
         return serialize(
-            array(
+            [
                 $this->headers,
                 $this->content,
                 $this->statusCode
-            )
+            ]
         );
     }
 

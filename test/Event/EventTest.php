@@ -21,11 +21,11 @@ class EventTest extends \PHPUnit_Framework_TestCase
 
     public function testGetParameters()
     {
-        $parameters = array(
+        $parameters = [
             'p1',
             'p2',
             'p3'
-        );
+        ];
         $event      = new Event('name', 'p1', 'p2', 'p3');
 
         $this->assertEquals($parameters, $event->getParameters());

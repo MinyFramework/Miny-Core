@@ -14,9 +14,9 @@ class Router
     /**
      * @var Route[]
      */
-    private $routes = array();
-    private $staticRoutes = array();
-    private $globalValues = array();
+    private $routes = [];
+    private $staticRoutes = [];
+    private $globalValues = [];
 
     /**
      * @var AbstractRouteParser
@@ -28,7 +28,7 @@ class Router
     /**
      * @var \Miny\Router\Resource[]
      */
-    private $resources = array();
+    private $resources = [];
 
     public function __construct(AbstractRouteParser $parser)
     {

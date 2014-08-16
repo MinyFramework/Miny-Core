@@ -131,10 +131,10 @@ class RouterTest extends \PHPUnit_Framework_TestCase
 
     public function testThatGlobalValuesAreAdded()
     {
-        $array = array(
+        $array = [
             'key_a' => 'value_a',
             'key_b' => 'value_b'
-        );
+        ];
         $this->router->addGlobalValues($array);
 
         $route = $this->router->add('');

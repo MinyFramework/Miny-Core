@@ -24,7 +24,7 @@ class ControllerDispatcher
     /**
      * @var AbstractControllerRunner[]
      */
-    private $runners = array();
+    private $runners = [];
 
     public function __construct(Container $container)
     {
@@ -46,7 +46,7 @@ class ControllerDispatcher
     public function runController(Request $request)
     {
         /** @var $response Response */
-        $response    = $this->container->get('\\Miny\\HTTP\\Response', array(), true);
+        $response    = $this->container->get('\\Miny\\HTTP\\Response', [], true);
         $oldResponse = $this->container->setInstance($response);
 
         $response = $this->doRun($request, $response);

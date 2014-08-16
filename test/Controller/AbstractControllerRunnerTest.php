@@ -35,12 +35,12 @@ class AbstractControllerRunnerTest extends \PHPUnit_Framework_TestCase
 
         $this->runner = $this->getMockForAbstractClass(
             '\\Miny\\Controller\\AbstractControllerRunner',
-            array($this->eventDispatcher),
+            [$this->eventDispatcher],
             'ControllerRunnerStub',
             true,
             true,
             true,
-            array('initController')
+            ['initController']
         );
         $this->runner->expects($this->any())
             ->method('createLoadedEvent')

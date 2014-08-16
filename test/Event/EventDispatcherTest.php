@@ -42,7 +42,7 @@ class EventDispatcherTest extends \PHPUnit_Framework_TestCase
         $handler_factory = $this->handler_factory;
 
         $this->expectOutputString('012');
-        $this->object->registerHandlers('event', array($handler_factory(0), $handler_factory(1)));
+        $this->object->registerHandlers('event', [$handler_factory(0), $handler_factory(1)]);
         $this->object->register('event2', $handler_factory(2));
 
         $this->object->raiseEvent(new Event('event'));

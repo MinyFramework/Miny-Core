@@ -6,10 +6,10 @@ class HeadersTest extends \PHPUnit_Framework_TestCase
 {
     public function sanitizeProvider()
     {
-        return array(
-            array('Content-Type', 'content-type'),
-            array('Content_Type', 'content-type'),
-        );
+        return [
+            ['Content-Type', 'content-type'],
+            ['Content_Type', 'content-type'],
+        ];
     }
 
     /**
@@ -115,7 +115,7 @@ class HeadersTest extends \PHPUnit_Framework_TestCase
     {
         $headers = new Headers;
 
-        $headers->set('Expect', array('something', 'something else'));
+        $headers->set('Expect', ['something', 'something else']);
         $headers->setRaw('Raw foo');
 
         $new_headers = unserialize(serialize($headers));
@@ -143,7 +143,7 @@ class HeadersTest extends \PHPUnit_Framework_TestCase
     public function testRemoveHeaders()
     {
         $headers = new Headers;
-        $headers->set('Expect', array('a', 'b', 'c'));
+        $headers->set('Expect', ['a', 'b', 'c']);
         $headers->set('foo', 'bar');
 
         $headers->remove('Expect', 'a');

@@ -24,7 +24,7 @@ abstract class Module
     /**
      * @var callback[]
      */
-    private $conditionalCallbacks = array();
+    private $conditionalCallbacks = [];
 
     /**
      * @var AbstractConfigurationTree
@@ -41,7 +41,7 @@ abstract class Module
     {
         $this->application  = $app;
         $parameterContainer = $app->getParameterContainer();
-        $parameterContainer->addParameters(array($name => $this->defaultConfiguration()), false);
+        $parameterContainer->addParameters([$name => $this->defaultConfiguration()], false);
         $this->configuration = $parameterContainer->getSubTree($name);
     }
 
@@ -78,12 +78,12 @@ abstract class Module
 
     public function getDependencies()
     {
-        return array();
+        return [];
     }
 
     public function defaultConfiguration()
     {
-        return array();
+        return [];
     }
 
     public function getConditionalCallbacks()
@@ -93,7 +93,7 @@ abstract class Module
 
     public function eventHandlers()
     {
-        return array();
+        return [];
     }
 
     public function ifModule($module, $callback)

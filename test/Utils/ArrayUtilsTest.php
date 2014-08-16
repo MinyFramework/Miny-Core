@@ -11,13 +11,13 @@ class ArrayUtilsTest extends \PHPUnit_Framework_TestCase
 
     protected function setUp()
     {
-        $this->array = array(
-            'key_a' => new \ArrayObject(array(
+        $this->array = [
+            'key_a' => new \ArrayObject([
                     'subkey_a' => 'value_a'
-                )),
+                ]),
             'key_b' => 'value',
             6       => 'six'
-        );
+        ];
     }
 
     public function testExistsByPath()
@@ -26,9 +26,9 @@ class ArrayUtilsTest extends \PHPUnit_Framework_TestCase
         $this->assertTrue(ArrayUtils::exists($this->array, 6));
 
         $this->assertTrue(ArrayUtils::exists($this->array, 'key_a:subkey_a'));
-        $this->assertTrue(ArrayUtils::exists($this->array, array('key_a', 'subkey_a')));
-        $this->assertFalse(ArrayUtils::exists($this->array, array('key_b:subkey_a')));
-        $this->assertFalse(ArrayUtils::exists($this->array, array('key_b', 'subkey_a')));
+        $this->assertTrue(ArrayUtils::exists($this->array, ['key_a', 'subkey_a']));
+        $this->assertFalse(ArrayUtils::exists($this->array, ['key_b:subkey_a']));
+        $this->assertFalse(ArrayUtils::exists($this->array, ['key_b', 'subkey_a']));
     }
 
     /**
@@ -46,12 +46,12 @@ class ArrayUtilsTest extends \PHPUnit_Framework_TestCase
         $this->assertEquals('value_a', ArrayUtils::get($this->array, 'key_a:subkey_a'));
         $this->assertEquals(
             'value_a',
-            ArrayUtils::get($this->array, array('key_a', 'subkey_a'))
+            ArrayUtils::get($this->array, ['key_a', 'subkey_a'])
         );
-        $this->assertEquals(null, ArrayUtils::get($this->array, array('key_a', 'subkey_b')));
+        $this->assertEquals(null, ArrayUtils::get($this->array, ['key_a', 'subkey_b']));
         $this->assertEquals(
             'default',
-            ArrayUtils::get($this->array, array('key_a', 'subkey_b'), 'default')
+            ArrayUtils::get($this->array, ['key_a', 'subkey_b'], 'default')
         );
     }
 
@@ -68,9 +68,9 @@ class ArrayUtilsTest extends \PHPUnit_Framework_TestCase
         $this->assertEquals('value_a', ArrayUtils::find($this->array, 'key_a:subkey_a'));
         $this->assertEquals(
             'value_a',
-            ArrayUtils::find($this->array, array('key_a', 'subkey_a'))
+            ArrayUtils::find($this->array, ['key_a', 'subkey_a'])
         );
-        $this->assertEquals(array(), ArrayUtils::find($this->array, array('foo_path'), true));
+        $this->assertEquals([], ArrayUtils::find($this->array, ['foo_path'], true));
     }
 
     /**
@@ -78,14 +78,14 @@ class ArrayUtilsTest extends \PHPUnit_Framework_TestCase
      */
     public function testFindByPathNonexistent()
     {
-        ArrayUtils::find($this->array, array('key_a', 'subkey_b'));
+        ArrayUtils::find($this->array, ['key_a', 'subkey_b']);
     }
 
     public function testSetByPath()
     {
         ArrayUtils::set($this->array, 'key_a:subkey_a', 'new_value');
         ArrayUtils::set($this->array, 'key_a:nonexistent:sub', 'value');
-        ArrayUtils::set($this->array, array('key', 'another', null), 'value');
+        ArrayUtils::set($this->array, ['key', 'another', null], 'value');
         $this->assertEquals('new_value', ArrayUtils::get($this->array, 'key_a:subkey_a'));
         $this->assertEquals('value', ArrayUtils::get($this->array, 'key_a:nonexistent:sub'));
         $this->assertEquals('value', ArrayUtils::get($this->array, 'key:another:0'));
@@ -101,34 +101,34 @@ class ArrayUtilsTest extends \PHPUnit_Framework_TestCase
 
     public function testMergeNoOverwrite()
     {
-        $expected = array(
-            'key_a' => new \ArrayObject(array(
+        $expected = [
+            'key_a' => new \ArrayObject([
                     'subkey_a' => 'value_a'
-                )),
+                ]),
             'key_b' => 'value',
             'key_c' => 'value_c',
             6       => 'six'
-        );
-        $merge    = array(
+        ];
+        $merge    = [
             'key_a' => 'anything',
             'key_c' => 'value_c'
-        );
+        ];
         $actual   = ArrayUtils::merge($this->array, $merge, false);
         $this->assertEquals($expected, $actual);
     }
 
     public function testMergeOverwrite()
     {
-        $expected = array(
+        $expected = [
             'key_a' => 'something',
             'key_b' => 'value',
             'key_c' => 'value_c',
             6       => 'six'
-        );
-        $merge    = array(
+        ];
+        $merge    = [
             'key_a' => 'something',
             'key_c' => 'value_c'
-        );
+        ];
         $actual   = ArrayUtils::merge($this->array, $merge);
         $this->assertEquals($expected, $actual);
     }
@@ -136,6 +136,6 @@ class ArrayUtilsTest extends \PHPUnit_Framework_TestCase
     public function testImplodeIfArray()
     {
         $this->assertEquals(540, ArrayUtils::implodeIfArray(540, 'anything'));
-        $this->assertEquals('1 glue 2', ArrayUtils::implodeIfArray(array(1, 2), ' glue '));
+        $this->assertEquals('1 glue 2', ArrayUtils::implodeIfArray([1, 2], ' glue '));
     }
 }

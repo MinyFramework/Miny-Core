@@ -38,7 +38,7 @@ class RouteGenerator
      * @return string
      * @throws \InvalidArgumentException
      */
-    public function generate($routeName, array $parameters = array())
+    public function generate($routeName, array $parameters = [])
     {
         $route = $this->router->getRoute($routeName);
 
@@ -80,7 +80,7 @@ class RouteGenerator
 
     private function buildPath($path, array $parameters, array $parameterNames)
     {
-        $replace = array();
+        $replace = [];
         foreach ($parameterNames as $name) {
             $replace['{' . $name . '}'] = $parameters[$name];
             unset($parameters[$name]);
@@ -94,7 +94,7 @@ class RouteGenerator
 
         } else {
             // this forces path to be the first key
-            $parameters = array('path' => $path) + $parameters;
+            $parameters = ['path' => $path] + $parameters;
             $path       = '?';
         }
 

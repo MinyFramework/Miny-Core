@@ -7,13 +7,13 @@ class RequestTest extends \PHPUnit_Framework_TestCase
 
     public function setUp()
     {
-        $_GET    = array(
+        $_GET    = [
             'key' => 'value',
             'get_array'
-        );
-        $_COOKIE = array(
+        ];
+        $_COOKIE = [
             'cookie_array'
-        );
+        ];
 
         $_SERVER['REQUEST_URI']    = '/some_path/to?this=foo';
         $_SERVER['REMOTE_ADDR']    = 'my_ip';
@@ -62,7 +62,7 @@ class RequestTest extends \PHPUnit_Framework_TestCase
 
     public function testEmulatedMethod()
     {
-        $_POST = array('_method' => 'boo');
+        $_POST = ['_method' => 'boo'];
         $this->assertEquals('BOO', Request::getGlobal()->getMethod());
     }
 
@@ -86,7 +86,7 @@ class RequestTest extends \PHPUnit_Framework_TestCase
 
     public function testSubRequest()
     {
-        $_POST   = array('key' => 'data');
+        $_POST   = ['key' => 'data'];
         $request = Request::getGlobal();
         $this->assertTrue($request->post()->has('key'));
 
@@ -94,7 +94,7 @@ class RequestTest extends \PHPUnit_Framework_TestCase
 
         $this->assertSame($request->post()->toArray(), $subRequest->post()->toArray());
 
-        $subRequestWithPost = $request->getSubRequest('GET', '', array('key' => 'other data'));
+        $subRequestWithPost = $request->getSubRequest('GET', '', ['key' => 'other data']);
 
         $this->assertNotSame($request->post()->toArray(), $subRequestWithPost->post()->toArray());
         $this->assertInstanceOf('\\Miny\\HTTP\\ParameterContainer', $subRequestWithPost->post());
@@ -123,15 +123,15 @@ class RequestTest extends \PHPUnit_Framework_TestCase
 
     public function testSingleFileUpload()
     {
-        $_FILES  = array(
-            'file' => array(
+        $_FILES  = [
+            'file' => [
                 'tmp_name' => 'foo.bar.baz',
                 'name'     => 'Test File',
                 'size'     => 5,
                 'error'    => UPLOAD_ERR_OK,
                 'type'     => 'image/jpeg'
-            )
-        );
+            ]
+        ];
         $request = Request::getGlobal();
 
         $file = $request->post()->get('file');
@@ -146,15 +146,15 @@ class RequestTest extends \PHPUnit_Framework_TestCase
 
     public function testArrayFileUpload()
     {
-        $_FILES  = array(
-            'file' => array(
-                'tmp_name' => array('foo.bar.baz', 'foobar'),
-                'name'     => array('Test File', 'Other File'),
-                'size'     => array(5, 6),
-                'error'    => array(UPLOAD_ERR_OK, UPLOAD_ERR_EXTENSION),
-                'type'     => array('image/jpeg', 'image/png')
-            )
-        );
+        $_FILES  = [
+            'file' => [
+                'tmp_name' => ['foo.bar.baz', 'foobar'],
+                'name'     => ['Test File', 'Other File'],
+                'size'     => [5, 6],
+                'error'    => [UPLOAD_ERR_OK, UPLOAD_ERR_EXTENSION],
+                'type'     => ['image/jpeg', 'image/png']
+            ]
+        ];
         $request = Request::getGlobal();
 
         $file = $request->post()->get('file');

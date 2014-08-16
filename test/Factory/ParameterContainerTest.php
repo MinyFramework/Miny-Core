@@ -8,23 +8,23 @@ class ParameterContainerTest extends \PHPUnit_Framework_TestCase
      * @var ParameterContainer
      */
     protected $container;
-    protected $parameters = array(
-        'array_a'      => array(
+    protected $parameters = [
+        'array_a'      => [
             'param_b' => '{@value_b}',
-            'array_b' => array(
+            'array_b' => [
                 'deep_parameter' => 'deep_value'
-            ),
-        ),
+            ],
+        ],
         'param_c'      => '{@array_a:param_b}',
         'value_b'      => 'value_c',
         'invalid_link' => '{@not_exists}',
         'some_item'    => 'some_value',
-        'array'        => array(
-            'array' => array(
+        'array'        => [
+            'array' => [
                 'array' => 'value'
-            )
-        )
-    );
+            ]
+        ]
+    ];
 
     protected function setUp()
     {
@@ -46,17 +46,17 @@ class ParameterContainerTest extends \PHPUnit_Framework_TestCase
      */
     public function testOffsetGetException()
     {
-        $this->container[array('no', 'path', 'that', 'exists')];
+        $this->container[['no', 'path', 'that', 'exists']];
     }
 
     public function testGetParameters()
     {
-        $array_a_with_resolved_links = array(
+        $array_a_with_resolved_links = [
             'param_b' => 'value_c',
-            'array_b' => array(
+            'array_b' => [
                 'deep_parameter' => 'deep_value'
-            )
-        );
+            ]
+        ];
 
         //simply get the item
         $this->assertEquals('value_c', $this->container['value_b']);
@@ -110,14 +110,14 @@ class ParameterContainerTest extends \PHPUnit_Framework_TestCase
         $this->assertFalse(isset($this->container['some_item']));
 
         unset($this->container['array_a:array_b:deep_parameter']);
-        $this->assertEquals(array(), $this->container['array_a:array_b']);
+        $this->assertEquals([], $this->container['array_a:array_b']);
 
         //deleting a link
         unset($this->container['value_b']);
         $this->assertEquals('{@value_b}', $this->container['array_a:param_b']);
 
         //tricky case - don't delete keys with same name, only the one with the correct path
-        $tricky_result = array('array' => array());
+        $tricky_result = ['array' => []];
 
         unset($this->container['array:array:array']);
         $this->assertTrue(isset($this->container['array']));
@@ -128,66 +128,66 @@ class ParameterContainerTest extends \PHPUnit_Framework_TestCase
 
     public function testParameterMerge()
     {
-        $new_parameters  = array(
-            'array_a'      => array(
+        $new_parameters  = [
+            'array_a'      => [
                 'param_b'           => 'some_value', //overwrite
                 'additional_param'  => 'other_value', //new key
                 'something'         => 'prefix_{@value_b}',
                 'something_invalid' => 'prefix_{@invalid_link}'
-            ),
+            ],
             'not_a_string' => 5
-        );
-        $expected_result = array(
-            'array_a'      => array(
+        ];
+        $expected_result = [
+            'array_a'      => [
                 'param_b'           => 'some_value',
-                'array_b'           => array(
+                'array_b'           => [
                     'deep_parameter' => 'deep_value'
-                ),
+                ],
                 'additional_param'  => 'other_value',
                 'something'         => 'prefix_{@value_b}',
                 'something_invalid' => 'prefix_{@invalid_link}'
-            ),
+            ],
             'param_c'      => '{@array_a:param_b}',
             'value_b'      => 'value_c',
             'invalid_link' => '{@not_exists}',
             'some_item'    => 'some_value',
-            'array'        => array(
-                'array' => array(
+            'array'        => [
+                'array' => [
                     'array' => 'value'
-                )
-            ),
+                ]
+            ],
             'not_a_string' => 5
-        );
+        ];
         $this->container->addParameters($new_parameters);
         $this->assertEquals($expected_result, $this->container->toArray());
     }
 
     public function testParameterMergeWithoutOverwrite()
     {
-        $new_parameters  = array(
-            'array_a' => array(
+        $new_parameters  = [
+            'array_a' => [
                 'param_b'          => 'some_value', //overwrite
                 'additional_param' => 'other_value', //new key
-            )
-        );
-        $expected_result = array(
-            'array_a'      => array(
+            ]
+        ];
+        $expected_result = [
+            'array_a'      => [
                 'param_b'          => '{@value_b}',
-                'array_b'          => array(
+                'array_b'          => [
                     'deep_parameter' => 'deep_value'
-                ),
+                ],
                 'additional_param' => 'other_value'
-            ),
+            ],
             'param_c'      => '{@array_a:param_b}',
             'value_b'      => 'value_c',
             'invalid_link' => '{@not_exists}',
             'some_item'    => 'some_value',
-            'array'        => array(
-                'array' => array(
+            'array'        => [
+                'array' => [
                     'array' => 'value'
-                )
-            )
-        );
+                ]
+            ]
+        ];
         $this->container->addParameters($new_parameters, false);
         $this->assertEquals($expected_result, $this->container->toArray());
     }

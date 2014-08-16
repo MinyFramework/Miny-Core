@@ -32,12 +32,12 @@ class Resource
     /**
      * @var array
      */
-    private $unnamedRoutes = array(
+    private $unnamedRoutes = [
         'create'  => true,
         'show'    => true,
         'update'  => true,
         'destroy' => true
-    );
+    ];
 
     /**
      * @var string
@@ -52,7 +52,7 @@ class Resource
     /**
      * @var array
      */
-    private $parameters = array();
+    private $parameters = [];
 
     /**
      * @var bool
@@ -65,29 +65,29 @@ class Resource
         $this->pluralName   = $pluralName;
 
         if ($pluralName !== null) {
-            $this->collectionRoutes       = array(
+            $this->collectionRoutes       = [
                 'index'  => Route::METHOD_GET,
                 'new'    => Route::METHOD_GET,
                 'create' => Route::METHOD_POST
-            );
-            $this->memberRoutes           = array(
+            ];
+            $this->memberRoutes           = [
                 'show'    => Route::METHOD_GET,
                 'edit'    => Route::METHOD_GET,
                 'update'  => Route::METHOD_PUT,
                 'destroy' => Route::METHOD_DELETE
-            );
+            ];
             $this->unnamedRoutes['index'] = true;
             $controllerName               = $pluralName;
         } else {
-            $this->collectionRoutes = array(
+            $this->collectionRoutes = [
                 'new'     => Route::METHOD_GET,
                 'create'  => Route::METHOD_POST,
                 'show'    => Route::METHOD_GET,
                 'edit'    => Route::METHOD_GET,
                 'update'  => Route::METHOD_PUT,
                 'destroy' => Route::METHOD_DELETE
-            );
-            $this->memberRoutes     = array();
+            ];
+            $this->memberRoutes     = [];
             $controllerName         = $singularName;
         }
 
@@ -182,7 +182,7 @@ class Resource
     {
         $pathBase   = '';
         $nameBase   = '';
-        $idPatterns = array();
+        $idPatterns = [];
         $parent     = $this->parent;
         while ($parent) {
             if ($parent->pluralName !== null) {

@@ -17,7 +17,7 @@ class SessionTest extends \PHPUnit_Framework_TestCase
 
     public function setUp()
     {
-        $this->data = array();
+        $this->data = [];
 
         $this->session = new Session(false);
         $this->session->open(new ArrayReferenceWrapper($this->data));

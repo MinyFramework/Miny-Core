@@ -47,7 +47,7 @@ class RouteMatcher
     private function matchVariableRoutes($path, $method)
     {
         $count  = 0;
-        $routes = array();
+        $routes = [];
         foreach ($this->router->getAll() as $route) {
             if ($route->isStatic() || !$route->isMethod($method)) {
                 continue;
@@ -62,7 +62,7 @@ class RouteMatcher
                 return $return;
             }
             $count  = 0;
-            $routes = array();
+            $routes = [];
         }
 
         return $this->matchVariableRouteChunk($path, $routes);
@@ -77,7 +77,7 @@ class RouteMatcher
     private function matchVariableRouteChunk($path, $variableRoutes)
     {
         $numGroups = 0;
-        $indexes   = array();
+        $indexes   = [];
         $pattern   = '';
         foreach ($variableRoutes as $route) {
             $numVariables = $route->getParameterCount();
@@ -107,7 +107,7 @@ class RouteMatcher
      */
     private function createMatch(Route $route, $matched)
     {
-        $matchedParams = array();
+        $matchedParams = [];
         foreach ($route->getParameterNames() as $i => $name) {
             $matchedParams[$name] = $matched[$i + 1];
         }

@@ -43,10 +43,10 @@ class ExtendableTest extends \PHPUnit_Framework_TestCase
 
         $object->addMethods(
             new FooPlugin,
-            array(
+            [
                 'bar',
                 'baz'
-            )
+            ]
         );
 
         $this->object = $object;
@@ -72,7 +72,7 @@ class ExtendableTest extends \PHPUnit_Framework_TestCase
      */
     public function testCallBadTypeException()
     {
-        $this->object->__call(5, array());
+        $this->object->__call(5, []);
     }
 
     /**
@@ -96,7 +96,7 @@ class ExtendableTest extends \PHPUnit_Framework_TestCase
      */
     public function testAddMethodsObjectException()
     {
-        $this->object->addMethods('object', array());
+        $this->object->addMethods('object', []);
     }
 
     /**
@@ -104,14 +104,14 @@ class ExtendableTest extends \PHPUnit_Framework_TestCase
      */
     public function testAddMethodsMethodException()
     {
-        $this->object->addMethods(new \stdClass, array('foo'));
+        $this->object->addMethods(new \stdClass, ['foo']);
     }
 
     public function testSetterException()
     {
         $this->object->addSetter('foo');
         $this->object->addSetter('asd', 'setAsdMethod');
-        $this->object->addSetters(array('foobar' => 'setFooBarMethod', 'baz'));
+        $this->object->addSetters(['foobar' => 'setFooBarMethod', 'baz']);
 
         $this->object->setFoo('bar');
         $this->object->setAsdMethod('bar');

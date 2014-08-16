@@ -51,8 +51,8 @@ class ContainerTest extends \PHPUnit_Framework_TestCase
     {
         $mock = $this->getMock(
             '\\Miny\\Factory\\LinkResolver',
-            array('resolveReferences'),
-            array(),
+            ['resolveReferences'],
+            [],
             'MockLinkResolver',
             false
         );
@@ -78,7 +78,7 @@ class ContainerTest extends \PHPUnit_Framework_TestCase
     public function testThatConstructorArgumentsAreSet()
     {
         $this->container->addConstructorArguments('fooBar', 'a', 'b');
-        $this->assertEquals(array('a', 'b'), $this->container->getConstructorArguments('fooBar'));
+        $this->assertEquals(['a', 'b'], $this->container->getConstructorArguments('fooBar'));
     }
 
     public function testThatEmptyConstructorArgumentsIsReturned()
@@ -88,9 +88,9 @@ class ContainerTest extends \PHPUnit_Framework_TestCase
             function () {
             }
         );
-        $this->assertEquals(array(), $this->container->getConstructorArguments(42));
-        $this->assertEquals(array(), $this->container->getConstructorArguments('fooBar'));
-        $this->assertEquals(array(), $this->container->getConstructorArguments('foo'));
+        $this->assertEquals([], $this->container->getConstructorArguments(42));
+        $this->assertEquals([], $this->container->getConstructorArguments('fooBar'));
+        $this->assertEquals([], $this->container->getConstructorArguments('foo'));
     }
 
     /**
@@ -163,7 +163,7 @@ class ContainerTest extends \PHPUnit_Framework_TestCase
 
     public function testThatForceNewDoesNotStoreCreatedInstance()
     {
-        $container = $this->container->get('\\Miny\\Factory\\Container', array(), true);
+        $container = $this->container->get('\\Miny\\Factory\\Container', [], true);
         $stored    = $this->container->get('\\Miny\\Factory\\Container');
 
         $this->assertSame($stored, $this->container);
@@ -201,7 +201,7 @@ class ContainerTest extends \PHPUnit_Framework_TestCase
         $this->container->addAlias(
             'foo',
             function (Container $c, array $params) use ($test) {
-                $test->assertEquals(array(1, 2, 3), $params);
+                $test->assertEquals([1, 2, 3], $params);
 
                 return new \stdClass();
             }
@@ -212,7 +212,7 @@ class ContainerTest extends \PHPUnit_Framework_TestCase
         $this->assertInstanceOf('\stdClass', $this->container->get('foo'));
 
         //instantiate with direct parameter injection
-        $this->assertInstanceOf('\stdClass', $this->container->get('foo', array(1, 2, 3), true));
+        $this->assertInstanceOf('\stdClass', $this->container->get('foo', [1, 2, 3], true));
     }
 
     public function testObjectArgumentsAreAutomaticallyInstantiated()
@@ -235,7 +235,7 @@ class ContainerTest extends \PHPUnit_Framework_TestCase
     public function testDefaultArgumentsAreInjected()
     {
         //this is required because no default value is set in TestClass
-        $obj = $this->container->get(__NAMESPACE__ . '\\TestClass', array(1 => 55));
+        $obj = $this->container->get(__NAMESPACE__ . '\\TestClass', [1 => 55]);
 
         $params = $obj->getParameters();
         $this->assertEquals(5, $params[2]);
@@ -265,7 +265,7 @@ class ContainerTest extends \PHPUnit_Framework_TestCase
         $class    = new \stdClass;
         $this->container->setInstance($class);
 
-        $this->container->setConstructorArguments(__NAMESPACE__ . '\\TestClass', array(null, 55, 'asd'));
+        $this->container->setConstructorArguments(__NAMESPACE__ . '\\TestClass', [null, 55, 'asd']);
 
         $obj = $this->container->get(__NAMESPACE__ . '\\TestClass');
 

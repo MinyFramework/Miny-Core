@@ -82,7 +82,7 @@ abstract class Controller extends Extendable
         $this->response->setCode($code);
     }
 
-    public function route($route, array $params = array())
+    public function route($route, array $params = [])
     {
         return $this->routeGenerator->generate($route, $params);
     }
@@ -92,7 +92,7 @@ abstract class Controller extends Extendable
         $this->response->redirect($url, $code);
     }
 
-    public function redirectRoute($route, array $params = array())
+    public function redirectRoute($route, array $params = [])
     {
         $path = $this->routeGenerator->generate($route, $params);
         $this->response->redirect($path);

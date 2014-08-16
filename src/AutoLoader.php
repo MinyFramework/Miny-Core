@@ -19,16 +19,16 @@ class AutoLoader
     /**
      * @var array[]
      */
-    private $namespaceMap = array();
+    private $namespaceMap = [];
     private $maxNameSpaceLength = 0;
-    private $classMap = array();
+    private $classMap = [];
 
     /**
      * @param array $map
      */
-    public function __construct(array $map = array())
+    public function __construct(array $map = [])
     {
-        spl_autoload_register(array($this, 'load'));
+        spl_autoload_register([$this, 'load']);
         $this->register($map);
     }
 
@@ -56,7 +56,7 @@ class AutoLoader
                 $this->maxNameSpaceLength = $length;
             }
             if (!isset($this->namespaceMap[$namespace])) {
-                $this->namespaceMap[$namespace] = array();
+                $this->namespaceMap[$namespace] = [];
             }
             if (is_array($path)) {
                 foreach ($path as $new_path) {

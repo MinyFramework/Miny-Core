@@ -16,7 +16,7 @@ class EventDispatcher
     /**
      * @var array The registered event handlers in the form of event => array of handlers
      */
-    private $handlers = array();
+    private $handlers = [];
 
     /**
      * @param $handler
@@ -29,7 +29,7 @@ class EventDispatcher
     {
         if (is_object($handler)) {
             if (!$handler instanceof \Closure) {
-                $handler = array($handler, $event);
+                $handler = [$handler, $event];
             }
         }
         if (!is_callable($handler)) {
@@ -55,10 +55,10 @@ class EventDispatcher
     public function register($event, $handler, $priority = 0)
     {
         if (!isset($this->handlers[$event])) {
-            $this->handlers[$event] = array();
+            $this->handlers[$event] = [];
         }
         if (!isset($this->handlers[$event][$priority])) {
-            $this->handlers[$event][$priority] = array();
+            $this->handlers[$event][$priority] = [];
         }
         $this->handlers[$event][$priority][] = $this->ensureCallback($handler, $event);
     }

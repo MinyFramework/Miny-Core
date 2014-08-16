@@ -35,22 +35,22 @@ class StringControllerRunnerTest extends \PHPUnit_Framework_TestCase
     {
         $this->controller = $this->getMock(
             '\\Miny\\Controller\\Controller',
-            array(
+            [
                 'setRouter',
                 'setRouteGenerator',
                 'setParameterContainer',
                 'indexAction',
                 'testAction'
-            ),
-            array(),
+            ],
+            [],
             'TestController',
             false
         );
 
         $this->container = $this->getMock(
             '\\Miny\\Factory\\Container',
-            array('get'),
-            array(),
+            ['get'],
+            [],
             'MockContainer',
             false
         );
@@ -59,21 +59,21 @@ class StringControllerRunnerTest extends \PHPUnit_Framework_TestCase
             ->disableOriginalConstructor()
             ->getMock();
 
-        $this->containerMap = array(
-            array('TestController', array(), false, $this->controller),
-            array('\\Miny\\Router\\Router', array(), false, $routerMock),
-            array(
+        $this->containerMap = [
+            ['TestController', [], false, $this->controller],
+            ['\\Miny\\Router\\Router', [], false, $routerMock],
+            [
                 '\\Miny\\Router\\RouteGenerator',
-                array(),
+                [],
                 false,
                 new RouteGenerator($routerMock)
-            ),
-            array('\\Miny\\Factory\\ParameterContainer', array(), false, new ParameterContainer)
-        );
+            ],
+            ['\\Miny\\Factory\\ParameterContainer', [], false, new ParameterContainer]
+        ];
 
         $this->eventDispatcher = $this->getMock(
             '\\Miny\\Event\\EventDispatcher',
-            array('raiseEvent')
+            ['raiseEvent']
         );
 
         $this->eventDispatcher->expects($this->any())

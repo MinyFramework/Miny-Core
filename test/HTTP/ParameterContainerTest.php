@@ -11,9 +11,9 @@ class ParameterContainerTest extends \PHPUnit_Framework_TestCase
 
     public function setUp()
     {
-        $this->container = new ParameterContainer(array(
+        $this->container = new ParameterContainer([
             'foo' => 'bar'
-        ));
+        ]);
     }
 
     /**
@@ -36,7 +36,7 @@ class ParameterContainerTest extends \PHPUnit_Framework_TestCase
     {
         $this->assertFalse($this->container->has('bar'));
 
-        $this->container->add(array('bar' => 'baz'));
+        $this->container->add(['bar' => 'baz']);
 
         $this->assertTrue($this->container->has('bar'));
     }
@@ -45,7 +45,7 @@ class ParameterContainerTest extends \PHPUnit_Framework_TestCase
     {
         $this->assertEquals('bar', $this->container->get('foo'));
 
-        $this->container->add(array('foo' => 'baz'));
+        $this->container->add(['foo' => 'baz']);
 
         $this->assertEquals('baz', $this->container->get('foo'));
     }
@@ -72,14 +72,14 @@ class ParameterContainerTest extends \PHPUnit_Framework_TestCase
 
     public function testThatToArrayReturnsAllStoredData()
     {
-        $this->container->add(array('bar' => 'baz'));
+        $this->container->add(['bar' => 'baz']);
         $this->container->set('foobar', 'foobaz');
         $this->assertEquals(
-            array(
+            [
                 'foo'    => 'bar',
                 'bar'    => 'baz',
                 'foobar' => 'foobaz'
-            ),
+            ],
             $this->container->toArray()
         );
     }

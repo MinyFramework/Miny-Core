@@ -192,7 +192,7 @@ class LogTest extends \PHPUnit_Framework_TestCase
             Log::INFO,
             'category',
             'message %s %s',
-            array('formatted', 'with arguments from array')
+            ['formatted', 'with arguments from array']
         );
         $this->log->flush();
     }

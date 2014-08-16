@@ -9,7 +9,7 @@ class ArrayReferenceWrapperTest extends \PHPUnit_Framework_TestCase
 
     public function setUp()
     {
-        $this->array  = array('foo', 'bar', new \stdClass(), array(1, 2));
+        $this->array  = ['foo', 'bar', new \stdClass(), [1, 2]];
         $this->object = new ArrayReferenceWrapper($this->array);
     }
 
@@ -33,7 +33,7 @@ class ArrayReferenceWrapperTest extends \PHPUnit_Framework_TestCase
 
     public function testAddReservesReferenceProperty()
     {
-        $this->object->add(array('baz' => 'foobar'));
+        $this->object->add(['baz' => 'foobar']);
 
         $this->assertTrue(isset($this->array['baz']));
         $this->object['baz'] = 'value';

@@ -14,12 +14,12 @@ namespace Miny\Shutdown;
  */
 class ShutdownService
 {
-    private $callbacks = array();
+    private $callbacks = [];
     private $lowestPriority = -1;
 
     public function __construct()
     {
-        register_shutdown_function(array($this, 'callShutdownFunctions'));
+        register_shutdown_function([$this, 'callShutdownFunctions']);
     }
 
     /**
@@ -37,7 +37,7 @@ class ShutdownService
         }
         $priority = $this->getPriority($priority);
         if (!isset($this->callbacks[$priority])) {
-            $this->callbacks[$priority] = array($callback);
+            $this->callbacks[$priority] = [$callback];
         } else {
             $this->callbacks[$priority][] = $callback;
         }

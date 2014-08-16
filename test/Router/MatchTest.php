@@ -8,10 +8,10 @@ class MatchTest extends \PHPUnit_Framework_TestCase
     public function testThatRouteAndParamsAreReturned()
     {
         $route      = new Route();
-        $parameters = array(
+        $parameters = [
             'name'  => 'value',
             'other' => 'other value'
-        );
+        ];
         $route->set($parameters);
 
         $match = new Match($route);
@@ -27,12 +27,12 @@ class MatchTest extends \PHPUnit_Framework_TestCase
      */
     public function testThatParametersOverrideDefaults(Route $route)
     {
-        $match = new Match($route, array('name' => 'should override'));
+        $match = new Match($route, ['name' => 'should override']);
         $this->assertEquals(
-            array(
+            [
                 'name'  => 'should override',
                 'other' => 'other value'
-            ),
+            ],
             $match->getParameters()
         );
     }

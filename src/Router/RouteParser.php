@@ -62,7 +62,7 @@ class RouteParser extends AbstractRouteParser
      */
     private function createRegexp($uri, Route $route)
     {
-        $patterns = array();
+        $patterns = [];
         foreach ($route->getParameterPatterns() as $key => $pattern) {
             $patterns['\\{' . $key . '\\}'] = '(' . $pattern . ')';
         }

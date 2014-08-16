@@ -21,9 +21,9 @@ class ParameterContainer extends AbstractConfigurationTree
     /**
      * @var array
      */
-    private $links = array();
+    private $links = [];
 
-    public function __construct(array $params = array())
+    public function __construct(array $params = [])
     {
         $this->parameters = $params;
     }
@@ -38,7 +38,7 @@ class ParameterContainer extends AbstractConfigurationTree
     public function addParameters(array $parameters, $overwrite = true)
     {
         $this->parameters = ArrayUtils::merge($this->parameters, $parameters, $overwrite);
-        $this->links      = array();
+        $this->links      = [];
     }
 
     /**
@@ -59,7 +59,7 @@ class ParameterContainer extends AbstractConfigurationTree
     public function resolveLinks($value)
     {
         if (is_array($value)) {
-            $return = array();
+            $return = [];
             foreach ($value as $k => $v) {
                 $return[$k] = $this->resolveLinks($v);
             }

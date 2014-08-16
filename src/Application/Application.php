@@ -23,16 +23,16 @@ class Application extends BaseApplication
     {
         parent::setDefaultParameters($parameterContainer);
         $parameterContainer->addParameters(
-            array(
-                'router'                   => array(
+            [
+                'router'                   => [
                     'prefix'             => '/',
                     'postfix'            => '',
-                    'default_parameters' => array(),
-                    'exception_paths'    => array(),
+                    'default_parameters' => [],
+                    'exception_paths'    => [],
                     'short_urls'         => false
-                ),
+                ],
                 'default_content_encoding' => 'utf-8'
-            )
+            ]
         );
     }
 
@@ -49,18 +49,18 @@ class Application extends BaseApplication
         $events = $this->eventDispatcher;
         $events->registerHandlers(
             CoreEvents::FILTER_REQUEST,
-            array(
-                array($eventHandlers, 'logRequest'),
-                array($eventHandlers, 'filterRoutes')
-            )
+            [
+                [$eventHandlers, 'logRequest'],
+                [$eventHandlers, 'filterRoutes']
+            ]
         );
 
         $events->registerHandlers(
             CoreEvents::FILTER_RESPONSE,
-            array(
-                array($eventHandlers, 'setContentType'),
-                array($eventHandlers, 'logResponse')
-            )
+            [
+                [$eventHandlers, 'setContentType'],
+                [$eventHandlers, 'logResponse']
+            ]
         );
 
         $parameterContainer = $this->parameterContainer;
@@ -83,7 +83,7 @@ class Application extends BaseApplication
                 $router->setPrefix($parameterContainer['router:prefix']);
                 $router->setPostfix($parameterContainer['router:postfix']);
 
-                $events->register(CoreEvents::BEFORE_RUN, array($router, 'registerResources'));
+                $events->register(CoreEvents::BEFORE_RUN, [$router, 'registerResources']);
             }
         );
 

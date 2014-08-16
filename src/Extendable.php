@@ -14,12 +14,12 @@ class Extendable
     /**
      * @var callable[]
      */
-    private $plugins = array();
+    private $plugins = [];
 
     /**
      * @var callable[]
      */
-    private $setters = array();
+    private $setters = [];
 
     /**
      * Dynamically add a method to the class.
@@ -49,13 +49,13 @@ class Extendable
      *
      * @throws \InvalidArgumentException
      */
-    public function addMethods($object, array $method_aliases = array())
+    public function addMethods($object, array $method_aliases = [])
     {
         if (!is_object($object)) {
             throw new \InvalidArgumentException('$object must be an object');
         }
         foreach ($method_aliases as $alias => $method) {
-            $callable = array($object, $method);
+            $callable = [$object, $method];
             if (!is_callable($callable)) {
                 $class = get_class($object);
                 throw new \InvalidArgumentException("Method {$method} not found in class {$class}");

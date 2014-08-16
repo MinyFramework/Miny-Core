@@ -21,8 +21,8 @@ class ControllerDispatcherTest extends \PHPUnit_Framework_TestCase
     {
         $this->container = $this->getMock(
             '\\Miny\\Factory\\Container',
-            array('get', 'setInstance'),
-            array(),
+            ['get', 'setInstance'],
+            [],
             'MockContainer',
             false
         );
@@ -52,12 +52,12 @@ class ControllerDispatcherTest extends \PHPUnit_Framework_TestCase
 
         $dummyRunner = $this->getMockBuilder('\\Miny\\Controller\\AbstractControllerRunner')
             ->disableOriginalConstructor()
-            ->setMethods(array('run', 'canRun'))
+            ->setMethods(['run', 'canRun'])
             ->getMockForAbstractClass();
 
         $mockRunner = $this->getMockBuilder('\\Miny\\Controller\\AbstractControllerRunner')
             ->disableOriginalConstructor()
-            ->setMethods(array('run', 'canRun'))
+            ->setMethods(['run', 'canRun'])
             ->getMockForAbstractClass();
 
         $dummyRunner->expects($this->exactly(3))
@@ -97,7 +97,7 @@ class ControllerDispatcherTest extends \PHPUnit_Framework_TestCase
 
         $mockRunner = $this->getMockBuilder('\\Miny\\Controller\\AbstractControllerRunner')
             ->disableOriginalConstructor()
-            ->setMethods(array('run', 'canRun'))
+            ->setMethods(['run', 'canRun'])
             ->getMockForAbstractClass();
 
         $mockRunner->expects($this->once())
@@ -118,7 +118,7 @@ class ControllerDispatcherTest extends \PHPUnit_Framework_TestCase
             ->method('get')
             ->with(
                 $this->equalTo('\\Miny\\HTTP\\Response'),
-                $this->equalTo(array()),
+                $this->equalTo([]),
                 $this->equalTo(true)
             )
             ->will($this->returnValue($response));
@@ -127,10 +127,10 @@ class ControllerDispatcherTest extends \PHPUnit_Framework_TestCase
             ->method('setInstance')
             ->will(
                 $this->returnValueMap(
-                    array(
-                        array($response, null, $oldResponse),
-                        array($oldResponse, null, $response)
-                    )
+                    [
+                        [$response, null, $oldResponse],
+                        [$oldResponse, null, $response]
+                    ]
                 )
             );
 

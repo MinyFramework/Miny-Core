@@ -14,12 +14,12 @@ class Container
     /**
      * @var (string|\Closure)[]
      */
-    private $aliases = array();
+    private $aliases = [];
 
     /**
      * @var array
      */
-    private $constructorArguments = array();
+    private $constructorArguments = [];
 
     /**
      * @var array
@@ -34,7 +34,7 @@ class Container
     /**
      * @var callable[]
      */
-    private $callbacks = array();
+    private $callbacks = [];
 
     /**
      * @param LinkResolver $resolver
@@ -43,10 +43,10 @@ class Container
     {
         $this->linkResolver = $resolver;
 
-        $this->objects = array(
+        $this->objects = [
             __CLASS__            => $this,
             get_class($resolver) => $resolver
-        );
+        ];
     }
 
     /**
@@ -88,7 +88,7 @@ class Container
         }
 
         if (!isset($this->constructorArguments[$concrete])) {
-            $this->constructorArguments[$concrete] = array($position => $argument);
+            $this->constructorArguments[$concrete] = [$position => $argument];
         } else {
             $this->constructorArguments[$concrete][$position] = $argument;
         }
@@ -130,7 +130,7 @@ class Container
         }
 
         if (!isset($this->callbacks[$concrete])) {
-            $this->callbacks[$concrete] = array($callback);
+            $this->callbacks[$concrete] = [$callback];
         } else {
             $this->callbacks[$concrete][] = $callback;
         }
@@ -170,7 +170,7 @@ class Container
 
         $concrete = $this->findMostConcreteDefinition($abstract);
         if (!isset($this->constructorArguments[$concrete])) {
-            $this->constructorArguments[$concrete] = array();
+            $this->constructorArguments[$concrete] = [];
         }
 
         return $this->constructorArguments[$concrete];
@@ -216,7 +216,7 @@ class Container
      *
      * @return object
      */
-    public function get($abstract, array $parameters = array(), $forceNew = false)
+    public function get($abstract, array $parameters = [], $forceNew = false)
     {
         //Strip all leading backslashes
         if ($abstract[0] === '\\') {
@@ -274,7 +274,7 @@ class Container
     private function findMostConcreteDefinition($class)
     {
         //This array holds the classes that were processed
-        $visited = array();
+        $visited = [];
 
         //One can specify an alias of an alias (or rather, override a class definition by an other)
         //so we have to traverse this structure
@@ -299,7 +299,7 @@ class Container
      * @return object
      * @throws \InvalidArgumentException
      */
-    private function instantiate($class, array $parameters = array())
+    private function instantiate($class, array $parameters = [])
     {
         if ($class instanceof \Closure) {
             return $class($this, $parameters);

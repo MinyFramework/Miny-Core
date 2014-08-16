@@ -19,7 +19,7 @@ class ResponseHeaders extends Headers
     /**
      * @var array
      */
-    private $cookies = array();
+    private $cookies = [];
 
     public function __construct(AbstractHeaderSender $sender)
     {
@@ -56,11 +56,11 @@ class ResponseHeaders extends Headers
 
     public function serialize()
     {
-        $array = array(
+        $array = [
             'parent'  => parent::serialize(),
             'cookies' => $this->cookies,
             'sender'  => $this->sender
-        );
+        ];
 
         return serialize($array);
     }

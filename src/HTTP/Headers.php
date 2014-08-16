@@ -21,7 +21,7 @@ use Serializable;
  */
 class Headers implements Iterator, Serializable
 {
-    private static $multipleValuesAllowed = array(
+    private static $multipleValuesAllowed = [
         'accept',
         'accept-charset',
         'accept-encoding',
@@ -45,9 +45,9 @@ class Headers implements Iterator, Serializable
         'via',
         'warning',
         'www-authenticate'
-    );
-    private $headers = array();
-    private $rawHeaders = array();
+    ];
+    private $headers = [];
+    private $rawHeaders = [];
 
     public static function sanitize($name)
     {
@@ -117,8 +117,8 @@ class Headers implements Iterator, Serializable
 
     public function reset()
     {
-        $this->headers    = array();
-        $this->rawHeaders = array();
+        $this->headers    = [];
+        $this->rawHeaders = [];
     }
 
     public function setRaw($header)
@@ -185,10 +185,10 @@ class Headers implements Iterator, Serializable
     public function serialize()
     {
         return serialize(
-            array(
+            [
                 $this->headers,
                 $this->rawHeaders
-            )
+            ]
         );
     }
 

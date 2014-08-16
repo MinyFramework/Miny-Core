@@ -27,7 +27,7 @@ class RouteMatcherTest extends \PHPUnit_Framework_TestCase
     {
         $this->routerMock->expects($this->any())
             ->method('getAll')
-            ->will($this->returnValue(array()));
+            ->will($this->returnValue([]));
 
         $this->assertFalse($this->matcher->match('some path'));
     }
@@ -53,7 +53,7 @@ class RouteMatcherTest extends \PHPUnit_Framework_TestCase
     {
         $this->routerMock->expects($this->any())
             ->method('getAll')
-            ->will($this->returnValue(array()));
+            ->will($this->returnValue([]));
 
         $staticGetRoute = new Route();
         $staticGetRoute->setPath('static path');
@@ -82,7 +82,7 @@ class RouteMatcherTest extends \PHPUnit_Framework_TestCase
             '\\Miny\\Router\\Match',
             $match
         );
-        $this->assertEquals(array('id' => 6), $match->getParameters());
+        $this->assertEquals(['id' => 6], $match->getParameters());
     }
 
     public function testThatMatcherMatchesDynamicRoutes()
@@ -96,7 +96,7 @@ class RouteMatcherTest extends \PHPUnit_Framework_TestCase
             '\\Miny\\Router\\Match',
             $match
         );
-        $this->assertEquals(array('id' => 6), $match->getParameters());
+        $this->assertEquals(['id' => 6], $match->getParameters());
     }
 
     public function testThatMatcherReturnsFalseWhenDynamicRoutesDoNotMatch()
@@ -108,7 +108,7 @@ class RouteMatcherTest extends \PHPUnit_Framework_TestCase
 
     private function createDynamicRoutes($num = 100)
     {
-        $routes = array();
+        $routes = [];
 
         $route = new Route();
 

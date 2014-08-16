@@ -21,7 +21,7 @@ class ModuleHandler
     /**
      * @var Module[]
      */
-    private $modules = array();
+    private $modules = [];
 
     /**
      * @var BaseApplication
@@ -51,10 +51,10 @@ class ModuleHandler
 
         $events->registerHandlers(
             CoreEvents::BEFORE_RUN,
-            array(
-                array($this, 'processConditionalCallbacks'),
-                array($this, 'registerEventHandlers')
-            )
+            [
+                [$this, 'processConditionalCallbacks'],
+                [$this, 'registerEventHandlers']
+            ]
         );
     }
 

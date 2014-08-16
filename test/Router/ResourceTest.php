@@ -260,10 +260,10 @@ class ResourceTest extends \PHPUnit_Framework_TestCase
         $resource = new Resource('resource', 'resources');
         $resource->only('index');
         $resource->set(
-            array(
+            [
                 'controller' => 'Foo',
                 'foo'        => 'bar'
-            )
+            ]
         );
         $resource->set('foobar', 'baz');
         $resource->register($this->router);

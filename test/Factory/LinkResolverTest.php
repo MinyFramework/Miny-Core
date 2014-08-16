@@ -11,7 +11,7 @@ class LinkResolverTest extends \PHPUnit_Framework_TestCase
     {
         $this->parameterContainerMock = $this->getMock(
             '\Miny\Factory\ParameterContainer',
-            array('offsetGet', 'resolveLinks', 'resolveLinksInString')
+            ['offsetGet', 'resolveLinks', 'resolveLinksInString']
         );
 
         $this->resolver = new LinkResolver($this->parameterContainerMock);
@@ -67,8 +67,8 @@ class LinkResolverTest extends \PHPUnit_Framework_TestCase
             ->will($this->onConsecutiveCalls('foo', 'bar'));
 
         $this->assertEquals(
-            array('foo', 'bar'),
-            $this->resolver->resolveReferences(array('{@foo}', '{@bar}'))
+            ['foo', 'bar'],
+            $this->resolver->resolveReferences(['{@foo}', '{@bar}'])
         );
     }
 

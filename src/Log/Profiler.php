@@ -14,7 +14,7 @@ use BadMethodCallException;
 class Profiler
 {
     private static $pattern = 'Profiling %s: Run #: %d, Time: %s ms, Memory: %s';
-    private static $units = array(' B', ' kiB', ' MiB', ' GiB', ' TiB', ' PiB');
+    private static $units = [' B', ' kiB', ' MiB', ' GiB', ' TiB', ' PiB'];
 
     /**
      * @var AbstractLog

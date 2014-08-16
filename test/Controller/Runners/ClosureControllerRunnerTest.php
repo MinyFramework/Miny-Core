@@ -21,7 +21,7 @@ class ClosureControllerRunnerTest extends \PHPUnit_Framework_TestCase
     {
         $this->eventDispatcher = $this->getMock(
             '\\Miny\\Event\\EventDispatcher',
-            array('raiseEvent')
+            ['raiseEvent']
         );
 
         $this->eventDispatcher->expects($this->any())

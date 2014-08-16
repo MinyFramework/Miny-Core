@@ -16,7 +16,7 @@ class ParameterContainer
      */
     protected $data;
 
-    public function __construct($data = array())
+    public function __construct($data = [])
     {
         if (!is_array($data) && !$data instanceof \ArrayAccess) {
             throw new \InvalidArgumentException('ParameterContainer::__construct() requires an array or array-like object.');

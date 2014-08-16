@@ -17,34 +17,34 @@ class Log extends AbstractLog
     const WARNING = 4;
     const ERROR   = 5;
 
-    private static $names = array(
+    private static $names = [
         self::PROFILE => 'Profile',
         self::DEBUG   => 'Debug',
         self::INFO    => 'Info',
         self::WARNING => 'Warning',
         self::ERROR   => 'Error'
-    );
+    ];
 
     /**
      * @var AbstractLogWriter
      */
-    private $writers = array(
-        Log::PROFILE => array(),
-        Log::DEBUG   => array(),
-        Log::INFO    => array(),
-        Log::WARNING => array(),
-        Log::ERROR   => array()
-    );
+    private $writers = [
+        Log::PROFILE => [],
+        Log::DEBUG   => [],
+        Log::INFO    => [],
+        Log::WARNING => [],
+        Log::ERROR   => []
+    ];
 
     /**
      * @var AbstractLogWriter[]
      */
-    private $allWriters = array();
+    private $allWriters = [];
 
     /**
      * @var Profiler[]
      */
-    private $profilers = array();
+    private $profilers = [];
 
     private $messageNum = 0;
     private $flushLimit = 100;
@@ -52,7 +52,7 @@ class Log extends AbstractLog
     /**
      * @var LogMessage[]
      */
-    private $messageBuffer = array();
+    private $messageBuffer = [];
 
     public static function getLevelName($level)
     {
@@ -74,7 +74,7 @@ class Log extends AbstractLog
     private function reset()
     {
         $this->messageNum    = 0;
-        $this->messageBuffer = array();
+        $this->messageBuffer = [];
         foreach ($this->allWriters as $writer) {
             $writer->reset();
         }
@@ -148,13 +148,13 @@ class Log extends AbstractLog
         $this->allWriters[] = $writer;
 
         if ($levels === null) {
-            $levels  = array(
+            $levels  = [
                 self::PROFILE,
                 self::DEBUG,
                 self::INFO,
                 self::WARNING,
                 self::ERROR
-            );
+            ];
             $isArray = true;
         } else {
             $isArray = is_array($levels);

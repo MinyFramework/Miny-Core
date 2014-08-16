@@ -97,12 +97,12 @@ class ApplicationEventHandlers
             $path = $getContainer->get('path', '/');
         }
         /** @var $match Match */
-        $methodMap = array(
+        $methodMap = [
             'GET'    => Route::METHOD_GET,
             'POST'   => Route::METHOD_POST,
             'PUT'    => Route::METHOD_PUT,
             'DELETE' => Route::METHOD_DELETE
-        );
+        ];
         $method    = strtoupper($request->getMethod());
         $method    = isset($methodMap[$method]) ? $methodMap[$method] : Route::METHOD_ALL;
         $match     = $router->match($path, $method);
@@ -145,7 +145,7 @@ class ApplicationEventHandlers
 
     private function getResponseContentType($format)
     {
-        $content_types = array(
+        $content_types = [
             //application
             'atom'  => 'application/atom+xml',
             'xhtml' => 'application/xhtml+xml',
@@ -170,7 +170,7 @@ class ApplicationEventHandlers
             'css'   => 'text/css',
             'csv'   => 'text/csv',
             'html'  => 'text/html',
-        );
+        ];
         if (isset($content_types[$format])) {
             return $content_types[$format];
         }

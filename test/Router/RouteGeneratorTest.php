@@ -43,10 +43,10 @@ class RouteGeneratorTest extends \PHPUnit_Framework_TestCase
     {
         $generated = $this->generator->generate(
             'route',
-            array(
+            [
                 'id'  => 1,
                 'foo' => 'bar'
-            )
+            ]
         );
 
         $this->assertEquals('/some/path/1/bar/baz', $generated);
@@ -56,11 +56,11 @@ class RouteGeneratorTest extends \PHPUnit_Framework_TestCase
     {
         $generated = $this->generator->generate(
             'route',
-            array(
+            [
                 'id'  => 1,
                 'foo' => 'bar',
                 'bar' => 'foobar'
-            )
+            ]
         );
 
         $this->assertEquals('/some/path/1/bar/foobar', $generated);
@@ -70,13 +70,13 @@ class RouteGeneratorTest extends \PHPUnit_Framework_TestCase
     {
         $generated = $this->generator->generate(
             'route',
-            array(
+            [
                 'id'    => 1,
                 'foo'   => 'bar',
                 'bar'   => 'foobar',
                 'extra' => 'foo',
                 'baz'   => 'barbaz'
-            )
+            ]
         );
 
         $this->assertEquals('/some/path/1/bar/foobar?extra=foo&baz=barbaz', $generated);
@@ -87,13 +87,13 @@ class RouteGeneratorTest extends \PHPUnit_Framework_TestCase
         $generator = new RouteGenerator($this->routerMock, false);
         $generated = $generator->generate(
             'route',
-            array(
+            [
                 'id'    => 1,
                 'foo'   => 'bar',
                 'bar'   => 'foobar',
                 'extra' => 'foo',
                 'baz'   => 'barbaz'
-            )
+            ]
         );
 
         $this->assertEquals(

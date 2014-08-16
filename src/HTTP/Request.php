@@ -53,7 +53,7 @@ class Request
     {
         foreach ($_FILES as $field => $data) {
             if (is_array($data['error'])) {
-                $files = array();
+                $files = [];
                 foreach ($data['error'] as $fileKey => $error) {
                     $files[$fileKey] = new UploadedFileInfo(
                         $data['tmp_name'][$fileKey],
@@ -86,7 +86,7 @@ class Request
     private $ip;
     private $isSubRequest = false;
 
-    public function __construct($method, $url, $get = array(), $post = array(), $cookie = array())
+    public function __construct($method, $url, $get = [], $post = [], $cookie = [])
     {
         $this->url     = $url;
         $this->method  = strtoupper($method);

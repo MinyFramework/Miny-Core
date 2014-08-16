@@ -28,7 +28,7 @@ class RouteTest extends \PHPUnit_Framework_TestCase
     {
         $route = new Route();
 
-        $route->set(array('key' => 'value', 'key2' => 'value2'));
+        $route->set(['key' => 'value', 'key2' => 'value2']);
         $this->assertTrue($route->isStatic());
 
         return $route;
@@ -41,11 +41,11 @@ class RouteTest extends \PHPUnit_Framework_TestCase
     {
         $route->set('key3', 'value3');
         $this->assertEquals(
-            array(
+            [
                 'key'  => 'value',
                 'key2' => 'value2',
                 'key3' => 'value3'
-            ),
+            ],
             $route->getDefaultValues()
         );
     }
@@ -101,15 +101,15 @@ class RouteTest extends \PHPUnit_Framework_TestCase
 
         $this->assertEquals(3, $route->getParameterCount());
         $this->assertEquals(
-            array('name', 'another', 'third name'),
+            ['name', 'another', 'third name'],
             $route->getParameterNames()
         );
         $this->assertEquals(
-            array(
+            [
                 'name'       => 'pattern',
                 'another'    => 'other pattern',
                 'third name' => 'third pattern'
-            ),
+            ],
             $route->getParameterPatterns()
         );
     }

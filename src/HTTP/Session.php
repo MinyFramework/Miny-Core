@@ -24,24 +24,13 @@ class Session implements \ArrayAccess, \IteratorAggregate, \Countable
     private $isOpen = false;
 
     /**
-     * @param bool            $open
-     * @param iSessionHandler $handler
+     * @param bool                     $open
+     * @param \SessionHandlerInterface $handler
      */
-    public function __construct($open = true, iSessionHandler $handler = null)
+    public function __construct($open = true, \SessionHandlerInterface $handler = null)
     {
         if ($handler !== null) {
-            if (PHP_MINOR_VERSION >= 4) {
-                session_set_save_handler($handler, true);
-            } else {
-                session_set_save_handler(
-                    array($handler, 'open'),
-                    array($handler, 'close'),
-                    array($handler, 'read'),
-                    array($handler, 'write'),
-                    array($handler, 'destroy'),
-                    array($handler, 'gc')
-                );
-            }
+            session_set_save_handler($handler, true);
         }
         if ($open) {
             $this->open(null);
@@ -88,6 +77,7 @@ class Session implements \ArrayAccess, \IteratorAggregate, \Countable
      * for security reasons and updates flash variables.
      *
      * @param mixed $data The data to use as session data. Pass null to use the previous data, if any.
+     *
      * @throws \RuntimeException When the session can not be opened.
      */
     public function open($data)
@@ -98,7 +88,7 @@ class Session implements \ArrayAccess, \IteratorAggregate, \Countable
         session_regenerate_id(true);
         if ($data !== null) {
             $this->data = $data;
-        } elseif($this->data === null) {
+        } elseif ($this->data === null) {
             $this->data = new ArrayReferenceWrapper($_SESSION);
         }
         $this->initializeContainer('data');
@@ -111,7 +101,7 @@ class Session implements \ArrayAccess, \IteratorAggregate, \Countable
     private function initializeContainer($key)
     {
         if (!isset($this->data[$key]) || !is_array($this->data[$key])) {
-            $this->data[$key] = array();
+            $this->data[$key] = [];
 
             return true;
         }
@@ -234,7 +224,7 @@ class Session implements \ArrayAccess, \IteratorAggregate, \Countable
 
     public function flash($key, $data, $ttl = 1)
     {
-        $this->data['flash'][$key] = array('data' => $data, 'ttl' => (int)$ttl);
+        $this->data['flash'][$key] = ['data' => $data, 'ttl' => (int)$ttl];
     }
 
     public function __isset($key)
