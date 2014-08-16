@@ -9,7 +9,6 @@
 
 namespace Miny\Modules;
 
-use InvalidArgumentException;
 use Miny\Application\BaseApplication;
 use Miny\Factory\AbstractConfigurationTree;
 use OutOfBoundsException;
@@ -96,11 +95,8 @@ abstract class Module
         return [];
     }
 
-    public function ifModule($module, $callback)
+    public function ifModule($module, callable $callback)
     {
-        if (!is_callable($callback)) {
-            throw new InvalidArgumentException('$callback must be callable.');
-        }
         $this->conditionalCallbacks[$module] = $callback;
     }
 

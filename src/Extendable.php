@@ -29,13 +29,10 @@ class Extendable
      *
      * @throws \InvalidArgumentException
      */
-    public function addMethod($method, $callback)
+    public function addMethod($method, callable $callback)
     {
         if (!is_string($method)) {
             throw new \InvalidArgumentException('$method must be string');
-        }
-        if (!is_callable($callback)) {
-            throw new \InvalidArgumentException("Callback given for method {$method} is not callable");
         }
         $this->plugins[$method] = $callback;
     }
@@ -112,7 +109,7 @@ class Extendable
             throw new \InvalidArgumentException('$method must be string');
         }
         if (isset($this->setters[$method])) {
-            $this->{$this->setters[$method]} = current($args);
+            return $this->{$this->setters[$method]} = current($args);
         } else {
             if (!isset($this->plugins[$method])) {
                 throw new \BadMethodCallException("Method not found: {$method}");

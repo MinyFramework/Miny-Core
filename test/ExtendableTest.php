@@ -78,22 +78,6 @@ class ExtendableTest extends \PHPUnit_Framework_TestCase
     /**
      * @expectedException InvalidArgumentException
      */
-    public function testAddMethodNameException()
-    {
-        $this->object->addMethod(5, null);
-    }
-
-    /**
-     * @expectedException InvalidArgumentException
-     */
-    public function testAddMethodCallbackException()
-    {
-        $this->object->addMethod('method', null);
-    }
-
-    /**
-     * @expectedException InvalidArgumentException
-     */
     public function testAddMethodsObjectException()
     {
         $this->object->addMethods('object', []);
