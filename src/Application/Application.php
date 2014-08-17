@@ -91,7 +91,7 @@ class Application extends BaseApplication
 
         $container->addAlias(
             'Miny\\HTTP\\Request',
-            'Miny\\HTTP\\Request::getGlobal'
+            ['Miny\\HTTP\\Request', 'getGlobal']
         );
 
         $routeGeneratorClass = 'Miny\\Router\\RouteGenerator';
