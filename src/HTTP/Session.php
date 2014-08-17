@@ -29,7 +29,7 @@ class Session implements \ArrayAccess, \IteratorAggregate, \Countable
      */
     public function __construct($open = true, \SessionHandlerInterface $handler = null)
     {
-        if ($handler !== null) {
+        if ($handler) {
             session_set_save_handler($handler, true);
         }
         if ($open) {
@@ -80,7 +80,7 @@ class Session implements \ArrayAccess, \IteratorAggregate, \Countable
      *
      * @throws \RuntimeException When the session can not be opened.
      */
-    public function open($data)
+    public function open($data = null)
     {
         if (!session_start()) {
             throw new \RuntimeException('Could not open session.');

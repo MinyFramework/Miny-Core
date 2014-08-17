@@ -76,13 +76,15 @@ abstract class BaseApplication
                 '\\Modules'     => './vendor/miny/Modules'
             ]);
         }
+
+        $root               = realpath('.');
         $parameterContainer = new ParameterContainer([
             'default_timezone' => 'UTC',
-            'root'             => realpath('.'),
+            'root'             => $root,
             'profile'          => $this->isDeveloperEnvironment(),
             'log'              => [
                 'enable_file_writer' => true,
-                'path'               => realpath('./logs'),
+                'path'               => $root . '/logs',
                 'flush_limit'        => 100
             ],
         ]);
@@ -117,12 +119,11 @@ abstract class BaseApplication
 
     private function loadModules(ParameterContainer $parameterContainer)
     {
-        if (!isset($parameterContainer['modules']) || !is_array($parameterContainer['modules'])) {
-            return;
+        if (isset($parameterContainer['modules']) && is_array($parameterContainer['modules'])) {
+            $this->container->get('Miny\\Modules\\ModuleHandler')
+                ->loadModules($parameterContainer['modules'])
+                ->initialize();
         }
-        $this->container->get('Miny\\Modules\\ModuleHandler')
-            ->loadModules($parameterContainer['modules'])
-            ->initialize();
     }
 
     /**
@@ -188,12 +189,12 @@ abstract class BaseApplication
 
         /**
          * @var $shutdown      ShutdownService
-         * @var $events        EventDispatcher
          * @var $errorHandlers ErrorHandlers
          */
         $shutdown      = $container->get('Miny\\Shutdown\\ShutdownService');
-        $events        = $container->get('Miny\\Event\\EventDispatcher');
         $errorHandlers = $container->get('Miny\\Application\\Handlers\\ErrorHandlers');
+
+        $this->eventDispatcher = $container->get('Miny\\Event\\EventDispatcher');
 
         set_error_handler([$errorHandlers, 'handleErrors']);
         set_exception_handler([$errorHandlers, 'handleExceptions']);
@@ -204,8 +205,8 @@ abstract class BaseApplication
         }
 
         $shutdown->register(
-            function () use ($events) {
-                $events->raiseEvent(new ShutDownEvent());
+            function () {
+                $this->eventDispatcher->raiseEvent(new ShutDownEvent());
             },
             0
         );
@@ -221,8 +222,6 @@ abstract class BaseApplication
             $profiler = $this->log->startProfiling('Miny', 'Application execution');
             $shutdown->register([$profiler, 'stop'], 998);
         }
-
-        $this->eventDispatcher = $events;
     }
 
     /**

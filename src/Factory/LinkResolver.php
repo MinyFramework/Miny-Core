@@ -31,12 +31,7 @@ class LinkResolver
     {
         if (is_array($argument)) {
             //If $argument is an array, resolve all values recursively
-            $return = [];
-            foreach ($argument as $k => $arg) {
-                $return[$k] = $this->resolveReferences($arg);
-            }
-
-            return $return;
+            return array_map([$this, 'resolveReferences'], $argument);
         }
 
         //direct injection for non-string values and characters
@@ -51,8 +46,9 @@ class LinkResolver
         //see if $argument is a reference to something
         switch ($argument[0]) {
             case '@':
-                $value    = $this->parameterContainer->offsetGet(substr($argument, 1));
-                $argument = $this->resolveReferences($value);
+                $argument = $this->resolveReferences(
+                    $this->parameterContainer->offsetGet(substr($argument, 1))
+                );
                 break;
 
             case '\\':

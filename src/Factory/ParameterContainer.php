@@ -59,12 +59,7 @@ class ParameterContainer extends AbstractConfigurationTree
     public function resolveLinks($value)
     {
         if (is_array($value)) {
-            $return = [];
-            foreach ($value as $k => $v) {
-                $return[$k] = $this->resolveLinks($v);
-            }
-
-            return $return;
+            return array_map([$this, 'resolveLinks'], $value);
         }
 
         if (is_string($value) && strpos($value, '{@') !== false) {

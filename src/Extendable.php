@@ -99,15 +99,11 @@ class Extendable
      * @param string $method
      * @param array  $args
      *
-     * @throws \InvalidArgumentException
      * @throws \BadMethodCallException
      * @return mixed
      */
     public function __call($method, $args)
     {
-        if (!is_string($method)) {
-            throw new \InvalidArgumentException('$method must be string');
-        }
         if (isset($this->setters[$method])) {
             return $this->{$this->setters[$method]} = current($args);
         } else {

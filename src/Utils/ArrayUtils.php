@@ -29,9 +29,9 @@ class ArrayUtils
             return array_key_exists($key, $array);
         } elseif ($array instanceof \ArrayAccess) {
             return isset($array[$key]);
-        } else {
-            return false;
         }
+
+        return false;
     }
 
     /**
@@ -45,7 +45,7 @@ class ArrayUtils
      */
     public static function exists($array, $parts)
     {
-        if (!is_array($array) && !$array instanceof \ArrayAccess) {
+        if (!self::isArray($array)) {
             throw new \InvalidArgumentException('ArrayUtils::existsByPath expects an array or an ArrayAccess object.');
         }
         foreach (self::explodePath($parts) as $k) {
@@ -154,7 +154,7 @@ class ArrayUtils
         if (!self::isArray($array)) {
             throw new \InvalidArgumentException('ArrayUtils::getByPath expects an array or an ArrayAccess object.');
         }
-        $parts = self::explodePath($parts);
+        $parts    = self::explodePath($parts);
         $last_key = array_pop($parts);
         foreach ($parts as $k) {
             if (!static::arrayHasKey($array, $k)) {
@@ -202,6 +202,7 @@ class ArrayUtils
 
     /**
      * @param $parts
+     *
      * @return array
      */
     private static function explodePath($parts)

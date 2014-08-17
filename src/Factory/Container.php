@@ -12,7 +12,7 @@ namespace Miny\Factory;
 class Container
 {
     /**
-     * @var (string|\Closure)[]
+     * @var (string|callable)[]
      */
     private $aliases = [];
 
@@ -50,18 +50,24 @@ class Container
     }
 
     /**
-     * @param string         $abstract
-     * @param string|\Closure $concrete
+     * @param string          $abstract
+     * @param string|callable $concrete
+     *
+     * @throws \InvalidArgumentException
      */
     public function addAlias($abstract, $concrete)
     {
+        if (is_string($concrete)) {
+            if ($concrete[0] === '\\') {
+                //Strip all leading backslashes if $concrete is a class name
+                $concrete = substr($concrete, 1);
+            }
+        } elseif (!is_callable($concrete)) {
+            throw new \InvalidArgumentException('The alias must either be a class name or a callable');
+        }
         //Strip all leading backslashes
         if ($abstract[0] === '\\') {
             $abstract = substr($abstract, 1);
-        }
-        if (is_string($concrete) && $concrete[0] === '\\') {
-            //Strip all leading backslashes if $concrete is a class name
-            $concrete = substr($concrete, 1);
         }
         $this->aliases[$abstract] = $concrete;
     }
@@ -88,10 +94,9 @@ class Container
         }
 
         if (!isset($this->constructorArguments[$concrete])) {
-            $this->constructorArguments[$concrete] = [$position => $argument];
-        } else {
-            $this->constructorArguments[$concrete][$position] = $argument;
+            $this->constructorArguments[$concrete] = [];
         }
+        $this->constructorArguments[$concrete][$position] = $argument;
     }
 
     /**
@@ -117,6 +122,7 @@ class Container
     /**
      * @param $concrete
      * @param $callback
+     *
      * @throws \InvalidArgumentException
      */
     public function addCallback($concrete, callable $callback)
@@ -135,7 +141,7 @@ class Container
     /**
      * @param $abstract
      *
-     * @return string|\Closure
+     * @return string|callable
      * @throws \OutOfBoundsException
      */
     public function getAlias($abstract)
@@ -187,9 +193,8 @@ class Container
         if ($abstract === null) {
             //If $abstract is not specified, use $objects class
             $abstract = get_class($object);
-        }
-        //Strip all leading backslashes
-        if ($abstract[0] === '\\') {
+        } elseif ($abstract[0] === '\\') {
+            //Strip all leading backslashes
             $abstract = substr($abstract, 1);
         }
         $concrete = $this->findMostConcreteDefinition($abstract);
@@ -297,7 +302,7 @@ class Container
      */
     private function instantiate($class, array $parameters = [])
     {
-        if ($class instanceof \Closure) {
+        if (is_callable($class)) {
             return $class($this, $parameters);
         }
         $reflector = new \ReflectionClass($class);
@@ -306,30 +311,27 @@ class Container
             //Try to give a descriptive exception message
             if ($reflector->isAbstract()) {
                 throw new \InvalidArgumentException("Class {$class} is abstract and can not be instantiated.");
-            } elseif ($reflector->isInterface()) {
-                throw new \InvalidArgumentException("{$class} is an interface and can not be instantiated.");
-            } else {
-                throw new \InvalidArgumentException("Class {$class} can not be instantiated.");
             }
+            if ($reflector->isInterface()) {
+                throw new \InvalidArgumentException("{$class} is an interface and can not be instantiated.");
+            }
+            throw new \InvalidArgumentException("Class {$class} can not be instantiated.");
         }
 
         $constructor = $reflector->getConstructor();
 
-        if ($constructor === null) {
+        if ($constructor === null || $constructor->getNumberOfParameters() === 0) {
             //Since the class has no constructor, it can not be instantiated with ReflectionClass
-            return new $class;
-        }
 
-        $constructorArgs = $constructor->getParameters();
-
-        if (empty($constructorArgs)) {
-            //If the class has no constructor arguments, it is cheaper to instantiate it directly
+            //Also, if the class has no constructor arguments, it is cheaper to instantiate it directly
             //Although this has the downside of disallowing variable sized argument lists if
             //no arguments are required by the constructor signature.
             return new $class;
         }
 
-        $arguments = $this->resolveDependencies($constructorArgs, $parameters);
+        $constructorArgs = $constructor->getParameters();
+        $arguments       = $this->resolveDependencies($constructorArgs, $parameters);
+
         if (!empty($parameters)) {
             //We need to sort the arguments because ReflectionClass passes them by order, not by index
             ksort($arguments);
@@ -338,18 +340,11 @@ class Container
         return $reflector->newInstanceArgs($arguments);
     }
 
-    /**
-     * @param \ReflectionParameter[] $dependencies
-     * @param array                 $resolved
-     *
-     * @return array
-     */
     private function resolveDependencies(array $dependencies, array $resolved)
     {
-        foreach ($resolved as $k => $value) {
-            unset($dependencies[$k]);
-        }
+        $dependencies = array_diff_key($dependencies, $resolved);
         foreach ($dependencies as $k => $dependency) {
+            /** @var $dependency \ReflectionParameter */
             $class = $dependency->getClass();
             if ($class === null) {
                 // primitive type
@@ -388,8 +383,10 @@ class Container
      * @throws \InvalidArgumentException
      * @return mixed|object
      */
-    private function resolveClassParameter(\ReflectionClass $class, \ReflectionParameter $dependency)
-    {
+    private function resolveClassParameter(
+        \ReflectionClass $class,
+        \ReflectionParameter $dependency
+    ) {
         try {
             return $this->get($class->getName());
         } catch (\InvalidArgumentException $e) {
