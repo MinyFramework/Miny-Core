@@ -15,6 +15,7 @@ use Miny\Event\EventDispatcher;
 use Miny\Log\AbstractLog;
 use Miny\Log\Log;
 use Miny\Modules\Exceptions\BadModuleException;
+use Miny\TemporaryFiles\TemporaryFileManager;
 
 class ModuleHandler
 {
@@ -22,6 +23,11 @@ class ModuleHandler
      * @var Module[]
      */
     private $modules = [];
+
+    /**
+     * @var TemporaryFileManager
+     */
+    private $fileManager;
 
     /**
      * @var BaseApplication
@@ -39,15 +45,21 @@ class ModuleHandler
     private $events;
 
     /**
-     * @param BaseApplication $app
-     * @param EventDispatcher $events
-     * @param AbstractLog     $log
+     * @param BaseApplication      $app
+     * @param TemporaryFileManager $fileManager
+     * @param EventDispatcher      $events
+     * @param AbstractLog          $log
      */
-    public function __construct(BaseApplication $app, EventDispatcher $events, AbstractLog $log)
-    {
+    public function __construct(
+        BaseApplication $app,
+        TemporaryFileManager $fileManager,
+        EventDispatcher $events,
+        AbstractLog $log
+    ) {
         $this->application = $app;
         $this->log         = $log;
         $this->events      = $events;
+        $this->fileManager = $fileManager;
 
         $events->registerHandlers(
             CoreEvents::BEFORE_RUN,
@@ -60,8 +72,10 @@ class ModuleHandler
 
     public function initialize()
     {
-        foreach ($this->modules as $module) {
+        foreach ($this->modules as $moduleName => $module) {
+            $this->fileManager->enterModule($moduleName);
             $module->init($this->application);
+            $this->fileManager->exitModule();
         }
     }
 
@@ -110,7 +124,9 @@ class ModuleHandler
         foreach ($this->modules as $module) {
             foreach ($module->getConditionalCallbacks() as $moduleName => $runnable) {
                 if (isset($this->modules[$moduleName])) {
+                    $this->fileManager->enterModule($moduleName);
                     $runnable($this->application);
+                    $this->fileManager->exitModule();
                 }
             }
         }

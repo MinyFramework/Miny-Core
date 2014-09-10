@@ -11,6 +11,7 @@ namespace Miny\Modules;
 
 use Miny\Application\BaseApplication;
 use Miny\Factory\AbstractConfigurationTree;
+use Miny\TemporaryFiles\TemporaryFileManager;
 use OutOfBoundsException;
 
 abstract class Module
@@ -31,17 +32,28 @@ abstract class Module
     private $configuration;
 
     /**
-     * @param string          $name
-     * @param BaseApplication $app
-     *
-     * @throws Exceptions\BadModuleException
+     * @var TemporaryFileManager
      */
-    public function __construct($name, BaseApplication $app)
+    private $fileManager;
+
+    /**
+     * @param string               $name
+     * @param BaseApplication      $app
+     *
+     * @param TemporaryFileManager $fileManager
+     */
+    public function __construct($name, BaseApplication $app, TemporaryFileManager $fileManager)
     {
         $this->application  = $app;
+        $this->fileManager  = $fileManager;
         $parameterContainer = $app->getParameterContainer();
         $parameterContainer->addParameters([$name => $this->defaultConfiguration()], false);
         $this->configuration = $parameterContainer->getSubTree($name);
+    }
+
+    public function getFileManager()
+    {
+        return $this->fileManager;
     }
 
     /**
@@ -54,15 +66,14 @@ abstract class Module
 
     public function getConfiguration($key, $default = null)
     {
-        if (!isset($this->configuration)) {
-            if ($default === null) {
-                throw new OutOfBoundsException("Key {$key} is not set");
-            }
-
-            return $default;
+        if (isset($this->configuration)) {
+            return $this->configuration[$key];
+        }
+        if ($default === null) {
+            throw new OutOfBoundsException("Key {$key} is not set");
         }
 
-        return $this->configuration[$key];
+        return $default;
     }
 
     public function setConfiguration($key, $value)

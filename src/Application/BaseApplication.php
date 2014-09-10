@@ -20,6 +20,7 @@ use Miny\Factory\ParameterContainer;
 use Miny\Log\FileWriter;
 use Miny\Log\Log;
 use Miny\Shutdown\ShutdownService;
+use Miny\TemporaryFiles\TemporaryFileManager;
 
 abstract class BaseApplication
 {
@@ -81,6 +82,7 @@ abstract class BaseApplication
         $parameterContainer = new ParameterContainer([
             'default_timezone' => 'UTC',
             'root'             => $root,
+            'cache_directory'  => $root . '/cache',
             'profile'          => $this->isDeveloperEnvironment(),
             'log'              => [
                 'enable_file_writer' => true,
@@ -183,7 +185,10 @@ abstract class BaseApplication
 
     protected function registerDefaultServices(Container $container)
     {
-        date_default_timezone_set($this->parameterContainer['default_timezone']);
+        $parameterContainer = $this->parameterContainer;
+
+        date_default_timezone_set($parameterContainer['default_timezone']);
+
         $container->setInstance($this);
         $container->addAlias('Miny\\Log\\AbstractLog', 'Miny\\Log\\Log');
 
@@ -199,10 +204,17 @@ abstract class BaseApplication
         set_error_handler([$errorHandlers, 'handleErrors']);
         set_exception_handler([$errorHandlers, 'handleExceptions']);
 
-        $this->log->setFlushLimit($this->parameterContainer['log']['flush_limit']);
-        if ($this->parameterContainer['log']['enable_file_writer']) {
-            $this->log->registerWriter(new FileWriter($this->parameterContainer['log']['path']));
+        $this->log->setFlushLimit($parameterContainer['log']['flush_limit']);
+        if ($parameterContainer['log']['enable_file_writer']) {
+            $this->log->registerWriter(new FileWriter($parameterContainer['log']['path']));
         }
+
+        $container->addAlias(
+            'Miny\\TemporaryFiles\\TemporaryFileManager',
+            function () use ($parameterContainer){
+                return new TemporaryFileManager($parameterContainer['cache_directory']);
+            }
+        );
 
         $shutdown->register(
             function () {
@@ -218,7 +230,7 @@ abstract class BaseApplication
             1000
         );
 
-        if ($this->parameterContainer['profile']) {
+        if ($parameterContainer['profile']) {
             $profiler = $this->log->startProfiling('Miny', 'Application execution');
             $shutdown->register([$profiler, 'stop'], 998);
         }
