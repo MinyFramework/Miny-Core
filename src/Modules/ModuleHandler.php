@@ -107,7 +107,7 @@ class ModuleHandler
         $this->log->write(Log::DEBUG, 'ModuleHandler', 'Loading module: %s', $module);
 
         $class        = "\\Modules\\{$module}\\Module";
-        $moduleObject = new $class($module, $this->application);
+        $moduleObject = new $class($module, $this->application, $this->fileManager);
 
         if (!$moduleObject instanceof Module) {
             throw new BadModuleException("Class {$class} does not extend Module class.");
