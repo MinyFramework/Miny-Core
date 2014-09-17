@@ -85,9 +85,6 @@ class StringControllerRunner extends AbstractControllerRunner
      */
     protected function initController(Request $request, Response $response)
     {
-        $this->controller->setRouter(
-            $this->container->get('\\Miny\\Router\\Router')
-        );
         $this->controller->setRouteGenerator(
             $this->container->get('\\Miny\\Router\\RouteGenerator')
         );

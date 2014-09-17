@@ -15,7 +15,6 @@ use Miny\HTTP\Request;
 use Miny\HTTP\Response;
 use Miny\HTTP\ResponseHeaders;
 use Miny\Router\RouteGenerator;
-use Miny\Router\Router;
 
 abstract class Controller extends Extendable
 {
@@ -23,11 +22,6 @@ abstract class Controller extends Extendable
      * @var ParameterContainer
      */
     protected $parameterContainer;
-
-    /**
-     * @var Router
-     */
-    private $router;
 
     /**
      * @var RouteGenerator
@@ -43,11 +37,6 @@ abstract class Controller extends Extendable
      * @var ResponseHeaders
      */
     private $headers;
-
-    public function setRouter(Router $router)
-    {
-        $this->router = $router;
-    }
 
     public function setRouteGenerator(RouteGenerator $routeGenerator)
     {
