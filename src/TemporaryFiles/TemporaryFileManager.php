@@ -65,6 +65,15 @@ class TemporaryFileManager
         file_put_contents($file, $contents);
     }
 
+    public function exists($file)
+    {
+        $file = $this->getFileName($file);
+
+        $this->ensureDirectoryIsSafe(dirname($file));
+
+        return is_file($file);
+    }
+
     private function getFileName($file)
     {
         return strtr($this->tempDirectoryRoot . $this->currentModule . $file, '\\', '/');
@@ -94,7 +103,7 @@ class TemporaryFileManager
     private function ensureDirectoryExists($directory)
     {
         if (!is_dir($directory)) {
-            if(!mkdir($directory, 0777, true)) {
+            if (!mkdir($directory, 0777, true)) {
                 throw new \UnexpectedValueException("Directory {$directory} could not be created");
             }
         }
