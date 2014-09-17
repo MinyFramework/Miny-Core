@@ -12,6 +12,8 @@ namespace Miny\TemporaryFiles;
 class TemporaryFileManager
 {
     private $tempDirectoryRoot;
+
+    private $moduleStack = [];
     private $currentModule;
 
     public function __construct($tempDirectoryRoot)
@@ -22,12 +24,13 @@ class TemporaryFileManager
 
     public function enterModule($module)
     {
+        $this->moduleStack[] = $this->currentModule;
         $this->currentModule = $module . '/';
     }
 
     public function exitModule()
     {
-        $this->currentModule = '';
+        $this->currentModule = array_pop($this->moduleStack);
     }
 
     public function load($file)
@@ -68,10 +71,17 @@ class TemporaryFileManager
     public function exists($file)
     {
         $file = $this->getFileName($file);
-
         $this->ensureDirectoryIsSafe(dirname($file));
 
         return is_file($file);
+    }
+
+    public function getFileInfo($file)
+    {
+        $file = $this->getFileName($file);
+        $this->ensureDirectoryIsSafe(dirname($file));
+
+        return new \SplFileInfo($file);
     }
 
     private function getFileName($file)
