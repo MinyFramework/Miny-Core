@@ -61,7 +61,6 @@ class StringControllerRunnerTest extends \PHPUnit_Framework_TestCase
 
         $this->containerMap = [
             ['TestController', [], false, $this->controller],
-            ['\\Miny\\Router\\Router', [], false, $routerMock],
             [
                 '\\Miny\\Router\\RouteGenerator',
                 [],
@@ -153,12 +152,9 @@ class StringControllerRunnerTest extends \PHPUnit_Framework_TestCase
 
     public function testControllerIsInitialisedOnRun()
     {
-        $this->container->expects($this->exactly(4))
+        $this->container->expects($this->any())
             ->method('get')
             ->will($this->returnValueMap($this->containerMap));
-
-        $this->controller->expects($this->once())
-            ->method('setRouter');
 
         $this->controller->expects($this->once())
             ->method('setRouteGenerator');
@@ -179,7 +175,7 @@ class StringControllerRunnerTest extends \PHPUnit_Framework_TestCase
 
     public function testActionIsReadFromRequest()
     {
-        $this->container->expects($this->exactly(4))
+        $this->container->expects($this->any())
             ->method('get')
             ->will($this->returnValueMap($this->containerMap));
 
