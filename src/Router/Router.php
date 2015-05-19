@@ -82,7 +82,13 @@ class Router
         }
         $this->routes[$name] = $route;
         if ($route->isStatic()) {
-            $this->staticRoutes[$uri] = $route;
+            if (!isset($this->staticRoutes[$uri])) {
+                $this->staticRoutes[$uri] = [
+                    $method => $route
+                ];
+            } else {
+                $this->staticRoutes[$uri][$method] = $route;
+            }
         }
         $route->set($this->globalValues);
 
@@ -160,18 +166,17 @@ class Router
     }
 
     /**
-     * @param $uri
-     *
+     * @param     $uri
+     * @param int $method
      * @return Route
-     * @throws \OutOfBoundsException
      */
-    public function getStaticByURI($uri)
+    public function getStaticByURI($uri, $method = Route::METHOD_GET)
     {
-        if (!isset($this->staticRoutes[$uri])) {
-            throw new \OutOfBoundsException("Static uri {$uri} is not found.");
+        if (!isset($this->staticRoutes[$uri][$method])) {
+            throw new \OutOfBoundsException("Static uri {$uri} with method {$method} is not found.");
         }
 
-        return $this->staticRoutes[$uri];
+        return $this->staticRoutes[$uri][$method];
     }
 
     public function resource($singularName, $pluralName = null)

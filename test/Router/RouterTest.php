@@ -129,6 +129,15 @@ class RouterTest extends \PHPUnit_Framework_TestCase
         $this->assertFalse($this->router->hasStatic('dynamic route'));
     }
 
+    public function testMultipleStaticRoutesWithDifferentMethods()
+    {
+        $get = $this->router->add('path', Route::METHOD_GET);
+        $this->router->add('path', Route::METHOD_POST);
+
+        $this->assertTrue($this->router->hasStatic('path'));
+        $this->assertSame($get, $this->router->getStaticByURI('path', Route::METHOD_GET));
+    }
+
     public function testThatGlobalValuesAreAdded()
     {
         $array = [
