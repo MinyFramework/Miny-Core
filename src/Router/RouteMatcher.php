@@ -34,8 +34,8 @@ class RouteMatcher
      */
     public function match($path, $method = Route::METHOD_ALL)
     {
-        if ($this->router->hasStatic($path)) {
-            $route = $this->router->getStaticByURI($path);
+        if ($this->router->hasStatic($path, $method)) {
+            $route = $this->router->getStaticByURI($path, $method);
             if ($route->isMethod($method)) {
                 return new Match($route);
             }

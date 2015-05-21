@@ -156,13 +156,14 @@ class Router
     /**
      * Determines if a static route $path exists.
      *
-     * @param $path
+     * @param $uri
+     * @param $method
      *
      * @return bool
      */
-    public function hasStatic($path)
+    public function hasStatic($uri, $method = Route::METHOD_GET)
     {
-        return isset($this->staticRoutes[$path]);
+        return isset($this->staticRoutes[$uri][$method]) || isset($this->staticRoutes[$uri][Route::METHOD_ALL]);
     }
 
     /**
@@ -173,6 +174,9 @@ class Router
     public function getStaticByURI($uri, $method = Route::METHOD_GET)
     {
         if (!isset($this->staticRoutes[$uri][$method])) {
+            if (isset($this->staticRoutes[$uri][Route::METHOD_ALL])) {
+                return $this->staticRoutes[$uri][Route::METHOD_ALL];
+            }
             throw new \OutOfBoundsException("Static uri {$uri} with method {$method} is not found.");
         }
 
