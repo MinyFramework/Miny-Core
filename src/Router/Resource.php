@@ -94,6 +94,10 @@ class Resource
         $this->parameters['controller'] = $this->camelize($controllerName);
     }
 
+    /**
+     * @param $str
+     * @return string
+     */
     private function camelize($str)
     {
         $str = strtolower($str);
@@ -102,6 +106,10 @@ class Resource
         return strtr($str, '_', '');
     }
 
+    /**
+     * @param bool $shallow
+     * @return $this
+     */
     public function shallow($shallow = true)
     {
         $this->shallow = $shallow;
@@ -109,6 +117,10 @@ class Resource
         return $this;
     }
 
+    /**
+     * @param $pattern
+     * @return $this
+     */
     public function idPattern($pattern)
     {
         $this->idPattern = $pattern;
@@ -116,6 +128,10 @@ class Resource
         return $this;
     }
 
+    /**
+     * @param Resource $resource
+     * @return $this
+     */
     public function resource(Resource $resource)
     {
         $resource->setParent($this);
@@ -123,6 +139,10 @@ class Resource
         return $this;
     }
 
+    /**
+     * @param Resource $parent
+     * @return $this
+     */
     public function setParent(Resource $parent)
     {
         $this->parent     = $parent;
@@ -131,6 +151,10 @@ class Resource
         return $this;
     }
 
+    /**
+     * @param $except
+     * @return $this
+     */
     public function except($except)
     {
         $except                 = array_flip(func_get_args());
@@ -140,6 +164,10 @@ class Resource
         return $this;
     }
 
+    /**
+     * @param $only
+     * @return $this
+     */
     public function only($only)
     {
         $only                   = array_flip(func_get_args());
@@ -149,6 +177,11 @@ class Resource
         return $this;
     }
 
+    /**
+     * @param $name
+     * @param $method
+     * @return $this
+     */
     public function member($name, $method)
     {
         if ($this->pluralName !== null) {
@@ -159,6 +192,11 @@ class Resource
         return $this;
     }
 
+    /**
+     * @param $name
+     * @param $method
+     * @return $this
+     */
     public function collection($name, $method)
     {
         unset($this->unnamedRoutes[$name]);
@@ -167,6 +205,9 @@ class Resource
         return $this;
     }
 
+    /**
+     * @return string
+     */
     public function getIdToken()
     {
         if ($this->isParent) {
@@ -178,6 +219,10 @@ class Resource
         return '{' . $name . '}';
     }
 
+    /**
+     * @param Router $router
+     * @return $this
+     */
     public function register(Router $router)
     {
         $pathBase   = '';
@@ -269,7 +314,7 @@ class Resource
      * @param $key
      * @param $value
      *
-     * @return Route $this
+     * @return $this
      */
     public function set($key, $value = null)
     {
