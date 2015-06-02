@@ -145,7 +145,7 @@ abstract class BaseApplication
             './config/config.php'        => self::ENV_PROD
         ];
         foreach ($config_files as $file => $env) {
-            $this->loadConfig($file, $env);
+            $this->loadConfigFile($file, $env, true);
         }
     }
 
@@ -179,7 +179,7 @@ abstract class BaseApplication
             $file
         );
         $this->parameterContainer->addParameters(
-            include $file
+            include_file($file)
         );
     }
 
@@ -306,4 +306,9 @@ abstract class BaseApplication
     }
 
     abstract protected function onRun();
+}
+
+function include_file($file) {
+    /** @noinspection PhpIncludeInspection */
+    return include $file;
 }
