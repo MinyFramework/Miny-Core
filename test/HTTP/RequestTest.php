@@ -81,7 +81,9 @@ class RequestTest extends \PHPUnit_Framework_TestCase
         $this->assertInstanceOf('\\Miny\\HTTP\\ParameterContainer', $request->post());
         $this->assertInstanceOf('\\Miny\\HTTP\\ParameterContainer', $request->cookie());
         $this->assertEquals('value', $request->get()->get('key'));
+        $this->assertEquals('value', $request->get('key'));
         $this->assertEquals('bar', $request->get()->get('foo', 'bar'));
+        $this->assertEquals('bar', $request->get('foo', 'bar'));
     }
 
     public function testSubRequest()

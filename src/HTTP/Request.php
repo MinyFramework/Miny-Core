@@ -134,27 +134,48 @@ class Request
     }
 
     /**
-     * @return ParameterContainer
+     * @param $key
+     * @param $default
+     * @return ParameterContainer|mixed
      */
-    public function get()
+    public function get($key = null, $default = null)
     {
-        return $this->get;
+        $container = $this->get;
+        if($key === null && $default === null) {
+            return $container;
+        }
+
+        return $container->get($key, $default);
     }
 
     /**
-     * @return ParameterContainer
+     * @param $key
+     * @param $default
+     * @return ParameterContainer|mixed
      */
-    public function post()
+    public function post($key = null, $default = null)
     {
-        return $this->post;
+        $container = $this->post;
+        if($key === null && $default === null) {
+            return $container;
+        }
+
+        return $container->get($key, $default);
     }
 
     /**
-     * @return ParameterContainer
+     * @param $key
+     * @param $default
+     * @return ParameterContainer|mixed
      */
-    public function cookie()
+    public function cookie($key = null, $default = null)
     {
-        return $this->cookie;
+        $container = $this->cookie;
+        if($key === null && $default === null) {
+            return $container;
+        }
+
+        return $container->get($key, $default);
     }
 
     /**
