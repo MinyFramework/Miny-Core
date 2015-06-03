@@ -71,7 +71,7 @@ class ControllerDispatcher
                 return $runner->run($request, $response);
             }
         }
-        $path = $request->getPath();
-        throw new InvalidControllerException("Invalid controller set for path {$path}");
+
+        throw new InvalidControllerException("Invalid controller set for path {$request->getPath()}");
     }
 }

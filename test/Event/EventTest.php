@@ -44,5 +44,3 @@ class EventTest extends \PHPUnit_Framework_TestCase
         $this->assertEquals($response, $event->getResponse());
     }
 }
-
-?>

@@ -137,7 +137,7 @@ class ApplicationEventHandlers
         if ($headers->has('content-type')) {
             return;
         }
-        $format       = $request->get()->get('format');
+        $format       = $request->get('format');
         $content_type = $this->getResponseContentType($format);
         $content_type .= '; charset=' . $this->parameterContainer['default_content_encoding'];
         $headers->set('content-type', $content_type);
