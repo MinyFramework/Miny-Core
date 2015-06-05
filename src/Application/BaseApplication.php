@@ -220,7 +220,7 @@ abstract class BaseApplication
             function () {
                 $error = error_get_last();
                 if ($error !== null) {
-                    $this->log->write(Log::ERROR, "PHP error({$error['type']}", "{$error['message']} in {$error['file']} on line {$error['line']}\n");
+                    $this->log->write(Log::ERROR, "PHP error({$error['type']}", "{$error['message']} in {$error['file']} on line {$error['line']}");
                 }
             },
             0
