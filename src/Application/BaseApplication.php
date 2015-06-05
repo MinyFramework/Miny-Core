@@ -218,9 +218,18 @@ abstract class BaseApplication
 
         $shutdown->register(
             function () {
-                $this->eventDispatcher->raiseEvent(new ShutDownEvent());
+                $error = error_get_last();
+                if ($error !== null) {
+                    $this->log->write(Log::ERROR, "PHP error({$error['type']}", "{$error['message']} in {$error['file']} on line {$error['line']}\n");
+                }
             },
             0
+        );
+        $shutdown->register(
+            function () {
+                $this->eventDispatcher->raiseEvent(new ShutDownEvent());
+            },
+            1
         );
         $shutdown->register(
             function () {
