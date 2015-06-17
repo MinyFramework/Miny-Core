@@ -29,6 +29,11 @@ class StringControllerRunnerTest extends \PHPUnit_Framework_TestCase
      */
     private $eventDispatcher;
 
+    /**
+     * @var \PHPUnit_Framework_MockObject_MockObject
+     */
+    private $log;
+
     private $containerMap;
 
     public function setUp()
@@ -44,6 +49,15 @@ class StringControllerRunnerTest extends \PHPUnit_Framework_TestCase
             ],
             [],
             'TestController',
+            false
+        );
+        $this->log = $this->getMock(
+            '\\Miny\\Log\\Log',
+            [
+                'write'
+            ],
+            [],
+            'TestLog',
             false
         );
 
@@ -67,6 +81,7 @@ class StringControllerRunnerTest extends \PHPUnit_Framework_TestCase
                 false,
                 new RouteGenerator($routerMock)
             ],
+            ['\\Miny\\Log\\Log', [], false, $this->log],
             ['\\Miny\\Factory\\ParameterContainer', [], false, new ParameterContainer]
         ];
 
