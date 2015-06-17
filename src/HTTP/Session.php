@@ -119,7 +119,8 @@ class Session implements \ArrayAccess, \IteratorAggregate, \Countable
         $this->data['flash'] = array_map(
             function ($flash) {
                 // decrease flash ttl
-                return $flash['ttl'] - 1;
+                --$flash['ttl'];
+                return $flash;
             },
             array_filter(
                 $this->data['flash'],
