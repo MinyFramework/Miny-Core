@@ -9,11 +9,13 @@
 
 namespace Miny\Controller;
 
+use Miny\Controller\Exceptions\IllegalStateException;
 use Miny\Extendable;
 use Miny\Factory\ParameterContainer;
 use Miny\HTTP\Request;
 use Miny\HTTP\Response;
 use Miny\HTTP\ResponseHeaders;
+use Miny\Log\Log;
 use Miny\Router\RouteGenerator;
 
 abstract class Controller extends Extendable
@@ -38,6 +40,35 @@ abstract class Controller extends Extendable
      */
     private $headers;
 
+    /**
+     * @var Log
+     */
+    private $log;
+
+    /**
+     * @var string
+     */
+    private $className;
+
+    /**
+     * @var bool
+     */
+    private $initCalled = false;
+
+    /**
+     * Initialize the controller.
+     */
+    protected function init()
+    {
+        $this->initCalled = true;
+        $this->className = get_class($this);
+    }
+
+    public function setLogger(Log $log)
+    {
+        $this->log = $log;
+    }
+
     public function setRouteGenerator(RouteGenerator $routeGenerator)
     {
         $this->routeGenerator = $routeGenerator;
@@ -46,6 +77,26 @@ abstract class Controller extends Extendable
     public function setParameterContainer(ParameterContainer $parameterContainer)
     {
         $this->parameterContainer = $parameterContainer;
+    }
+
+    /**
+     * Writes a line to the log
+     *
+     * @param $level
+     * @param $message
+     * @param ... arguments to be replaced in $message. {@see http://php.net/sprintf}
+     */
+    public function log($level, $message)
+    {
+        if (func_num_args() > 3) {
+            $args = array_slice(func_get_args(), 3);
+            if (is_array($args[0])) {
+                $args = $args[0];
+            }
+            $this->log->write($level, $this->className, $message, $args);
+        } else {
+            $this->log->write($level, $this->className, $message);
+        }
     }
 
     /**
@@ -123,6 +174,10 @@ abstract class Controller extends Extendable
      */
     public function run($action, Request $request, Response $response)
     {
+        $this->init();
+        if (!$this->initCalled) {
+            throw new IllegalStateException("Controller::init() must be called");
+        }
         $this->response = $response;
         $this->headers  = $response->getHeaders();
 

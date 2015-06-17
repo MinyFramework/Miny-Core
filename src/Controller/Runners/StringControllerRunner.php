@@ -59,7 +59,7 @@ class StringControllerRunner extends AbstractControllerRunner
      */
     public function canRun(Request $request)
     {
-        $class = $request->get()->get('controller');
+        $class = $request->get('controller');
         if (!is_string($class)) {
             return false;
         }
@@ -85,6 +85,9 @@ class StringControllerRunner extends AbstractControllerRunner
      */
     protected function initController(Request $request, Response $response)
     {
+        $this->controller->setLogger(
+            $this->container->get('\\Miny\\Log\\Log')
+        );
         $this->controller->setRouteGenerator(
             $this->container->get('\\Miny\\Router\\RouteGenerator')
         );
@@ -92,7 +95,7 @@ class StringControllerRunner extends AbstractControllerRunner
             $this->container->get('\\Miny\\Factory\\ParameterContainer')
         );
 
-        $this->action = $request->get()->get('action', $this->controller->getDefaultAction());
+        $this->action = $request->get('action', $this->controller->getDefaultAction());
     }
 
     protected function runController(Request $request, Response $response)

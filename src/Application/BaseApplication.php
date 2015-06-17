@@ -62,7 +62,7 @@ abstract class BaseApplication
     {
         $environmentNames = [
             self::ENV_PROD => 'production',
-            self::ENV_DEV  => 'development',
+            self::ENV_DEV => 'development',
             self::ENV_TEST => 'testing'
         ];
         if (!isset($environmentNames[$environment])) {
@@ -74,47 +74,46 @@ abstract class BaseApplication
         if ($autoLoader === null) {
             $autoLoader = new AutoLoader([
                 '\\Application' => '.',
-                '\\Modules'     => './vendor/miny/Modules'
+                '\\Modules' => './vendor/miny/Modules'
             ]);
         }
 
         $root               = realpath('.');
         $parameterContainer = new ParameterContainer([
             'default_timezone' => 'UTC',
-            'root'             => $root,
-            'cache_directory'  => $root . '/cache',
-            'profile'          => $this->isDeveloperEnvironment(),
-            'log'              => [
+            'root' => $root,
+            'cache_directory' => $root . '/cache',
+            'profile' => $this->isDeveloperEnvironment(),
+            'log' => [
                 'enable_file_writer' => true,
-                'path'               => $root . '/logs',
-                'flush_limit'        => 100
+                'path' => $root . '/logs',
+                'flush_limit' => 100
             ],
         ]);
 
-        $ioc = new Container(new LinkResolver($parameterContainer));
-        $ioc->setInstance($autoLoader);
-        $ioc->setInstance($parameterContainer);
+        $container = new Container(new LinkResolver($parameterContainer));
+        $container->setInstance($autoLoader);
+        $container->setInstance($parameterContainer);
 
         /** @var $log Log */
-        $this->log = $ioc->get('Miny\\Log\\Log');
+        $this->log = $container->get('Miny\\Log\\Log');
 
         if ($this->environment !== $environment) {
             $message = 'Unknown environment option "%s". Assuming production environment.';
-            $this->log->write(Log::WARNING, 'Miny', $message, $environment);
+            $this->log(Log::WARNING, 'Miny', $message, $environment);
         }
-        $this->log->write(
+        $this->log(
             Log::INFO,
             'Miny',
-            'Starting Miny in %s environment',
-            $environmentNames[$this->environment]
+            "Starting Miny in {$environmentNames[$this->environment]} environment"
         );
 
         $this->parameterContainer = $parameterContainer;
-        $this->container          = $ioc;
+        $this->container          = $container;
 
         $this->setDefaultParameters($parameterContainer);
         $this->loadConfigFiles();
-        $this->registerDefaultServices($ioc);
+        $this->registerDefaultServices($container);
 
         $this->loadModules($parameterContainer);
     }
@@ -140,9 +139,9 @@ abstract class BaseApplication
     {
         $config_files = [
             './config/config.common.php' => self::ENV_COMMON,
-            './config/config.dev.php'    => self::ENV_DEV,
-            './config/config.test.php'   => self::ENV_TEST,
-            './config/config.php'        => self::ENV_PROD
+            './config/config.dev.php' => self::ENV_DEV,
+            './config/config.test.php' => self::ENV_TEST,
+            './config/config.php' => self::ENV_PROD
         ];
         foreach ($config_files as $file => $env) {
             $this->loadConfigFile($file, $env, true);
@@ -172,11 +171,10 @@ abstract class BaseApplication
             }
             throw new \InvalidArgumentException("Configuration file not found: {$file}");
         }
-        $this->log->write(
+        $this->log(
             Log::DEBUG,
             'Configuration',
-            'Loading configuration file: %s',
-            $file
+            "Loading configuration file: {$file}"
         );
         $this->parameterContainer->addParameters(
             include_file($file)
@@ -211,7 +209,7 @@ abstract class BaseApplication
 
         $container->addAlias(
             'Miny\\TemporaryFiles\\TemporaryFileManager',
-            function () use ($parameterContainer){
+            function () use ($parameterContainer) {
                 return new TemporaryFileManager($parameterContainer['cache_directory']);
             }
         );
@@ -220,7 +218,7 @@ abstract class BaseApplication
             function () {
                 $error = error_get_last();
                 if ($error !== null) {
-                    $this->log->write(Log::ERROR, "PHP error({$error['type']}", "{$error['message']} in {$error['file']} on line {$error['line']}");
+                    $this->log(Log::ERROR, "PHP error({$error['type']}", "{$error['message']} in {$error['file']} on line {$error['line']}");
                 }
             },
             0
@@ -233,7 +231,7 @@ abstract class BaseApplication
         );
         $shutdown->register(
             function () {
-                $this->log->write(Log::INFO, 'Miny', "End of execution.\n");
+                $this->log(Log::INFO, 'Miny', "End of execution.\n");
                 $this->log->flush();
             },
             1000
@@ -242,6 +240,27 @@ abstract class BaseApplication
         if ($parameterContainer['profile']) {
             $profiler = $this->log->startProfiling('Miny', 'Application execution');
             $shutdown->register([$profiler, 'stop'], 998);
+        }
+    }
+
+    /**
+     * Writes a line to the log
+     *
+     * @param $level
+     * @param $category
+     * @param $message
+     * @param ... arguments to be replaced in $message. {@see http://php.net/sprintf}
+     */
+    public function log($level, $category, $message)
+    {
+        if (func_num_args() > 3) {
+            $args = array_slice(func_get_args(), 3);
+            if (is_array($args[0])) {
+                $args = $args[0];
+            }
+            $this->log->write($level, $category, $message, $args);
+        } else {
+            $this->log->write($level, $category, $message);
         }
     }
 
@@ -317,7 +336,8 @@ abstract class BaseApplication
     abstract protected function onRun();
 }
 
-function include_file($file) {
+function include_file($file)
+{
     /** @noinspection PhpIncludeInspection */
     return include $file;
 }

@@ -19,10 +19,10 @@ class Log extends AbstractLog
 
     private static $names = [
         self::PROFILE => 'Profile',
-        self::DEBUG   => 'Debug',
-        self::INFO    => 'Info',
+        self::DEBUG => 'Debug',
+        self::INFO => 'Info',
         self::WARNING => 'Warning',
-        self::ERROR   => 'Error'
+        self::ERROR => 'Error'
     ];
 
     /**
@@ -30,10 +30,10 @@ class Log extends AbstractLog
      */
     private $writers = [
         Log::PROFILE => [],
-        Log::DEBUG   => [],
-        Log::INFO    => [],
+        Log::DEBUG => [],
+        Log::INFO => [],
         Log::WARNING => [],
-        Log::ERROR   => []
+        Log::ERROR => []
     ];
 
     /**
@@ -111,7 +111,9 @@ class Log extends AbstractLog
             if (is_array($args[0])) {
                 $args = $args[0];
             }
-            $message = vsprintf($message, $args);
+            if (!empty($args)) {
+                $message = vsprintf($message, $args);
+            }
         }
 
         $this->messageBuffer[] = new LogMessage(
