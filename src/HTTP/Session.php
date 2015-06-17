@@ -116,12 +116,18 @@ class Session implements \ArrayAccess, \IteratorAggregate, \Countable
      */
     private function updateFlash()
     {
-        $this->data['flash'] = array_filter(
-            $this->data['flash'],
-            function (&$flash) {
-                // decrease flash ttl and remove if expired
-                return $flash['ttl']-- > 0;
-            }
+        $this->data['flash'] = array_map(
+            function ($flash) {
+                // decrease flash ttl
+                return $flash['ttl'] - 1;
+            },
+            array_filter(
+                $this->data['flash'],
+                function ($flash) {
+                    //and remove if expired
+                    return $flash['ttl'] > 0;
+                }
+            )
         );
     }
 
