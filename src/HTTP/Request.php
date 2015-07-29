@@ -55,17 +55,17 @@ class Request
             if (is_array($data['error'])) {
                 $files = [];
                 foreach ($data['error'] as $fileKey => $error) {
-                    $files[$fileKey] = new UploadedFileInfo(
-                        $data['tmp_name'][$fileKey],
-                        $data['name'][$fileKey],
-                        $data['type'][$fileKey],
-                        $data['size'][$fileKey],
+                    $files[ $fileKey ] = new UploadedFileInfo(
+                        $data['tmp_name'][ $fileKey ],
+                        $data['name'][ $fileKey ],
+                        $data['type'][ $fileKey ],
+                        $data['size'][ $fileKey ],
                         $error
                     );
                 }
-                $_POST[$field] = $files;
+                $_POST[ $field ] = $files;
             } else {
-                $_POST[$field] = new UploadedFileInfo(
+                $_POST[ $field ] = new UploadedFileInfo(
                     $data['tmp_name'],
                     $data['name'],
                     $data['type'],
@@ -116,7 +116,7 @@ class Request
     {
         $request = new Request($method, $url,
             $this->get->toArray(),
-            $post ? : $this->post->toArray(),
+            $post ?: $this->post->toArray(),
             $this->cookie->toArray()
         );
 
@@ -141,7 +141,7 @@ class Request
     public function get($key = null, $default = null)
     {
         $container = $this->get;
-        if($key === null && $default === null) {
+        if ($key === null && $default === null) {
             return $container;
         }
 
@@ -156,11 +156,19 @@ class Request
     public function post($key = null, $default = null)
     {
         $container = $this->post;
-        if($key === null && $default === null) {
+        if ($key === null && $default === null) {
             return $container;
         }
 
         return $container->get($key, $default);
+    }
+
+    /**
+     * @return string The raw input
+     */
+    public function rawInput()
+    {
+        return file_get_contents('php://input');
     }
 
     /**
@@ -171,7 +179,7 @@ class Request
     public function cookie($key = null, $default = null)
     {
         $container = $this->cookie;
-        if($key === null && $default === null) {
+        if ($key === null && $default === null) {
             return $container;
         }
 
