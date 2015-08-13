@@ -22,13 +22,13 @@ class SessionTest extends \PHPUnit_Framework_TestCase
         $this->assertEquals('bar', $session->foo);
 
         $session->close();
-        $session->open(null);
+        $session->open(new ArrayReferenceWrapper($data));
 
         $this->assertTrue(isset($session->foo));
         $this->assertEquals('bar', $session->foo);
 
         $session->close();
-        $session->open(null);
+        $session->open(new ArrayReferenceWrapper($data));
 
         $this->assertFalse(isset($session->foo));
     }
