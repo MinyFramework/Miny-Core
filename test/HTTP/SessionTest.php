@@ -4,43 +4,32 @@ namespace Miny\HTTP;
 
 use Miny\Utils\ArrayReferenceWrapper;
 
-/**
- * @runTestsInSeparateProcesses
- */
 class SessionTest extends \PHPUnit_Framework_TestCase
 {
+
     /**
-     * @var Session
+     * @runInSeparateProcess
      */
-    private $session;
-    private $data;
-
-    public function setUp()
+    public function testFlashVariables()
     {
-        $this->data = [];
+        $data = [];
 
-        $this->session = new Session(false);
-        $this->session->open(new ArrayReferenceWrapper($this->data));
-    }
+        $session = new Session(false);
+        $session->open(new ArrayReferenceWrapper($data));
 
-    public function testFlashVariablesCanBeAccessedInSameSession()
-    {
-        $this->session->foo = 'bar';
-        $this->assertEquals('bar', $this->session->foo);
-    }
+        $session->foo = 'bar';
+        $this->assertTrue(isset($session->foo));
+        $this->assertEquals('bar', $session->foo);
 
-    public function testFlashVariablesCanBeAccessedInNextSessionButNotAfter()
-    {
-        $this->session->foo = 'bar';
+        $session->close();
+        $session->open(null);
 
-        $this->session->close();
-        $this->session->open(null);
+        $this->assertTrue(isset($session->foo));
+        $this->assertEquals('bar', $session->foo);
 
-        $this->assertEquals('bar', $this->session->foo);
+        $session->close();
+        $session->open(null);
 
-        $this->session->close();
-        $this->session->open(null);
-
-        $this->assertFalse(isset($this->session->foo));
+        $this->assertFalse(isset($session->foo));
     }
 }
