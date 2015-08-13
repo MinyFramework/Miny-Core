@@ -49,28 +49,6 @@ class RouteMatcherTest extends \PHPUnit_Framework_TestCase
         $this->assertInstanceOf('\\Miny\\Router\\Match', $this->matcher->match('static path'));
     }
 
-    public function testThatMatcherReturnsFalseWhenRouteMethodDoesNotMatch()
-    {
-        $this->routerMock->expects($this->any())
-            ->method('getAll')
-            ->will($this->returnValue([]));
-
-        $staticGetRoute = new Route();
-        $staticGetRoute->setPath('static path');
-        $staticGetRoute->setMethod(Route::METHOD_GET);
-
-        $this->routerMock->expects($this->any())
-            ->method('hasStatic')
-            ->will($this->returnValue(true));
-
-        $this->routerMock->expects($this->any())
-            ->method('getStaticByURI')
-            ->will($this->returnValue($staticGetRoute));
-
-        $this->assertFalse($this->matcher->match('static path', Route::METHOD_POST));
-    }
-
-
     public function testThatMatcherMatchesAFewDynamicRoutes()
     {
         $this->createDynamicRoutes(5);

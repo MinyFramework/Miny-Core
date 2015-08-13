@@ -27,13 +27,15 @@ class EventDispatcher
      */
     private function ensureCallback($handler, $event)
     {
-        if (is_object($handler)) {
-            if (!$handler instanceof \Closure) {
-                $handler = [$handler, $event];
-            }
-        }
         if (!is_callable($handler)) {
-            throw new EventHandlerException("Handler is not callable for event {$event}");
+            if (is_object($handler)) {
+                if (!$handler instanceof \Closure) {
+                    $handler = [$handler, $event];
+                }
+            }
+            if (!is_callable($handler)) {
+                throw new EventHandlerException("Handler is not callable for event {$event}");
+            }
         }
 
         return $handler;
@@ -54,13 +56,13 @@ class EventDispatcher
      */
     public function register($event, $handler, $priority = 0)
     {
-        if (!isset($this->handlers[$event])) {
-            $this->handlers[$event] = [];
+        if (!isset($this->handlers[ $event ])) {
+            $this->handlers[ $event ] = [];
         }
-        if (!isset($this->handlers[$event][$priority])) {
-            $this->handlers[$event][$priority] = [];
+        if (!isset($this->handlers[ $event ][ $priority ])) {
+            $this->handlers[ $event ][ $priority ] = [];
         }
-        $this->handlers[$event][$priority][] = $this->ensureCallback($handler, $event);
+        $this->handlers[ $event ][ $priority ][] = $this->ensureCallback($handler, $event);
     }
 
     public function registerHandlers($event, $handlers)
@@ -82,10 +84,10 @@ class EventDispatcher
     public function raiseEvent(Event $event)
     {
         $name = $event->getName();
-        if (isset($this->handlers[$name])) {
-            ksort($this->handlers[$name]);
+        if (isset($this->handlers[ $name ])) {
+            ksort($this->handlers[ $name ]);
             $response = null;
-            foreach ($this->handlers[$name] as $handlers) {
+            foreach ($this->handlers[ $name ] as $handlers) {
                 foreach ($handlers as $handler) {
                     $response = $handler($event);
                 }
