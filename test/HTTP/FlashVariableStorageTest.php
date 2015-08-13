@@ -22,6 +22,7 @@ class FlashVariableStorageTest extends \PHPUnit_Framework_TestCase
         $this->assertEquals('bar', $container->get('foo'));
         $this->assertEquals('baz', $container->get('foobar'));
 
+        $container = new FlashVariableStorage($data);
         $container->decrement();
 
         $this->assertFalse($container->has('foo'));

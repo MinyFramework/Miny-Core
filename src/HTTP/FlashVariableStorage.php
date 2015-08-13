@@ -18,7 +18,7 @@ class FlashVariableStorage
         if (!(is_array($storage) || $storage instanceof \ArrayAccess)) {
             throw new \InvalidArgumentException('$storage must be an array or array-like object');
         }
-        $this->storage = $storage;
+        $this->storage =& $storage;
     }
 
     public function decrement()
