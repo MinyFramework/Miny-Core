@@ -93,6 +93,12 @@ class Session implements \ArrayAccess, \IteratorAggregate, \Countable
             $data =& $_SESSION;
         }
 
+        foreach (['data', 'flash'] as $key) {
+            if (!isset($data[ $key ])) {
+                $data[ $key ] = [];
+            }
+        }
+
         $this->data         =& $data['data'];
         $this->flashStorage = new FlashVariableStorage($data['flash']);
         $this->flashStorage->decrement();
