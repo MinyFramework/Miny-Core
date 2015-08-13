@@ -90,7 +90,11 @@ class Session implements \ArrayAccess, \IteratorAggregate, \Countable
         }
         session_regenerate_id(true);
         if ($data === null) {
-            $data =& $_SESSION;
+            if ($this->data === null) {
+                $data =& $_SESSION;
+            } else {
+                $data =& $this->data;
+            }
         }
 
         foreach (['data', 'flash'] as $key) {
