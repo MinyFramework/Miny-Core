@@ -89,11 +89,15 @@ class Session implements \ArrayAccess, \IteratorAggregate, \Countable
             throw new \RuntimeException('Could not open session.');
         }
         session_regenerate_id(true);
+        $this->isOpen = true;
+
         if ($data === null) {
             if ($this->data === null) {
                 $data =& $_SESSION;
             } else {
-                $data =& $this->data;
+                //don't touch the data, only decrement the flash counters
+                $this->flashStorage->decrement();
+                return;
             }
         }
 
@@ -106,8 +110,6 @@ class Session implements \ArrayAccess, \IteratorAggregate, \Countable
         $this->data         =& $data['data'];
         $this->flashStorage = new FlashVariableStorage($data['flash']);
         $this->flashStorage->decrement();
-
-        $this->isOpen = true;
     }
 
     //Session option methods
