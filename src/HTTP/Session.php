@@ -9,8 +9,6 @@
 
 namespace Miny\HTTP;
 
-use Miny\Utils\ArrayReferenceWrapper;
-
 class Session implements \ArrayAccess, \IteratorAggregate, \Countable
 {
     /**
@@ -22,6 +20,11 @@ class Session implements \ArrayAccess, \IteratorAggregate, \Countable
      * @var bool
      */
     private $isOpen = false;
+
+    /**
+     * @var FlashVariableStorage
+     */
+    private $flashStorage;
 
     /**
      * @param bool                     $open
@@ -86,50 +89,15 @@ class Session implements \ArrayAccess, \IteratorAggregate, \Countable
             throw new \RuntimeException('Could not open session.');
         }
         session_regenerate_id(true);
-        if ($data !== null) {
-            $this->data = $data;
-        } elseif ($this->data === null) {
-            $this->data = new ArrayReferenceWrapper($_SESSION);
+        if ($data === null) {
+            $data =& $_SESSION;
         }
-        $this->initializeContainer('data');
-        if (!$this->initializeContainer('flash')) {
-            $this->updateFlash();
-        }
+
+        $this->data         =& $data['data'];
+        $this->flashStorage = new FlashVariableStorage($data['flash']);
+        $this->flashStorage->decrement();
+
         $this->isOpen = true;
-    }
-
-    private function initializeContainer($key)
-    {
-        if (!isset($this->data[$key]) || !is_array($this->data[$key])) {
-            $this->data[$key] = [];
-
-            return true;
-        }
-
-        return false;
-    }
-
-    /**
-     * Updates time to live values for flash variable and removes old items.
-     *
-     * @access private
-     */
-    private function updateFlash()
-    {
-        $this->data['flash'] = array_map(
-            function ($flash) {
-                // decrease flash ttl
-                --$flash['ttl'];
-                return $flash;
-            },
-            array_filter(
-                $this->data['flash'],
-                function ($flash) {
-                    //and remove if expired
-                    return $flash['ttl'] > 0;
-                }
-            )
-        );
     }
 
     //Session option methods
@@ -217,31 +185,27 @@ class Session implements \ArrayAccess, \IteratorAggregate, \Countable
 
     public function &__get($key)
     {
-        if (!isset($this->data['flash'][$key])) {
-            throw new \OutOfBoundsException("Flash key '{$key}' is not found");
-        }
-
-        return $this->data['flash'][$key]['data'];
+        return $this->flashStorage->get($key);
     }
 
     public function __set($key, $data)
     {
-        $this->flash($key, $data, 1);
+        $this->flash($key, $data);
     }
 
     public function flash($key, $data, $ttl = 1)
     {
-        $this->data['flash'][$key] = ['data' => $data, 'ttl' => (int)$ttl];
+        $this->flashStorage->set($key, $data, $ttl);
     }
 
     public function __isset($key)
     {
-        return isset($this->data['flash'][$key]);
+        return $this->flashStorage->has($key);
     }
 
     public function __unset($key)
     {
-        unset($this->data['flash'][$key]);
+        $this->flashStorage->remove($key);
     }
 
     public function __call($key, $arguments)
@@ -262,35 +226,35 @@ class Session implements \ArrayAccess, \IteratorAggregate, \Countable
 
     public function getIterator()
     {
-        return new \ArrayIterator($this->data['data']);
+        return new \ArrayIterator($this->data);
     }
 
     public function count()
     {
-        return count($this->data['data']);
+        return count($this->data);
     }
 
     public function offsetSet($key, $value)
     {
-        $this->data['data'][$key] = $value;
+        $this->data[ $key ] = $value;
     }
 
     public function offsetExists($key)
     {
-        return isset($this->data['data'][$key]);
+        return isset($this->data[ $key ]);
     }
 
     public function offsetUnset($key)
     {
-        unset($this->data['data'][$key]);
+        unset($this->data[ $key ]);
     }
 
     public function &offsetGet($key)
     {
-        if (!isset($this->data['data'][$key])) {
+        if (!isset($this->data[ $key ])) {
             throw new \OutOfBoundsException("Session data '{$key}' is not found");
         }
 
-        return $this->data['data'][$key];
+        return $this->data[ $key ];
     }
 }
