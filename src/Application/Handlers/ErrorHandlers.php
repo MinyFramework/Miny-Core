@@ -31,18 +31,8 @@ class ErrorHandlers
         $this->eventDispatcher = $eventDispatcher;
     }
 
-    public function handleExceptions($e)
+    public function handleExceptions5(\Exception $e)
     {
-        if (PHP_MAJOR_VERSION >= 7) {
-            if (!$e instanceof \Throwable) {
-                throw new \InvalidArgumentException("handleExceptions was called with an argument of invalid type");
-            }
-        } else {
-            if (!$e instanceof \Exception) {
-                throw new \InvalidArgumentException("handleExceptions was called with an argument of invalid type");
-            }
-        }
-
         $this->log->write(
             Log::ERROR,
             get_class($e),
@@ -56,6 +46,33 @@ class ErrorHandlers
         if (!$event->isHandled()) {
             // Rethrow the exception that we did not handle.
             throw $e;
+        }
+    }
+
+    public function handleExceptions7(\Throwable $e)
+    {
+        $this->log->write(
+            Log::ERROR,
+            get_class($e),
+            "%s \n Trace: %s",
+            $e->getMessage(),
+            $e->getTraceAsString()
+        );
+        $event = $this->eventDispatcher->raiseEvent(
+            new UncaughtExceptionEvent($e)
+        );
+        if (!$event->isHandled()) {
+            // Rethrow the exception that we did not handle.
+            throw $e;
+        }
+    }
+
+    public function handleExceptions($e)
+    {
+        if (PHP_MAJOR_VERSION >= 7) {
+            $this->handleExceptions7($e);
+        } else {
+            $this->handleExceptions5($e);
         }
     }
 
