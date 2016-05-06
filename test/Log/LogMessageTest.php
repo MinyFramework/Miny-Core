@@ -1,12 +1,8 @@
 <?php
-/**
- * Created by PhpStorm.
- * User: Dániel
- * Date: 2014.05.08.
- * Time: 22:53
- */
 
-namespace Miny\Log;
+namespace Miny\Test\Log;
+
+use Miny\Log\LogMessage;
 
 class LogMessageTest extends \PHPUnit_Framework_TestCase
 {

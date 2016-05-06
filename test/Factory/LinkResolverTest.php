@@ -1,6 +1,8 @@
 <?php
 
-namespace Miny\Factory;
+namespace Miny\Test\Factory;
+
+use Miny\Factory\LinkResolver;
 
 class LinkResolverTest extends \PHPUnit_Framework_TestCase
 {

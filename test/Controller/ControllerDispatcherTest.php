@@ -1,7 +1,8 @@
 <?php
 
-namespace Miny\Controller;
+namespace Miny\Test\Controller;
 
+use Miny\Controller\ControllerDispatcher;
 use Miny\HTTP\Request;
 use Miny\HTTP\Response;
 

@@ -1,7 +1,8 @@
 <?php
 
-namespace Miny\Utils;
+namespace Miny\Test\Utils;
 
+use Miny\Utils\StringUtils;
 use PHPUnit_Framework_TestCase;
 
 class StringUtilsTest extends PHPUnit_Framework_TestCase

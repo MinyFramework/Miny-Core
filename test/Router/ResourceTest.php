@@ -1,6 +1,10 @@
 <?php
 
-namespace Miny\Router;
+namespace Miny\Test\Router;
+
+use Miny\Router\Resource;
+use Miny\Router\Route;
+use Miny\Router\Router;
 
 class ResourceTest extends \PHPUnit_Framework_TestCase
 {

@@ -1,6 +1,9 @@
 <?php
 
-namespace Miny\Log;
+namespace Miny\Test\Log;
+
+use Miny\Log\Log;
+use Miny\Log\LogMessage;
 
 class LogTest extends \PHPUnit_Framework_TestCase
 {

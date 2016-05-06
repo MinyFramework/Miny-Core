@@ -1,6 +1,8 @@
 <?php
 
-namespace Miny\HTTP;
+namespace Miny\Test\HTTP;
+
+use Miny\HTTP\Request;
 
 class RequestTest extends \PHPUnit_Framework_TestCase
 {
@@ -24,7 +26,7 @@ class RequestTest extends \PHPUnit_Framework_TestCase
     public function testGetGlobal()
     {
         $request = Request::getGlobal();
-        $this->assertInstanceOf(__NAMESPACE__ . '\Request', $request);
+        $this->assertInstanceOf(Request::class, $request);
 
         return $request;
     }

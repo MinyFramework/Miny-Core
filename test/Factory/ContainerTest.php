@@ -1,7 +1,8 @@
 <?php
 
-namespace Miny\Factory;
+namespace Miny\Test\Factory;
 
+use Miny\Factory\Container;
 use Miny\Log\AbstractLog;
 
 class TestClass

@@ -1,12 +1,6 @@
 <?php
-/**
- * Created by PhpStorm.
- * User: Dániel
- * Date: 2014.05.08.
- * Time: 23:41
- */
 
-namespace Miny\Controller;
+namespace Miny\Test\Controller;
 
 use Miny\Controller\Events\ControllerFinishedEvent;
 use Miny\Controller\Events\ControllerLoadedEvent;

@@ -1,6 +1,8 @@
 <?php
 
-namespace Miny\HTTP;
+namespace Miny\Test\HTTP;
+
+use Miny\HTTP\ParameterContainer;
 
 class ParameterContainerTest extends \PHPUnit_Framework_TestCase
 {

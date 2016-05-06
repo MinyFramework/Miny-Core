@@ -1,6 +1,9 @@
 <?php
 
-namespace Miny\Event;
+namespace Miny\Test\Event;
+
+use Miny\Event\Event;
+use Miny\Event\EventDispatcher;
 
 class EventDispatcherTest extends \PHPUnit_Framework_TestCase
 {

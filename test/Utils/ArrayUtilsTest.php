@@ -1,8 +1,9 @@
 <?php
 
-namespace Miny\Utils;
+namespace Miny\Test\Utils;
 
 use InvalidArgumentException;
+use Miny\Utils\ArrayUtils;
 use OutOfBoundsException;
 
 class ArrayUtilsTest extends \PHPUnit_Framework_TestCase

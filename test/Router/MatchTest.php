@@ -1,6 +1,9 @@
 <?php
 
-namespace Miny\Router;
+namespace Miny\Test\Router;
+
+use Miny\Router\Match;
+use Miny\Router\Route;
 
 class MatchTest extends \PHPUnit_Framework_TestCase
 {

@@ -1,6 +1,8 @@
 <?php
 
-namespace Miny\Factory;
+namespace Miny\Test\Factory;
+
+use Miny\Factory\ParameterContainer;
 
 class ParameterContainerTest extends \PHPUnit_Framework_TestCase
 {

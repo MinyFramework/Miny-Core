@@ -1,7 +1,8 @@
 <?php
 
-namespace Miny\Controller\Runners;
+namespace Miny\Test\Controller\Runners;
 
+use Miny\Controller\Runners\ClosureControllerRunner;
 use Miny\HTTP\Request;
 use Miny\HTTP\Response;
 

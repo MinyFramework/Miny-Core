@@ -8,7 +8,7 @@ Miny is licensed under the MIT License.
 Requirements
 =============
 
- * Any supported version of PHP (5.4 or newer)
+ * PHP 7
  * Composer
 
 Installation, basic usage

@@ -1,9 +1,10 @@
 <?php
 
-namespace Miny;
+namespace Miny\Test;
 
 use BadMethodCallException;
 use InvalidArgumentException;
+use Miny\Extendable;
 
 class FooPlugin
 {

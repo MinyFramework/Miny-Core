@@ -1,7 +1,8 @@
 <?php
 
-namespace Miny\Shutdown;
+namespace Miny\Test\Shutdown;
 
+use Miny\Shutdown\ShutdownService;
 use PHPUnit_Framework_TestCase;
 
 class MockShutdownService extends ShutdownService
